@@ -14,7 +14,7 @@ import { useAndroidBackButton } from "./hooks/useAndroidBackButton";
 import { IS_DEV } from "./config";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { REVENUECAT_API_KEY } from "./config/revenuecat";
-import { trackAppOpened, trackSessionEnd } from "./hooks/useAnalytics";
+import { trackAppOpened, trackSessionEnd, trackAppResumed } from "./hooks/useAnalytics";
 
 // Lazy-loaded screens (not in initial bundle)
 const DevScreen = lazy(() => import("./screens/DevScreen"));
@@ -107,14 +107,18 @@ export default function App() {
   // Analytics: track app open and session duration
   useEffect(() => {
     trackAppOpened();
-    const listener = CapApp.addListener("pause", () => {
+    const pauseListener = CapApp.addListener("pause", () => {
       trackSessionEnd();
+    });
+    const resumeListener = CapApp.addListener("resume", () => {
+      trackAppResumed();
     });
     // Also track on browser unload (web dev)
     const handleUnload = () => trackSessionEnd();
     window.addEventListener("beforeunload", handleUnload);
     return () => {
-      listener.then((l) => l.remove());
+      pauseListener.then((l) => l.remove());
+      resumeListener.then((l) => l.remove());
       window.removeEventListener("beforeunload", handleUnload);
     };
   }, []);

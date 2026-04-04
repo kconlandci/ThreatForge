@@ -52,15 +52,18 @@ export function usePurchase(): UsePurchase {
         // Purchase went through but entitlement not active — shouldn't happen
         return { success: false, error: "unknown" };
       } catch (err: unknown) {
-        const error = err as { code?: string; userCancelled?: boolean };
+        // Safely check error properties — err could be null, a primitive, or an object
+        if (err != null && typeof err === "object") {
+          const error = err as Record<string, unknown>;
 
-        if (error.userCancelled || error.code === "1") {
-          return { success: false, error: "cancelled" };
-        }
-        if (error.code === "7") {
-          // ITEM_ALREADY_OWNED — grant access
-          await setPremiumStatus(true);
-          return { success: true, error: "already_owned" };
+          if (error.userCancelled === true || error.code === "1") {
+            return { success: false, error: "cancelled" };
+          }
+          if (error.code === "7") {
+            // ITEM_ALREADY_OWNED — grant access
+            await setPremiumStatus(true);
+            return { success: true, error: "already_owned" };
+          }
         }
 
         console.error("[ThreatForge] Purchase failed:", err);

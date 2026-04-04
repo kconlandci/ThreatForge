@@ -103,6 +103,10 @@ export function trackSessionEnd() {
   }
 }
 
+export function trackAppResumed() {
+  sessionStartTime = Date.now();
+}
+
 export function trackLabStarted(labId: string) {
   pushEvent({ type: "lab_started", labId, timestamp: Date.now() });
 }
@@ -171,18 +175,19 @@ export function getAnalyticsSummary(): AnalyticsSummary {
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  // Labs per day (last 14 days)
+  // Labs per day (last 14 days) — pre-compute date strings to avoid redundant conversions
   const now = new Date();
+  const completedByDate: Record<string, number> = {};
+  for (const e of completed) {
+    const dateStr = getLocalDateString(new Date(e.timestamp));
+    completedByDate[dateStr] = (completedByDate[dateStr] || 0) + 1;
+  }
   const days: Array<{ date: string; count: number }> = [];
   for (let i = 13; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     const dateStr = getLocalDateString(d);
-    const count = completed.filter((e) => {
-      const eDate = getLocalDateString(new Date(e.timestamp));
-      return eDate === dateStr;
-    }).length;
-    days.push({ date: dateStr, count });
+    days.push({ date: dateStr, count: completedByDate[dateStr] || 0 });
   }
 
   return {
