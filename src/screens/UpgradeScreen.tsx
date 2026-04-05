@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   Shield,
   Target,
-  Infinity,
+  Infinity as InfinityIcon,
   Lock,
   CheckCircle,
   Loader2,
@@ -97,7 +97,7 @@ export default function UpgradeScreen() {
       text: "Real incident response, cloud security & threat hunting",
     },
     {
-      icon: Infinity,
+      icon: InfinityIcon,
       text: "All future labs included as they're released",
     },
   ];
