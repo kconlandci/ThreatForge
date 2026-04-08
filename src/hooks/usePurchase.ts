@@ -87,6 +87,8 @@ export function usePurchase(): UsePurchase {
         return { success: true };
       }
 
+      // No active entitlement — clear local premium cache (handles refunds)
+      await setPremiumStatus(false);
       return { success: false, error: "unknown" };
     } catch (err) {
       console.error("[ThreatForge] Restore failed:", err);
