@@ -12,6 +12,8 @@ import {
 } from "react";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { Preferences } from "@capacitor/preferences";
+import { Capacitor } from "@capacitor/core";
+import { Purchases } from "@revenuecat/purchases-capacitor";
 import { auth } from "../config/firebase";
 
 interface AuthContextType {
@@ -59,6 +61,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           // Always update stored UID to current
           await storeUid(currentUid);
+
+          // Wire Firebase UID into RevenueCat. logIn aliases any prior
+          // anonymous RC user to this UID, so entitlements follow the
+          // user across reinstalls/devices. Safe to call every auth
+          // event — RC no-ops when the UID is already current.
+          if (Capacitor.isNativePlatform()) {
+            try {
+              await Purchases.logIn({ appUserID: currentUid });
+            } catch (rcError) {
+              console.error(
+                "[ThreatForge] Purchases.logIn failed:",
+                rcError
+              );
+            }
+          }
         } catch (error) {
           console.error("[ThreatForge] UID persistence failed:", error);
         } finally {
