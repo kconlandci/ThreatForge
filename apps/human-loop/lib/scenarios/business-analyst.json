@@ -1,0 +1,144 @@
+{
+  "pathwayId": "business-analyst",
+  "pathwayName": "Business Analyst",
+  "agentPersona": "Quill — an AI assistant that drafts requirements docs, stakeholder reports, and data summaries from meeting notes and datasets.",
+  "roleBlurb": "A Business Analyst turns messy meeting notes and raw data into the documents a company actually runs on: requirements a dev team can build from, and reports a VP or regulator can act on. AI agents like Quill can now draft a first-pass version of any of these in seconds — which means the BA's real job is shifting from writing the first draft to being the last check before it ships: verifying the numbers, catching what got quietly dropped, and knowing when a pattern in the data doesn't actually support the conclusion.",
+  "scenarios": [
+    {
+      "id": "ba-fabricated-stat",
+      "title": "The 68% Problem",
+      "setup": "You're a Junior Business Analyst on the Customer Experience team at Northfield Outfitters, a mid-size outdoor apparel retailer. You asked Quill to turn the Q3 returns survey (500 responses) into a one-page brief for tomorrow morning's meeting with the VP of Merchandising, who's deciding whether to pull the new fall line for a quality review.",
+      "agentMessage": "Quill (Slack, 6:42 PM): Draft brief for tomorrow's VP Merchandising meeting is ready. Headline stat: '68% of customers who returned items in Q3 cited poor product quality as the primary driver, up from 41% in Q2 — signaling an urgent quality control issue in the new fall line.' Full brief attached. Let me know if you want edits before it goes out, otherwise I'll consider this final.",
+      "agentContext": [
+        "Q3_Returns_Survey.csv — 'return_reason' field is a dropdown with exactly 5 options: Wrong size/fit, Changed mind, Item damaged in shipping, Doesn't match photo, Other",
+        "Actual tally from the raw file: Wrong size/fit 44%, Changed mind 22%, Damaged in shipping 14%, Doesn't match photo 12%, Other 8%",
+        "'Poor product quality' isn't a dropdown option at all — it appears only in the free-text notes on 9 of 500 responses (1.8%), all filed under 'Other'",
+        "No Q2 returns report exists in the shared project folder to compare against"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "label": "Approve and send — Quill's numbers are usually right",
+          "isCorrect": false,
+          "rationale": "Quill's drafts read fluently and confidently, but that's not the same as being sourced. Here it invented both a category that doesn't exist in the dataset and a Q2 comparison that doesn't exist anywhere in the project folder — and a VP is about to make a real call off it.",
+          "consequence": "The VP orders a costly quality audit and pauses restocking on the fall line based on a stat that was never in the data. When sizing turns out to be the actual top return reason, it traces straight back to the brief you signed off on."
+        },
+        {
+          "id": "b",
+          "label": "Reject the whole brief and ask Quill to start over",
+          "isCorrect": false,
+          "rationale": "You already know exactly which line is wrong and why. Throwing out the entire brief instead of naming the specific problem wastes the one advantage you have, and gives Quill nothing to go on but 'try again.'",
+          "consequence": "Quill regenerates the whole report from scratch overnight, burning hours you don't have before the 9 AM meeting — and with no idea what went wrong the first time, there's no guarantee the rewrite doesn't introduce a different unsupported claim."
+        },
+        {
+          "id": "c",
+          "label": "Swap in your own quick estimate and send it",
+          "isCorrect": false,
+          "rationale": "Guessing a more plausible-sounding number isn't verification, it's just a second fabrication — this time yours, and you have the raw CSV sitting right there with no excuse not to use it.",
+          "consequence": "The brief goes out with a 'corrected' stat that's still not backed by the data. If anyone in the meeting asks to see the source, it's your number that doesn't hold up, not Quill's."
+        },
+        {
+          "id": "d",
+          "label": "Pull the raw survey data and verify the stat before sending",
+          "isCorrect": true,
+          "rationale": "This is the core check a BA owes any stakeholder-facing number: does this claim actually exist in the source data? A five-minute look at the CSV shows 'poor product quality' isn't even a category, which is enough to hold the brief before it reaches the VP.",
+          "consequence": "You catch the fabrication before it ships. Quill's corrected brief accurately leads with sizing and fit as the top return driver, and the VP greenlights a review of the fit guide instead of an imaginary QC crisis."
+        }
+      ],
+      "hint": "Before trusting a headline stat, check whether that category even exists in the source data.",
+      "careerInsight": "Entry-level BAs are often the last human check before a report reaches leadership. AI drafting tools can produce fluent, specific-sounding statistics that were never in the source file, and catching that takes actually opening the raw data, not just reading the polished summary.",
+      "skillTag": "Verify against the source, don't just read the draft"
+    },
+    {
+      "id": "ba-dropped-compliance",
+      "title": "A Reasonable Timeframe",
+      "setup": "You're a Business Analyst at Comstock Federal Credit Union, writing the requirements doc for a new online personal loan application. You sat in the Sept 10 discovery session and asked Quill to turn your notes into the formal BRD for ticket BRD-2201, which is tagged compliance-sensitive and goes to Legal for sign-off once you approve it.",
+      "agentMessage": "Quill commented on BRD-2201: Requirements draft is ready for review. Section 4 (Application Outcome Notifications): 'The system shall notify applicants of their application decision via automated email within a reasonable business timeframe. Denied applicants will receive a generic notice indicating they did not meet underwriting criteria.' Looks complete to me — ready to route to Legal for final sign-off unless you have changes.",
+      "agentContext": [
+        "Discovery Session notes, Sept 10 — Compliance Officer D. Alvarez: 'Any denial OR counteroffer under 90% of the requested amount counts as adverse action under Reg B / ECOA. Written notice required within 30 calendar days, and it has to list the SPECIFIC principal reasons — insufficient income, derogatory credit history, etc. Generic boilerplate is not sufficient. This is non-negotiable, we got cited on this exact point two years ago.'",
+        "BRD-2201 is labeled compliance-sensitive in Jira",
+        "Quill's changelog for Section 4 makes no reference to the Sept 10 notes",
+        "Workflow: BA approval → Legal sign-off. No compliance reviewer is scheduled before Legal on this ticket"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "label": "Approve and route to Legal — they'll catch it",
+          "isCorrect": false,
+          "rationale": "Legal's sign-off assumes the BRD already reflects what was covered in discovery — it's not built to re-derive requirements from scratch. If you don't flag the gap, Legal has no reason to suspect Section 4 doesn't match what Alvarez said.",
+          "consequence": "Legal signs off, trusting the BRD is accurate. The feature ships with generic denial notices. An examiner cites the credit union again on the same Reg B issue — this time as a repeat finding — and it traces straight back to this ticket."
+        },
+        {
+          "id": "b",
+          "label": "Reject the whole BRD and escalate to Compliance",
+          "isCorrect": false,
+          "rationale": "You already have the exact requirement in your own meeting notes — this isn't a question that's above your authority to answer. Kicking the entire document to the Compliance Officer for a rewrite just makes her re-explain something that's already documented.",
+          "consequence": "The ticket sits for a week waiting on Alvarez's calendar. The sprint slips, and when she finally responds, her answer is the same paragraph that was already sitting in the Sept 10 notes the whole time."
+        },
+        {
+          "id": "c",
+          "label": "Change '30 days' yourself and move it forward",
+          "isCorrect": false,
+          "rationale": "You fixed the deadline but missed the substance: adverse action isn't only about the 30-day window, it's about what must be disclosed (specific principal reasons, not generic boilerplate) and what counts as adverse action (including counteroffers under 90%). A partial fix still ships non-compliant.",
+          "consequence": "The revised BRD now says 'within 30 days' but still promises applicants 'a generic notice indicating they did not meet underwriting criteria' — the exact language Alvarez flagged as insufficient two years ago. The real violation ships anyway."
+        },
+        {
+          "id": "d",
+          "label": "Check the discovery notes and send Quill specific corrections",
+          "isCorrect": true,
+          "rationale": "You attended the meeting where this exact requirement was stated. Comparing Section 4 against the Sept 10 notes and giving Quill the specific fix — adverse action defined per Reg B, 30-day written notice, specific principal reasons required — plus routing it to Compliance before Legal, is exactly the check this workflow needs from you.",
+          "consequence": "Quill revises Section 4 to match the regulation. Alvarez signs off quickly since the language is already correct, and the BRD reaches Legal clean, with no repeat-citation risk hanging over it."
+        }
+      ],
+      "hint": "A generic-sounding requirement on a ticket tagged compliance-sensitive is worth checking against the actual meeting notes.",
+      "careerInsight": "BAs are often the only person who both sits in discovery meetings and reviews the resulting requirements doc. AI-drafted BRDs can quietly soften a specific regulatory line into vague language that reads fine until an examiner tests it against the actual rule.",
+      "skillTag": "Catch dropped or softened requirements against source notes"
+    },
+    {
+      "id": "ba-correlation-causation",
+      "title": "Retention by Correlation",
+      "setup": "You're a Business Analyst at Cascade CRM, a SaaS company. You asked Quill to dig into why some customers churn and others don't, using a year of account data, for ticket ANLY-448.",
+      "agentMessage": "Quill commented on ANLY-448: Churn analysis is done. Customers who attended the live onboarding webinar in their first 30 days show a 92% 12-month retention rate, vs. 61% for those who didn't — a 31-point gap. Recommendation: make live onboarding webinar attendance mandatory for all new customers in week 1 to reduce churn. Starting on the policy proposal now unless you flag concerns.",
+      "agentContext": [
+        "customers.csv (1,200 rows): customer_id, contract_tier (Starter/Growth/Enterprise), attended_onboarding_webinar (Y/N), assigned_csm (Y/N), employee_count, retained_12mo (Y/N)",
+        "Cross-tab Quill didn't run: 89% of webinar attendees are Growth/Enterprise with a dedicated CSM; only 23% of non-attendees have a dedicated CSM",
+        "Customers with a dedicated CSM retain at 90%+ whether or not they attended the webinar",
+        "Starter-tier customers (mostly self-serve, mostly no CSM): only 58% attend the webinar, and retention is ~60% either way",
+        "Webinar attendance was always opt-in and self-scheduled — no random assignment or controlled test behind this number"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "label": "Approve the mandatory-webinar recommendation",
+          "isCorrect": false,
+          "rationale": "The 31-point gap is real, but attendees are overwhelmingly Growth/Enterprise accounts that already have a dedicated CSM — a group that retains well regardless. Approving this means acting on a correlation without knowing if forcing attendance would produce the same lift for the customers who actually churn.",
+          "consequence": "The mandatory-webinar policy rolls out. Starter-tier customers, the segment actually churning, get pushed into a webinar they didn't ask for. Retention there doesn't move, because their real gap — no dedicated support — was never addressed. Leadership asks why the 'proven fix' didn't work."
+        },
+        {
+          "id": "b",
+          "label": "Reject the whole analysis and start over",
+          "isCorrect": false,
+          "rationale": "The retention numbers themselves aren't wrong — the problem is the causal leap Quill made from them. Scrapping the whole analysis throws out a real, useful pattern (CSM assignment tracking with retention) along with the flawed conclusion.",
+          "consequence": "Quill starts a fresh analysis on a different metric next sprint, and the actual useful finding — that dedicated CSM support is tied to retention — never surfaces at all."
+        },
+        {
+          "id": "c",
+          "label": "Soften the wording but keep the same recommendation",
+          "isCorrect": false,
+          "rationale": "Changing 'causes' to 'is associated with' doesn't fix the substance: the recommended action — mandating webinar attendance company-wide — still assumes the webinar itself drives retention, which falls apart once CSM assignment is accounted for.",
+          "consequence": "The hedged report still ends in the same mandatory-attendance recommendation. Leadership skims past the caveat, approves the policy, and you've now co-signed a recommendation you already suspected didn't follow from the data."
+        },
+        {
+          "id": "d",
+          "label": "Send it back to control for tier and CSM assignment first",
+          "isCorrect": true,
+          "rationale": "Attendance wasn't randomly assigned, and a more plausible driver — dedicated CSM support, concentrated in higher-tier accounts — hasn't been ruled out. Asking Quill to control for that, and flagging that a pilot with real controls is needed before a company-wide policy, is what turns a correlation into a decision you can actually act on.",
+          "consequence": "The re-cut analysis shows CSM assignment, not webinar attendance, is the stronger predictor of retention. The team pilots a small mandatory-webinar test on a subset of Starter accounts instead of a blanket policy, and the real lever — support model for self-serve customers — gets the attention it deserves."
+        }
+      ],
+      "hint": "Ask what else differs between the two groups being compared — is attendance the only thing that changed, or is it standing in for something else, like account tier or support level?",
+      "careerInsight": "Turning a data pattern into a business recommendation is core BA work, and AI analysis tools are especially prone to treating any correlation as an actionable cause. Spotting a hidden confounding variable before a policy gets built on it is what separates a strong analyst from one who just reports the numbers.",
+      "skillTag": "Separate correlation from causation before recommending action"
+    }
+  ]
+}

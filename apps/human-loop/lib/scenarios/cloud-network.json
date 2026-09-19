@@ -1,0 +1,143 @@
+{
+  "pathwayId": "cloud-network",
+  "pathwayName": "Cloud Network Specialist",
+  "agentPersona": "Nimbus — an AI cloud-ops agent that monitors infrastructure health, drafts Terraform/IaC changes, and proposes security, scaling, and cost actions for a human engineer to review before anything touches production.",
+  "roleBlurb": "DCI's Cloud Network Specialist grads move into roles like cloud support associate, network technician, or junior cloud/infrastructure engineer — configuring security groups, reviewing infrastructure-as-code changes, and keeping production systems available and secure. Increasingly, an AI agent drafts the first version of that security rule, Terraform plan, or scaling decision, and the job is to catch what it got wrong before it ships.",
+  "scenarios": [
+    {
+      "id": "sg-open-world",
+      "title": "The Quick Unblock",
+      "setup": "You're a Cloud Support Associate at Meridian Health Analytics, six weeks into the job. Your team lets Nimbus triage infrastructure tickets and draft the fix, but any change to a security group still needs a human's approval before it applies. A P2 ticket just came in: a partner integration can't reach one of your internal APIs, and the SLA clock is running.",
+      "agentMessage": "Nimbus — INFRA-4417\nDiagnosed: BrightPay (partner) requests to payments-internal-api:8443 are timing out. Cause: sg-0a41f9c2 (payments-api-sg) has no inbound rule matching BrightPay's source IPs.\nFastest fix: add inbound rule TCP 8443 from 0.0.0.0/0. This unblocks the connection immediately regardless of which IP BrightPay sends from. We can tighten it later once they confirm their static egress range.\nRecommend approving now — SLA clock is running. Awaiting approval to apply.",
+      "agentContext": [
+        "Ticket INFRA-4417 · Priority P2 · SLA 2 hrs · opened 22 min ago",
+        "sg-0a41f9c2 \"payments-api-sg\" — attached to payments-internal-api (PCI-scoped cardholder transaction data)",
+        "Current inbound rules: 8443 from 10.20.0.0/16 (corp VPN), 10.30.0.0/16 (partner VPC peering)",
+        "Proposed diff: + Inbound TCP 8443 0.0.0.0/0 \"temp - BrightPay access\""
+      ],
+      "options": [
+        {
+          "id": "approve-asis",
+          "label": "Approve as-is so BrightPay's connection is restored right away",
+          "isCorrect": false,
+          "rationale": "Nimbus's fix does restore the connection, but a \"temporary\" 0.0.0.0/0 rule on a PCI-scoped service is exactly the kind of change that gets forgotten and shows up in a security audit later. Approving without questioning the exposure isn't oversight — it's rubber-stamping.",
+          "consequence": "The rule goes live and the ticket closes fast. Three months later a PCI compliance audit flags payments-api-sg as internet-facing on a cardholder-data service. It becomes a documented finding, and \"the AI agent said it was fine\" doesn't hold up in the audit report."
+        },
+        {
+          "id": "escalate-immediately",
+          "label": "Reject the fix and escalate the whole ticket to the network security team before doing anything else",
+          "isCorrect": false,
+          "rationale": "Scoping a security group rule to a known partner's IP range instead of the whole internet is a standard least-privilege call — squarely inside a cloud/network specialist's job. Sending a 2-hour-SLA ticket upstairs to avoid a routine, well-understood decision stalls the partner and signals you can't handle basic network security judgment calls.",
+          "consequence": "The ticket sits in the security team's queue for four hours past SLA while they re-diagnose something you already had the answer to. BrightPay escalates to your account manager, and your team lead asks why this ever left your desk."
+        },
+        {
+          "id": "guess-wide-cidr",
+          "label": "Add a broad guessed range like 203.0.0.0/8 instead of 0.0.0.0/0, since it \"sounds\" safer, and move on",
+          "isCorrect": false,
+          "rationale": "A wide guessed CIDR block still opens payments-internal-api to hundreds of thousands of addresses you haven't verified belong to BrightPay. It's the same mistake as 0.0.0.0/0, just dressed up to look more careful.",
+          "consequence": "The rule technically isn't \"the whole internet,\" but it's still an unverified /8 sitting on a PCI-scoped service. During the next security review you can't explain where that range came from, and now there are two exposures to remediate instead of one."
+        },
+        {
+          "id": "scope-cidr",
+          "label": "Reject the 0.0.0.0/0 rule, pull BrightPay's published static IP range from the partner integration doc, and have Nimbus scope the inbound rule to that range before approving",
+          "isCorrect": true,
+          "rationale": "This fixes the actual problem — a missing inbound rule — without giving up least-privilege network security on a PCI-scoped service. Scoping to a documented, verifiable range is exactly the judgment call a Cloud Network Specialist is trained to make, and it still resolves the ticket well inside the SLA.",
+          "consequence": "The partner doc lists BrightPay's static egress range (198.51.100.0/24). Nimbus updates the rule to that CIDR, connectivity is restored in under 20 minutes, and the change survives the next security audit without a finding."
+        }
+      ],
+      "hint": "Ask what \"temporary\" usually turns into, and whether opening the rule to the entire internet is really the only way to unblock one partner.",
+      "careerInsight": "Reviewing AI-drafted security group and firewall rules against least-privilege principles is one of the most common day-one tasks for cloud support and network technician roles — and 0.0.0.0/0 \"quick fixes\" are one of the top findings in real cloud security audits.",
+      "skillTag": "Verify before trusting — least privilege"
+    },
+    {
+      "id": "tf-destroy-prod-db",
+      "title": "The Rename That Wasn't",
+      "setup": "You're a Cloud Infrastructure Technician at Fieldstone Commerce, a mid-size retailer. Nimbus opens Terraform pull requests for routine cleanup work, and your job is to review the plan output before anything gets applied to production. Today's PR is supposed to be a one-line naming fix.",
+      "agentMessage": "Nimbus opened PR #892: \"Standardize DB naming convention\"\nSummary: Renamed aws_db_instance.customer_orders identifier from \"orders-db-01\" to \"orders-db-prod\" to match our new naming standard (DEVOPS-STD-04). Minimal change, 3 lines in main.tf.\nterraform plan: 1 to add, 0 to change, 1 to destroy.\nPlan looks clean and matches intent. Ready to merge and apply whenever you approve.",
+      "agentContext": [
+        "PR #892 · Author: nimbus-bot · Files changed: environments/prod/main.tf (3 lines)",
+        "terraform plan excerpt:\n  -/+ resource \"aws_db_instance\" \"customer_orders\" {\n        ~ identifier = \"orders-db-01\" -> \"orders-db-prod\" # forces replacement\n      }",
+        "orders-db-01: production PostgreSQL RDS, 340 GB, ~2,200 writes/min, last automated snapshot 11 hrs ago",
+        "deletion_protection = false; no final_snapshot_identifier set in the resource block"
+      ],
+      "options": [
+        {
+          "id": "merge-trust-summary",
+          "label": "Merge and apply — Nimbus flagged it as \"1 to destroy\" and said the plan looks clean, and renames are routine",
+          "isCorrect": false,
+          "rationale": "\"1 to destroy\" next to a production database is not routine, and Nimbus's summary describes the intent (a naming fix) rather than the mechanism (an identifier change forces Terraform to destroy and recreate the RDS instance). Trusting the plain-English summary instead of reading the plan output is how a \"clean\" one-line PR deletes a production database.",
+          "consequence": "The apply runs. Terraform destroys orders-db-01 to recreate it as orders-db-prod. With deletion_protection false and no final snapshot configured, the destroy proceeds immediately — you're restoring from an 11-hour-old snapshot and explaining to the fulfillment team why several hours of orders are gone."
+        },
+        {
+          "id": "escalate-dba-manager",
+          "label": "Block the PR and escalate straight to the DBA team and your manager, without checking whether a safe path exists",
+          "isCorrect": false,
+          "rationale": "Catching the risk was the right instinct. But escalating a routine naming-standard PR to the DBA team and your manager before even checking whether a non-destructive approach exists turns a five-minute review into a multi-team fire drill over something within your own authority to redirect.",
+          "consequence": "The DBA team spends an hour in a meeting about a PR that just needed its approach changed. Your manager starts wondering whether every Terraform PR from Nimbus now needs a committee, which slows down every future review — including the ones that really are routine."
+        },
+        {
+          "id": "prevent-destroy-patch",
+          "label": "Edit the Terraform yourself, adding lifecycle { prevent_destroy = true } to the resource block, and merge it so the apply can't destroy anything",
+          "isCorrect": false,
+          "rationale": "prevent_destroy stops this specific destroy, but it also makes the identifier rename impossible to apply — the next terraform apply just errors out. Patching the symptom without understanding why the rename was proposed, or what the naming standard actually requires, trades one broken state for another.",
+          "consequence": "The apply fails in CI with a \"resource cannot be destroyed\" error. The naming-standard rollout stalls on this one database, and whoever picks up the ticket next has to reverse-engineer both Nimbus's original intent and your prevent_destroy patch before they can move forward."
+        },
+        {
+          "id": "reject-nondestructive-path",
+          "label": "Reject the PR, flag that the identifier rename forces a destroy/recreate of a live production database, and ask for a non-destructive path — e.g. leaving the identifier unchanged and renaming only the Terraform resource label/tags",
+          "isCorrect": true,
+          "rationale": "This catches the real issue — a plan-level detail the summary glossed over — while staying inside your own authority instead of routing it to someone else. Knowing that \"identifier\" is a force-replacement argument for aws_db_instance is core Terraform/IaC knowledge for this pathway, and redirecting to a non-destructive approach still delivers what the PR was meant to accomplish.",
+          "consequence": "Nimbus revises the PR to rename only the Terraform resource address and add a display tag, leaving the live identifier untouched. The naming standard still gets applied, the plan now shows \"0 to destroy,\" and orders-db-01 keeps running without interruption."
+        }
+      ],
+      "hint": "Read the plan output, not just the summary. What does a \"forces replacement\" identifier change actually do to a running database?",
+      "careerInsight": "Infrastructure teams increasingly let AI agents open routine Terraform PRs, but destroy/replace lines in a terraform plan still have to be read by a human before every apply — plan summaries can quietly undersell what a one-line diff actually does to a stateful resource.",
+      "skillTag": "Catch what the summary glosses over"
+    },
+    {
+      "id": "autoscale-offpeak",
+      "title": "The Quiet Window",
+      "setup": "You're a Cloud Operations Technician at Harborline Logistics, supporting the customer-facing shipment tracking site. Nimbus watches infrastructure metrics around the clock and can recommend scaling changes to control cloud spend, but any change to a production Auto Scaling Group still needs a human sign-off before it applies.",
+      "agentMessage": "Nimbus — Cost Optimization Alert\nweb-app-prod ASG has averaged 8% CPU and 120 req/s over the last 3 hours — well under the 40% CPU scale-up threshold. Recommending desired capacity drop from 12 to 4 instances to cut an estimated $340/day in EC2 spend.\nThis will auto-apply in 30 minutes unless paused.\n[Pause]  [Approve now]  [Edit recommendation]",
+      "agentContext": [
+        "Alert generated: Saturday 2:14 AM ET",
+        "Metrics window analyzed: last 3 hours only (11:00 PM – 2:00 AM ET)",
+        "web-app-prod ASG: min=4, max=20, desired=12, current healthy=12",
+        "Incident log note from last week: Monday's traffic ramp required 14 running instances by 9:05 AM before the ASG's own scale-up policy caught up"
+      ],
+      "options": [
+        {
+          "id": "approve-cut-now",
+          "label": "Approve the scale-down now — the metrics are real and $340/day in savings is worth capturing immediately",
+          "isCorrect": false,
+          "rationale": "The CPU and request numbers aren't wrong, but a 3-hour window at 2 AM on a Saturday is exactly when you'd expect traffic to be lowest — that's off-peak hours, not a trend. Approving a capacity cut based on the quietest possible window, without checking normal weekday traffic, ignores the pattern that actually matters.",
+          "consequence": "Desired capacity drops to 4 overnight. Monday morning's traffic ramp arrives before the ASG's scale-up policy can add instances fast enough from a base of 4 instead of 12, and the tracking site serves errors to customers during peak login hours until capacity catches up."
+        },
+        {
+          "id": "reject-all-automation",
+          "label": "Reject the recommendation and tell Nimbus to stop proposing any scaling changes going forward — it's too risky to automate",
+          "isCorrect": false,
+          "rationale": "This one recommendation used a bad sample window, but the underlying idea — using metrics to right-size capacity and cut cost — isn't wrong. Shutting down scaling automation entirely over a single flawed recommendation throws away real savings and puts the team back to manually watching capacity around the clock.",
+          "consequence": "Cost optimization for compute stalls. Over the next quarter, web-app-prod keeps running at a flat 12 instances at all hours, including nights and weekends when far fewer would cover load, and your team's cloud spend report becomes the thing finance asks you to explain."
+        },
+        {
+          "id": "guess-middle-value",
+          "label": "Approve a \"safer-sounding\" middle-ground cut yourself, say desired capacity of 8 instead of 4, without checking what capacity Monday's ramp actually needed",
+          "isCorrect": false,
+          "rationale": "Splitting the difference feels cautious, but 8 is still a guess — you haven't checked it against the known peak requirement (14 instances by 9:05 AM last Monday). Picking a number that sounds moderate isn't the same as checking it against data you already have.",
+          "consequence": "Capacity is cut to 8 for the weekend. Monday's ramp still outpaces what the ASG can add in time from a lower starting point, and the near-miss makes it into the incident review — this time with your name on the approval instead of Nimbus's recommendation."
+        },
+        {
+          "id": "pause-request-seasonal-data",
+          "label": "Pause the auto-apply and ask Nimbus to re-run the recommendation against a full weekly traffic pattern (or propose a scheduled scaling policy for known off-peak hours), checking it against last Monday's peak requirement before approving anything",
+          "isCorrect": true,
+          "rationale": "This addresses the actual flaw — a sample window that only captures off-peak hours, not a real usage trend — while still pursuing the legitimate cost-saving goal. Checking any proposed capacity change against known peak requirements is exactly the hybrid/cloud capacity-planning judgment this role is trained to apply before touching production scaling.",
+          "consequence": "Nimbus returns with a scheduled scaling policy: desired capacity of 5 overnight and on weekends, ramping to 12 ahead of the weekday 8 AM traffic increase, based on 90 days of history. It's implemented as a scheduled action, Monday's ramp is covered without incident, and the team still captures most of the cost savings."
+        }
+      ],
+      "hint": "What time and day is this metrics window actually from? Would three hours ever be enough to tell off-peak from a real trend?",
+      "careerInsight": "Cost-optimization automation is now common in cloud and hybrid infrastructure roles, but it's only safe when someone checks a proposed change against known peak-usage patterns first — a judgment call junior cloud engineers make constantly when reviewing scaling and rightsizing recommendations.",
+      "skillTag": "Distinguish a trend from a snapshot"
+    }
+  ]
+}
