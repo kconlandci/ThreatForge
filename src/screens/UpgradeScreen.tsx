@@ -76,7 +76,8 @@ function goBack(navigate: ReturnType<typeof useNavigate>) {
 
 export default function UpgradeScreen() {
   const navigate = useNavigate();
-  const { purchase, restore, isPurchasing, isRestoring } = usePurchase();
+  const { packages, offeringsError, purchase, restore, isPurchasing, isRestoring } =
+    usePurchase();
   const { isPremium, refreshPremiumStatus } = usePremiumStatus();
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -116,6 +117,8 @@ export default function UpgradeScreen() {
       // User cancelled — do nothing
     } else if (result.error === "network") {
       setErrorMsg("Purchase failed — check your connection and try again.");
+    } else if (result.error === "not_found") {
+      setErrorMsg("That plan isn't available right now. Please try again in a moment.");
     } else {
       setErrorMsg("Something went wrong. Please try again.");
     }
@@ -137,6 +140,8 @@ export default function UpgradeScreen() {
 
   const isBusy = isPurchasing || isRestoring;
   const activePlan = PLANS.find((p) => p.key === selectedPlan)!;
+  const activePlanPrice =
+    packages?.[activePlan.productId]?.product.priceString ?? activePlan.price;
 
   // Already premium — show confirmation
   if (isPremium || purchaseSuccess) {
@@ -226,6 +231,9 @@ export default function UpgradeScreen() {
           {PLANS.map((plan) => {
             const isSelected = selectedPlan === plan.key;
             const Icon = plan.icon;
+            // Prefer the live, localized price from the store; fall back to the
+            // display string only while offerings are still loading/unavailable.
+            const livePrice = packages?.[plan.productId]?.product.priceString;
             return (
               <button
                 key={plan.key}
@@ -260,7 +268,7 @@ export default function UpgradeScreen() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
                       <span className="text-base font-bold text-white">
-                        {plan.price}
+                        {livePrice ?? plan.price}
                       </span>
                       <span className="text-xs text-slate-400">
                         {plan.period}
@@ -296,6 +304,11 @@ export default function UpgradeScreen() {
         {errorMsg && (
           <p className="text-xs text-red-400 text-center mb-3">{errorMsg}</p>
         )}
+        {!errorMsg && offeringsError && (
+          <p className="text-xs text-amber-400 text-center mb-3">
+            Couldn't load live pricing — showing estimated prices.
+          </p>
+        )}
 
         {/* CTA */}
         <button
@@ -309,7 +322,7 @@ export default function UpgradeScreen() {
               Processing...
             </>
           ) : (
-            `Get ${activePlan.label} — ${activePlan.price}`
+            `Get ${activePlan.label} — ${activePlanPrice}`
           )}
         </button>
         <p className="text-[10px] text-slate-500 text-center mb-4">
