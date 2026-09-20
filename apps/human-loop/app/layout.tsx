@@ -15,12 +15,12 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "The Human Loop — an AI Oversight Simulator by DCI",
+  title: "Human Loop — an AI Oversight Simulator by DCI",
   description:
     "Practice the skill every tech job will need: knowing when to trust an AI agent, and when to stop it. A free interactive simulator across DCI's 5 career pathways.",
   metadataBase: new URL("https://human-loop.vercel.app"),
   openGraph: {
-    title: "The Human Loop — an AI Oversight Simulator by DCI",
+    title: "Human Loop — an AI Oversight Simulator by DCI",
     description:
       "You're not competing with AI. You're supervising it. Play 5 career pathways, catch the agent's mistakes before they ship.",
     type: "website",

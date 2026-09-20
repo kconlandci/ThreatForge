@@ -5,7 +5,7 @@ export function LoopMark({ className = "h-9 w-9" }: { className?: string }) {
       fill="none"
       className={className}
       role="img"
-      aria-label="The Human Loop icon"
+      aria-label="Human Loop icon"
     >
       <path
         d="M24 6C13.5 6 5 13.6 5 23s8.5 17 19 17"
@@ -57,7 +57,7 @@ export function Wordmark({
       <LoopMark className={iconSize} />
       <div className="flex flex-col leading-none">
         <span className={`font-display font-semibold tracking-tight ${textSize}`}>
-          The Human Loop
+          Human Loop
         </span>
         {showDci && (
           <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-loop-text-muted">
