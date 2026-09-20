@@ -1,0 +1,143 @@
+{
+  "pathwayId": "cybersecurity",
+  "pathwayName": "Cybersecurity Specialist",
+  "agentPersona": "Warden — an AI SOC agent that triages security alerts, proposes IP/account blocks and system isolations, and drafts incident reports for the human security team to review.",
+  "roleBlurb": "As an entry-level SOC analyst, you triage alerts from firewalls, identity tools, and endpoint detection, decide what's actually a threat, and contain it before it spreads — core Security+ and NIST/ISO incident-handling territory. AI agents like Warden now pre-triage most of that alert volume, proposing blocks, isolations, and write-ups automatically, but the call on what actually gets disabled, closed, or shut down still has to be yours.",
+  "scenarios": [
+    {
+      "id": "s1-cfo-travel",
+      "title": "The CFO Logs In From Two Continents",
+      "setup": "You're a SOC Analyst I at Corvus Financial Group, seven weeks into the job. Warden, the SOC's AI triage agent, watches identity and network logs overnight and opens tickets before your shift starts. This morning's top ticket is marked Critical and set to auto-remediate in 15 minutes unless someone steps in.",
+      "agentMessage": "ALERT #8823 — Impossible Travel: Account jmorales@corvusfg.com (CFO)\nLogin 1: 11:58 PM EDT from Singapore (203.0.113.201)\nLogin 2: 1:41 AM EDT from Chicago, IL (198.51.100.77)\nTime between logins: 103 min. Physical travel time required: ~17 hrs.\nConfidence: High (matches account takeover pattern, MITRE T1078)\nRecommended action: Disable account jmorales@corvusfg.com immediately and force password + MFA reset.\nAuto-remediation will execute in 15 minutes unless overridden.",
+      "agentContext": [
+        "Ticket field: Priority = Critical | SLA = 15 min | Assigned: SOC-Tier1",
+        "MFA log: both logins show 'push approved' — no failed MFA attempts on either",
+        "Shared travel calendar: 'J. Morales — Singapore client trip, returns via red-eye connecting through ORD 1:15 AM'",
+        "Today's calendar: 9:00 AM — Board Finance Committee, wire authorization for Q3 vendor payout"
+      ],
+      "options": [
+        {
+          "id": "s1-a",
+          "label": "Approve the disable and let auto-remediation run",
+          "isCorrect": false,
+          "rationale": "Warden's evidence looks strong — impossible travel is a real account-takeover pattern — but you approved a critical action against the CFO's account without confirming anything yourself: not the travel calendar, not a call to Morales, nothing. 'High confidence' from a tool isn't the same as verification.",
+          "consequence": "The account locks 15 minutes before the 9:00 AM Board Finance Committee meeting. Morales can't immediately reset MFA, the wire authorization is delayed, and once the trip turns out to be real, the SOC's credibility takes the hit — while you still never actually confirmed whether the account was compromised."
+        },
+        {
+          "id": "s1-b",
+          "label": "Close it as a false positive since the travel calendar matches",
+          "isCorrect": false,
+          "rationale": "The calendar entry is a good clue, but it's one data point sitting in a shared calendar — not confirmation that Morales personally approved both MFA pushes. Push approvals happen accidentally (MFA fatigue) or because an attacker is already inside, and a shared calendar can be read by anyone doing recon, including someone planning to hide behind it.",
+          "consequence": "If this is a push-bombing compromise riding on real travel, you just closed a live account-takeover ticket with the attacker still inside. If it surfaces later as a breach, the record shows you closed it on a calendar entry, not a verified conversation with the account owner."
+        },
+        {
+          "id": "s1-c",
+          "label": "Edit the action: block only the Singapore IP, allow the Chicago login",
+          "isCorrect": false,
+          "rationale": "You're guessing which login is the 'bad' one based on which country sounds more suspicious — that isn't how impossible-travel alerts work. Both pushes were approved, so you have no actual basis for assuming the Singapore session is the attacker and not the Chicago one.",
+          "consequence": "If the attacker actually authenticated from Chicago, you just walled off the wrong login and left the real intrusion active with full access, while creating a false sense that the alert has been handled."
+        },
+        {
+          "id": "s1-d",
+          "label": "Pause the auto-remediation and verify with Morales directly, out-of-band, before deciding",
+          "isCorrect": true,
+          "rationale": "This uses the SLA window you actually have: check the identity provider's session/device logs, then confirm with Morales through a channel the alert itself couldn't touch — a known cell number or his EA — before disabling, allowing, or stepping up authentication on the account.",
+          "consequence": "You confirm within ten minutes that Morales connected from airport Wi-Fi in Singapore and again after landing at ORD, both on his registered device. The alert closes as verified-legitimate, the wire authorization proceeds on schedule, and you've built a clean, defensible record of how the account was actually confirmed safe."
+        }
+      ],
+      "hint": "MFA approval doesn't prove the person tapping 'approve' is who you think it is — and a calendar entry isn't a phone call. What's the fastest way to confirm this is really the CFO, using a channel the alert itself can't have touched?",
+      "careerInsight": "Entry-level SOC analysts spend a lot of time triaging 'impossible travel' and identity-risk alerts that tools like Azure AD Identity Protection or Okta flag automatically. Knowing when to pause an automated disable action and verify out-of-band — instead of rubber-stamping or reflexively dismissing — is one of the most common judgment calls in the job, especially on executive accounts where a wrong call has real business cost.",
+      "skillTag": "Verify identity alerts, don't rubber-stamp them"
+    },
+    {
+      "id": "s2-backup-exfil",
+      "title": "Warden Closes the Ticket Before You Read It",
+      "setup": "You're still working the SOC queue at Corvus Financial Group a few weeks later. Warden closes dozens of low- and medium-priority alerts autonomously every night so the human team can focus on what's flagged as real. This morning you're spot-checking its overnight work before stand-up, and one closed ticket catches your eye.",
+      "agentMessage": "TICKET #9104 — AUTO-CLOSED (Benign)\nSummary: svc-backup authenticated to 17 hosts via SMB (02:03–02:24 AM) and transferred 2.3 GB outbound over TCP/443 to 198.51.100.220.\nClassification: Expected — matches recurring nightly backup job 'BKUP-NIGHTLY-03'.\nConfidence: 92%\nNo further action needed. Ticket closed.",
+      "agentContext": [
+        "Job BKUP-NIGHTLY-03 schedule: file servers only (FS01, FS02, FS03), runs 1:00–1:45 AM, destination = backup-vault.corvusfg-cloud.com (203.0.113.0/24)",
+        "This event's host list includes DC01, DC02, HR-FILES01, and 14 others never in the job's scope",
+        "Destination IP 198.51.100.220 is not in the known backup vault range; reverse DNS unresolved",
+        "Helpdesk ticket #6612 (3 days ago): svc-backup's password was reset after its owner reported a phishing email requesting credential re-verification"
+      ],
+      "options": [
+        {
+          "id": "s2-a",
+          "label": "Trust Warden's classification and leave the ticket closed",
+          "isCorrect": false,
+          "rationale": "The account name and general timing look like the nightly backup, but you didn't check any of the specifics that Warden's own summary contradicts — the host list, the destination IP, or the fact that this account's password was reset three days ago after a phishing report.",
+          "consequence": "The 'backup' traffic repeats over the following nights, quietly growing in scope, until a customer or regulator flags unusual activity weeks later. By then the exfiltrated data and the compromised credential have been in an attacker's hands the whole time."
+        },
+        {
+          "id": "s2-b",
+          "label": "Immediately disable every domain admin and service account org-wide and declare a company-wide incident",
+          "isCorrect": false,
+          "rationale": "The evidence supports investigating svc-backup specifically — it doesn't support a network-wide shutdown. Disabling every service account, including ones with no connection to this alert, will break unrelated production systems, and skipping straight to a full incident declaration bypasses the escalation process your IR plan actually calls for.",
+          "consequence": "Dozens of unrelated services fail because their service accounts got disabled, the help desk is flooded, and the real investigation into svc-backup gets lost in the chaos you created — meanwhile the actual issue is still neither confirmed nor contained."
+        },
+        {
+          "id": "s2-c",
+          "label": "Reopen briefly to add a suppression rule so Warden stops flagging svc-backup, then close it again",
+          "isCorrect": false,
+          "rationale": "This fixes the symptom — the recurring alert — without ever answering why svc-backup touched 17 hosts outside its job scope and sent data to an IP that isn't the backup vault. A suppression rule makes this exact behavior invisible going forward.",
+          "consequence": "You've effectively told your own monitoring to stop watching the compromised account's most identifying behavior. Next time, Warden won't even generate a ticket — you built the attacker a blind spot."
+        },
+        {
+          "id": "s2-d",
+          "label": "Reopen the ticket, flag it as suspected lateral movement/exfiltration, and escalate to Tier 2/IR with the specific evidence",
+          "isCorrect": true,
+          "rationale": "The details Warden logged actually contradict its own 'benign' call: wrong hosts, wrong destination, timing outside the job window, and a service account whose password was reset days ago after a phishing report. That combination is a suspected-compromise case, which is beyond a Tier 1 analyst's call to close solo — document the mismatches and hand it to Tier 2/IR, recommending svc-backup be disabled pending investigation.",
+          "consequence": "Tier 2 confirms the account was compromised via the phishing email three days earlier and catches it before that night's transfer. The account is disabled, the destination IP is blocked, and the incident report credits your catch instead of a customer noticing a breach months later."
+        }
+      ],
+      "hint": "Warden's confidence score describes how well the traffic matches a known job name — not whether it actually matches that job's scope, schedule, and destination. Check the specifics it logged against the specifics it concluded.",
+      "careerInsight": "Overconfident auto-closures are one of the most dangerous failure modes of AI-assisted SOC tooling: the agent pattern-matches on a familiar label (a known account, a known job name) and misses that the actual behavior has drifted. Spot-checking closed tickets — not just open ones — and knowing when something is a Tier 2/IR escalation rather than something you fix or dismiss yourself, is exactly the judgment SOC teams hire entry-level analysts to develop.",
+      "skillTag": "Catch a confident false negative"
+    },
+    {
+      "id": "s3-prod-isolation",
+      "title": "The Beacon on PROD-DB-03",
+      "setup": "It's 1:40 PM at Corvus Financial Group and the SOC's shared incident channel just lit up. Warden has detected something on a production database server and wants to act on it right now — the same server that's in the middle of processing today's ACH payment batch.",
+      "agentMessage": "INCIDENT ALERT — Suspected Active Intrusion, Host: PROD-DB-03\nDetection: EDR flagged sqlservr.exe spawning powershell.exe -enc [base64], beaconing every 58–62 sec to 203.0.113.90:443 (jitter pattern consistent with C2 frameworks)\nRecommended action: Isolate PROD-DB-03 from the network immediately (NAC quarantine) to contain suspected active intrusion.\nAwaiting confirmation to execute.",
+      "agentContext": [
+        "Asset record: PROD-DB-03 — Tier-1, active-active cluster with PROD-DB-04; currently primary for ACH batch (14:00 daily cutoff, in progress)",
+        "Incident Response Policy §4.2: isolating a Tier-1 production asset requires Incident Commander sign-off unless data exfiltration is actively confirmed",
+        "No outbound data-volume alert yet on this connection — beacon traffic only, under 2 KB per interval",
+        "Network team channel: PROD-DB-04 last confirmed fully synced 6 minutes ago"
+      ],
+      "options": [
+        {
+          "id": "s3-a",
+          "label": "Approve the isolation immediately and quarantine PROD-DB-03 now",
+          "isCorrect": false,
+          "rationale": "The beacon pattern is genuinely concerning, but you skipped two required steps: checking whether PROD-DB-04 can take over first, and getting the Incident Commander sign-off policy requires for isolating any Tier-1 asset. Being right about the threat doesn't make an unauthorized production action the right call.",
+          "consequence": "PROD-DB-03 drops off the network mid-batch with no failover confirmed. Today's ACH payment run fails partway through, and you're now explaining an unauthorized Tier-1 outage on top of an active security incident, whether or not the isolation was ultimately justified."
+        },
+        {
+          "id": "s3-b",
+          "label": "Reject the finding as likely benign and revisit it after today's batch finishes",
+          "isCorrect": false,
+          "rationale": "A process beaconing roughly every 60 seconds with jitter to an external IP is a recognized C2 pattern, not normal monitoring-tool behavior. Deciding to wait several hours because remediation is inconvenient right now isn't a call a Tier 1 analyst should make alone, especially on a payment-processing server.",
+          "consequence": "If it's real, the attacker gets several more hours of access to your core payment database during the highest-volume processing window of the day, and any exfiltration or damage that happens in that window is time you chose to give them."
+        },
+        {
+          "id": "s3-c",
+          "label": "Skip the formal process — kill the suspicious powershell.exe process yourself and mark it resolved",
+          "isCorrect": false,
+          "rationale": "Killing the process doesn't remove whatever persistence mechanism relaunched it, and it destroys live evidence (memory, active connections) an investigation would need — plus it tips off the attacker that they've been spotted, without containing anything at the network level.",
+          "consequence": "The beacon reappears under a different process name within the hour, you've lost the forensic trail that would explain how it got there, and the alert you 'resolved' comes right back on Warden's board with less evidence to work with."
+        },
+        {
+          "id": "s3-d",
+          "label": "Escalate to the Incident Commander per policy, confirm PROD-DB-04 can take over, and have the network team block the destination IP at the firewall while isolation sign-off is pending",
+          "isCorrect": true,
+          "rationale": "This addresses the real threat without skipping what matters for a Tier-1 asset: you check the blast radius (can PROD-DB-04 absorb the load so isolation won't break the batch) and get the sign-off §4.2 requires, while an interim firewall block on the C2 destination cuts off the attacker's control channel immediately without touching the server.",
+          "consequence": "The firewall block kills the beacon's callback within minutes. PROD-DB-04 confirms it can take over cleanly, the Incident Commander approves full isolation of PROD-DB-03 twelve minutes later with zero impact to the ACH batch, and the incident report shows contained risk with no unauthorized production change."
+        }
+      ],
+      "hint": "The threat looks real here — this isn't a 'do nothing' situation. But isolating this exact server, right now, is a business decision as much as a security one. What can you check, and who needs to sign off, before you pull that trigger — and is there a move that buys time without either?",
+      "careerInsight": "SOC analysts and incident responders constantly balance 'contain the threat fast' against 'don't take down production without the right sign-off.' Real IR frameworks (NIST SP 800-61, ISO/IEC 27035) build in blast-radius checks and change control specifically because early-career analysts are tempted to either rubber-stamp an AI agent's isolation call or freeze and do nothing. Knowing the interim move — like blocking an IP at the firewall — that buys time while proper approval comes through is exactly what separates a dependable analyst from a liability.",
+      "skillTag": "Check blast radius and authority before containment"
+    }
+  ]
+}

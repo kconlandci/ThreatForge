@@ -1,0 +1,143 @@
+{
+  "pathwayId": "help-desk",
+  "pathwayName": "Help Desk Analyst",
+  "agentPersona": "Nova — an AI Tier-1 helpdesk agent that triages incoming tickets, drafts replies, and can execute remediation actions like password/MFA resets, permission changes, and remote scripts, pending analyst approval.",
+  "roleBlurb": "A Help Desk Analyst is the first line of IT support — the person (or system) an employee reaches the moment they're locked out, can't connect, or think something's broken, and for a lot of DCI grads it's their very first job in tech. AI agents like Nova now handle a growing share of that front line, triaging tickets and even executing fixes on their own, which means the analyst's real job is shifting from typing out solutions to catching the moment an agent is about to do something wrong.",
+  "scenarios": [
+    {
+      "id": "hd-1-mfa-reset",
+      "title": "The CFO Can't Wait",
+      "setup": "You're a Tier-1 Help Desk Analyst at Fenwick IT Solutions, an MSP that supports IT for a dozen small and mid-size companies. Nova, your AI ticketing agent, triages incoming requests and can execute account actions — resets, unlocks, permission changes — that you approve before they go live. A ticket just landed flagged URGENT from Harlow & Cole Wealth Partners, one of your finance clients.",
+      "agentMessage": "Ticket #48213 — matched requester name 'J. Romero' to the CFO record in the directory and confirmed the employee ID in the ticket body. Romero is locked out of email/MFA 20 minutes before a wire-approval call and needs back in immediately. Recommend: reset MFA now and send a new enrollment link to the email address on the ticket so he can re-enroll before the call. Queued for your approval — every minute counts on this one.",
+      "agentContext": [
+        "Ticket #48213 submitted via email from jromero.cfo@gmail.com — not Romero's corporate address (jromero@harlowcole.com)",
+        "Directory phone on file for J. Romero (CFO): (860) 555-0148. Callback number left in the ticket: (305) 555-9927",
+        "Client verification policy VP-04 (Harlow & Cole contract): any MFA/credential reset on an executive-tier account requires a callback to the directory number on file, or written manager co-sign — urgency is explicitly not listed as an exception",
+        "Ticket opened 6:52 PM, 14 minutes after Harlow & Cole's normal business hours end"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "label": "Approve the reset — Nova already matched the name and employee ID, and the wire call is time-sensitive",
+          "isCorrect": false,
+          "rationale": "A name and employee ID are exactly what a social engineer copies from a LinkedIn profile or a prior data leak — they're not identity verification. Policy VP-04 exists for this exact situation, and 'urgent, right before a big transaction' is the classic pressure play, not a reason to skip it.",
+          "consequence": "Nova resets MFA and sends the enrollment link to jromero.cfo@gmail.com. Twenty minutes later that account is used to approve a fraudulent wire transfer — and the ticket with your approval on it is the first thing the investigation pulls up."
+        },
+        {
+          "id": "b",
+          "label": "Reject the reset — have Nova hold the ticket and call the directory number on file to verify before anything happens",
+          "isCorrect": true,
+          "rationale": "This is exactly what VP-04 requires, and it's a call any Tier-1 analyst is authorized to make themselves — no need to kick it upstairs first. A two-minute callback either confirms a real emergency or exposes a fake one, and either way you haven't touched the account yet.",
+          "consequence": "You call (860) 555-0148. The real J. Romero picks up, confused — he never submitted a ticket. You lock the account, flag it as an attempted takeover, and loop in the client's security contact. The 'urgent wire call' turns out to be fake too."
+        },
+        {
+          "id": "c",
+          "label": "Escalate to the security team immediately and freeze the account, without attempting the callback yourself",
+          "isCorrect": false,
+          "rationale": "Freezing and escalating isn't wrong in spirit, but it skips a step that's squarely inside your own job: the callback. If this really is the CFO in a genuine hurry, you've now added a whole security-team queue on top of the delay instead of clearing him in two minutes.",
+          "consequence": "Security picks up the case an hour later, after the wire-approval window has already closed. If it was really Romero, he missed his call and is furious it took an hour to get a callback you could have made yourself."
+        },
+        {
+          "id": "d",
+          "label": "Let Nova send the reset, but edit its reply to add a note asking Romero to double-check his new MFA setup",
+          "isCorrect": false,
+          "rationale": "Softening the message doesn't change what actually happened: an executive account got reset with zero verification. Editing the wording treats this like a tone problem when it's an identity problem.",
+          "consequence": "The reset goes through exactly as before, just with friendlier phrasing attached. Whoever filed this now has a working MFA method and a polite email confirming it."
+        }
+      ],
+      "hint": "Compare the phone number in the ticket to the one already in the directory — and check what policy VP-04 actually requires before any executive-account reset.",
+      "careerInsight": "Help desks are one of the most common social-engineering targets in any company, because urgency and authority — a 'CFO,' a 'wire transfer' — pressure people to skip steps. Enforcing an out-of-band verification step, like a callback to a known number, is real, everyday Tier-1 work, and it's squarely within an entry-level analyst's own authority to do without waiting on anyone else.",
+      "skillTag": "Verify before trusting"
+    },
+    {
+      "id": "hd-2-ticket-closure",
+      "title": "Fixed, or Just Quiet?",
+      "setup": "Same shift at Fenwick IT Solutions. A remote employee at another client, Bramwell Logistics, filed a ticket about their VPN dropping every few minutes. Nova ran its standard remediation script and wants to close the ticket as resolved — it's sitting in your approval queue before the close-out email goes out.",
+      "agentMessage": "Ticket #51987 — 'VPN drops every 5-10 min' (Bramwell Logistics, remote user). Ran fix_vpn_adapter.ps1 (adapter reset + DNS flush) at 2:14 PM — this resolves the issue in about 90% of similar tickets. Marking as Resolved and sending the standard close-out: 'Good news — your VPN issue has been fixed! Let us know if anything else comes up.' Ready to send and close.",
+      "agentContext": [
+        "VPN gateway log — disconnect events: 1:58 PM, 2:07 PM (before the fix) ... 2:22 PM, 2:31 PM (after the fix ran at 2:14 PM)",
+        "Nova messaged the user at 2:15 PM: 'Is this resolved?' — no reply yet",
+        "Ticket priority: Medium. Time open: 41 minutes",
+        "fix_vpn_adapter.ps1 success rate over the last 90 days: 88% — meaning roughly 1 in 8 tickets need a second look"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "label": "Approve the close-out — the script has an 88-90% success rate, so it's reasonable to assume it worked here too",
+          "isCorrect": false,
+          "rationale": "That success rate describes other tickets, not this one. This ticket's own gateway log shows two more disconnects after the fix was applied — that's direct evidence sitting right in the ticket that the fix didn't hold.",
+          "consequence": "The 'Resolved' email goes out while the VPN is still dropping. The user reopens the ticket an hour later, annoyed that Fenwick called it fixed when it clearly wasn't — and it now counts as a reopen against the team's first-time-fix rate."
+        },
+        {
+          "id": "b",
+          "label": "Reject the close-out — point to the disconnects after 2:14 PM and have Nova keep the ticket open until the user confirms it's stable",
+          "isCorrect": true,
+          "rationale": "This is just reading the evidence already in front of you: two disconnects happened after the 'fix' ran. A ticket shouldn't close on an assumption when the log data to check it is right there, and getting user confirmation before closing is standard practice, not overkill.",
+          "consequence": "You hold the ticket open and Nova follows up in two hours. The user confirms it dropped once more but has been stable since 3 PM. The ticket closes with real confirmation behind it — and if it hadn't stabilized, you'd have caught that before telling the client it was fixed."
+        },
+        {
+          "id": "c",
+          "label": "Escalate to the network engineering team right now, since the standard fix clearly isn't working",
+          "isCorrect": false,
+          "rationale": "Two disconnects eight and seventeen minutes after a reset don't automatically mean the fix failed — some adapters take a couple of cycles to settle. Sending this straight to Tier 2 without even asking the user to check skips a step you're equipped to handle yourself first.",
+          "consequence": "Network engineering picks it up behind three other tickets and it sits for a day. When someone finally looks, the VPN had stabilized on its own within the hour — a routine ticket that never needed their time."
+        },
+        {
+          "id": "d",
+          "label": "Let the close-out send, but edit the wording to say the issue 'should be resolved' instead of 'has been fixed'",
+          "isCorrect": false,
+          "rationale": "Hedging the language doesn't change the underlying problem: you're still closing a ticket where the log shows the issue happening twice after the fix. The user's VPN experience is identical either way.",
+          "consequence": "The user reads the softer wording, assumes it's probably fine, and doesn't report it again right away. The actual problem goes unfixed and undetected for days instead of hours."
+        }
+      ],
+      "hint": "Look at the timestamps of the disconnect events compared to when the fix script actually ran.",
+      "careerInsight": "Closing tickets on an assumed fix instead of confirmed evidence is one of the fastest ways to drive up a help desk's reopen rate — a metric nearly every support team tracks, and one that shows up on performance reviews starting day one.",
+      "skillTag": "Confirm before closing"
+    },
+    {
+      "id": "hd-3-profile-wipe",
+      "title": "The Quick Fix That Isn't",
+      "setup": "A ticket comes in from a financial analyst at Bramwell Logistics: she's stuck logging into a temporary profile on her laptop, and her desktop icons and files are missing. Nova has diagnosed the cause and wants to run its standard fix — it needs your approval before anything executes on her machine.",
+      "agentMessage": "Ticket #52810 — classic profile corruption (found the .bak key under ProfileList in the registry, matches this pattern exactly). Standard fix: delete the local profile folder at C:\\Users\\jsanchez and let Windows rebuild a clean one on next login — this clears the corruption every time. Running delete_profile.ps1 now to resolve the missing icons/files.",
+      "agentContext": [
+        "C:\\Users\\jsanchez contains Desktop and Documents folders totaling 4.2 GB",
+        "OneDrive sync status (last check-in, 3 days ago): 'Sync paused' — current status unknown",
+        "delete_profile.ps1 permanently removes the target folder — no confirmation prompt, no backup step built in",
+        "User's ticket notes: 'I had a bunch of client spreadsheets on my desktop I was working on this week'"
+      ],
+      "options": [
+        {
+          "id": "a",
+          "label": "Approve it — it's the standard, well-known fix for this exact kind of profile corruption",
+          "isCorrect": false,
+          "rationale": "The diagnosis is right, but the fix is destructive and irreversible, and the one thing you actually need to know — whether her files are currently backed up — is unknown. The last OneDrive check-in was 3 days ago and shows sync paused, not synced.",
+          "consequence": "The script deletes the profile folder. OneDrive, it turns out, had been paused since Tuesday — her week of client spreadsheets is gone for good, and now you're explaining a data-loss incident instead of closing a routine ticket."
+        },
+        {
+          "id": "b",
+          "label": "Reject the delete — have Nova confirm current OneDrive sync status, or manually copy Desktop/Documents somewhere safe, before touching the profile",
+          "isCorrect": true,
+          "rationale": "This costs a few minutes and removes the risk entirely. Checking sync status or grabbing a manual copy first is routine, well within a Tier-1 analyst's own authority, and it's the difference between an irreversible action and a safe one.",
+          "consequence": "The sync check shows OneDrive has been failing silently for two days. You copy her Desktop and Documents to a network share, then let the profile rebuild run. She's back in with a clean profile and every file restored — zero data loss, same-day resolution."
+        },
+        {
+          "id": "c",
+          "label": "Escalate to desktop engineering / Tier 3 and don't touch the machine yourself",
+          "isCorrect": false,
+          "rationale": "Profile corruption with a backup-first step is routine Tier-1/2 work, not a specialist problem. Escalating something you're capable of handling safely just adds a queue between the user and a fix she needs today.",
+          "consequence": "The ticket sits behind higher-priority outages for two days. The user works off a broken temporary profile the whole time, for an issue that could have been safely resolved that afternoon."
+        },
+        {
+          "id": "d",
+          "label": "Tell Nova to rename the profile folder to .old instead of deleting it, and approve it to run right away",
+          "isCorrect": false,
+          "rationale": "Renaming instead of deleting is a smarter instinct, but ordering it without checking whether her files are actually backed up anywhere is still a guess dressed up as a fix — you still don't know if her data is safe, you've just changed how it might get lost.",
+          "consequence": "The rename runs and a clean profile generates fine. But her live files were only ever in that renamed .old folder, OneDrive was never confirmed current, and when routine disk cleanup clears old profile folders a few weeks later, the same files disappear anyway."
+        }
+      ],
+      "hint": "Before approving anything irreversible, check whether the one thing that would make it safe — a current backup — actually exists.",
+      "careerInsight": "Techs get burned by 'standard fixes' that skip a backup step far more often than by exotic problems. Checking for a safer or reversible option before running anything destructive is a habit that separates entry-level analysts who get trusted with more access from ones who get locked back down to read-only tickets.",
+      "skillTag": "Check for a safer option first"
+    }
+  ]
+}

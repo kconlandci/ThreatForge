@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --loop-bg: #0a0e13;
+  --loop-bg-elevated: #10161d;
+  --loop-bg-card: #131b23;
+  --loop-border: #212b35;
+  --loop-text: #eef2f5;
+  --loop-text-muted: #93a1ad;
+  --loop-green: #22c55e;
+  --loop-green-strong: #16a34a;
+  --loop-violet: #8b5cf6;
+  --loop-red: #ef4444;
+  --loop-amber: #f59e0b;
+}
+
+@theme inline {
+  --color-loop-bg: var(--loop-bg);
+  --color-loop-bg-elevated: var(--loop-bg-elevated);
+  --color-loop-bg-card: var(--loop-bg-card);
+  --color-loop-border: var(--loop-border);
+  --color-loop-text: var(--loop-text);
+  --color-loop-text-muted: var(--loop-text-muted);
+  --color-loop-green: var(--loop-green);
+  --color-loop-green-strong: var(--loop-green-strong);
+  --color-loop-violet: var(--loop-violet);
+  --color-loop-red: var(--loop-red);
+  --color-loop-amber: var(--loop-amber);
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-inter);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--loop-bg);
+  color: var(--loop-text);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--loop-green) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px color-mix(in srgb, var(--loop-green) 0%, transparent);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise-in {
+  animation: rise-in 0.35s ease-out both;
+}
