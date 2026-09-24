@@ -2,7 +2,7 @@
   "pathwayId": "cybersecurity",
   "pathwayName": "Cybersecurity Specialist",
   "agentPersona": "Warden — an AI SOC agent that triages security alerts, proposes IP/account blocks and system isolations, and drafts incident reports for the human security team to review.",
-  "roleBlurb": "As an entry-level SOC analyst, you triage alerts from firewalls, identity tools, and endpoint detection, decide what's actually a threat, and contain it before it spreads — core Security+ and NIST/ISO incident-handling territory. AI agents like Warden now pre-triage most of that alert volume, proposing blocks, isolations, and write-ups automatically, but the call on what actually gets disabled, closed, or shut down still has to be yours.",
+  "roleBlurb": "As an entry-level SOC analyst, you triage alerts from firewalls, identity tools, and endpoint detection, decide what's actually a threat, and contain it before it spreads — the core of day-to-day incident handling. AI agents like Warden now pre-triage most of that alert volume, proposing blocks, isolations, and write-ups automatically, but the call on what actually gets disabled, closed, or shut down still has to be yours.",
   "scenarios": [
     {
       "id": "s1-cfo-travel",

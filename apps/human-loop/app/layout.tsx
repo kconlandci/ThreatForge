@@ -1,37 +1,36 @@
-import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Atkinson_Hyperlegible_Next, JetBrains_Mono, Lexend } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const lexend = Lexend({ subsets: ["latin"], variable: "--font-lexend", display: "swap" });
+const atkinson = Atkinson_Hyperlegible_Next({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-atkinson",
   display: "swap",
 });
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Human Loop — an AI Oversight Simulator by DCI",
+  title: "Human Loop — a DCI game about supervising AI",
   description:
-    "Practice the skill every tech job will need: knowing when to trust an AI agent, and when to stop it. A free interactive simulator across DCI's 5 career pathways.",
-  metadataBase: new URL("https://human-loop.vercel.app"),
+    "AI agents are your new coworkers. Learn to supervise them. A card-battler from DCI across five tech career pathways.",
+  metadataBase: new URL("https://human-loop-eight.vercel.app"),
   openGraph: {
-    title: "Human Loop — an AI Oversight Simulator by DCI",
-    description:
-      "You're not competing with AI. You're supervising it. Play 5 career pathways, catch the agent's mistakes before they ship.",
+    title: "Human Loop — a DCI game about supervising AI",
+    description: "AI agents are your new coworkers. Learn to supervise them.",
     type: "website",
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className={`${lexend.variable} ${atkinson.variable} ${jetbrains.variable}`}>
       <body className="antialiased">{children}</body>
     </html>
   );

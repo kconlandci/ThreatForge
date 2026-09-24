@@ -1,73 +1,59 @@
-export type OversightOption = {
-  id: string;
-  label: string;
-  isCorrect: boolean;
-  rationale: string;
-  consequence: string;
-};
-
-export type Scenario = {
-  id: string;
-  title: string;
-  setup: string;
-  agentMessage: string;
-  agentContext?: string[];
-  options: OversightOption[];
-  hint: string;
-  careerInsight: string;
-  skillTag: string;
-};
-
 export type PathwayId =
   | "help-desk"
   | "cybersecurity"
+  | "cloud-network"
   | "full-stack"
-  | "business-analyst"
-  | "cloud-network";
-
-export type PathwayPack = {
-  pathwayId: PathwayId;
-  pathwayName: string;
-  agentPersona: string;
-  roleBlurb: string;
-  scenarios: Scenario[];
-};
+  | "business-analyst";
 
 export type PathwayMeta = {
   id: PathwayId;
   name: string;
+  /** The AI coworker the player supervises in this pathway. */
+  agentName: string;
   tagline: string;
-  accent: "green" | "violet";
+  status: "live" | "soon";
 };
 
 export const PATHWAYS: PathwayMeta[] = [
-  { id: "help-desk", name: "Help Desk Analyst", tagline: "Oversee an AI ticket-triage agent", accent: "green" },
-  { id: "cybersecurity", name: "Cybersecurity Specialist", tagline: "Oversee an AI threat-detection agent", accent: "violet" },
-  { id: "full-stack", name: "Full Stack Developer", tagline: "Oversee an AI coding agent", accent: "green" },
-  { id: "business-analyst", name: "Business Analyst", tagline: "Oversee an AI reporting & analysis agent", accent: "violet" },
-  { id: "cloud-network", name: "Cloud Network Specialist", tagline: "Oversee an AI cloud-ops agent", accent: "green" },
+  {
+    id: "help-desk",
+    name: "Help Desk",
+    agentName: "ResetBot 3000",
+    tagline: "Supervise an AI that really, really loves resetting passwords.",
+    status: "live",
+  },
+  {
+    id: "cybersecurity",
+    name: "Cybersecurity",
+    agentName: "Warden",
+    tagline: "Supervise an AI that wants to quarantine everything, including the CEO.",
+    status: "soon",
+  },
+  {
+    id: "cloud-network",
+    name: "Cloud & Network",
+    agentName: "Nimbus",
+    tagline: "Supervise an AI with root access and a lot of confidence.",
+    status: "soon",
+  },
+  {
+    id: "full-stack",
+    name: "Full-Stack Development",
+    agentName: "Piper",
+    tagline: "Supervise an AI that ships fast and reads docs never.",
+    status: "soon",
+  },
+  {
+    id: "business-analyst",
+    name: "Business Analyst",
+    agentName: "Quill",
+    tagline: "Supervise an AI whose charts always go up and to the right.",
+    status: "soon",
+  },
 ];
 
-export type PlayerProfile = {
-  playerId: string;
-  name: string;
-  email: string;
-  createdAt: string;
-};
-
-export type ScenarioResult = {
-  scenarioId: string;
-  pathwayId: PathwayId;
-  optionId: string;
-  correct: boolean;
-  usedHint: boolean;
-  score: number;
-};
-
-export type PathwayRunResult = {
-  pathwayId: PathwayId;
-  score: number;
-  maxScore: number;
-  completedAt: string;
-  results: ScenarioResult[];
-};
+export function getPathway(id: PathwayId): PathwayMeta {
+  const p = PATHWAYS.find((x) => x.id === id);
+  if (!p) throw new Error(`Unknown pathway ${id}`);
+  return p;
+}

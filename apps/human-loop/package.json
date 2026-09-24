@@ -7,15 +7,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@vercel/blob": "^0.27.1",
+    "@neondatabase/serverless": "^1.1.0",
+    "lucide-react": "^1.48.0",
     "next": "^15.1.4",
+    "phaser": "4.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3.2.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.5",
@@ -24,6 +29,7 @@
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.4",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^5.0.1"
   }
 }

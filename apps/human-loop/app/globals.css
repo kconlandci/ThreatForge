@@ -1,69 +1,66 @@
 @import "tailwindcss";
 
+/* DCI brand tokens (mirror lib/brand.ts). Light only: the brand is a white page. */
 :root {
-  --loop-bg: #0a0e13;
-  --loop-bg-elevated: #10161d;
-  --loop-bg-card: #131b23;
-  --loop-border: #212b35;
-  --loop-text: #eef2f5;
-  --loop-text-muted: #93a1ad;
-  --loop-green: #22c55e;
-  --loop-green-strong: #16a34a;
-  --loop-violet: #8b5cf6;
-  --loop-red: #ef4444;
-  --loop-amber: #f59e0b;
+  --hl-teal: #0f6a61;
+  --hl-teal-dark: #0a4c45;
+  --hl-teal-tint: #e7f1ef;
+  --hl-teal-tint-2: #d3e6e2;
+  --hl-ink: #111418;
+  --hl-ink-soft: #3a4149;
+  --hl-muted: #5f6b76;
+  --hl-line: #e3e7ea;
+  --hl-paper: #ffffff;
+  --hl-paper-soft: #f6f8f9;
+  --hl-orange: #f26b1d;
+  --hl-orange-text: #c2410c;
+  --hl-orange-tint: #fff1e8;
+  --hl-danger: #b42318;
 }
 
 @theme inline {
-  --color-loop-bg: var(--loop-bg);
-  --color-loop-bg-elevated: var(--loop-bg-elevated);
-  --color-loop-bg-card: var(--loop-bg-card);
-  --color-loop-border: var(--loop-border);
-  --color-loop-text: var(--loop-text);
-  --color-loop-text-muted: var(--loop-text-muted);
-  --color-loop-green: var(--loop-green);
-  --color-loop-green-strong: var(--loop-green-strong);
-  --color-loop-violet: var(--loop-violet);
-  --color-loop-red: var(--loop-red);
-  --color-loop-amber: var(--loop-amber);
-  --font-display: var(--font-space-grotesk);
-  --font-body: var(--font-inter);
+  --color-teal: var(--hl-teal);
+  --color-teal-dark: var(--hl-teal-dark);
+  --color-teal-tint: var(--hl-teal-tint);
+  --color-teal-tint-2: var(--hl-teal-tint-2);
+  --color-ink: var(--hl-ink);
+  --color-ink-soft: var(--hl-ink-soft);
+  --color-muted: var(--hl-muted);
+  --color-line: var(--hl-line);
+  --color-paper: var(--hl-paper);
+  --color-paper-soft: var(--hl-paper-soft);
+  --color-orange: var(--hl-orange);
+  --color-orange-text: var(--hl-orange-text);
+  --color-orange-tint: var(--hl-orange-tint);
+  --color-danger: var(--hl-danger);
+  --font-display: var(--font-lexend);
+  --font-body: var(--font-atkinson);
+  --font-mono: var(--font-jetbrains);
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--loop-bg);
-  color: var(--loop-text);
+  background: var(--hl-paper);
+  color: var(--hl-ink);
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--loop-green) 45%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 14px color-mix(in srgb, var(--loop-green) 0%, transparent);
-  }
+:focus-visible {
+  outline: 3px solid var(--hl-orange);
+  outline-offset: 2px;
 }
 
-.animate-pulse-ring {
-  animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-rise-in {
-  animation: rise-in 0.35s ease-out both;
 }
