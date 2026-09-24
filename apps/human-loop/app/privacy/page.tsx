@@ -110,8 +110,8 @@ export default function PrivacyPage() {
 
               <Section id="where" title="Where it’s stored">
                 <p>
-                  The website is hosted by <strong>Vercel</strong>. Sign-up and progress data are stored in a Postgres
-                  database run by <strong>Neon</strong>. Both are in the United States.
+                  Sign-up and progress data are stored in <strong>Airtable</strong>, a cloud database service, in the
+                  United States. The website is hosted by <strong>Vercel</strong>, also in the United States.
                 </p>
                 <p>
                   Like most websites, our hosting provider keeps short-term server logs, such as IP address and

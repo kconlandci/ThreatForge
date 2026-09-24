@@ -2,12 +2,16 @@
  * POST /api/lead  {name, email, marketingOptIn, ageConfirmed: true}
  *   200 {stored: boolean, playerId: string}  and sets the httpOnly "hl_pid" cookie.
  *   400 / 413 / 415 {error}  invalid input.   429 {error}  too many sign-ups from this network.
+ *   503 {error} + Retry-After  storage is configured but temporarily unavailable (Airtable rate
+ *                              limit, outage, timeout). No cookie; the browser keeps the sign-up and
+ *                              sends it again later, so it is not lost.
  *
- * `stored: false` means no database is configured (or it is unreachable). The player still gets
- * a server-issued id and cookie, and the game keeps saving in the browser.
+ * `stored: false` means no storage (Postgres or Airtable) is configured, or it failed for a reason
+ * a retry would not fix (or Postgres is unreachable). The player still gets a server-issued id and
+ * cookie, and the game keeps saving in the browser.
  */
 import { after, NextResponse } from "next/server";
-import { createPlayer, maybePurgeStalePlayers } from "@/lib/server/db";
+import { createPlayer, maybePurgeStalePlayers } from "@/lib/server/storage";
 import { newPlayerId, setPlayerCookie } from "@/lib/server/player-cookie";
 import { clientIp, leadLimiter } from "@/lib/server/rate-limit";
 import { LEAD_MAX_BYTES, readJsonBody, validateLead } from "@/lib/server/validate";
@@ -46,7 +50,14 @@ export async function POST(req: Request) {
   }
 
   const playerId = newPlayerId();
-  const stored = await createPlayer(playerId, lead.value);
+  const { stored, retryAfterSec } = await createPlayer(playerId, lead.value);
+  if (!stored && retryAfterSec !== undefined) {
+    // Not the player's fault: this attempt does not count toward the network's sign-up limit.
+    leadLimiter.release(clientIp(req));
+    return error("We couldn't save your sign-up just now. We'll try again shortly.", 503, {
+      "Retry-After": String(retryAfterSec),
+    });
+  }
   if (stored) {
     afterResponse(async () => {
       await maybePurgeStalePlayers();

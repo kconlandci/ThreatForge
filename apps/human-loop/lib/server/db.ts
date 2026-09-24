@@ -12,13 +12,13 @@
  */
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { SaveData, SaveProfile } from "@/lib/game/types";
+import { PURGE_EVERY_MS, RETENTION_MONTHS } from "./retention";
 import { validateSave, type LeadInput } from "./validate";
+
+export { RETENTION_MONTHS };
 
 /** Per-request timeout for each database round trip. A stuck database must not hang sign-up. */
 const QUERY_TIMEOUT_MS = 6000;
-/** Matches the privacy notice: data is deleted 24 months after the player last played. */
-export const RETENTION_MONTHS = 24;
-const PURGE_EVERY_MS = 24 * 60 * 60 * 1000;
 
 export const SCHEMA_SQL = [
   `CREATE TABLE IF NOT EXISTS players (

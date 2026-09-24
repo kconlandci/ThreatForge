@@ -7,7 +7,7 @@
  * refuses every request (401), so it can't be triggered by anyone else.
  */
 import { NextResponse } from "next/server";
-import { maybePurgeStalePlayers } from "@/lib/server/db";
+import { maybePurgeStalePlayers } from "@/lib/server/storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

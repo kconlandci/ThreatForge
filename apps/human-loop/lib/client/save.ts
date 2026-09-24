@@ -7,23 +7,38 @@
  * - POST   /api/lead      {name, email, marketingOptIn, ageConfirmed: true}
  *                         -> {stored: boolean, playerId: string}; sets the httpOnly "hl_pid" cookie.
  * - GET    /api/progress  -> {cloud: boolean, save: SaveData | null, profile?: SaveProfile | null}
- * - PUT    /api/progress  {save: SaveData} -> {stored: boolean}
+ * - PUT    /api/progress  {save: SaveData} -> {stored: boolean, retry?: true}
  * - DELETE /api/progress  -> {ok: true}; deletes the player's data and clears the cookie
  *                         (503 {ok: false} when the database can't be reached; the cookie is kept).
  * - POST   /api/logout    -> {ok: true}; clears the cookie only (the server data stays).
  * `cloud: false` / `stored: false` mean the database is not configured (or unreachable).
+ * `retry: true` (with Retry-After) means storage is only temporarily unavailable: ask again later.
  */
 import type { PathwayId } from "@/lib/types";
 import type { BattleState, PathwayProgress, SaveData, SaveProfile } from "@/lib/game/types";
 
 const KEY = "human-loop:save:v2";
-const PUSH_DELAY_MS = 1500;
+/**
+ * Cloud push pacing, per tab: at most one routine push a minute (trailing, so the newest save
+ * always goes out). Airtable allows 5 requests per second per base (with a 30 s penalty when
+ * exceeded) and counts calls against a monthly cap, and each push costs 1-4 calls. Finished
+ * battles and a tab being hidden or closed push right away.
+ */
+const PUSH_INTERVAL_MS = 60_000;
+/** Short wait even when the interval has passed, so a burst of updates becomes one push. */
+const PUSH_SETTLE_MS = 1500;
+/** After a push that the server could not store for now: try again after 45-75 s (past Airtable's 30 s penalty). */
+const PUSH_RETRY_MIN_MS = 45_000;
+const PUSH_RETRY_JITTER_MS = 30_000;
 
 let memory: SaveData | null = null;
 let cloudAvailable = false;
 let pushTimer: ReturnType<typeof setTimeout> | null = null;
+let lastPushAt = 0;
 let listening = false;
 let leadRetryTimer: ReturnType<typeof setTimeout> | null = null;
+let syncRetryTimer: ReturnType<typeof setTimeout> | null = null;
+let syncRetries = 0;
 
 function randomId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -134,9 +149,29 @@ function persist(save: SaveData) {
   }
 }
 
+/** Seconds from a Retry-After header, or 0. */
+function retryAfterSec(res: Response): number {
+  const n = Number(res.headers.get("retry-after"));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/**
+ * A push was not stored for a temporary reason: send the newest save again later (unless a push
+ * is already waiting). A hidden or closed tab flushes it sooner.
+ */
+function schedulePushRetry(afterSec = 0) {
+  if (pushTimer || !cloudAvailable) return;
+  const wait = Math.max(PUSH_RETRY_MIN_MS, afterSec * 1000) + Math.random() * PUSH_RETRY_JITTER_MS;
+  pushTimer = setTimeout(() => {
+    pushTimer = null;
+    sendPush();
+  }, wait);
+}
+
 function sendPush() {
   const latest = memory;
   if (!latest?.profile || latest.profile.guest || !cloudAvailable) return;
+  lastPushAt = Date.now();
   const body = JSON.stringify({ save: latest });
   fetch("/api/progress", {
     method: "PUT",
@@ -144,9 +179,19 @@ function sendPush() {
     body,
     // Browsers cap keepalive bodies at 64 KB; bigger saves go as a normal request.
     keepalive: body.length < 60_000,
-  }).catch(() => {
-    // Offline: the next update retries.
-  });
+  })
+    .then(async (res) => {
+      let retry = res.status === 429 || res.status >= 500;
+      if (res.ok) {
+        const reply = (await res.json().catch(() => null)) as { retry?: unknown } | null;
+        retry = reply?.retry === true;
+      }
+      if (retry) schedulePushRetry(retryAfterSec(res));
+    })
+    .catch(() => {
+      // Offline: try again later (or with the next update).
+      schedulePushRetry();
+    });
 }
 
 /** Send a waiting cloud push now (the tab is being hidden or closed). */
@@ -200,14 +245,36 @@ export function loadSave(): SaveData {
   return save;
 }
 
-function schedulePush() {
+/**
+ * Queue a cloud push. Routine updates share one trailing push at most every PUSH_INTERVAL_MS
+ * (the timer sends whatever the newest save is when it fires). `immediate` (a battle just ended)
+ * sends now and cancels the queued one.
+ */
+function schedulePush(immediate = false) {
   const save = memory;
   if (!save?.profile || save.profile.guest || !cloudAvailable) return;
-  if (pushTimer) clearTimeout(pushTimer);
+  if (immediate) {
+    if (pushTimer) clearTimeout(pushTimer);
+    pushTimer = null;
+    sendPush();
+    return;
+  }
+  if (pushTimer) return;
+  const wait = Math.max(PUSH_SETTLE_MS, lastPushAt + PUSH_INTERVAL_MS - Date.now());
   pushTimer = setTimeout(() => {
     pushTimer = null;
     sendPush();
-  }, PUSH_DELAY_MS);
+  }, wait);
+}
+
+/** True when `next` has a finished-battle history entry that `prev` does not. */
+function addsHistory(prev: SaveData, next: SaveData): boolean {
+  const seen = new Set<string>();
+  for (const p of Object.values(prev.pathways)) for (const h of p?.history ?? []) seen.add(`${h.at}|${h.encounterId}`);
+  for (const p of Object.values(next.pathways)) {
+    for (const h of p?.history ?? []) if (!seen.has(`${h.at}|${h.encounterId}`)) return true;
+  }
+  return false;
 }
 
 /**
@@ -220,7 +287,7 @@ export function updateSave(update: (save: SaveData) => SaveData): SaveData {
   const base = stored && stored.updatedAt >= mine.updatedAt ? stored : mine;
   const next = { ...update(base), updatedAt: new Date().toISOString() };
   persist(next);
-  schedulePush();
+  schedulePush(addsHistory(base, next));
   return next;
 }
 
@@ -259,10 +326,33 @@ async function postLead(lead: { name: string; email: string; marketingOptIn: boo
 function scheduleLeadRetry(sec: number) {
   if (typeof window === "undefined") return;
   if (leadRetryTimer) clearTimeout(leadRetryTimer);
-  leadRetryTimer = setTimeout(() => {
-    leadRetryTimer = null;
-    void retryPendingLead();
-  }, Math.min(sec, 15 * 60) * 1000);
+  // Jitter, so a classroom that signed up together does not retry in the same second.
+  leadRetryTimer = setTimeout(
+    () => {
+      leadRetryTimer = null;
+      void retryPendingLead();
+    },
+    Math.min(sec, 15 * 60) * 1000 * (1 + Math.random() * 0.5),
+  );
+}
+
+/**
+ * The cloud check could not reach storage for now: check again later (30 s doubling to 5 min,
+ * with jitter). Only for a signed-up profile whose sign-up already went through.
+ */
+function scheduleSyncRetry(afterSec = 0) {
+  if (typeof window === "undefined" || syncRetryTimer) return;
+  const local = loadSave();
+  if (!local.profile || local.profile.guest || local.pendingLead) return;
+  const base = Math.min(300, Math.max(afterSec, 30 * 2 ** syncRetries));
+  syncRetries += 1;
+  syncRetryTimer = setTimeout(
+    () => {
+      syncRetryTimer = null;
+      void syncFromCloud({ adopt: false });
+    },
+    base * 1000 * (1 + Math.random() * 0.5),
+  );
 }
 
 /**
@@ -339,9 +429,18 @@ export async function syncFromCloud(opts: { adopt?: boolean } = {}): Promise<{ s
   const adopt = opts.adopt ?? true;
   try {
     const res = await fetch("/api/progress", { cache: "no-store" });
-    if (!res.ok) return { save: loadSave(), restored: false };
-    const body = (await res.json()) as { cloud?: boolean; save?: unknown; profile?: unknown };
+    if (!res.ok) {
+      if (res.status === 429 || res.status >= 500) scheduleSyncRetry(retryAfterSec(res));
+      return { save: loadSave(), restored: false };
+    }
+    const body = (await res.json()) as { cloud?: boolean; save?: unknown; profile?: unknown; retry?: unknown };
     const local = loadSave();
+    if (body.retry === true) {
+      // Storage is busy for now, not gone: keep pushing if we were, and check again later.
+      scheduleSyncRetry(retryAfterSec(res));
+      return { save: local, restored: false };
+    }
+    syncRetries = 0;
     cloudAvailable = body.cloud === true && !local.profile?.guest;
     if (body.cloud !== true) return { save: local, restored: false };
 
@@ -362,7 +461,8 @@ export async function syncFromCloud(opts: { adopt?: boolean } = {}): Promise<{ s
     }
     schedulePush();
   } catch {
-    // Offline: local save wins.
+    // Offline: local save wins; check again later.
+    scheduleSyncRetry();
   }
   return { save: loadSave(), restored: false };
 }
@@ -370,6 +470,9 @@ export async function syncFromCloud(opts: { adopt?: boolean } = {}): Promise<{ s
 function clearLocal(): SaveData {
   if (pushTimer) clearTimeout(pushTimer);
   pushTimer = null;
+  if (syncRetryTimer) clearTimeout(syncRetryTimer);
+  syncRetryTimer = null;
+  syncRetries = 0;
   try {
     window.localStorage.removeItem(KEY);
   } catch {

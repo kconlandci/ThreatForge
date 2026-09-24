@@ -1,5 +1,5 @@
 /**
- * Route handlers in "no-op mode": no DATABASE_URL / POSTGRES_URL. The game must keep working:
+ * Route handlers in "no-op mode": no DATABASE_URL / POSTGRES_URL / AIRTABLE_TOKEN. The game must keep working:
  * sign-up still issues a player id + cookie, progress reads return cloud:false, writes stored:false.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -44,6 +44,7 @@ let logs: unknown[][] = [];
 beforeEach(() => {
   vi.stubEnv("DATABASE_URL", "");
   vi.stubEnv("POSTGRES_URL", "");
+  vi.stubEnv("AIRTABLE_TOKEN", "");
   leadLimiter.reset();
   saveLimiter.reset();
   logs = [];

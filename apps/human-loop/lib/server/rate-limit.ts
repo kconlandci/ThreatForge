@@ -9,6 +9,8 @@ export type RateLimitResult = { ok: true } | { ok: false; retryAfterSec: number 
 
 export type RateLimiter = {
   check(key: string, now?: number): RateLimitResult;
+  /** Give back one use (the request it counted did not go through, e.g. storage was down). */
+  release(key: string): void;
   reset(): void;
 };
 
@@ -39,6 +41,10 @@ export function createRateLimiter(opts: { limit: number; windowMs: number; maxKe
       w.count += 1;
       if (w.count > limit) return { ok: false, retryAfterSec: Math.max(1, Math.ceil((w.resetAt - now) / 1000)) };
       return { ok: true };
+    },
+    release(key) {
+      const w = windows.get(key);
+      if (w && w.count > 0) w.count -= 1;
     },
     reset() {
       windows.clear();
@@ -74,5 +80,18 @@ export const leadLimiter = createRateLimiter({
   windowMs: 10 * 60 * 1000,
 });
 
-/** Cloud save writes per player per minute. The client debounces to one every 1.5 s at most. */
+/** Cloud save writes per player per minute (any backend). */
 export const saveLimiter = createRateLimiter({ limit: 60, windowMs: 60 * 1000 });
+
+/**
+ * Airtable only (5 requests per second per base, and a monthly API call cap): cloud save writes
+ * per player per minute. The client pushes about once a minute, plus battle ends, tab hides and
+ * retries, so 12 leaves room for honest play.
+ */
+export const airtableSaveLimiter = createRateLimiter({ limit: 12, windowMs: 60 * 1000 });
+
+/**
+ * Airtable only: cloud save writes per IP per minute. A classroom shares one IP; 50 players at
+ * about 2 pushes a minute stay well under this, while a script with many cookies does not.
+ */
+export const saveIpLimiter = createRateLimiter({ limit: 240, windowMs: 60 * 1000 });
