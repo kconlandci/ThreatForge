@@ -242,7 +242,7 @@ export function SignUpForm({
           Play as guest
         </button>
         <p id={ids.guestNote} className="text-center text-[15px] text-muted">
-          No sign-up. Your progress stays on this device.
+          No sign-up, any age. Your progress stays on this device.
         </p>
       </div>
       </div>

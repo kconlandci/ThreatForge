@@ -147,8 +147,10 @@ export default function PrivacyPage() {
 
               <Section id="age" title="Age">
                 <p>
-                  Human Loop is for people 13 and older. We don&rsquo;t knowingly collect personal information from
-                  children under 13. If you think a child under 13 signed up, <ContactUs /> and we&rsquo;ll delete it.
+                  Anyone can play Human Loop. To sign up with a name and email you must be 13 or older; younger
+                  players can play as a guest, which collects no personal information. We don&rsquo;t knowingly
+                  collect personal information from children under 13. If you think a child under 13 signed up,{" "}
+                  <ContactUs /> and we&rsquo;ll delete it.
                 </p>
               </Section>
 
