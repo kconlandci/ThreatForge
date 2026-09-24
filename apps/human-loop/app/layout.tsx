@@ -7,18 +7,31 @@ const atkinson = Atkinson_Hyperlegible_Next({
   subsets: ["latin"],
   variable: "--font-atkinson",
   display: "swap",
+  // next/font has no fallback metrics for this family (it only printed a build warning).
+  adjustFontFallback: false,
 });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Human Loop — a DCI game about supervising AI",
+  title: {
+    default: "Human Loop: learn to supervise AI at work",
+    template: "%s · Human Loop",
+  },
   description:
-    "AI agents are your new coworkers. Learn to supervise them. A card-battler from DCI across five tech career pathways.",
+    "AI agents are your new coworkers. Learn to supervise them. A free card game from DCI Resources: read the agent's plan, inspect the evidence, and make the call.",
+  applicationName: "Human Loop",
   metadataBase: new URL("https://human-loop-eight.vercel.app"),
   openGraph: {
-    title: "Human Loop — a DCI game about supervising AI",
-    description: "AI agents are your new coworkers. Learn to supervise them.",
+    title: "Human Loop: learn to supervise AI at work",
+    description: "AI agents are your new coworkers. Learn to supervise them. A free card game from DCI Resources.",
+    siteName: "Human Loop",
     type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Human Loop: learn to supervise AI at work",
+    description: "AI agents are your new coworkers. Learn to supervise them.",
   },
 };
 

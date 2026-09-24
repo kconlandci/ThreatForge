@@ -64,3 +64,267 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Site shell (components/site). Appended; tokens above are unchanged. */
+/* ------------------------------------------------------------------ */
+
+/* Smooth anchor scrolling on the landing page only (game routes keep instant scrolling). */
+html:has(#how-it-works) {
+  scroll-behavior: smooth;
+}
+
+.hl-skip-link {
+  position: absolute;
+  left: 12px;
+  top: -80px;
+  z-index: 100;
+  padding: 12px 16px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 12px;
+  background: var(--hl-orange);
+  color: var(--hl-ink);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  text-decoration: none;
+}
+.hl-skip-link:focus {
+  top: 12px;
+}
+
+/* Anchored sections clear the sticky site header. */
+section[id] {
+  scroll-margin-top: 88px;
+}
+
+/* Soft dot grid used behind the hero and on the play page. */
+.hl-dots {
+  background-image: radial-gradient(circle at 1px 1px, rgb(15 106 97 / 0.16) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* Orange highlighter behind ink text (orange fills always carry ink text). */
+.hl-mark {
+  background-image: linear-gradient(transparent 62%, var(--hl-orange) 62%, var(--hl-orange) 90%, transparent 90%);
+  padding-inline: 0.06em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Hero quips: only the first shows unless motion is allowed. */
+.hl-quip + .hl-quip {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hl-bob {
+    animation: hl-bob 1.8s ease-in-out infinite alternate;
+  }
+  .hl-blink {
+    animation: hl-blink 2.2s steps(1, end) infinite;
+  }
+  .hl-bubble {
+    animation: hl-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 350ms both;
+  }
+  .hl-intent {
+    animation: hl-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) 700ms both;
+  }
+  .hl-quip {
+    visibility: visible;
+    animation: hl-quip 15s linear infinite both;
+  }
+  .hl-quip + .hl-quip {
+    visibility: visible;
+  }
+  .hl-quip[data-i="1"] {
+    animation-delay: 5s;
+  }
+  .hl-quip[data-i="2"] {
+    animation-delay: 10s;
+  }
+  .hl-quip[data-i="0"] {
+    animation-name: hl-quip-first;
+  }
+  .hl-float {
+    animation: hl-float 5s ease-in-out infinite alternate;
+  }
+  .hl-card-lift {
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .hl-card-lift:hover {
+    transform: translateY(-4px) rotate(var(--hl-hover-rot, 0deg));
+  }
+
+  @supports (animation-timeline: view()) {
+    .hl-reveal {
+      animation: hl-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+@keyframes hl-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-3px);
+  }
+}
+@keyframes hl-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes hl-pop {
+  from {
+    transform: scale(0.6) translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* Animates "transform" only: Tailwind v4 utilities use the separate translate/rotate/scale properties. */
+@keyframes hl-rise {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* Each quip is visible for a third of the cycle. The first starts visible (no blank frame). */
+@keyframes hl-quip {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  2%,
+  31% {
+    opacity: 1;
+    transform: none;
+  }
+  33%,
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes hl-quip-first {
+  0%,
+  31% {
+    opacity: 1;
+    transform: none;
+  }
+  33%,
+  98% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hl-float {
+  from {
+    transform: translateY(0) rotate(var(--hl-rot, 0deg));
+  }
+  to {
+    transform: translateY(-6px) rotate(var(--hl-rot, 0deg));
+  }
+}
+/* Transform only, so text never renders at partial opacity. */
+@keyframes hl-reveal {
+  from {
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Long-form text (privacy notice). */
+.hl-prose {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--hl-ink-soft);
+}
+.hl-prose > * + * {
+  margin-top: 0.85rem;
+}
+.hl-prose strong {
+  color: var(--hl-ink);
+  font-weight: 700;
+}
+.hl-prose ul {
+  display: grid;
+  gap: 0.6rem;
+}
+.hl-prose ul > li {
+  position: relative;
+  padding-left: 1.6rem;
+}
+.hl-prose ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.62em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--hl-orange);
+  box-shadow: 0 0 0 2px var(--hl-ink);
+}
+.hl-prose code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.35rem;
+  background: var(--hl-paper-soft);
+  border: 1px solid var(--hl-line);
+  color: var(--hl-ink);
+}
+
+/* Game-style checkbox (native input, restyled). */
+.hl-check {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  flex-shrink: 0;
+  width: 1.625rem;
+  height: 1.625rem;
+  margin: 0;
+  border: 2px solid var(--hl-ink);
+  border-radius: 0.45rem;
+  background: var(--hl-paper) center / 1.05rem no-repeat;
+  box-shadow: 0 2px 0 0 var(--hl-ink);
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+.hl-check:hover {
+  background-color: var(--hl-teal-tint);
+}
+.hl-check:checked {
+  background-color: var(--hl-teal);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+.hl-check[aria-invalid="true"] {
+  border-color: var(--hl-danger);
+  box-shadow: 0 2px 0 0 var(--hl-danger);
+}
+@media (forced-colors: active) {
+  .hl-check {
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+}

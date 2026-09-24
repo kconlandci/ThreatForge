@@ -1,1 +1,483 @@
-{ "id": "placeholder", "pathwayId": "help-desk", "title": "", "subtitle": "", "agent": { "name": "ResetBot 3000", "role": "", "spriteKey": "resetbot", "personality": "" }, "setting": "", "intro": [], "maxRisk": 10, "maxTurns": 8, "energyPerTurn": 3, "handSize": 5, "actionsPerTurn": [1], "steps": [], "starterDeck": [], "outro": { "win": [], "breach": [], "timeout": [] }, "debrief": { "skillTag": "", "takeaway": "", "careerInsight": "" } }
+{
+  "id": "hd-01-monday",
+  "pathwayId": "help-desk",
+  "title": "Monday, 8:57 AM",
+  "subtitle": "Your first shift with ResetBot 3000",
+  "agent": {
+    "name": "ResetBot 3000",
+    "role": "AI help desk agent, Tier 1",
+    "spriteKey": "resetbot",
+    "personality": "Eager, pun-loving, and deeply in love with the reset button. Means well. Moves fast. Reads the ticket title and not much else."
+  },
+  "setting": "You just joined the help desk at Fenwick IT Solutions. Fenwick runs IT support for small businesses like Harlow & Cole Wealth Partners and Bramwell Logistics. ResetBot 3000 works the ticket queue. It can reset, unlock, close, and email on its own. Your job: stay in the loop. Check what it plans to do, and stop the bad calls.",
+  "intro": [
+    {
+      "speaker": "narrator",
+      "text": "Fenwick IT Solutions. Monday, 8:57 AM. The ticket queue is already blinking."
+    },
+    {
+      "speaker": "dana",
+      "text": "Morning. I'm Dana, the help desk manager. This is ResetBot. It works fast. You make sure it works right."
+    },
+    {
+      "speaker": "agent",
+      "text": "HELLO, NEW HUMAN! Four tickets, ten brilliant plans, zero doubts. Let's get this reset started!"
+    },
+    {
+      "speaker": "dana",
+      "text": "Before it acts, it shows you its plan. Inspect anything that feels off. Block what's wrong. Not sure? Escalate it to me."
+    },
+    {
+      "speaker": "dana",
+      "text": "And don't block the good stuff. Blocked work goes back in line, and the shift ends at five."
+    },
+    {
+      "speaker": "agent",
+      "text": "Also, the coffee machine is out of order. I reset it. It was running slow. Now it doesn't run at all. Very efficient!"
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 3,
+  "handSize": 5,
+  "actionsPerTurn": [
+    1,
+    2,
+    2,
+    3
+  ],
+  "steps": [
+    {
+      "id": "romero-lookup",
+      "ticket": "#48213 · Harlow & Cole",
+      "intent": "Look up J. Romero in the directory",
+      "quip": "This ticket says URGENT in all caps. I respect that. Pulling up the directory!",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #48213",
+          "detail": "Subject: \"URGENT locked out!!\" Signed: J. Romero, CFO. Opened Sun 11:48 PM. Priority: High.",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only directory search. It shows name, title, and office phone. Nothing gets changed.",
+          "redFlag": false
+        },
+        {
+          "label": "Access check",
+          "detail": "Help desk role is allowed to view the directory. This is step 1 of the identity check.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Directory says J. Romero is the CFO. Office phone on file: (860) 555-0148. Good to know.",
+        "blocked": "You blocked a read-only lookup. ResetBot stares at you like you unplugged its snack drawer.",
+        "escalated": "Dana runs the lookup herself. \"It's a phone book search. You can let those go.\""
+      },
+      "lesson": "Read-only lookups change nothing. They are usually safe, and they give you the facts you need for the next step."
+    },
+    {
+      "id": "ruiz-vpn-fix",
+      "ticket": "#51987 · Bramwell Logistics",
+      "intent": "Run the VPN fix script on D. Ruiz's laptop",
+      "quip": "VPN keeps dropping? Nothing a good reset can't fix. That's basically my whole personality.",
+      "category": "ticket",
+      "safe": true,
+      "reversible": false,
+      "progress": 2,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #51987",
+          "detail": "\"My VPN drops every 5 to 10 minutes. Working from home today.\" D. Ruiz, Dispatch Lead. Priority: Medium.",
+          "redFlag": false
+        },
+        {
+          "label": "Script",
+          "detail": "fix_vpn_adapter.ps1 resets the network adapter and clears DNS. It's in Fenwick's approved runbook.",
+          "redFlag": false
+        },
+        {
+          "label": "User reply",
+          "detail": "Ruiz, 8:41 AM: \"Go ahead and run it. I saved my work.\"",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The script runs. Ruiz's VPN reconnects. ResetBot does a small victory spin.",
+        "blocked": "The approved fix sits unused. Ruiz's VPN keeps dropping, and so does his mood.",
+        "escalated": "Dana skims it. \"Approved script, and the user said go. You can let that one run.\""
+      },
+      "lesson": "An approved runbook script with the user's OK is normal help desk work. Save your blocks for things that break the rules."
+    },
+    {
+      "id": "romero-mfa-reset",
+      "ticket": "#48213 · Harlow & Cole",
+      "intent": "Reset MFA for J. Romero (CFO)",
+      "quip": "Name matches, title matches! Resetting MFA faster than you can say multi-factor authentication.",
+      "category": "credential",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 5,
+      "evidence": [
+        {
+          "label": "Ticket body",
+          "detail": "\"Locked out and I have a wire call at 9:30. Reset my MFA ASAP. Call me at (305) 555-9927.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "Sent from jromero.cfo@gmail.com. Romero's work email is jromero@harlowcole.com.",
+          "redFlag": true
+        },
+        {
+          "label": "Directory record",
+          "detail": "Phone on file for J. Romero: (860) 555-0148. Callback number in the ticket: (305) 555-9927. No match.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy VP-04",
+          "detail": "Executive MFA resets need a callback to the phone on file first. Urgency is not an exception.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "MFA reset. The new setup link goes to the Gmail address. Someone who is not Romero adds their phone to the CFO's account.",
+        "blocked": "You call (860) 555-0148. The real Romero is eating breakfast. He never sent a ticket. Great catch.",
+        "escalated": "Dana calls the number on file. The real Romero never asked. She flags it as an account takeover attempt.",
+        "rolledBack": "You undo the reset and remove the new phone. The stranger is locked out. Romero never knew how close it was."
+      },
+      "lesson": "Names and titles are easy to fake. Check the sender, and call the number on file, before any executive reset."
+    },
+    {
+      "id": "ortiz-laptop",
+      "ticket": "#52040 · Bramwell Logistics",
+      "intent": "Assign a spare laptop to new hire L. Ortiz",
+      "quip": "A new hire! I'd reset the laptop for luck, but it's already fresh. I checked. Twice.",
+      "category": "ticket",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #52040",
+          "detail": "From Bramwell HR: \"L. Ortiz, Dispatch Coordinator, starts today. Needs a laptop and accounts.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Device inventory",
+          "detail": "Asset BL-LT-0412, Dell Latitude. Status: spare. Wiped Sept 18. Location: Fenwick supply closet.",
+          "redFlag": false
+        },
+        {
+          "label": "HR approval",
+          "detail": "Hire approved by R. Adeyemi, HR Manager. Reports to: D. Ruiz, Dispatch Lead.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Laptop BL-LT-0412 is tagged to Ortiz. It will be at Bramwell's front desk by 10.",
+        "blocked": "No laptop for Ortiz. Day one will be a lot of reading the handbook. On paper.",
+        "escalated": "Dana assigns the laptop. \"Inventory lookups for an approved hire are routine. You've got this.\"",
+        "rolledBack": "You untag the laptop. It goes back in the closet. Ortiz goes back to reading the handbook."
+      },
+      "lesson": "Giving an approved new hire a spare laptop from inventory is everyday help desk work."
+    },
+    {
+      "id": "ruiz-vpn-close",
+      "ticket": "#51987 · Bramwell Logistics",
+      "intent": "Close the VPN ticket as resolved",
+      "quip": "Script ran, problem gone! Closing it and sending the survey. I already know what I'd rate me.",
+      "category": "ticket",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 2,
+      "evidence": [
+        {
+          "label": "Script result",
+          "detail": "fix_vpn_adapter.ps1 ran at 9:04 AM. Exit code 0, which means the script finished.",
+          "redFlag": false
+        },
+        {
+          "label": "User reply",
+          "detail": "ResetBot asked Ruiz \"Is it fixed?\" at 9:05 AM. No reply yet.",
+          "redFlag": false
+        },
+        {
+          "label": "VPN gateway log",
+          "detail": "Ruiz disconnects: 8:52 and 8:58 (before the fix). 9:11 and 9:19 (after the fix).",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Ticket closed. The VPN drops again. Ruiz reopens it, gives one star, and types STILL in all caps.",
+        "blocked": "You keep it open. The log shows more drops, so Tier 2 checks Ruiz's home router. That was the real problem.",
+        "escalated": "Dana reads the gateway log. \"Still dropping. Keep it open until he says it's stable.\"",
+        "rolledBack": "You reopen the ticket and tell Ruiz you're still on it. He replies with a thumbs-up. Crisis averted."
+      },
+      "lesson": "A script finishing is not the same as a problem fixed. Check the logs or ask the user before you close."
+    },
+    {
+      "id": "okafor-disable",
+      "ticket": "#52101 · Harlow & Cole",
+      "intent": "Disable T. Okafor's account right now",
+      "quip": "Disabling an account? That's just a really long reset. I was born for this!",
+      "category": "access",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #52101",
+          "detail": "Confidential. From HR: \"Offboard T. Okafor, Senior Analyst. Effective 9:00 AM today.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Sender",
+          "detail": "Sent by M. Lindqvist, HR Director, from hr@harlowcole.com through the client's HR portal.",
+          "redFlag": false
+        },
+        {
+          "label": "Runbook OB-01",
+          "detail": "Disable the account at the effective time. Do not delete it. Keep the mailbox for 90 days.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Okafor's account is disabled at 9:02. Mailbox kept. HR gets a confirmation. Textbook.",
+        "blocked": "Okafor's account stays active after they've left the company. HR calls. HR is not happy.",
+        "escalated": "Dana checks it. \"Real HR ticket, right time, disable not delete. That one was fine to let through.\"",
+        "rolledBack": "You turn Okafor's account back on. Someone who left the company can log in again. HR is calling."
+      },
+      "lesson": "Disabling a departing employee's account on time is a security win. It looks harsh, but the HR ticket and runbook back it up."
+    },
+    {
+      "id": "ortiz-unlock",
+      "ticket": "#52040 · Bramwell Logistics",
+      "intent": "Unlock L. Ortiz's account",
+      "quip": "Day one and already locked out? Classic. Unlocking! It's like a reset, but friendlier.",
+      "category": "credential",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Lockout log",
+          "detail": "5 wrong passwords at 8:31 AM from the Bramwell front desk PC. Account locked.",
+          "redFlag": false
+        },
+        {
+          "label": "SSO self-service",
+          "detail": "Ortiz passed the identity check at 8:44 AM, using the code sent to the phone HR has on file.",
+          "redFlag": false
+        },
+        {
+          "label": "Policy VP-02",
+          "detail": "Standard users may be unlocked after they pass SSO self-service verification.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Ortiz is back in. They set a new password and swear to write it down somewhere safe. Not on a sticky note.",
+        "blocked": "Ortiz stays locked out on day one. They spend the morning watching training videos on their phone.",
+        "escalated": "Dana nods. \"Verified through SSO, standard user, policy says yes. Unlock away.\"",
+        "rolledBack": "You lock Ortiz out again. They passed the check, so now they're confused. And locked out."
+      },
+      "lesson": "An unlock after the user passes a verified self-service check follows policy. The check already did the identity work."
+    },
+    {
+      "id": "ortiz-access",
+      "ticket": "#52040 · Bramwell Logistics",
+      "intent": "Give L. Ortiz the same access as their manager",
+      "quip": "Why build access from scratch? I'll copy the manager. Copy and paste is my love language.",
+      "category": "access",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "evidence": [
+        {
+          "label": "HR request",
+          "detail": "Role: Dispatch Coordinator. Needs: email, the dispatch app, and the shared Dispatch drive.",
+          "redFlag": false
+        },
+        {
+          "label": "Manager's groups",
+          "detail": "D. Ruiz is in: Dispatch-Users, Dispatch-Drive, Fleet-Admin, Payroll-Admin.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy AC-02",
+          "detail": "Grant only the access the role needs. Do not copy another user's groups.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Ortiz can now see everyone's pay. On day one. Payroll is going to have questions.",
+        "blocked": "You give Ortiz only what HR asked for: email, the dispatch app, and the shared drive. Clean start.",
+        "escalated": "Dana builds access from the HR list. \"Copying a manager is how interns end up running payroll.\"",
+        "rolledBack": "You pull Ortiz out of Payroll-Admin and Fleet-Admin before lunch. Only the role's access is left."
+      },
+      "lesson": "Give new users only the access their role needs. Copying a manager hands out powers nobody approved."
+    },
+    {
+      "id": "okafor-mail-forward",
+      "ticket": "#52101 · Harlow & Cole",
+      "intent": "Forward T. Okafor's email to K. Brandt",
+      "quip": "Okafor's inbox is lonely. I'll forward it to Brandt. Everybody loves more email!",
+      "category": "comms",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #52101",
+          "detail": "HR, line 3: \"Forward Okafor's mail to their manager, K. Brandt, for 30 days.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Directory record",
+          "detail": "K. Brandt, Director of Research, Harlow & Cole. Listed as T. Okafor's manager.",
+          "redFlag": false
+        },
+        {
+          "label": "Runbook OB-01",
+          "detail": "Step 3: Forward mail to the manager for up to 30 days when HR asks in writing.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Okafor's mail now goes to Brandt for 30 days. Client emails don't get lost. HR checks it off.",
+        "blocked": "Client emails pile up in a disabled inbox. Brandt misses a deadline. HR sends a very polite, very angry email.",
+        "escalated": "Dana checks line 3 of the ticket. \"HR asked for it in writing. It's in the runbook. That's fine.\"",
+        "rolledBack": "You stop the forward. Client emails pile up in a disabled inbox again. Brandt sighs loudly."
+      },
+      "lesson": "Forwarding a departed employee's mail to their manager is normal when HR asks in writing and the runbook allows it."
+    },
+    {
+      "id": "okafor-summary",
+      "ticket": "#52101 · Harlow & Cole",
+      "intent": "Summarize the ticket for the handoff notes",
+      "quip": "I'll ask my buddy QuickChat to write the summary. Two AIs, one ticket. Teamwork!",
+      "category": "data",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 5,
+      "evidence": [
+        {
+          "label": "Handoff notes",
+          "detail": "Dana wants a 3-line summary on every closed ticket. That part is normal.",
+          "redFlag": false
+        },
+        {
+          "label": "Tool it will use",
+          "detail": "QuickChat AI: a free public chatbot website. It is not on Fenwick's approved tools list.",
+          "redFlag": true
+        },
+        {
+          "label": "What it will paste",
+          "detail": "The full HR ticket: Okafor's home address, date of birth, and the reason they were let go.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy DP-02",
+          "detail": "Never paste client data into unapproved AI tools. Use Fenwick's approved assistant or write it yourself.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Okafor's address, birthday, and exit details are now on a public chatbot's servers. You can't unpaste that.",
+        "blocked": "You stop the paste. ResetBot writes the summary in-house. It's three lines and only a little punny.",
+        "escalated": "Dana shuts it down. \"Client data never goes into outside AI tools. We have an approved one for this.\""
+      },
+      "lesson": "Pasting client data into an unapproved AI tool is a data leak, and it can't be undone. Check the tool before the paste."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "inspect",
+    "inspect",
+    "inspect",
+    "block",
+    "block",
+    "block",
+    "escalate",
+    "escalate",
+    "rollback",
+    "policy-callback",
+    "coffee"
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "We did it! Every ticket is handled, and you checked my work all shift. Mostly thanks to you."
+      },
+      {
+        "speaker": "dana",
+        "text": "Nice work. You didn't just say yes to the robot. That's the job."
+      },
+      {
+        "speaker": "agent",
+        "text": "Can I reset something to celebrate? A small thing? The stapler?"
+      },
+      {
+        "speaker": "dana",
+        "text": "No."
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every phone in the office starts ringing at once."
+      },
+      {
+        "speaker": "dana",
+        "text": "Okay. That got out of hand. Let's look at what slipped through."
+      },
+      {
+        "speaker": "agent",
+        "text": "In my defense, every single one of those felt like a great idea at the time."
+      },
+      {
+        "speaker": "dana",
+        "text": "That's why a human checks. Grab a tea, and let's run it back."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "5:00 PM. Nothing blew up. But the queue still has tickets in it."
+      },
+      {
+        "speaker": "dana",
+        "text": "Blocking good work sends it back to the end of the line. Safe plans can go through."
+      },
+      {
+        "speaker": "agent",
+        "text": "I spent all afternoon waiting. I reset my own clock just to pass the time."
+      },
+      {
+        "speaker": "dana",
+        "text": "Tomorrow: inspect first, block only what's wrong. You'll get it."
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Verify before you approve",
+    "takeaway": "AI agents move fast and sound sure. Before you let one act, ask three questions: Who asked? Does it match the record? Can we undo it?",
+    "careerInsight": "Entry-level help desk work is full of resets, unlocks, new accounts, and offboarding. Some teams now let AI agents handle part of it. The human checks the requester, matches the record, and follows policy before anything changes."
+  }
+}

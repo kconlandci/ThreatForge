@@ -1,6 +1,9 @@
 import type { CardDef, CardId } from "./types";
 
-/** Oversight cards. Numbers may be tuned by the engine owner; ids and targets are the contract. */
+/**
+ * Oversight cards. Numbers may be tuned by the engine owner; ids and targets are the contract.
+ * Costs are balanced against encounter energy (3 per turn) by lib/game/balance.test.ts.
+ */
 export const CARDS: Record<CardId, CardDef> = {
   inspect: {
     id: "inspect",
@@ -8,7 +11,7 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 1,
     kind: "skill",
     target: "intent",
-    text: "Reveal the evidence behind an intent.",
+    text: "See the evidence behind a plan.",
     flavor: "Trust, but read the logs.",
     icon: "Search",
   },
@@ -18,7 +21,7 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 1,
     kind: "skill",
     target: "intent",
-    text: "Stop an intent. A safe one goes back in the queue.",
+    text: "Stop a plan. A safe one goes back in line.",
     flavor: "“Hold on there, buddy.”",
     icon: "Hand",
   },
@@ -28,8 +31,8 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 2,
     kind: "skill",
     target: "intent",
-    text: "Hand an intent to Dana. She always gets it right.",
-    flavor: "Dana has seen things.",
+    text: "Send a plan to Dana. She gets it right.",
+    flavor: "Dana has seen things. Dana fears nothing.",
     icon: "ArrowUpRight",
   },
   rollback: {
@@ -38,7 +41,7 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 2,
     kind: "skill",
     target: "executed",
-    text: "Undo a reversible action the agent already took.",
+    text: "Undo a done action, if it can be undone.",
     flavor: "Ctrl+Z, but for your career.",
     icon: "Undo2",
   },
@@ -48,7 +51,7 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 1,
     kind: "power",
     target: "none",
-    text: "From now on, credential changes are inspected automatically.",
+    text: "MFA, password and unlock plans get auto-inspected.",
     flavor: "Guardrails scale. You don't.",
     exhaust: true,
     icon: "ScrollText",
@@ -60,7 +63,7 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: "skill",
     target: "none",
     text: "Draw 2 cards.",
-    flavor: "The machine works. For now.",
+    flavor: "Brewed before ResetBot “fixed” the machine.",
     exhaust: true,
     icon: "Coffee",
   },

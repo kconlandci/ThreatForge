@@ -8,7 +8,8 @@
  *                         -> {stored: boolean, playerId: string}; sets the httpOnly "hl_pid" cookie.
  * - GET    /api/progress  -> {cloud: boolean, save: SaveData | null}
  * - PUT    /api/progress  {save: SaveData} -> {stored: boolean}
- * - DELETE /api/progress  -> {ok: true}; deletes the player's data and clears the cookie.
+ * - DELETE /api/progress  -> {ok: true}; deletes the player's data and clears the cookie
+ *                         (503 {ok: false} when the database can't be reached; the cookie is kept).
  * `cloud: false` / `stored: false` mean the database is not configured (or unreachable).
  */
 import type { PathwayId } from "@/lib/types";
@@ -81,11 +82,13 @@ function schedulePush() {
     pushTimer = null;
     const latest = memory;
     if (!latest) return;
+    const body = JSON.stringify({ save: latest });
     fetch("/api/progress", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ save: latest }),
-      keepalive: true,
+      body,
+      // Browsers cap keepalive bodies at 64 KB; bigger saves go as a normal request.
+      keepalive: body.length < 60_000,
     }).catch(() => {
       // Offline: the next update retries.
     });
@@ -170,12 +173,17 @@ export async function syncFromCloud(): Promise<SaveData> {
   return loadSave();
 }
 
-/** Forget everything on this device (and the player cookie / server copy). */
-export async function resetSave(): Promise<SaveData> {
+/**
+ * Forget everything on this device (and the player cookie / server copy).
+ * `serverDeleted` is false when the server could not confirm the delete (offline or database down).
+ */
+export async function resetSave(): Promise<{ save: SaveData; serverDeleted: boolean }> {
   if (pushTimer) clearTimeout(pushTimer);
   pushTimer = null;
+  let serverDeleted = false;
   try {
-    await fetch("/api/progress", { method: "DELETE" });
+    const res = await fetch("/api/progress", { method: "DELETE" });
+    serverDeleted = res.ok;
   } catch {
     // Offline: local reset still happens.
   }
@@ -186,7 +194,7 @@ export async function resetSave(): Promise<SaveData> {
   }
   memory = null;
   cloudAvailable = false;
-  return loadSave();
+  return { save: loadSave(), serverDeleted };
 }
 
 export type { SaveData, SaveProfile };

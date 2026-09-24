@@ -1,1 +1,58 @@
-{ "officeName": "", "targets": { "resetbot": { "label": "", "description": "", "action": "battle", "lines": [] }, "dana": { "label": "", "description": "", "action": "talk", "lines": [] }, "whiteboard": { "label": "", "description": "", "action": "look", "lines": [] }, "coffee": { "label": "", "description": "", "action": "look", "lines": [] }, "printer": { "label": "", "description": "", "action": "look", "lines": [] } } }
+{
+  "officeName": "Fenwick IT Solutions · Help Desk",
+  "targets": {
+    "resetbot": {
+      "label": "ResetBot 3000's desk",
+      "description": "Your AI coworker. Start the shift here.",
+      "action": "battle",
+      "lines": [
+        { "speaker": "agent", "text": "Oh! A human! Hi! I'm ResetBot 3000. I have four tickets, ten plans, and a very itchy reset button." },
+        { "speaker": "agent", "text": "Dana says you have to watch me work. Great news: I love an audience." },
+        { "speaker": "agent", "text": "Ready to start the shift? I promise to only reset things that need it. Probably. Mostly." }
+      ]
+    },
+    "dana": {
+      "label": "Dana, help desk manager",
+      "description": "Your manager. Ask her how this works.",
+      "action": "talk",
+      "lines": [
+        { "speaker": "dana", "text": "Welcome to Fenwick. I'm Dana. I run the help desk. Lately, I also run ResetBot." },
+        { "speaker": "dana", "text": "ResetBot is fast. It is not always right. Your job is to keep a human in the loop." },
+        { "speaker": "dana", "text": "Each turn, it shows you what it plans to do. Play Inspect to see the evidence behind a plan." },
+        { "speaker": "dana", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
+        { "speaker": "dana", "text": "When you press End turn, ResetBot goes ahead with everything you didn't stop. So look first." },
+        { "speaker": "dana", "text": "But don't block everything. Blocked good work goes back in line, and the shift ends at five." }
+      ]
+    },
+    "whiteboard": {
+      "label": "Team whiteboard",
+      "description": "Dana's rules, in dry-erase marker.",
+      "action": "look",
+      "lines": [
+        { "speaker": "narrator", "text": "Big letters across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
+        { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
+        { "speaker": "narrator", "text": "Circled in red: POLICY VP-04. Before any executive MFA or password reset, call the phone number on file. Not the one in the ticket." },
+        { "speaker": "narrator", "text": "In the corner, in very small handwriting: \"Please do not reset the whiteboard. — Dana\"" }
+      ]
+    },
+    "coffee": {
+      "label": "Coffee machine",
+      "description": "Out of order. Long story.",
+      "action": "look",
+      "lines": [
+        { "speaker": "narrator", "text": "The coffee machine's screen says: FACTORY RESET COMPLETE. PLEASE SELECT A LANGUAGE." },
+        { "speaker": "narrator", "text": "It has said that since Thursday. The machine has no buttons." },
+        { "speaker": "narrator", "text": "A sticky note in neat robot print: \"You're welcome! It was running slow. — ResetBot 3000\"" }
+      ]
+    },
+    "printer": {
+      "label": "Office printer",
+      "description": "It works. Nobody knows why.",
+      "action": "look",
+      "lines": [
+        { "speaker": "narrator", "text": "The printer's screen says: PAPER JAM IN TRAY 3. The printer has two trays." },
+        { "speaker": "narrator", "text": "A note is taped to the lid: \"ResetBot, do NOT touch. It jams, but it's OUR jam. — Dana\"" }
+      ]
+    }
+  }
+}
