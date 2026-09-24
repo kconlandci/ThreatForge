@@ -43,7 +43,16 @@ export default function PhaserStage({ bus, mode, reducedMotion, initialHubPos, c
     ro.observe(box);
 
     (async () => {
-      const { createStage } = await import("./stage/createStage");
+      let mod: typeof import("./stage/createStage");
+      try {
+        mod = await import("./stage/createStage");
+      } catch {
+        // Flaky Wi-Fi: try the download once more before giving up.
+        await new Promise((r) => window.setTimeout(r, 2000));
+        if (cancelled) return;
+        mod = await import("./stage/createStage");
+      }
+      const { createStage } = mod;
       if (cancelled) return;
       const s = size();
       handle = createStage({
@@ -61,6 +70,7 @@ export default function PhaserStage({ bus, mode, reducedMotion, initialHubPos, c
       }
     })().catch((err) => {
       console.error("[stage] failed to start", err);
+      if (!cancelled) bus.fromStage.emit({ type: "failed" });
     });
 
     return () => {

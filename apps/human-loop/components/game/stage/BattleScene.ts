@@ -39,8 +39,15 @@ export class BattleScene extends StageScene {
   }
 
   protected computeFit(cssW: number, cssH: number) {
-    this.fit = battleFit(cssW, cssH);
-    this.focus = { x: BATTLE_BOX.cx, y: BATTLE_BOX.cy };
+    // Keep ResetBot above the "Done" tray (at most 40% of a short stage goes to the tray).
+    const inset = Math.min(this.rt.battleInset, cssH * 0.4);
+    this.fit = battleFit(cssW, cssH - inset);
+    this.focus = { x: BATTLE_BOX.cx, y: BATTLE_BOX.cy + inset / 2 / this.fit };
+  }
+
+  /** The covered area changed: refit the camera. */
+  relayout() {
+    if (this.sys.isActive()) this.layout();
   }
 
   create() {

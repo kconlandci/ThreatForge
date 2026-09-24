@@ -104,7 +104,7 @@ export function DialogueBox({
         </button>
       ) : null}
       {/* Screen readers get the whole line at once; the typewriter is visual only. */}
-      <p className="sr-only" aria-live="polite">
+      <p id={`${id}-line`} className="sr-only" aria-live="polite">
         {text}
       </p>
       <p
@@ -121,6 +121,9 @@ export function DialogueBox({
         <button
           ref={nextRef}
           type="button"
+          // The first line of a conversation arrives with the box (a new live region is not read), so
+          // focusing Next also reads the line.
+          aria-describedby={`${id}-line`}
           className="inline-flex min-h-12 items-center gap-1.5 rounded-xl border-2 border-ink bg-paper px-4 font-display text-base font-semibold text-ink shadow-[0_3px_0_0_var(--hl-ink)] transition-transform active:translate-y-[2px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
           onClick={() => {
             if (!done) finish();

@@ -47,6 +47,8 @@ export interface BattleViewProps {
   onSave: (state: BattleState) => void;
   /** The player asked to see the result screen. */
   onShowResult: (state: BattleState) => void;
+  /** The player's first shift: show the how-a-turn-works coach until they play a card. */
+  firstShift?: boolean;
 }
 
 interface Phase {
@@ -64,6 +66,9 @@ interface Leaving {
 }
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/** After a new turn starts, "Let ResetBot proceed" ignores taps for a moment (no double-tap skips a turn). */
+const TURN_COOLDOWN_MS = 700;
 
 const PROMPT: Partial<Record<CardDef["id"], string>> = {
   inspect: "Pick a plan to inspect.",
@@ -137,6 +142,7 @@ export function BattleView({
   reducedMotion,
   onSave,
   onShowResult,
+  firstShift = false,
 }: BattleViewProps) {
   const { state, play, endTurn } = useBattle(encounter, initial, onSave);
   const latest = useRef(state);
@@ -147,6 +153,11 @@ export function BattleView({
   const endTurnRef = useRef<HTMLButtonElement>(null);
   const playNoneRef = useRef<HTMLButtonElement>(null);
   const resultBtnRef = useRef<HTMLButtonElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
+  const actionBarRef = useRef<HTMLDivElement>(null);
+  const toastAnchorRef = useRef<HTMLDivElement>(null);
+  const stageWrapRef = useRef<HTMLDivElement>(null);
+  const insetSent = useRef("");
   const cardEls = useRef(new Map<string, HTMLButtonElement>());
   const intentEls = useRef(new Map<string, HTMLButtonElement>());
   const trayEls = useRef(new Map<string, HTMLButtonElement>());
@@ -166,6 +177,17 @@ export function BattleView({
   const counter = useRef(0);
   const focusTargetsNext = useRef(false);
   const focusHandNext = useRef<number | null>(null);
+  // Turn cooldown: a new turn ignores "proceed" briefly, so a double tap on Skip can't end it unseen.
+  const turnReadyAt = useRef(0);
+  const [turnCooling, setTurnCooling] = useState(0);
+  const endTurnViaFocus = useRef(false);
+  // Player-phase toasts pause while the pointer or focus is on them, or the tab is hidden.
+  const [toastHold, setToastHold] = useState(false);
+  const [pageHidden, setPageHidden] = useState(false);
+  const toastLeft = useRef({ id: 0, left: 0 });
+  const [coach, setCoach] = useState(
+    () => firstShift && initial.status === "playing" && initial.turn === 1 && !initial.events.some((e) => e.t === "card-played"),
+  );
 
   const agent = agentShortName(encounter);
   const agentFull = encounter.agent.name;
@@ -201,6 +223,11 @@ export function BattleView({
     setBanner({ turn, announced, key: ++counter.current });
   }, []);
 
+  const armTurn = useCallback(() => {
+    turnReadyAt.current = performance.now() + TURN_COOLDOWN_MS;
+    setTurnCooling((c) => c + 1);
+  }, []);
+
   const endBattle = useCallback(
     (status: BattleStatus) => {
       setEnded(status);
@@ -216,11 +243,14 @@ export function BattleView({
       for (const b of beats) {
         toStage(b.stage);
         addLog(b.log);
-        if (b.kind === "turn" && b.turn) showBanner(b.turn, b.announced ?? 0);
+        if (b.kind === "turn" && b.turn) {
+          showBanner(b.turn, b.announced ?? 0);
+          armTurn();
+        }
         if (b.kind === "end" && b.status) endBattle(b.status);
       }
     },
-    [toStage, addLog, showBanner, endBattle],
+    [toStage, addLog, showBanner, armTurn, endBattle],
   );
 
   const showAgentBeat = useCallback(
@@ -233,7 +263,8 @@ export function BattleView({
       addLog(b.log);
       const last = index === ph.beats.length - 1;
       const endsBattle = ph.rest.some((r) => r.kind === "end");
-      if (b.toast) showToast(b.toast, readingMs(b.toast, 3600, 8500), last ? (endsBattle ? "Finish" : "Next turn") : "Next");
+      // Agent beats wait for the player ("Next" / "Skip"): the consequence is the lesson, so it never times out.
+      if (b.toast) showToast(b.toast, 0, last ? (endsBattle ? "Finish" : "Next turn") : "Next");
     },
     [toStage, addLog, showToast],
   );
@@ -264,16 +295,38 @@ export function BattleView({
     finishPhase();
   }, [addLog, finishPhase]);
 
-  // Toast timer: during the agent's turn it advances to the next beat.
+  // Toast timer (player-phase toasts only; agent beats wait for Next). It pauses while the toast is
+  // hovered, touched or focused, and while the tab is hidden, then resumes with the time that was left.
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || toast.nextLabel || toastHold || pageHidden) return;
     const id = toast.id;
-    const t = window.setTimeout(() => {
-      setToast((cur) => (cur && cur.id === id && !phaseRef.current ? null : cur));
-      if (phaseRef.current) advance();
-    }, toast.ms);
+    if (toastLeft.current.id !== id) toastLeft.current = { id, left: toast.ms };
+    const start = performance.now();
+    const t = window.setTimeout(() => setToast((cur) => (cur && cur.id === id ? null : cur)), toastLeft.current.left);
+    return () => {
+      window.clearTimeout(t);
+      if (toastLeft.current.id === id) toastLeft.current.left = Math.max(0, toastLeft.current.left - (performance.now() - start));
+    };
+  }, [toast, toastHold, pageHidden]);
+
+  // A new toast starts un-held (the old one may have unmounted under the pointer).
+  const toastId = toast?.id;
+  useEffect(() => {
+    setToastHold(false);
+  }, [toastId]);
+
+  useEffect(() => {
+    const on = () => setPageHidden(document.hidden);
+    document.addEventListener("visibilitychange", on);
+    return () => document.removeEventListener("visibilitychange", on);
+  }, []);
+
+  // Turn cooldown lifetime (the ref is the real guard; this state only updates the button's look).
+  useEffect(() => {
+    if (!turnCooling) return;
+    const t = window.setTimeout(() => setTurnCooling(0), Math.max(0, turnReadyAt.current - performance.now()));
     return () => window.clearTimeout(t);
-  }, [toast, advance]);
+  }, [turnCooling]);
 
   // Turn banner lifetime.
   useEffect(() => {
@@ -296,6 +349,7 @@ export function BattleView({
     if (s0.status !== "playing" || opened.current) return;
     opened.current = true;
     showBanner(s0.turn, s0.announced.length);
+    armTurn();
     toStage([{ type: "agent-mood", mood: s0.announced.length ? "eager" : "idle" }]);
     addLog([
       `${encounter.title}. Turn ${s0.turn} of ${encounter.maxTurns}. ${agentFull} has ${s0.announced.length} ${
@@ -312,6 +366,18 @@ export function BattleView({
     const s0 = latest.current;
     toStage([{ type: "agent-mood", mood: s0.status !== "playing" ? "idle" : s0.announced.length ? "eager" : "idle" }]);
   }, [stageReady, toStage]);
+
+  // The "Done" tray covers the bottom of the stage: tell the stage, so ResetBot sits above it.
+  useIsoLayoutEffect(() => {
+    const tray = stageWrapRef.current?.querySelector<HTMLElement>("[data-tray]");
+    const h = tray ? Math.round(tray.offsetHeight) : 0;
+    // Send again once the stage is ready (it misses messages sent before it started).
+    const key = `${h}:${stageReady}`;
+    if (key === insetSent.current) return;
+    insetSent.current = key;
+    bus.toStage.emit({ type: "stage-inset", bottom: h });
+  });
+  useEffect(() => () => bus.toStage.emit({ type: "stage-inset", bottom: 0 }), [bus]);
 
   // Height decides whether quips clamp to one line.
   useIsoLayoutEffect(() => {
@@ -348,6 +414,7 @@ export function BattleView({
       }
       if (!reducedMotion) flyCard(cardEl, targetEl, rootRef.current);
       setSelectedUid(null);
+      setCoach(false);
       const next = r.state;
       const beats = eventsToBeats(newEvents(prev, next), encounter);
       let reveal: string | undefined;
@@ -419,7 +486,9 @@ export function BattleView({
   );
 
   const onEndTurn = useCallback(() => {
-    if (locked) return;
+    if (locked || phaseRef.current || performance.now() < turnReadyAt.current) return;
+    endTurnViaFocus.current = document.activeElement === endTurnRef.current;
+    setCoach(false);
     setSelectedUid(null);
     setEvidence(null);
     setToast(null);
@@ -436,6 +505,24 @@ export function BattleView({
     }
     showAgentBeat({ prev, beats: agentBeats, rest, shown: 0 }, 0);
   }, [locked, endTurn, encounter, agent, addLog, applyRest, showAgentBeat]);
+
+  // Focus: the proceed button is swapped for Skip while the agent works, and back afterwards.
+  // Keep keyboard and screen-reader focus on the action bar instead of dropping it to <body>.
+  const hadPhase = useRef(false);
+  const phaseOn = phase !== null;
+  useEffect(() => {
+    const ae = document.activeElement;
+    const lost = !ae || ae === document.body;
+    if (phaseOn && !hadPhase.current) {
+      if (endTurnViaFocus.current || lost) skipRef.current?.focus({ preventScroll: true });
+      endTurnViaFocus.current = false;
+    } else if (!phaseOn && hadPhase.current) {
+      if (lost || actionBarRef.current?.contains(ae) || toastAnchorRef.current?.contains(ae)) {
+        (resultBtnRef.current ?? endTurnRef.current)?.focus({ preventScroll: true });
+      }
+    }
+    hadPhase.current = phaseOn;
+  }, [phaseOn]);
 
   // Keyboard: after selecting a card, move focus to its first target (or its Play button).
   useEffect(() => {
@@ -484,18 +571,14 @@ export function BattleView({
     (el ?? endTurnRef.current)?.focus();
   }, [state.hand]);
 
-  // When the battle ends (and the last outcome has been read), offer the result screen,
-  // and go there on its own after a moment.
+  // When the battle ends (and the last outcome has been read), offer the result screen.
+  // It waits for the player: no timed jump away from the last outcome.
   const showEnd = ended !== null && !toast;
   useEffect(() => {
     if (!showEnd) return;
     const focus = window.setTimeout(() => resultBtnRef.current?.focus({ preventScroll: true }), 60);
-    const auto = window.setTimeout(() => onShowResult(latest.current), 4500);
-    return () => {
-      window.clearTimeout(focus);
-      window.clearTimeout(auto);
-    };
-  }, [showEnd, onShowResult]);
+    return () => window.clearTimeout(focus);
+  }, [showEnd]);
 
   /* ---------------------------------------------------------------- */
   /* View model                                                        */
@@ -527,6 +610,8 @@ export function BattleView({
   const autoInspected = useMemo(() => autoInspectedIds(view), [view]);
   const liveCount = items.filter((i) => !i.leaving).length;
   const compact = (liveCount >= 3 && height < 860) || (liveCount >= 2 && height < 660);
+  // Quips keep their punchlines: clamp (to two lines) only when three plans share a short screen.
+  const clampQuip = liveCount >= 3 && height < 740;
   const intentTargeting =
     selectedDef && selectedDef.target === "intent" && targets ? { valid: targets, verb: VERB[selectedDef.id] ?? "Play" } : null;
   const trayTargets = selectedDef && selectedDef.target === "executed" && targets ? targets : null;
@@ -561,7 +646,7 @@ export function BattleView({
             <li>Does it match the record?</li>
             <li>Can we undo it?</li>
           </ol>
-          <p className={s.noteFoot}>Inspect first. Evidence beats vibes.</p>
+          <p className={s.noteFoot}>Inspect first. Trust evidence, not feelings.</p>
         </div>
         <div className={s.legend}>
           <p className={s.feedTitle}>How a turn works</p>
@@ -602,7 +687,13 @@ export function BattleView({
           maxEnergy={encounter.energyPerTurn}
         />
 
-        <div className={s.stageWrap}>
+        {/* Toasts hang from the meters over the stage (and the plan list if they need the room),
+            so a long outcome is never clipped by the stage on short phones. */}
+        <div ref={toastAnchorRef} className={s.toastAnchor}>
+          <OutcomeToast toast={toast} paused={toastHold || pageHidden} onHold={setToastHold} onDismiss={advance} />
+        </div>
+
+        <div ref={stageWrapRef} className={s.stageWrap}>
           {!stageReady ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img className={s.stageFallback} src="/game/sprites/resetbot-idle.svg" alt="" width={220} height={220} />
@@ -620,7 +711,17 @@ export function BattleView({
               </div>
             </div>
           ) : null}
-          <OutcomeToast toast={toast} onDismiss={advance} />
+          {coach && !banner && !toast && !ended ? (
+            <div className={s.coach} role="note" aria-label="How a turn works">
+              <p>
+                <strong>Tap a card, then tap a plan.</strong> Cards cost energy: you get {encounter.energyPerTurn} each
+                turn. <strong>Done?</strong> Tap “Let {agent} proceed”. Every plan left on the board runs.
+              </p>
+              <button type="button" className={s.coachClose} aria-label="Hide these tips" onClick={() => setCoach(false)}>
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
           <RecentActions
             state={view}
             encounter={encounter}
@@ -649,6 +750,7 @@ export function BattleView({
             autoInspected={autoInspected}
             targeting={intentTargeting}
             compact={compact}
+            clampQuip={clampQuip}
             headingId="hl-intents-title"
             over={ended !== null}
             onActivate={onIntent}
@@ -666,6 +768,7 @@ export function BattleView({
             selectedUid={selectedUid}
             locked={locked}
             dealKey={view.turn}
+            maxHeight={height}
             onSelect={onSelectCard}
             registerCard={(uid, el) => {
               if (el) cardEls.current.set(uid, el);
@@ -674,7 +777,14 @@ export function BattleView({
           />
         </div>
 
-        <div className={s.actionBar}>
+        <div
+          ref={actionBarRef}
+          className={s.actionBar}
+          onKeyDownCapture={(e) => {
+            // A held Enter/Space must not click through Skip, then proceed, then the next turn.
+            if (e.repeat && (e.key === "Enter" || e.key === " ")) e.preventDefault();
+          }}
+        >
           {ended ? (
             <button
               ref={resultBtnRef}
@@ -701,7 +811,13 @@ export function BattleView({
                   Plan {Math.max(1, phase.shown)} of {phase.beats.length}
                 </span>
               </p>
-              <button type="button" className={s.iconButton} style={{ width: "auto", paddingInline: 14 }} onClick={skipPhase}>
+              <button
+                ref={skipRef}
+                type="button"
+                className={s.iconButton}
+                style={{ width: "auto", paddingInline: 14 }}
+                onClick={skipPhase}
+              >
                 <span className="font-display text-[15px] font-semibold">Skip</span>
                 <ChevronsRight className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -720,9 +836,10 @@ export function BattleView({
               >
                 <X className="h-6 w-6" aria-hidden="true" />
               </button>
-              <p className={s.prompt} aria-live="polite">
+              <p className={s.prompt}>
                 <span className={`${s.promptTitle} block`}>{promptTitle}</span>
                 <span className={`${s.promptText} block`}>{promptText}</span>
+                <span className={`${s.promptFlavor} block`}>{selectedDef.flavor}</span>
               </p>
               {selectedDef.target === "none" && selectedUid ? (
                 <button ref={playNoneRef} type="button" className={s.playButton} onClick={() => tryPlay(selectedUid, undefined, true)}>
@@ -735,19 +852,24 @@ export function BattleView({
             <button
               ref={endTurnRef}
               type="button"
-              className={`${s.endTurn} ${state.energy === 0 || state.hand.length === 0 ? s.nudge : ""}`}
-              aria-disabled={locked || undefined}
+              className={`${s.endTurn} ${!turnCooling && (state.energy === 0 || state.hand.length === 0) ? s.nudge : ""}`}
+              aria-disabled={locked || turnCooling > 0 || undefined}
               aria-label={`Let ${agent} proceed: ${willRun} ${willRun === 1 ? "plan" : "plans"} will run.`}
               onClick={onEndTurn}
             >
               Let {agent} proceed
               <span className={s.countBadge} aria-hidden="true">
-                {willRun}
+                {willRun} {willRun === 1 ? "plan" : "plans"}
               </span>
               <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
             </button>
           )}
         </div>
+
+        {/* One persistent live region for the card prompt, so it is announced when a card is picked. */}
+        <p className={s.srOnly} aria-live="polite">
+          {selectedDef ? `${promptTitle} ${promptText}` : ""}
+        </p>
 
         <BattleLog lines={log.slice(-8)} />
 

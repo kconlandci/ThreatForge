@@ -6,6 +6,8 @@
  * - careful:          inspects, blocks red flags, escalates what it can't inspect,
  *                     uses policy / coffee / rollback     -> must win on >= 80%
  * - perfect:          knows the answers                   -> must win on >= 98%
+ * - gut:              never inspects, blocks plans that sound risky (MFA / access)
+ *                                                       -> never 3 stars (blind blocks lose the 3rd)
  * - random:           plays random cards (reported only)
  *
  * Only the deck shuffle is random (the step queue is authored), so seeds vary the draws.
@@ -137,6 +139,19 @@ const perfect: Turn = (s, enc) => {
   return finishTurn(cur, enc);
 };
 
+/** Judges plans by their wording only: blocks anything about MFA or access, never inspects. */
+const gut: Turn = (s, enc) => {
+  let cur = s;
+  for (let guard = 0; cur.status === "playing" && guard < 50; guard++) {
+    const id = cur.announced.find((x) => /MFA|access/i.test(stepOf(enc, x).intent));
+    if (!id) break;
+    const next = tryPlay(cur, enc, "block", id) ?? (!has(cur, "block") ? tryPlay(cur, enc, "coffee") : null);
+    if (!next) break;
+    cur = next;
+  }
+  return finishTurn(cur, enc);
+};
+
 function randomBot(seed: number): Turn {
   let rng = seedState(`random-${seed}`);
   const roll = (n: number) => {
@@ -190,6 +205,7 @@ describe(`balance: ${HELP_DESK_ENCOUNTER.id} over ${SEEDS} seeds`, () => {
     "block-everything": simulate(enc, () => blockEverything),
     careful: simulate(enc, () => careful),
     perfect: simulate(enc, () => perfect),
+    gut: simulate(enc, () => gut),
     random: simulate(enc, randomBot),
   };
 
@@ -199,7 +215,7 @@ describe(`balance: ${HELP_DESK_ENCOUNTER.id} over ${SEEDS} seeds`, () => {
         `${name.padEnd(17)} win ${pct(r.won).padStart(6)}  breach ${pct(r.breach).padStart(6)}  timeout ${pct(r.timeout).padStart(6)}  stars 0/1/2/3 = ${r.stars.join("/")}`,
     );
     console.info(`\n${rows.join("\n")}\n`);
-    expect(rows).toHaveLength(5);
+    expect(rows).toHaveLength(6);
   });
 
   it("yes-bot (always ends turn) loses to a breach on >= 95% of seeds", () => {
@@ -217,6 +233,10 @@ describe(`balance: ${HELP_DESK_ENCOUNTER.id} over ${SEEDS} seeds`, () => {
 
   it("perfect-information player wins on >= 98% of seeds", () => {
     expect(results.perfect.won / SEEDS).toBeGreaterThanOrEqual(0.98);
+  });
+
+  it("guessing from the wording never earns 3 stars (the 3rd star needs inspected evidence)", () => {
+    expect(results.gut.stars[3]).toBe(0);
   });
 
   it("stars reward care: careful earns 3 stars often, random rarely", () => {

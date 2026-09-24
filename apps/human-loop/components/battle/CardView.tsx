@@ -20,6 +20,8 @@ export interface CardViewProps {
   describedBy?: string;
   /** Pixels of this card hidden under the next card in the fan: its text moves into the visible part. */
   covered?: number;
+  /** Right under the lifted (selected) card: show a plain edge. */
+  buried?: boolean;
   "data-uid"?: string;
 }
 
@@ -35,6 +37,7 @@ export const CardView = forwardRef<HTMLButtonElement, CardViewProps>(function Ca
     onSelect,
     describedBy,
     covered = 0,
+    buried = false,
     ...rest
   },
   ref,
@@ -56,6 +59,7 @@ export const CardView = forwardRef<HTMLButtonElement, CardViewProps>(function Ca
         card.kind === "power" ? s.power : "",
         affordable ? "" : s.unaffordable,
         covered > 0 && !selected ? s.covered : "",
+        buried && !selected ? s.buried : "",
       ].join(" ")}
       style={covered > 0 ? ({ ...style, "--ov": `${Math.round(covered)}px` } as CSSProperties) : style}
       aria-pressed={selected}
@@ -81,7 +85,7 @@ export const CardView = forwardRef<HTMLButtonElement, CardViewProps>(function Ca
         {card.exhaust ? <span className={s.oneUse}>1×</span> : null}
       </span>
       <span className={s.cardRules} aria-hidden="true">
-        {card.text}
+        {covered > 0 && !selected && card.short ? card.short : card.text}
       </span>
       {showFlavor ? (
         <span className={s.cardFlavor} aria-hidden="true">

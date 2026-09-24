@@ -104,7 +104,7 @@ export function HubOverlay({
   return (
     <div className={h.overlay}>
       <div className={h.top}>
-        <div className={h.objective} role="status">
+        <div className={h.objective}>
           <span className={h.objectiveIcon} aria-hidden="true">
             <Flag className="h-4 w-4" strokeWidth={2.6} />
           </span>
@@ -121,6 +121,11 @@ export function HubOverlay({
         </div>
       </div>
 
+      {/* Only walking is announced (the objective is plain text, read once with the page). */}
+      <p className="sr-only" aria-live="polite">
+        {walkingLabel ? `Walking to ${walkingLabel}.` : ""}
+      </p>
+
       <div className={h.bottom}>
         {dialogue ? (
           <TargetDialogue
@@ -135,11 +140,12 @@ export function HubOverlay({
           />
         ) : (
           <div className={h.actions}>
-            <button type="button" className={plainBtn} onClick={onOpenRooms}>
+            <button type="button" className={`${plainBtn} max-[389px]:px-3.5`} onClick={onOpenRooms}>
               <List className="h-5 w-5" aria-hidden="true" />
-              Office list
+              {/* Narrow phones: icon only, so the main button fits on one line. */}
+              <span className="max-[389px]:sr-only">Office list</span>
             </button>
-            <button type="button" className={startBtn} onClick={() => onGo("resetbot")}>
+            <button type="button" className={`${startBtn} max-[389px]:whitespace-nowrap`} onClick={() => onGo("resetbot")}>
               <Play className="h-5 w-5" aria-hidden="true" fill="currentColor" />
               {hasBattle ? "Back to your shift" : `Go to ${encounter.agent.name.split(" ")[0]}`}
             </button>

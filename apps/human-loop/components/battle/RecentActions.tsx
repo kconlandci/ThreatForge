@@ -24,7 +24,7 @@ export function RecentActions({ state, encounter, targets, onActivate, registerT
   if (ids.length === 0) return null;
 
   return (
-    <div className={s.tray} role="group" aria-label="Recent actions by the agent">
+    <div className={s.tray} role="group" aria-label="Recent actions by the agent" data-tray="">
       <span className={s.trayLabel} aria-hidden="true">
         Done
       </span>

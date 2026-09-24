@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useId, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
-import { Lock, ScrollText, Search } from "lucide-react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { Check, Lock, ScrollText, Search, Undo2 } from "lucide-react";
 import { CARDS } from "@/lib/game/cards";
 import { stepById } from "@/lib/game/useBattle";
 import type { BattleState, CardId, CardInstance, Encounter, PlayResult } from "@/lib/game/types";
@@ -86,10 +86,14 @@ export function EvidencePanel({
   const [error, setError] = useState<string | null>(null);
   // Keep showing the last step while the sheet animates closed.
   const [shownId, setShownId] = useState(stepId);
+  // Tap guard: right after a play (or when the sheet opens or reveals) the footer can reflow under
+  // the finger, so a double tap on Inspect must not land on Block.
+  const armedAt = useRef(0);
   useEffect(() => {
     if (stepId) setShownId(stepId);
     setError(null);
-  }, [stepId]);
+    armedAt.current = performance.now() + 450;
+  }, [stepId, reveal]);
 
   const step = shownId ? stepById(encounter, shownId) : undefined;
   const rt = shownId ? state.steps[shownId] : undefined;
@@ -101,10 +105,13 @@ export function EvidencePanel({
   const agent = encounter.agent.name;
 
   const actions: { card: CardInstance; label: string; tone: "primary" | "teal" | "plain" }[] = [];
+  // Once inspected, Inspect keeps its slot as a disabled "Inspected" button, so Block never slides under the finger.
+  let inspectedSlot = false;
   if (canAct && state.status === "playing") {
     if (announced) {
       const inspect = !rt.inspected ? firstOf(state.hand, "inspect") : undefined;
       if (inspect) actions.push({ card: inspect, label: "Inspect", tone: "teal" });
+      else if (rt.inspected && !autoInspected.has(step.id)) inspectedSlot = true;
       const block = firstOf(state.hand, "block");
       if (block) actions.push({ card: block, label: "Block", tone: "primary" });
       const escalate = firstOf(state.hand, "escalate");
@@ -116,8 +123,10 @@ export function EvidencePanel({
   }
 
   const doPlay = (uid: string) => {
+    if (performance.now() < armedAt.current) return;
     const r = onPlay(uid, step.id);
     if (!r.ok) setError(r.reason);
+    else armedAt.current = performance.now() + 450;
   };
 
   const whatHappened =
@@ -151,6 +160,12 @@ export function EvidencePanel({
       footer={
         announced || actions.length ? (
           <>
+            {inspectedSlot ? (
+              <button type="button" className={`${s.actionBtn} ${s.actionDone}`} aria-disabled="true">
+                <Check className="h-5 w-5" aria-hidden="true" />
+                Inspected
+              </button>
+            ) : null}
             {actions.map((a) => {
               const def = CARDS[a.card.cardId];
               const CardIcon = cardIcon(def.icon);
@@ -181,7 +196,7 @@ export function EvidencePanel({
               <p className={s.footNote} role="alert">
                 {error}
               </p>
-            ) : announced && canAct && actions.length === 0 ? (
+            ) : announced && canAct && actions.length === 0 && !inspectedSlot ? (
               <p className={s.footNote}>No Inspect, Block, or Escalate cards in your hand right now.</p>
             ) : null}
           </>
@@ -216,6 +231,12 @@ export function EvidencePanel({
         ) : null}
       </h3>
 
+      {announced ? (
+        <p className={s.evAsk}>
+          <strong>Ask:</strong> Who asked? · Does it match the record? · Can we undo it?
+        </p>
+      ) : null}
+
       {rt.inspected ? (
         <ul className={s.evList}>
           {step.evidence.map((ev, i) => {
@@ -236,6 +257,21 @@ export function EvidencePanel({
               </li>
             );
           })}
+          <li className={s.evRow} style={{ "--i": step.evidence.length, animationName: reveal ? undefined : "none" } as CSSProperties}>
+            <span className={s.evIcon} aria-hidden="true">
+              <Undo2 className="h-4 w-4" strokeWidth={2.2} />
+            </span>
+            <div className={s.evMain}>
+              <p className={s.evLabel}>Can we undo it?</p>
+              <p className={`${s.artifact} ${s.artRecord}`}>
+                {step.category === "lookup"
+                  ? "Nothing to undo. It only reads. It changes nothing."
+                  : step.reversible
+                    ? "Yes. Roll Back can undo this after it runs."
+                    : "No. Once this runs, it can't be undone."}
+              </p>
+            </div>
+          </li>
         </ul>
       ) : (
         <div className={s.locked}>
@@ -247,7 +283,7 @@ export function EvidencePanel({
               <Lock className="h-4 w-4 flex-none" aria-hidden="true" />
               {executed
                 ? "You never inspected this one."
-                : `${step.evidence.length} clues hidden. Play Inspect to see them.`}
+                : "Evidence hidden. Play Inspect to see it."}
             </span>
           </p>
         </div>

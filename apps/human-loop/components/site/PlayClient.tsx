@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck, Info, RotateCcw, UserRound, X } from "lucide-react";
+import { CircleCheck, Info, LogOut, RotateCcw, Trash2, UserRound, X } from "lucide-react";
 import {
   continueAsGuest,
   getPathwayProgress,
   loadSave,
   resetSave,
+  retryPendingLead,
+  signOut,
   signUp,
   syncFromCloud,
   type SaveData,
@@ -107,23 +109,67 @@ function SignUpView({
   );
 }
 
+type BarMode = null | "reset" | "signout" | "delete";
+
 function PlayerBar({
   save,
   onReset,
+  onSignOut,
 }: {
   save: SaveData;
-  onReset: () => Promise<void>;
+  /** Delete this player's data. Resolves false when the server could not confirm (nothing was deleted). */
+  onReset: () => Promise<boolean>;
+  onSignOut: () => Promise<void>;
 }) {
-  const [confirming, setConfirming] = useState(false);
+  const [mode, setMode] = useState<BarMode>(null);
   const [busy, setBusy] = useState(false);
-  const startOverRef = useRef<HTMLButtonElement>(null);
+  const [failed, setFailed] = useState(false);
+  const openerRef = useRef<HTMLButtonElement>(null);
+  const deleteRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const guest = save.profile?.guest ?? true;
   const name = guest ? "Guest" : save.profile?.name || "Player";
 
   useEffect(() => {
-    if (confirming) confirmRef.current?.focus();
-  }, [confirming]);
+    if (mode) confirmRef.current?.focus();
+  }, [mode]);
+
+  const cancel = () => {
+    const back = mode === "delete" ? deleteRef : openerRef;
+    setMode(null);
+    setFailed(false);
+    requestAnimationFrame(() => back.current?.focus());
+  };
+
+  const confirm = async () => {
+    setBusy(true);
+    setFailed(false);
+    try {
+      if (mode === "signout") await onSignOut();
+      else if (!(await onReset())) setFailed(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const copy =
+    mode === "signout"
+      ? {
+          title: "Sign out on this device?",
+          body: "Your name and progress leave this device, so the next person starts fresh. Your sign-up with DCI is not deleted.",
+          yes: busy ? "Signing out…" : "Yes, sign out",
+        }
+      : mode === "delete"
+        ? {
+            title: "Delete your data?",
+            body: "This deletes your name, email, and progress from this device and from our database.",
+            yes: busy ? "Deleting…" : failed ? "Try again" : "Yes, delete my data",
+          }
+        : {
+            title: "Start over?",
+            body: "This deletes your progress on this device.",
+            yes: busy ? "Deleting…" : "Yes, delete and start over",
+          };
 
   return (
     <div className="rounded-2xl border-2 border-line bg-paper px-4 py-3">
@@ -132,56 +178,65 @@ function PlayerBar({
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-teal-tint text-teal">
             <UserRound className="h-5 w-5" aria-hidden="true" />
           </span>
-          <span className="min-w-0 truncate">
-            Playing as <strong className="font-display font-bold">{name}</strong>
+          <span className="min-w-0">
+            <span className="block truncate">
+              Playing as <strong className="font-display font-bold">{name}</strong>
+            </span>
+            {guest ? (
+              <span className="block text-[14px] leading-snug text-ink-soft">Your progress stays on this device.</span>
+            ) : null}
           </span>
         </p>
-        {!confirming ? (
-          <button
-            ref={startOverRef}
-            type="button"
-            onClick={() => setConfirming(true)}
-            className="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-semibold text-teal underline decoration-2 underline-offset-4 hover:text-teal-dark hover:decoration-orange"
-          >
-            <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            Not you? Start over
-          </button>
+        {!mode ? (
+          <div className="flex flex-wrap items-center gap-x-5">
+            <button
+              ref={openerRef}
+              type="button"
+              onClick={() => setMode(guest ? "reset" : "signout")}
+              className="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-semibold text-teal underline decoration-2 underline-offset-4 hover:text-teal-dark hover:decoration-orange"
+            >
+              {guest ? <RotateCcw className="h-4 w-4" aria-hidden="true" /> : <LogOut className="h-4 w-4" aria-hidden="true" />}
+              {guest ? "Start over" : "Not you? Sign out"}
+            </button>
+            {!guest ? (
+              <button
+                ref={deleteRef}
+                type="button"
+                onClick={() => setMode("delete")}
+                className="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-semibold text-ink-soft underline decoration-2 underline-offset-4 hover:text-ink"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                Delete my data
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
-      {confirming ? (
+      {mode ? (
         <div className="mt-3 rounded-xl bg-orange-tint p-4" role="group" aria-labelledby="start-over-title">
           <p id="start-over-title" className="font-display font-bold text-ink">
-            Start over?
+            {copy.title}
           </p>
-          <p className="mt-1 text-[15px] leading-relaxed text-ink-soft">
-            {guest
-              ? "This deletes your progress on this device."
-              : "This deletes your name, email, and progress from this device and from our database."}
-          </p>
+          <p className="mt-1 text-[15px] leading-relaxed text-ink-soft">{copy.body}</p>
+          {failed ? (
+            <p role="alert" className="mt-2 rounded-lg border-2 border-danger bg-paper px-3 py-2 text-[15px] font-semibold text-ink">
+              We couldn&apos;t delete your data from our server. Nothing was deleted. Please try again.
+            </p>
+          ) : null}
           <div className="mt-3 flex flex-wrap gap-3">
             <button
               ref={confirmRef}
               type="button"
               disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await onReset();
-                } finally {
-                  setBusy(false);
-                }
-              }}
+              onClick={confirm}
               className={buttonClass("secondary", "md", "min-h-11 text-[15px]")}
             >
-              {busy ? "Deleting…" : "Yes, delete and start over"}
+              {copy.yes}
             </button>
             <button
               type="button"
               disabled={busy}
-              onClick={() => {
-                setConfirming(false);
-                requestAnimationFrame(() => startOverRef.current?.focus());
-              }}
+              onClick={cancel}
               className="inline-flex min-h-11 items-center rounded-lg px-3 text-[15px] font-semibold text-ink underline decoration-2 underline-offset-4"
             >
               Cancel
@@ -197,15 +252,31 @@ export function PlayClient() {
   const [save, setSave] = useState<SaveData | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  // Shown on the sign-up screen after Start over / Delete my data / Sign out.
+  const [doneNotice, setDoneNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const moveFocus = useRef(false);
 
   useEffect(() => {
     let alive = true;
     setSave(loadSave());
-    syncFromCloud().then((s) => {
-      if (alive) setSave(s);
-    });
+    (async () => {
+      // A sign-up that could not reach the server last time goes first, then the cloud check.
+      await retryPendingLead();
+      const { save: s, restored } = await syncFromCloud();
+      if (!alive) return;
+      setSave(s);
+      if (restored && s.profile && !s.profile.guest) {
+        const first = s.profile.name.split(" ")[0] || "there";
+        const n: Notice = {
+          tone: "success",
+          title: `Welcome back, ${first}.`,
+          body: "We found your saved progress. Not you? Sign out below.",
+        };
+        setNotice(n);
+        setAnnouncement(`${n.title} ${n.body}`);
+      }
+    })();
     return () => {
       alive = false;
     };
@@ -240,27 +311,38 @@ export function PlayClient() {
           body: "Your progress stays in this browser for now.",
         };
     setNotice(n);
+    setDoneNotice(null);
     setAnnouncement(`${n.title} ${n.body}`);
     setSave(next);
   }, []);
 
   const handleGuest = useCallback(() => {
     moveFocus.current = true;
-    const n: Notice = { tone: "info", title: "Playing as a guest.", body: "Your progress stays on this device." };
-    setNotice(n);
-    setAnnouncement(`${n.title} ${n.body}`);
+    // The player bar says "Playing as Guest. Your progress stays on this device", so no extra notice.
+    setNotice(null);
+    setDoneNotice(null);
+    setAnnouncement("Playing as a guest. Your progress stays on this device.");
     setSave(continueAsGuest());
   }, []);
 
   const handleReset = useCallback(async () => {
     const { save: fresh, serverDeleted } = await resetSave();
+    if (!serverDeleted && fresh.profile && !fresh.profile.guest) {
+      // Nothing was deleted: the player bar shows the error and a Try again button.
+      return false;
+    }
     moveFocus.current = true;
     setNotice(null);
-    setAnnouncement(
-      serverDeleted
-        ? "Done. Your saved data was deleted. You can sign up again or play as a guest."
-        : "Your progress on this device was deleted. We could not reach our server to delete the online copy. Please try again later.",
-    );
+    setDoneNotice("Done. Your saved data was deleted. You can sign up again or play as a guest.");
+    setSave(fresh);
+    return true;
+  }, []);
+
+  const handleSignOut = useCallback(async () => {
+    const fresh = await signOut();
+    moveFocus.current = true;
+    setNotice(null);
+    setDoneNotice("You're signed out on this device. The next person can sign up or play as a guest.");
     setSave(fresh);
   }, []);
 
@@ -272,7 +354,15 @@ export function PlayClient() {
       {save === null ? (
         <Loading />
       ) : !save.profile ? (
-        <SignUpView headingRef={headingRef} onSignUp={handleSignUp} onGuest={handleGuest} />
+        <>
+          {doneNotice ? (
+            <div role="status" className="mx-auto mb-5 flex max-w-4xl items-start gap-3 rounded-2xl border-2 border-teal bg-teal-tint px-4 py-3">
+              <CircleCheck className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden="true" />
+              <p className="flex-1 text-[16px] leading-snug text-ink">{doneNotice}</p>
+            </div>
+          ) : null}
+          <SignUpView headingRef={headingRef} onSignUp={handleSignUp} onGuest={handleGuest} />
+        </>
       ) : (
         <PickerView
           save={save}
@@ -280,6 +370,7 @@ export function PlayClient() {
           headingRef={headingRef}
           onDismiss={() => setNotice(null)}
           onReset={handleReset}
+          onSignOut={handleSignOut}
         />
       )}
     </>
@@ -292,12 +383,14 @@ function PickerView({
   headingRef,
   onDismiss,
   onReset,
+  onSignOut,
 }: {
   save: SaveData;
   notice: Notice | null;
   headingRef: React.Ref<HTMLHeadingElement>;
   onDismiss: () => void;
-  onReset: () => Promise<void>;
+  onReset: () => Promise<boolean>;
+  onSignOut: () => Promise<void>;
 }) {
   const helpDesk = save.pathways["help-desk"] ? getPathwayProgress(save, "help-desk") : null;
 
@@ -307,7 +400,7 @@ function PickerView({
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="font-display text-[2rem] font-bold leading-tight tracking-tight text-ink focus:outline-none sm:text-4xl"
+          className="font-display text-[1.75rem] font-bold leading-tight tracking-tight text-ink focus:outline-none sm:text-4xl"
         >
           Choose your pathway
         </h1>
@@ -344,10 +437,10 @@ function PickerView({
       ) : null}
 
       <div className="mt-5">
-        <PlayerBar save={save} onReset={onReset} />
+        <PlayerBar save={save} onReset={onReset} onSignOut={onSignOut} />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         <PathwayPicker helpDesk={helpDesk} />
       </div>
     </div>

@@ -31,6 +31,13 @@ function afterResponse(task: () => Promise<void>) {
 }
 
 export async function POST(req: Request) {
+  const body = await readJsonBody(req, LEAD_MAX_BYTES);
+  if (!body.ok) return error(body.error, body.status);
+
+  const lead = validateLead(body.value);
+  if (!lead.ok) return error(lead.error, 400);
+
+  // Only real sign-ups count toward the per-network limit (a room on one Wi-Fi shares it).
   const limit = leadLimiter.check(clientIp(req));
   if (!limit.ok) {
     return error("Lots of sign-ups from this network right now. Please try again in a few minutes.", 429, {
@@ -38,15 +45,13 @@ export async function POST(req: Request) {
     });
   }
 
-  const body = await readJsonBody(req, LEAD_MAX_BYTES);
-  if (!body.ok) return error(body.error, body.status);
-
-  const lead = validateLead(body.value);
-  if (!lead.ok) return error(lead.error, 400);
-
   const playerId = newPlayerId();
   const stored = await createPlayer(playerId, lead.value);
-  if (stored) afterResponse(() => maybePurgeStalePlayers());
+  if (stored) {
+    afterResponse(async () => {
+      await maybePurgeStalePlayers();
+    });
+  }
 
   const res = NextResponse.json({ stored, playerId }, { headers: NO_STORE });
   setPlayerCookie(res, playerId);

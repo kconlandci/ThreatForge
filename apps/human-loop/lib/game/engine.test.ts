@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARDS } from "./cards";
-import { canResume, createBattle, endTurn, playCard, scoreBattle, validTargets } from "./engine";
+import { blindBlocks, canResume, createBattle, endTurn, playCard, scoreBattle, validTargets } from "./engine";
 import { nextFloat, seedState, shuffle } from "./rng";
 import { HELP_DESK_ENCOUNTER } from "./content";
 import type { AgentStep, BattleState, CardId, Encounter, PlayResult } from "./types";
@@ -84,14 +84,27 @@ function allCards(s: BattleState) {
   return [...s.drawPile, ...s.hand, ...s.discardPile, ...s.exhausted].map((c) => c.uid).sort();
 }
 
-/** Resolve every announced step correctly (block unsafe, let safe run) until the battle ends. */
-function playCorrectly(state: BattleState, enc: Encounter): BattleState {
+/**
+ * Resolve every announced step correctly (inspect and block unsafe, let safe run) until the battle
+ * ends. With `inspect: false` it blocks the risky plans blind (a lucky guess).
+ */
+function playCorrectly(state: BattleState, enc: Encounter, opts: { inspect?: boolean } = {}): BattleState {
+  const inspect = opts.inspect ?? true;
   let s = state;
   for (let guard = 0; s.status === "playing" && guard < 50; guard++) {
     const bad = s.announced.filter((id) => !enc.steps.find((x) => x.id === id)!.safe);
     const blocks = bad.map((_, i) => `b${i}`);
-    s = { ...s, energy: 99, hand: blocks.map((uid) => ({ uid, cardId: "block" as const })) };
+    const looks = bad.map((_, i) => `i${i}`);
+    s = {
+      ...s,
+      energy: 99,
+      hand: [
+        ...blocks.map((uid) => ({ uid, cardId: "block" as const })),
+        ...(inspect ? looks.map((uid) => ({ uid, cardId: "inspect" as const })) : []),
+      ],
+    };
     bad.forEach((id, i) => {
+      if (inspect && !s.steps[id].inspected) s = ok(playCard(s, enc, looks[i], id));
       s = ok(playCard(s, enc, blocks[i], id));
     });
     if (s.status === "playing") s = endTurn(s, enc);
@@ -546,6 +559,16 @@ describe("win and loss", () => {
     expect(stars(1, 0)).toBe(2);
     expect(stars(1, 1)).toBe(2);
     expect(stars(2, 3)).toBe(1);
+  });
+
+  it("withholds the third star for risky plans blocked without inspecting them", () => {
+    const blind = playCorrectly(createBattle(FIXTURE, 2), FIXTURE, { inspect: false });
+    expect(blind.status).toBe("won");
+    expect(blindBlocks(blind, FIXTURE).length).toBeGreaterThan(0);
+    expect(scoreBattle(blind, FIXTURE).stars).toBe(2);
+    const careful = playCorrectly(createBattle(FIXTURE, 2), FIXTURE);
+    expect(blindBlocks(careful, FIXTURE)).toEqual([]);
+    expect(scoreBattle(careful, FIXTURE).stars).toBe(3);
   });
 
   it("has a headline for every outcome", () => {

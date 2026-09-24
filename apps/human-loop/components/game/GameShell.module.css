@@ -30,6 +30,7 @@
   gap: 10px;
   height: 52px;
   padding: 0 8px 0 12px;
+  padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(8px, env(safe-area-inset-right, 0px));
   border-bottom: 2px solid var(--hl-ink);
   background: var(--hl-paper);
 }
@@ -55,6 +56,13 @@
 .titleSub {
   font-weight: 500;
   color: var(--hl-muted);
+}
+
+/* Phones: "Help Desk" alone, instead of a truncated "Help Desk · Fen…". */
+@media (max-width: 419px) {
+  .titleSub {
+    display: none;
+  }
 }
 
 .main {
@@ -218,6 +226,23 @@
   place-items: center;
   color: var(--hl-muted);
   font-size: 15px;
+}
+
+/* The office picture could not load: say so, offer a retry. The DOM controls still work. */
+.stageFailed {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 90px 24px 120px;
+  text-align: center;
+}
+
+.stageFailed p {
+  max-width: 300px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--hl-ink-soft);
 }
 
 .howList {

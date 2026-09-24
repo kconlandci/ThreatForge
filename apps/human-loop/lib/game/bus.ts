@@ -20,6 +20,8 @@ export type ToStage =
       intensity?: number;
     }
   | { type: "agent-mood"; mood: AgentMood }
+  /** Battle: CSS px at the bottom of the stage covered by the DOM "Done" tray (ResetBot sits above it). */
+  | { type: "stage-inset"; bottom: number }
   | { type: "reduced-motion"; value: boolean };
 
 /** Messages from the Phaser stage to React. */
@@ -30,7 +32,12 @@ export type FromStage =
   /** The avatar reached an interactable. */
   | { type: "hub-arrived"; target: HubTargetId }
   /** Avatar grid position changed (for saving). */
-  | { type: "hub-moved"; x: number; y: number };
+  | { type: "hub-moved"; x: number; y: number }
+  /** The WebGL context was lost (the canvas is blank until "restored"). */
+  | { type: "lost" }
+  | { type: "restored" }
+  /** The stage could not start (e.g. the Phaser download failed twice). */
+  | { type: "failed" };
 
 export type StageMode = "hub" | "battle";
 export type AgentMood = "idle" | "eager" | "busted" | "sad" | "celebrate";

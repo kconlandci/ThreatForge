@@ -22,9 +22,14 @@ export function SiteHeader({ showPlay = true }: { showPlay?: boolean }) {
             <Wordmark size="sm" className="whitespace-nowrap" textClassName="max-[359px]:sr-only" />
           </Link>
           {showPlay ? (
-            <Link href="/play" className={buttonClass("primary", "md", "min-h-11 whitespace-nowrap px-3.5 text-[15px] sm:px-5")}>
+            <Link
+              href="/play"
+              aria-label="Play free"
+              className={buttonClass("primary", "md", "min-h-11 whitespace-nowrap px-3.5 text-[15px] max-[389px]:px-3 sm:px-5")}
+            >
               <Play aria-hidden="true" className="h-4 w-4 fill-current" />
-              Play free
+              {/* Narrow phones: "Play" alone, so the wordmark keeps its room. */}
+              Play<span className="max-[389px]:hidden"> free</span>
             </Link>
           ) : null}
         </div>

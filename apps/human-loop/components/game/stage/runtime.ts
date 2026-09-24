@@ -37,6 +37,8 @@ export interface StageRuntime {
   artPending: Promise<void> | null;
   /** Generated fx textures are drawn at this many px per world unit. */
   fxRes: number;
+  /** Battle: CSS px at the bottom of the canvas covered by DOM (the "Done" tray). */
+  battleInset: number;
   emit(msg: FromStage): void;
   /** A hub/battle scene finished create() and is on screen. */
   sceneReady(mode: StageMode): void;

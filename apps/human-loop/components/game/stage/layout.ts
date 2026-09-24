@@ -36,14 +36,15 @@ export function hubFit(cssW: number, cssH: number): number {
 
 /**
  * Tall phone boxes: the whole-room fit leaves the room small with empty bands above and below.
- * Zoom in (up to 1.3x) and let the camera follow the avatar sideways instead.
+ * Zoom in (up to 1.55x) and let the camera follow the avatar sideways instead (the player can also
+ * drag to look around, and every spot is in the Office list).
  */
 export function hubPortraitZoom(cssW: number, cssH: number): number {
   if (cssH < cssW * 1.25) return 1;
   const base = hubFit(cssW, cssH);
   const m = Math.min(28, Math.max(8, Math.min(cssW, cssH) * 0.035));
-  const heightFit = ((cssH - m * 2) / (HUB_BOUNDS.maxY - HUB_BOUNDS.minY)) * 0.62;
-  return Math.max(1, Math.min(1.3, heightFit / base));
+  const heightFit = ((cssH - m * 2) / (HUB_BOUNDS.maxY - HUB_BOUNDS.minY)) * 0.78;
+  return Math.max(1, Math.min(1.55, heightFit / base));
 }
 
 export function hubFocus() {

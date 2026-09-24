@@ -98,7 +98,7 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
             </div>
             <p className={r.starsLabel}>
               {won
-                ? "1 star for finishing. 1 for no misses. 1 for one false alarm or fewer."
+                ? "1 star for finishing. 1 for no misses. 1 for inspecting before you block, with one false alarm or fewer."
                 : "Finish the shift to earn stars. Try again: you know more now."}
             </p>
             <ul className={r.stats}>

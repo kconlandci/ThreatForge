@@ -4,6 +4,7 @@ import { Ban, Check, EyeOff, Trash2 } from "lucide-react";
 import { SiteFooter } from "@/components/site/Footer";
 import { SiteHeader } from "@/components/site/Header";
 import { container, textLink } from "@/components/site/ui";
+import { PRIVACY_EMAIL } from "@/lib/site/contact";
 
 export const metadata: Metadata = {
   title: "Privacy notice",
@@ -14,8 +15,21 @@ const SHORT = [
   { Icon: Ban, text: "We never sell your data." },
   { Icon: EyeOff, text: "No ads. No third-party trackers." },
   { Icon: Check, text: "Guests: your progress stays in your browser." },
-  { Icon: Trash2, text: "Delete your data any time with “Start over.”" },
+  { Icon: Trash2, text: "Delete your data any time with “Delete my data.”" },
 ];
+
+/** "contact us": a mailto link when DCI's privacy email is configured, else a link to the Contact section. */
+function ContactUs({ children = "contact us" }: { children?: React.ReactNode }) {
+  return PRIVACY_EMAIL ? (
+    <a href={`mailto:${PRIVACY_EMAIL}`} className={textLink}>
+      {children}
+    </a>
+  ) : (
+    <a href="#contact" className={textLink}>
+      {children}
+    </a>
+  );
+}
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -87,8 +101,8 @@ export default function PrivacyPage() {
                 <ul>
                   <li>To save your progress, so you can pick up where you left off.</li>
                   <li>
-                    To tell you about DCI training programs, <strong>only if you checked that box</strong>. You can ask
-                    us to stop at any time.
+                    To tell you about DCI training programs, <strong>only if you checked that box</strong>. You can{" "}
+                    <ContactUs>ask us to stop</ContactUs> at any time.
                   </li>
                   <li>To keep the game working and fix problems.</li>
                 </ul>
@@ -134,7 +148,7 @@ export default function PrivacyPage() {
               <Section id="age" title="Age">
                 <p>
                   Human Loop is for people 13 and older. We don&rsquo;t knowingly collect personal information from
-                  children under 13. If you think a child under 13 signed up, contact us and we&rsquo;ll delete it.
+                  children under 13. If you think a child under 13 signed up, <ContactUs /> and we&rsquo;ll delete it.
                 </p>
               </Section>
 
@@ -145,20 +159,40 @@ export default function PrivacyPage() {
                     <Link href="/play" className={textLink}>
                       Play page
                     </Link>{" "}
-                    and choose <strong>&ldquo;Not you? Start over.&rdquo;</strong> This deletes your progress on this
-                    device. If you signed up, it also deletes your sign-up and progress from our database.
+                    and choose <strong>&ldquo;Delete my data.&rdquo;</strong> This deletes your sign-up and progress
+                    from this device and from our database. (Guests: choose <strong>&ldquo;Start over&rdquo;</strong>.)
                   </li>
-                  <li>Or contact DCI Resources and ask us to delete it. We&rsquo;ll confirm when it&rsquo;s done.</li>
+                  <li>
+                    On a shared computer, <strong>&ldquo;Not you? Sign out&rdquo;</strong> removes your name and
+                    progress from that computer only. It does not delete your sign-up.
+                  </li>
+                  <li>
+                    Or <ContactUs>contact DCI Resources</ContactUs> and ask us to delete it. We&rsquo;ll confirm when
+                    it&rsquo;s done.
+                  </li>
                 </ul>
               </Section>
 
               <Section id="contact" title="Contact">
-                <p>Questions, or want your data deleted? Contact DCI Resources:</p>
-                <p>
-                  <span className="inline-block rounded-lg border-2 border-dashed border-orange-text bg-orange-tint px-3 py-1.5 font-mono text-[15px] font-semibold text-orange-text">
-                    [DCI contact email]
-                  </span>
-                </p>
+                {PRIVACY_EMAIL ? (
+                  <>
+                    <p>Questions, or want your data deleted? Email DCI Resources:</p>
+                    <p>
+                      <a href={`mailto:${PRIVACY_EMAIL}`} className={`${textLink} font-semibold`}>
+                        {PRIVACY_EMAIL}
+                      </a>
+                    </p>
+                  </>
+                ) : (
+                  <p>
+                    Questions? Contact DCI Resources, the organization that runs Human Loop. To delete your data
+                    yourself right now, use <strong>&ldquo;Delete my data&rdquo;</strong> on the{" "}
+                    <Link href="/play" className={textLink}>
+                      Play page
+                    </Link>
+                    .
+                  </p>
+                )}
               </Section>
             </div>
           </div>

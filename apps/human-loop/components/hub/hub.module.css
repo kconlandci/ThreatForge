@@ -20,6 +20,8 @@
   align-items: flex-start;
   gap: 8px;
   padding: 12px 12px 0;
+  /* Landscape iPhones: keep clear of the notch and rounded corners (viewport-fit=cover). */
+  padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
   pointer-events: none !important;
 }
 
@@ -79,6 +81,7 @@
   display: flex;
   justify-content: center;
   padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
 }
 
 .actions {
@@ -344,6 +347,7 @@
   justify-content: flex-end;
   align-items: center;
   padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
   background: linear-gradient(to bottom, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.92) 55%);
   animation: fade 400ms ease-out both;
 }
@@ -449,7 +453,8 @@
   align-items: flex-end;
   width: 100%;
   max-width: 560px;
-  height: min(40dvh, 320px);
+  /* 56vw: on phones the robot and Dana both fit across the screen. */
+  height: min(40dvh, 320px, 56vw);
   margin-bottom: -6px;
   pointer-events: none;
 }
@@ -457,6 +462,9 @@
 .actor {
   height: 100%;
   width: auto;
+  min-width: 0;
+  object-fit: contain;
+  object-position: 50% 100%;
   transform-origin: 50% 100%;
   transition: opacity 250ms, filter 250ms, transform 300ms cubic-bezier(0.34, 1.5, 0.64, 1);
   filter: drop-shadow(0 6px 0 rgb(17 20 24 / 0.08));
@@ -468,7 +476,7 @@
 }
 
 .actorBot {
-  margin-right: 2%;
+  margin-right: 0;
 }
 
 .actorQuiet {

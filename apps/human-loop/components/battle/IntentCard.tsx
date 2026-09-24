@@ -19,8 +19,10 @@ export interface IntentCardProps {
   /** Verb for the tap hint, e.g. "Block". */
   verb?: string;
   tail?: boolean;
-  /** Clamp the quip to one line (tight phone layouts with 3+ intents). */
+  /** Tighter padding, no category icon (tight phone layouts with several intents). */
   compact?: boolean;
+  /** Clamp the quip to two lines (three plans on a short screen). */
+  clampQuip?: boolean;
   /** The agent is executing this one right now. */
   running?: boolean;
   stamp?: IntentStamp | null;
@@ -41,6 +43,7 @@ export const IntentCard = forwardRef<HTMLButtonElement, IntentCardProps>(functio
     verb,
     tail,
     compact,
+    clampQuip,
     running,
     stamp,
     leaving,
@@ -111,7 +114,7 @@ export const IntentCard = forwardRef<HTMLButtonElement, IntentCardProps>(functio
             </span>
           </span>
           <span className={s.intentText}>{step.intent}</span>
-          <span id={quipId} className={`${s.quip} ${compact ? s.quipClamp : ""}`}>
+          <span id={quipId} className={`${s.quip} ${clampQuip ? s.quipClamp : ""}`}>
             “{step.quip}”
           </span>
         </span>

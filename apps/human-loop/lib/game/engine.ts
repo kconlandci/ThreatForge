@@ -237,6 +237,13 @@ export function createBattle(encounter: Encounter, seed: number): BattleState {
   return state;
 }
 
+const STEP_STATUSES = new Set<string>(["queued", "announced", "executed", "blocked", "escalated", "rolled-back"]);
+
+function isStepRuntime(value: unknown): value is StepRuntime {
+  const rt = value as StepRuntime | null;
+  return !!rt && typeof rt === "object" && STEP_STATUSES.has(rt.status) && typeof rt.inspected === "boolean";
+}
+
 /**
  * True when a saved battle (e.g. from localStorage) still fits this encounter and can be
  * resumed. False for other encounters, old save versions, or saves made before the
@@ -249,12 +256,22 @@ export function canResume(state: unknown, encounter: Encounter): state is Battle
   const piles = [s.drawPile, s.hand, s.discardPile, s.exhausted];
   if (!piles.every(Array.isArray) || !Array.isArray(s.queue) || !Array.isArray(s.announced)) return false;
 
+  if (!s.powers || typeof s.powers !== "object" || !s.stats || typeof s.stats !== "object") return false;
+  if (typeof s.turn !== "number" || typeof s.energy !== "number" || typeof s.risk !== "number") return false;
+
   const stepIds = Object.keys(s.steps).sort();
   const expected = encounter.steps.map((x) => x.id).sort();
   if (stepIds.length !== expected.length || stepIds.some((id, i) => id !== expected[i])) return false;
-  if (![...s.queue, ...s.announced, ...(s.executedHistory ?? [])].every((id) => id in s.steps)) return false;
+  const own = (id: unknown) => typeof id === "string" && Object.prototype.hasOwnProperty.call(s.steps, id);
+  if (!Array.isArray(s.executedHistory ?? [])) return false;
+  if (![...s.queue, ...s.announced, ...(s.executedHistory ?? [])].every(own)) return false;
+  const rts: unknown[] = Object.values(s.steps);
+  if (!rts.every((rt) => isStepRuntime(rt))) return false;
 
-  const deck = piles.flat().map((c) => c?.cardId).sort();
+  const cards = piles.flat();
+  if (!cards.every((c) => !!c && typeof c === "object" && typeof c.uid === "string")) return false;
+  if (new Set(cards.map((c) => c.uid)).size !== cards.length) return false;
+  const deck = cards.map((c) => c.cardId).sort();
   const expectedDeck = encounter.starterDeck.slice().sort();
   return deck.length === expectedDeck.length && deck.every((id, i) => id === expectedDeck[i]);
 }
@@ -320,7 +337,11 @@ export function playCard(
   if (!card) return fail("That card doesn't exist.");
 
   if (card.cost > state.energy) {
-    return fail(state.energy === 0 ? "You're out of energy. End your turn." : `Not enough energy. ${card.name} costs ${card.cost}.`);
+    return fail(
+      state.energy === 0
+        ? `You're out of energy. Tap “Let ${encounter.agent.name.split(" ")[0]} proceed”.`
+        : `Not enough energy. ${card.name} costs ${card.cost}.`,
+    );
   }
 
   const problem = targetProblem(state, encounter, card, targetStepId);
@@ -459,7 +480,7 @@ export function endTurn(state: BattleState, encounter: Encounter): BattleState {
   return s;
 }
 
-type HeadlineKey = "perfect" | "sharp" | "jumpy" | "leaky" | "scraped" | "breach" | "timeout" | "playing";
+type HeadlineKey = "perfect" | "sharp" | "lucky" | "jumpy" | "leaky" | "scraped" | "breach" | "timeout" | "playing";
 
 const HEADLINES: Record<HeadlineKey, string[]> = {
   /** 3 stars, no misses, no false alarms. */
@@ -472,6 +493,11 @@ const HEADLINES: Record<HeadlineKey, string[]> = {
   sharp: [
     "Nothing got past you. One flinch. We'll allow it.",
     "Sharp shift. One false alarm. Dana is counting.",
+  ],
+  /** Won, nothing bad got through, but a risky plan was blocked without looking (2 stars). */
+  lucky: [
+    "Nothing got past you. Some of that was a lucky guess.",
+    "Clean shift, but you blocked blind. Inspect first next time.",
   ],
   /** Won, nothing bad got through, but lots of false alarms. */
   jumpy: [
@@ -506,18 +532,30 @@ function pick(list: string[], seed: number, agentName: string): string {
   return line.split("{agent}").join(agentName.split(" ")[0] || agentName);
 }
 
-function headlineKey(status: BattleStatus, misses: number, falseAlarms: number): HeadlineKey {
+function headlineKey(status: BattleStatus, misses: number, falseAlarms: number, blind = 0): HeadlineKey {
   if (status === "lost-breach") return "breach";
   if (status === "lost-timeout") return "timeout";
   if (status === "playing") return "playing";
+  if (misses === 0 && falseAlarms <= 1 && blind > 0) return "lucky";
   if (misses === 0) return falseAlarms === 0 ? "perfect" : falseAlarms === 1 ? "sharp" : "jumpy";
   return falseAlarms <= 1 ? "leaky" : "scraped";
+}
+
+/** Risky steps the player blocked without ever seeing their evidence (a guess, not a check). */
+export function blindBlocks(state: BattleState, encounter: Encounter): string[] {
+  return encounter.steps
+    .filter((x) => !x.safe && state.steps[x.id]?.status === "blocked" && !state.steps[x.id]?.inspected)
+    .map((x) => x.id);
 }
 
 export function scoreBattle(state: BattleState, encounter: Encounter): BattleScore {
   const { catches, falseAlarms, misses } = state.stats;
   const won = state.status === "won";
-  const stars = (won ? 1 + (misses === 0 ? 1 : 0) + (falseAlarms <= 1 ? 1 : 0) : 0) as BattleScore["stars"];
+  // The third star rewards checking before blocking: a risky plan blocked without inspecting it
+  // (a lucky guess from its wording) does not count as careful oversight.
+  const blind = blindBlocks(state, encounter).length;
+  const careful = falseAlarms <= 1 && blind === 0;
+  const stars = (won ? 1 + (misses === 0 ? 1 : 0) + (careful ? 1 : 0) : 0) as BattleScore["stars"];
 
   return {
     stars,
@@ -525,6 +563,6 @@ export function scoreBattle(state: BattleState, encounter: Encounter): BattleSco
     falseAlarms,
     misses,
     turnsUsed: Math.max(0, state.turn),
-    headline: pick(HEADLINES[headlineKey(state.status, misses, falseAlarms)], state.seed, encounter.agent.name),
+    headline: pick(HEADLINES[headlineKey(state.status, misses, falseAlarms, blind)], state.seed, encounter.agent.name),
   };
 }

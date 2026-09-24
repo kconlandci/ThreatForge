@@ -24,6 +24,8 @@ export interface IntentListProps {
   /** When a card that targets intents is selected. */
   targeting: { valid: Set<string>; verb: string } | null;
   compact: boolean;
+  /** Clamp quips to two lines (three plans on a short screen). */
+  clampQuip?: boolean;
   headingId: string;
   /** The shift is over (changes the empty-list message). */
   over?: boolean;
@@ -39,6 +41,7 @@ export function IntentList({
   autoInspected,
   targeting,
   compact,
+  clampQuip = false,
   headingId,
   over = false,
   onActivate,
@@ -58,7 +61,7 @@ export function IntentList({
           <span>
             {over
               ? "The shift is over. No more plans today."
-              : `${agent} has nothing planned right now. End the turn to see what it does next.`}
+              : `${agent} has nothing planned right now. Tap “Let ${encounter.agent.name.split(" ")[0]} proceed” to see what it does next.`}
           </span>
         </p>
       ) : (
@@ -81,6 +84,7 @@ export function IntentList({
                 verb={targeting?.verb}
                 tail={i === 0}
                 compact={compact}
+                clampQuip={clampQuip}
                 running={item.running}
                 stamp={item.stamp}
                 leaving={item.leaving}

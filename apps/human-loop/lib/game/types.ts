@@ -29,6 +29,8 @@ export interface CardDef {
   target: CardTarget;
   /** Rules text, one short sentence. */
   text: string;
+  /** Shorter rules text for a card partly covered by its neighbour in the fan (the full text is in the prompt). */
+  short?: string;
   /** Joke line shown small under the rules text. */
   flavor: string;
   /** Removed for the rest of the battle once played. */
@@ -58,7 +60,7 @@ export interface DialogueLine {
 /** One action the AI agent intends to take. */
 export interface AgentStep {
   id: string;
-  /** Ticket reference shown on the intent, e.g. "#48213 · Harlow & Cole". */
+  /** Ticket reference shown on the intent, e.g. "#51876 · Harlow & Cole". */
   ticket: string;
   /** Short action label, e.g. "Reset MFA for J. Romero (CFO)". */
   intent: string;
@@ -204,6 +206,11 @@ export interface PathwayProgress {
   hub: { x: number; y: number } | null;
   /** In-progress battle, for resume after reload. */
   battle: BattleState | null;
+  /**
+   * The last finished battle until its result screen has been left, so a reload (or Pause)
+   * right after the end still shows the result and debrief.
+   */
+  pendingResult?: BattleState | null;
   best: { stars: number; completedAt: string } | null;
   attempts: number;
   wins: number;
@@ -235,4 +242,9 @@ export interface SaveData {
   pathways: Partial<Record<PathwayId, PathwayProgress>>;
   settings: { reducedMotion: boolean | null };
   updatedAt: string;
+  /**
+   * A sign-up the server could not take yet (rate limited, down or offline). Sent again on the
+   * next visit to /play or when the browser comes back online. Never uploaded as part of a save.
+   */
+  pendingLead?: { name: string; email: string; marketingOptIn: boolean; consentAt: string } | null;
 }

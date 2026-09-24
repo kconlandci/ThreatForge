@@ -335,11 +335,14 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
   return beats;
 }
 
-/** How long a toast stays up: enough time to read it (slow readers and ESL learners included). */
-export function readingMs(toast: ToastSpec | undefined, min = 3200, max = 8000): number {
+/**
+ * How long a toast stays up: enough time to read it for slow readers and ESL learners
+ * (about 120 words a minute). The toast also pauses while it is hovered, touched or focused.
+ */
+export function readingMs(toast: ToastSpec | undefined, min = 3200, max = 15000): number {
   if (!toast) return min;
   const chars = toast.title.length + toast.text.length;
-  return Math.max(min, Math.min(max, 1800 + chars * 45));
+  return Math.max(min, Math.min(max, 1500 + chars * 80));
 }
 
 /* ------------------------------------------------------------------ */
@@ -392,8 +395,10 @@ export function debriefRows(state: BattleState, encounter: Encounter): DebriefRo
     } else {
       switch (runtime.status) {
         case "blocked":
-          resolution = "You blocked it. Caught!";
-          grade = "good";
+          resolution = runtime.inspected
+            ? "You blocked it. Caught!"
+            : "You blocked it without looking at the evidence. Caught, but it was a lucky guess.";
+          grade = runtime.inspected ? "good" : "ok";
           break;
         case "escalated":
           resolution = "You escalated it. Dana caught it.";

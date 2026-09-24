@@ -224,8 +224,10 @@ describe("with a database", () => {
       { json: { fields, rows: [["A", "a@b.co", "f", "2026-09-20 14:05:06+00", '{"version":1}']] } },
     ];
     expect(await db.loadCloudSave(PID)).toEqual({ cloud: false, save: null });
-    expect(await db.loadCloudSave(PID)).toEqual({ cloud: true, save: null });
-    expect(await db.loadCloudSave(PID)).toEqual({ cloud: true, save: null });
+    // No save row yet (or an unreadable one): the profile still comes back, so a wiped browser can restore it.
+    const profile = { name: "A", email: "a@b.co", guest: false, consentAt: "2026-09-20T14:05:06.000Z", marketingOptIn: false };
+    expect(await db.loadCloudSave(PID)).toEqual({ cloud: true, save: null, profile });
+    expect(await db.loadCloudSave(PID)).toEqual({ cloud: true, save: null, profile });
   });
 
   it("deletes the player row (the save cascades)", async () => {

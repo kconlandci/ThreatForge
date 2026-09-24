@@ -52,6 +52,7 @@ export function createStage(opts: CreateStageOptions): StageHandle & { debug: St
     art: {},
     artPending: null,
     fxRes: 3,
+    battleInset: 0,
     emit: (msg) => opts.bus.fromStage.emit(msg),
     sceneReady: (mode) => {
       rt.active = mode;
@@ -106,6 +107,14 @@ export function createStage(opts: CreateStageOptions): StageHandle & { debug: St
     scene: [boot, hub, battle],
   });
 
+  // A lost WebGL context leaves a blank canvas: tell React, so it can show its fallbacks.
+  game.events.once(Phaser.Core.Events.READY, () => {
+    const r = game.renderer as unknown as { type?: number; on?: (event: string, fn: () => void) => void } | null;
+    if (!r || r.type !== Phaser.WEBGL || typeof r.on !== "function") return;
+    r.on(Phaser.Renderer.Events.LOSE_WEBGL, () => rt.emit({ type: "lost" }));
+    r.on(Phaser.Renderer.Events.RESTORE_WEBGL, () => rt.emit({ type: "restored" }));
+  });
+
   function switchScene() {
     if (rt.switching || rt.active === null || rt.active === rt.mode) return;
     rt.switching = true;
@@ -155,6 +164,13 @@ export function createStage(opts: CreateStageOptions): StageHandle & { debug: St
       case "fx":
         if (rt.active === "battle" && !rt.switching) battle.playFx(msg.fx, msg.intensity);
         break;
+      case "stage-inset": {
+        const v = Math.max(0, Math.round(msg.bottom));
+        if (v === rt.battleInset) break;
+        rt.battleInset = v;
+        if (rt.active === "battle" && !rt.switching) battle.relayout();
+        break;
+      }
     }
   };
   const off = opts.bus.toStage.on(onMsg);

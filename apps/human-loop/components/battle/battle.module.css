@@ -92,7 +92,7 @@
   justify-content: center;
   gap: 28px;
   height: 100%;
-  padding-inline: 0;
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
 }
 
 .side {
@@ -649,7 +649,7 @@
 }
 
 .intentCompact {
-  padding: 8px 10px;
+  padding: 6px 10px;
 }
 
 .intentCompact .cat {
@@ -666,7 +666,7 @@
 
 .quipClamp {
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -801,6 +801,11 @@
   transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* A keyboard-focused card rises above its neighbours so its focus ring is not half hidden. */
+.cardSlot:has(> :focus-visible) {
+  z-index: 45;
+}
+
 .deal {
   animation: deal 520ms cubic-bezier(0.2, 0.9, 0.25, 1.08) both;
   animation-delay: calc(var(--i, 0) * 70ms + 80ms);
@@ -894,7 +899,9 @@
 
 .covered .cardRules {
   text-align: left;
+  padding-top: calc(var(--cw, 96px) * 0.03);
   padding-right: calc(var(--ov, 0px) + 2px);
+  line-height: 1.15;
 }
 
 .covered .cardArt {
@@ -903,6 +910,13 @@
 
 .covered .oneUse {
   right: calc(var(--ov, 0px) + 3px);
+}
+
+/* The card right under the lifted (selected) card: show a plain edge, not slivers of shifted text. */
+.buried .cardBand,
+.buried .cardRules,
+.buried .cardArt > * {
+  visibility: hidden;
 }
 
 .gem {
@@ -935,7 +949,7 @@
   display: grid;
   place-items: center;
   flex: none;
-  height: calc(var(--cw, 96px) * 0.4);
+  height: calc(var(--cw, 96px) * 0.32);
   background-color: var(--art);
   background-image: radial-gradient(circle at 1px 1px, rgb(17 20 24 / 0.1) 1px, transparent 0);
   background-size: 8px 8px;
@@ -1029,18 +1043,19 @@
   box-shadow: 0 4px 0 0 var(--hl-line);
 }
 
+/* "3 plans": a neutral pill, so it never reads like an orange energy cost. */
 .countBadge {
   display: inline-grid;
   place-items: center;
-  min-width: 26px;
   height: 26px;
-  padding-inline: 6px;
+  padding-inline: 8px;
   border-radius: 999px;
   border: 2px solid #fff;
-  background: var(--hl-orange);
+  background: #fff;
   color: var(--hl-ink);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .nudge {
@@ -1097,6 +1112,13 @@
 .promptText {
   font-size: 14.5px;
   color: var(--hl-ink-soft);
+}
+
+.promptFlavor {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.25;
+  color: var(--hl-muted);
 }
 
 .playButton {
@@ -1162,6 +1184,13 @@
 /* Stage overlays: toast, turn banner, recent actions, end banner      */
 /* ------------------------------------------------------------------ */
 
+/* Zero-height anchor under the meters: the toast hangs over the stage without being clipped by it. */
+.toastAnchor {
+  position: relative;
+  height: 0;
+  z-index: 30;
+}
+
 .toastWrap {
   position: absolute;
   top: 8px;
@@ -1186,8 +1215,38 @@
   border-radius: 16px;
   background: var(--hl-paper);
   box-shadow: 0 4px 0 0 var(--hl-ink), 0 16px 30px -14px rgb(17 20 24 / 0.45);
-  overflow: hidden;
+  max-height: calc(100dvh - 190px);
+  overflow: auto;
+  overscroll-behavior: contain;
   animation: toastIn 380ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+/* Each new beat's text fades in; the toast box and its Next button stay put (focus survives). */
+.toastSwap {
+  animation: toastSwap 240ms ease-out both;
+}
+
+@keyframes toastSwap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .toastHasNext {
+    flex-wrap: wrap;
+  }
+  .toastHasNext .toastBody {
+    flex: 1 1 calc(100% - 46px);
+  }
+  .toastHasNext .toastBtnStrong {
+    margin-left: auto;
+  }
 }
 
 @keyframes toastIn {
@@ -1330,6 +1389,10 @@
   background: var(--hl-teal);
   transform-origin: left;
   animation: timer var(--ms, 4000ms) linear both;
+}
+
+.toastPaused .toastTimer::after {
+  animation-play-state: paused;
 }
 
 .toastBad .toastTimer::after {
@@ -1938,6 +2001,17 @@
   color: #fff;
 }
 
+/* Inspect, already used: keeps its slot so the other buttons never move. */
+.actionDone,
+.actionDone[aria-disabled="true"] {
+  opacity: 1;
+  cursor: default;
+  background: var(--hl-teal-tint);
+  color: var(--hl-teal-dark);
+  box-shadow: none;
+  border-style: dashed;
+}
+
 .costPip {
   display: inline-grid;
   place-items: center;
@@ -2035,4 +2109,112 @@
 /* Fade at the bottom of the intent list when it scrolls. */
 .intentsScroll {
   mask-image: linear-gradient(to bottom, black calc(100% - 22px), transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Very short screens (phone landscape, 200% zoom): let the column     */
+/* scroll, keep the plan list readable and the action bar reachable.   */
+/* ------------------------------------------------------------------ */
+
+@media (max-height: 560px) {
+  .battle {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .stageWrap {
+    flex: 0 0 auto;
+    height: clamp(0px, 22dvh - 20px, 96px);
+    min-height: 0;
+  }
+  .intents {
+    flex: 1 0 auto;
+    min-height: min(120px, 30dvh);
+  }
+  .handZone {
+    padding: 12px 0 6px;
+  }
+  .actionBar {
+    position: sticky;
+    bottom: 0;
+  }
+  .coach {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* First-shift coach (phones and tablets have no side panels)          */
+/* ------------------------------------------------------------------ */
+
+.coach {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  right: 10px;
+  z-index: 15;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 470px;
+  margin-inline: auto;
+  padding: 8px 4px 8px 12px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 14px;
+  background: #fff4c7;
+  box-shadow: 0 3px 0 0 var(--hl-ink);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--hl-ink);
+}
+
+.coach p {
+  flex: 1;
+  min-width: 0;
+}
+
+.coach strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.coachClose {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: -4px 0;
+  border-radius: 10px;
+  color: var(--hl-ink);
+}
+
+.coachClose:hover {
+  background: rgb(17 20 24 / 0.08);
+}
+
+@media (min-width: 1100px) {
+  .coach {
+    display: none;
+  }
+}
+
+/* The 3 questions in the evidence sheet, where the side note is hidden (under 1100px). */
+.evAsk {
+  margin: 4px 0 12px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--hl-teal-tint);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--hl-ink);
+}
+
+.evAsk strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+@media (min-width: 1100px) {
+  .evAsk {
+    display: none;
+  }
 }

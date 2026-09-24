@@ -162,7 +162,12 @@ export function createPlayer(playerId: string, lead: LeadInput): Promise<boolean
   });
 }
 
-export type CloudLoad = { cloud: boolean; save: SaveData | null };
+export type CloudLoad = {
+  cloud: boolean;
+  save: SaveData | null;
+  /** The player's profile, also sent when they have no save row yet (so a wiped browser can restore it). */
+  profile?: SaveProfile | null;
+};
 
 /**
  * Load a player's save. `cloud` is true only when the database answered and the player exists,
@@ -172,11 +177,6 @@ export function loadCloudSave(playerId: string): Promise<CloudLoad> {
   return withDb<CloudLoad>("load-save", { cloud: false, save: null }, async (sql) => {
     const [row] = await query(sql, SQL.selectSave, [playerId]);
     if (!row) return { cloud: false, save: null };
-    if (row.data === null || row.data === undefined) return { cloud: true, save: null };
-
-    const data: unknown = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const checked = validateSave(data, { envelope: false });
-    if (!checked.ok) return { cloud: true, save: null };
 
     const profile: SaveProfile = {
       name: typeof row.name === "string" ? row.name : "",
@@ -185,7 +185,13 @@ export function loadCloudSave(playerId: string): Promise<CloudLoad> {
       consentAt: toIso(row.consent_at),
       marketingOptIn: row.marketing_opt_in === true,
     };
-    return { cloud: true, save: { ...checked.value, playerId, profile } };
+    if (row.data === null || row.data === undefined) return { cloud: true, save: null, profile };
+
+    const data: unknown = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const checked = validateSave(data, { envelope: false });
+    if (!checked.ok) return { cloud: true, save: null, profile };
+
+    return { cloud: true, save: { ...checked.value, playerId, profile }, profile };
   });
 }
 
@@ -210,13 +216,17 @@ export async function deletePlayer(playerId: string): Promise<boolean> {
   });
 }
 
-/** Enforce the retention promise. Runs at most once a day per server instance. */
-export async function maybePurgeStalePlayers(now = Date.now()): Promise<void> {
-  if (!getSql() || now - lastPurgeAt < PURGE_EVERY_MS) return;
+/**
+ * Enforce the retention promise. Runs at most once a day per server instance, unless `force`
+ * (the daily cron, app/api/cron/purge). Returns how many players were deleted.
+ */
+export async function maybePurgeStalePlayers(now = Date.now(), force = false): Promise<number> {
+  if (!getSql() || (!force && now - lastPurgeAt < PURGE_EVERY_MS)) return 0;
   lastPurgeAt = now;
   const purged = await withDb("purge", 0, async (sql) => {
     const [row] = await query(sql, SQL.purgeStale, [RETENTION_MONTHS]);
     return typeof row?.n === "number" ? row.n : 0;
   });
   if (purged > 0) console.info(`[human-loop] retention: deleted ${purged} inactive player(s).`);
+  return purged;
 }

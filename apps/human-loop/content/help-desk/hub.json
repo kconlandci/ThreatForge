@@ -20,7 +20,7 @@
         { "speaker": "dana", "text": "ResetBot is fast. It is not always right. Your job is to keep a human in the loop." },
         { "speaker": "dana", "text": "Each turn, it shows you what it plans to do. Play Inspect to see the evidence behind a plan." },
         { "speaker": "dana", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
-        { "speaker": "dana", "text": "When you press End turn, ResetBot goes ahead with everything you didn't stop. So look first." },
+        { "speaker": "dana", "text": "When you tap “Let ResetBot proceed”, it goes ahead with every plan you didn't stop. So look first." },
         { "speaker": "dana", "text": "But don't block everything. Blocked good work goes back in line, and the shift ends at five." }
       ]
     },

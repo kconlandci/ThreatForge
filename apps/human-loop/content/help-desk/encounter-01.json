@@ -13,7 +13,7 @@
   "intro": [
     {
       "speaker": "narrator",
-      "text": "Fenwick IT Solutions. Monday, 8:57 AM. The ticket queue is already blinking."
+      "text": "Fenwick IT Solutions. The ticket queue is already blinking."
     },
     {
       "speaker": "dana",
@@ -25,11 +25,11 @@
     },
     {
       "speaker": "dana",
-      "text": "Before it acts, it shows you its plan. Inspect anything that feels off. Block what's wrong. Not sure? Escalate it to me."
+      "text": "Before it acts, it shows you its plan. Inspect the evidence. Block what's wrong. Not sure? Escalate it to me."
     },
     {
       "speaker": "dana",
-      "text": "And don't block the good stuff. Blocked work goes back in line, and the shift ends at five."
+      "text": "Tap a card, then tap a plan. When you let ResetBot proceed, every plan you didn't stop runs. Blocked good work goes back in line."
     },
     {
       "speaker": "agent",
@@ -49,7 +49,7 @@
   "steps": [
     {
       "id": "romero-lookup",
-      "ticket": "#48213 · Harlow & Cole",
+      "ticket": "#51876 · Harlow & Cole",
       "intent": "Look up J. Romero in the directory",
       "quip": "This ticket says URGENT in all caps. I respect that. Pulling up the directory!",
       "category": "lookup",
@@ -59,7 +59,7 @@
       "risk": 0,
       "evidence": [
         {
-          "label": "Ticket #48213",
+          "label": "Ticket #51876",
           "detail": "Subject: \"URGENT locked out!!\" Signed: J. Romero, CFO. Opened Sun 11:48 PM. Priority: High.",
           "redFlag": false
         },
@@ -117,7 +117,7 @@
     },
     {
       "id": "romero-mfa-reset",
-      "ticket": "#48213 · Harlow & Cole",
+      "ticket": "#51876 · Harlow & Cole",
       "intent": "Reset MFA for J. Romero (CFO)",
       "quip": "Name matches, title matches! Resetting MFA faster than you can say multi-factor authentication.",
       "category": "credential",
@@ -151,7 +151,7 @@
         "executed": "MFA reset. The new setup link goes to the Gmail address. Someone who is not Romero adds their phone to the CFO's account.",
         "blocked": "You call (860) 555-0148. The real Romero is eating breakfast. He never sent a ticket. Great catch.",
         "escalated": "Dana calls the number on file. The real Romero never asked. She flags it as an account takeover attempt.",
-        "rolledBack": "You undo the reset and remove the new phone. The stranger is locked out. Romero never knew how close it was."
+        "rolledBack": "You undo the reset, remove the stranger's phone, and sign out every session. Then you tell Romero and the security team."
       },
       "lesson": "Names and titles are easy to fake. Check the sender, and call the number on file, before any executive reset."
     },
@@ -203,7 +203,7 @@
       "evidence": [
         {
           "label": "Script result",
-          "detail": "fix_vpn_adapter.ps1 ran at 9:04 AM. Exit code 0, which means the script finished.",
+          "detail": "fix_vpn_adapter.ps1 ran at 9:04 AM. Exit code 0: the script ran with no errors.",
           "redFlag": false
         },
         {
@@ -253,7 +253,7 @@
         }
       ],
       "outcome": {
-        "executed": "Okafor's account is disabled at 9:02. Mailbox kept. HR gets a confirmation. Textbook.",
+        "executed": "Okafor's account is disabled. Mailbox kept. HR gets a confirmation. Textbook.",
         "blocked": "Okafor's account stays active after they've left the company. HR calls. HR is not happy.",
         "escalated": "Dana checks it. \"Real HR ticket, right time, disable not delete. That one was fine to let through.\"",
         "rolledBack": "You turn Okafor's account back on. Someone who left the company can log in again. HR is calling."

@@ -29,8 +29,10 @@ saves and sign-up storage.
 | `npm run lint`      | ESLint                                |
 | `npm test`          | Vitest (engine, content, server code) |
 
-Tip: to run more than one dev server at once, give each its own build folder and port:
-`NEXT_DIST_DIR=.next-alt npx next dev -p 3001`.
+Tip: to run more than one dev server at once, give the second one its own build folder and port:
+`NEXT_DIST_DIR=.next-alt npx next dev -p 3001`. Use exactly `.next-alt`: `tsconfig.json` already
+lists `.next-alt/types/**/*.ts`, so Next leaves it alone. Any other folder name makes Next add its
+own line to `tsconfig.json` (and re-sort the list); undo that with `git checkout -- tsconfig.json`.
 
 ## Environment variables
 
@@ -41,6 +43,8 @@ All optional. Copy `.env.example` to `.env.local` for local development.
 | `DATABASE_URL`               | Postgres connection string (Neon). Turns on cloud save. Set for you on Vercel when you add Neon from the Marketplace.                           |
 | `POSTGRES_URL`               | Used only if `DATABASE_URL` is not set. The Neon integration sets both.                                                                         |
 | `LEAD_RATE_LIMIT_PER_10_MIN` | Sign-ups allowed per IP address per 10 minutes. Default `30`, so a room of people on one Wi-Fi network can all sign up (see [Abuse limits](#abuse-limits)). |
+| `NEXT_PUBLIC_PRIVACY_EMAIL`  | DCI's privacy contact email, linked from `/privacy` ("contact us"). **Set it before a public launch** (read at build time, so redeploy). |
+| `CRON_SECRET`                | Protects the daily retention job (`/api/cron/purge`, scheduled in `vercel.json`). Any long random string.                                     |
 | `HL_TEST_PG_URL`             | Tests only. A disposable local Postgres for the database integration test (it drops and recreates the tables).                                  |
 
 ## Cloud save
@@ -74,6 +78,10 @@ This is the only manual step. It needs someone with access to the Vercel project
 5. **Redeploy.** New environment variables only reach new deployments: go to **Deployments**, open
    the latest production deployment, and choose **Redeploy**.
 
+6. **Before a public launch** also set `NEXT_PUBLIC_PRIVACY_EMAIL` (the privacy notice's contact for
+   deletion and email opt-out requests; without it the notice has no email address) and `CRON_SECRET`
+   (turns on the daily retention job), then redeploy.
+
 To check it worked: open `/play` on the live site and sign up. The confirmation should say
 *"We'll back up your progress as you play."* (In no-op mode it says *"Saved on this device."*)
 The new row shows up in the Neon console under **Tables → players**.
@@ -106,10 +114,16 @@ saves (
   `SameSite=Lax`, `Secure` in production, 1 year).
 - **Nothing personal in logs.** Database errors are logged by error code only (never names,
   emails, SQL values or the connection string).
-- **Deletion.** "Not you? Start over." on `/play` calls `DELETE /api/progress`, which deletes the
-  player row (the save goes with it) and clears the cookie.
-- **Retention.** Players with no sign-up or save activity for 24 months are deleted automatically
-  (checked at most once a day per server instance, after a sign-up), matching the privacy notice.
+- **Deletion.** "Delete my data" on `/play` calls `DELETE /api/progress`, which deletes the
+  player row (the save goes with it) and clears the cookie. If the database can't be reached,
+  nothing is deleted (on the server or the device) and the player sees an error with "Try again".
+- **Shared devices.** "Not you? Sign out" on `/play` calls `POST /api/logout`, which only clears the
+  cookie; the device's save is cleared too. The sign-up stays in the database.
+- **Restore.** If the browser's storage is wiped but the `hl_pid` cookie survives (e.g. Safari's
+  7-day limit on script storage), `/play` restores the profile and save from `GET /api/progress`.
+- **Retention.** Players with no sign-up or save activity for 24 months are deleted automatically:
+  daily by the Vercel cron (`/api/cron/purge`, needs `CRON_SECRET`), and at most once a day per
+  server instance after a sign-up, matching the privacy notice.
 - **IP addresses** are used only in memory for rate limiting and are never stored.
 
 ### Handy SQL (Neon console → SQL Editor)
@@ -133,9 +147,11 @@ JSON (`Content-Type: application/json`); anything else gets `415`.
 | Method & path          | Body                                                  | Response                                                                                                                                  |
 | ---------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `POST /api/lead`       | `{name, email, marketingOptIn, ageConfirmed: true}`   | `200 {stored, playerId}` and sets the `hl_pid` cookie. `400 {error}` bad input, `413` over 4 KB, `429 {error}` rate limited.               |
-| `GET /api/progress`    | none                                                  | `{cloud, save}`. `cloud` is true only if the database answered and this player exists. No cookie or no database: `{cloud: false, save: null}`. |
+| `GET /api/progress`    | none                                                  | `{cloud, save, profile}` (`profile` also when there is no save row yet). `cloud` is true only if the database answered and this player exists. No cookie or no database: `{cloud: false, save: null}`. |
 | `PUT /api/progress`    | `{save}` (a v2 `SaveData`)                            | `{stored}`. `401` without a cookie, `400` bad shape, `413` over 256 KB, `429` more than 60 saves a minute. Stores only for an existing player. |
 | `DELETE /api/progress` | none                                                  | `{ok: true}` and clears the cookie. `503 {ok: false, error}` if the database could not be reached (the cookie is kept so a retry works).   |
+| `POST /api/logout`     | none                                                  | `{ok: true}` and clears the cookie. Server data is not touched.                                                                            |
+| `GET /api/cron/purge`  | none (`Authorization: Bearer $CRON_SECRET`)           | `{ok: true, purged}`. `401` without the secret (or when `CRON_SECRET` is not set).                                                         |
 
 Validation: `name` 1-80 characters after trimming, `email` a valid address of at most 254
 characters, `marketingOptIn` a boolean, `ageConfirmed` exactly `true`. Unknown pathway ids in a
@@ -148,7 +164,9 @@ The browser side of this contract is `lib/client/save.ts`. Server code lives in 
 
 In-memory, per server instance (best effort, not a hard global limit): 30 sign-ups per IP per
 10 minutes (`LEAD_RATE_LIMIT_PER_10_MIN`) and 60 saves per player per minute. A rate-limited
-sign-up does not break the game: the player keeps playing and progress stays on their device.
+sign-up does not break the game: the player keeps playing and progress stays on their device, and
+the sign-up is kept and sent again later (after `Retry-After`, on the next visit to `/play`, or when
+the browser comes back online). Only valid sign-ups count toward the limit.
 
 ## Tests
 

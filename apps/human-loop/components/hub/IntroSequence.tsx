@@ -50,13 +50,14 @@ export function IntroSequence({
             <Clock className="h-6 w-6" strokeWidth={2.4} />
           </span>
           <p className={h.sceneEyebrow}>{encounter.title}</p>
-          <p className={h.sceneTitle} aria-live="polite">
+          <p id={`hl-intro-scene-${i}`} className={h.sceneTitle}>
             {line.text}
           </p>
           <p className={h.sceneSub}>{encounter.subtitle}</p>
           <button
             ref={sceneBtnRef}
             type="button"
+            aria-describedby={`hl-intro-scene-${i}`}
             className="mt-4 inline-flex min-h-12 items-center gap-1.5 rounded-xl border-2 border-ink bg-orange px-5 font-display text-base font-bold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
             onClick={next}
           >

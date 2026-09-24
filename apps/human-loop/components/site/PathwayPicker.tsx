@@ -38,7 +38,7 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
     <div>
       <div className="relative overflow-hidden rounded-3xl border-2 border-ink bg-paper shadow-[0_6px_0_0_var(--hl-ink)]">
         <div className="grid sm:grid-cols-[15rem_1fr]">
-          <div className="relative flex h-40 items-end justify-center overflow-hidden bg-teal pt-3 sm:h-auto sm:pt-6" aria-hidden="true">
+          <div className="relative flex h-28 items-end justify-center overflow-hidden bg-teal pt-3 sm:h-auto sm:pt-6" aria-hidden="true">
             <div
               className="absolute inset-0 opacity-[0.16]"
               style={{
@@ -54,7 +54,7 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
               priority
               width={220}
               height={220}
-              className="hl-float relative h-36 w-36 sm:h-52 sm:w-52"
+              className="hl-float relative h-24 w-24 sm:h-52 sm:w-52"
             />
           </div>
           <div className="flex flex-col p-5 sm:p-7">
@@ -74,7 +74,8 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
             </p>
             <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">{live.tagline}</p>
 
-            <dl className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl bg-paper-soft px-4 py-3">
+            {/* On phones the button comes before the stats, so it is above the fold. */}
+            <dl className="order-last mt-4 flex flex-wrap sm:order-none items-center gap-x-6 gap-y-3 rounded-2xl bg-paper-soft px-4 py-3">
               <div className="flex items-center gap-2">
                 <dt className="font-display text-sm font-semibold text-muted">Best</dt>
                 <dd>
@@ -99,7 +100,7 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
               ) : null}
             </dl>
 
-            <div className="mt-5">
+            <div className="mt-4 sm:mt-5">
               <Link
                 href={`/play/${live.id}`}
                 aria-label={`${cta}: ${live.name}`}

@@ -216,7 +216,7 @@ describe("hub.json (help desk office)", () => {
 
   it("teaches the basics", () => {
     const dana = hub.targets.dana.lines.map((l) => l.text).join(" ");
-    for (const word of ["Inspect", "Block", "Escalate", "End turn", "human in the loop"]) expect(dana).toContain(word);
+    for (const word of ["Inspect", "Block", "Escalate", "proceed", "human in the loop"]) expect(dana).toContain(word);
     const board = hub.targets.whiteboard.lines.map((l) => l.text).join(" ");
     for (const q of ["Who asked?", "Does it match the record?", "Can we undo it?", "VP-04"]) expect(board).toContain(q);
   });

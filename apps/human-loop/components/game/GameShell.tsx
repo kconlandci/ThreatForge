@@ -43,7 +43,7 @@ import { IntroSequence } from "@/components/hub/IntroSequence";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
 import { preloadStage } from "@/lib/client/preloadStage";
-import { getPathwayProgress, loadSave, updateSave, type SaveData } from "@/lib/client/save";
+import { getPathwayProgress, loadSave, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
 import { createBus, type StageMode } from "@/lib/game/bus";
 import { CARDS } from "@/lib/game/cards";
 import { HELP_DESK_ENCOUNTER, HELP_DESK_HUB } from "@/lib/game/content";
@@ -105,6 +105,7 @@ function StageSlot({ host, className }: { host: HTMLDivElement | null; className
 
 function GameMenu({
   view,
+  battleOver,
   reducedMotion,
   onToggleMotion,
   onOfficeList,
@@ -112,6 +113,8 @@ function GameMenu({
   onHowTo,
 }: {
   view: View;
+  /** The battle has ended (its result screen is one tap away): no "Pause". */
+  battleOver: boolean;
   reducedMotion: boolean;
   onToggleMotion: () => void;
   onOfficeList: () => void;
@@ -140,8 +143,9 @@ function GameMenu({
     setOpen(false);
     if (refocus) btnRef.current?.focus();
   };
+  // Focus the Menu button first, so a sheet opened from the menu returns focus there when it closes.
   const run = (fn: () => void) => () => {
-    close(false);
+    close(true);
     fn();
   };
 
@@ -169,6 +173,11 @@ function GameMenu({
           onKeyDown={(e) => {
             if (e.key === "Escape") close();
           }}
+          onBlur={(e) => {
+            // Tabbing out of the menu closes it (it would cover the office otherwise).
+            const to = e.relatedTarget as Node | null;
+            if (to && !boxRef.current?.contains(to) && to !== btnRef.current) setOpen(false);
+          }}
         >
           <button type="button" role="switch" aria-checked={reducedMotion} className={g.menuItem} onClick={onToggleMotion}>
             <span className={g.menuIcon} aria-hidden="true">
@@ -191,7 +200,7 @@ function GameMenu({
               Office list
             </button>
           ) : null}
-          {view === "battle" ? (
+          {view === "battle" && !battleOver ? (
             <button type="button" className={g.menuItem} onClick={run(onLeaveBattle)}>
               <span className={g.menuIcon} aria-hidden="true">
                 <Building className="h-5 w-5" />
@@ -288,6 +297,9 @@ export function GameShell() {
   const [battleKey, setBattleKey] = useState(0);
   const [finalState, setFinalState] = useState<BattleState | null>(null);
   const [stageReady, setStageReady] = useState(false);
+  // The stage could not start, or lost its WebGL context and did not come back: show a retry.
+  const [stageFailed, setStageFailed] = useState(false);
+  const [stageKey, setStageKey] = useState(0);
   const [dialogue, setDialogue] = useState<HubTargetId | null>(null);
   const [walking, setWalking] = useState<HubTargetId | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
@@ -323,6 +335,8 @@ export function GameShell() {
       return;
     }
     setSave(s);
+    // Signed-up players: re-check the cloud backup (a reload of this page skips /play).
+    if (!s.profile.guest) void syncFromCloud({ adopt: false });
     const p = getPathwayProgress(s, PATHWAY);
     setInitialHubPos(p.hub);
 
@@ -351,7 +365,11 @@ export function GameShell() {
       return;
     }
 
-    if (p.battle && p.battle.status === "playing" && canResume(p.battle, ENC)) {
+    if (p.pendingResult && p.pendingResult.status !== "playing" && canResume(p.pendingResult, ENC)) {
+      // The last shift ended but its result screen was never left (reload, or the tab closed).
+      setFinalState(p.pendingResult);
+      setView("result");
+    } else if (p.battle && p.battle.status === "playing" && canResume(p.battle, ENC)) {
       setView("resume");
     } else {
       if (p.battle) setSave(patchProgress((x) => ({ ...x, battle: null })));
@@ -362,10 +380,24 @@ export function GameShell() {
   /* Stage -> React. */
   useEffect(() => {
     let moveTimer: number | undefined;
+    let lostTimer: number | undefined;
     const off = bus.fromStage.on((msg) => {
       switch (msg.type) {
         case "ready":
+        case "restored":
+          window.clearTimeout(lostTimer);
           setStageReady(true);
+          setStageFailed(false);
+          break;
+        case "lost":
+          // The fallbacks show while the canvas is blank. Not restored within 3 s: rebuild the stage.
+          setStageReady(false);
+          window.clearTimeout(lostTimer);
+          lostTimer = window.setTimeout(() => setStageKey((k) => k + 1), 3000);
+          break;
+        case "failed":
+          setStageReady(false);
+          setStageFailed(true);
           break;
         case "hub-tap":
           if (viewRef.current !== "hub") break;
@@ -389,6 +421,7 @@ export function GameShell() {
     return () => {
       off();
       window.clearTimeout(moveTimer);
+      window.clearTimeout(lostTimer);
     };
   }, [bus]);
 
@@ -434,7 +467,7 @@ export function GameShell() {
   );
 
   const beginBattle = useCallback((st: BattleState) => {
-    setSave(patchProgress((p) => ({ ...p, battle: st })));
+    setSave(patchProgress((p) => ({ ...p, battle: st, pendingResult: null })));
     setBattle(st);
     setBattleKey((k) => k + 1);
     setFinalState(null);
@@ -466,6 +499,8 @@ export function GameShell() {
       patchProgress((p) => ({
         ...p,
         battle: null,
+        // Kept until the result screen is left, so a reload right now still shows the debrief.
+        pendingResult: st,
         attempts: p.attempts + 1,
         wins: p.wins + (won ? 1 : 0),
         best: won && (!p.best || score.stars > p.best.stars) ? { stars: score.stars, completedAt: now } : p.best,
@@ -494,6 +529,7 @@ export function GameShell() {
   const backToOffice = useCallback(() => {
     setDialogue(null);
     setWalking(null);
+    if (viewRef.current === "result") setSave(patchProgress((p) => ({ ...p, pendingResult: null })));
     setView("hub");
   }, []);
 
@@ -514,6 +550,8 @@ export function GameShell() {
   const hasBattle = !!(save && getPathwayProgress(save, PATHWAY).battle);
   const resumeState = view === "resume" && save ? getPathwayProgress(save, PATHWAY).battle : null;
   const inHub = view === "hub" || view === "intro" || view === "resume";
+  const battleOver = view === "battle" && !!finalState && finalState.status !== "playing";
+  const firstShift = !!save && getPathwayProgress(save, PATHWAY).attempts === 0;
 
   return (
     <div id="hl-game-root" className={`${g.root} ${reducedMotion ? "hl-rm" : ""}`} data-view={view}>
@@ -532,6 +570,7 @@ export function GameShell() {
         {view !== "boot" ? (
           <GameMenu
             view={view}
+            battleOver={battleOver}
             reducedMotion={reducedMotion}
             onToggleMotion={toggleMotion}
             onOfficeList={() => setRoomsOpen(true)}
@@ -558,7 +597,24 @@ export function GameShell() {
               {HUB.officeName}
             </h1>
             <StageSlot host={host} />
-            {!stageReady ? (
+            {stageFailed ? (
+              <div className={g.stageFailed}>
+                <div>
+                  <p>The office picture didn&apos;t load. You can still use the Office list below.</p>
+                  <button
+                    type="button"
+                    className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl border-2 border-ink bg-paper px-4 font-display text-[15px] font-semibold text-ink shadow-[0_3px_0_0_var(--hl-ink)]"
+                    onClick={() => {
+                      setStageFailed(false);
+                      setStageKey((k) => k + 1);
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                    Try again
+                  </button>
+                </div>
+              </div>
+            ) : !stageReady ? (
               <p className={g.stageLoading} aria-hidden="true">
                 Opening the office…
               </p>
@@ -621,7 +677,7 @@ export function GameShell() {
                       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-ink bg-paper px-5 font-display text-base font-semibold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
                     >
                       <RotateCcw className="h-5 w-5" aria-hidden="true" />
-                      Start over
+                      Start a new shift
                     </button>
                   </div>
                 </section>
@@ -641,6 +697,7 @@ export function GameShell() {
             reducedMotion={reducedMotion}
             onSave={onBattleSave}
             onShowResult={showResult}
+            firstShift={firstShift}
           />
         ) : null}
 
@@ -659,6 +716,7 @@ export function GameShell() {
       {host && view !== "boot"
         ? createPortal(
             <PhaserStage
+              key={stageKey}
               bus={bus}
               mode={stageMode}
               reducedMotion={reducedMotion}

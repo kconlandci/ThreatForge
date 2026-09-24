@@ -70,6 +70,11 @@ export class HubScene extends StageScene {
   /** Walk requested while a reduced-motion teleport was fading. */
   private queued: { goal: GridPos; target: HubTargetId | null } | null = null;
   private down: { x: number; y: number; t: number } | null = null;
+  /** Drag-to-look (follow camera only): world px the player has panned away from the follow point. */
+  private panOffset = 0;
+  private drag: { lastX: number; active: boolean } | null = null;
+  /** Last touch release: the browser's emulated mouse events that follow a tap are ignored. */
+  private lastTouchAt = -1e9;
   private hoverKey = "";
 
   constructor(rt: StageRuntime) {
@@ -95,7 +100,7 @@ export class HubScene extends StageScene {
     if (lo >= hi) return (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2;
     // Lean toward the avatar but stay near the middle, so ResetBot's desk stays in view.
     const mid = (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2;
-    const ax = mid + ((this.pos.x - this.pos.y) * 32 - mid) * 0.6;
+    const ax = mid + ((this.pos.x - this.pos.y) * 32 - mid) * 0.6 + this.panOffset;
     return Math.min(hi, Math.max(lo, ax));
   }
 
@@ -118,6 +123,8 @@ export class HubScene extends StageScene {
     this.teleporting = false;
     this.queued = null;
     this.down = null;
+    this.drag = null;
+    this.panOffset = 0;
     this.hoverKey = "";
     this.initStage();
 
@@ -136,7 +143,10 @@ export class HubScene extends StageScene {
       this.centerCamera(0, 0);
     }
 
-    if (this.game.input.touch) this.game.input.touch.capture = true;
+    // No touch capture: a pinch that starts on the office must still zoom the page (low-vision
+    // players). The canvas allows pinch-zoom only, so drags stay with the game.
+    if (this.game.input.touch) this.game.input.touch.capture = false;
+    if (this.game.canvas) this.game.canvas.style.touchAction = "pinch-zoom";
     this.fadeIn();
     this.rt.sceneReady("hub");
   }
@@ -390,20 +400,48 @@ export class HubScene extends StageScene {
   /* Input                                                             */
   /* ---------------------------------------------------------------- */
 
+  /** A mouse event the browser made up after a touch (without touch capture it reaches Phaser too). */
+  private isEmulatedMouse(p: Phaser.Input.Pointer): boolean {
+    return !p.wasTouch && this.time.now - this.lastTouchAt < 700;
+  }
+
   private bindInput() {
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (p: Phaser.Input.Pointer) => {
+      if (p.wasTouch) this.lastTouchAt = this.time.now;
+      else if (this.isEmulatedMouse(p)) return;
       this.down = { x: p.x, y: p.y, t: this.time.now };
+      this.drag = this.follow ? { lastX: p.x, active: false } : null;
     });
     this.input.on(Phaser.Input.Events.POINTER_UP, (p: Phaser.Input.Pointer) => {
+      if (p.wasTouch) this.lastTouchAt = this.time.now;
+      else if (this.isEmulatedMouse(p)) return;
       const d = this.down;
+      const dragged = !!this.drag?.active;
       this.down = null;
-      if (!d) return;
+      this.drag = null;
+      if (!d || dragged) return;
       const moved = Math.hypot(p.x - d.x, p.y - d.y) / this.rt.dpr;
       if (moved > 14 || this.time.now - d.t > 900) return;
       this.handleTap(p.x, p.y);
     });
     this.input.on(Phaser.Input.Events.POINTER_MOVE, (p: Phaser.Input.Pointer) => {
-      if (p.wasTouch) return;
+      // Drag sideways to look around the zoomed-in room (portrait phones).
+      if (this.drag && this.down && p.isDown) {
+        const dxCss = (p.x - this.drag.lastX) / this.rt.dpr;
+        if (!this.drag.active && Math.abs(p.x - this.down.x) / this.rt.dpr > 8) this.drag.active = true;
+        if (this.drag.active) {
+          this.drag.lastX = p.x;
+          const before = this.followX();
+          this.panOffset -= dxCss / this.fit;
+          // Keep the offset inside the room's edges (followX clamps the camera itself).
+          const after = this.followX();
+          this.panOffset += after - (before - dxCss / this.fit);
+          this.focus.x = after;
+          if (!this.isShaking()) this.centerCamera(0, 0);
+        }
+        return;
+      }
+      if (p.wasTouch || this.isEmulatedMouse(p)) return;
       this.updateHover(p.x, p.y);
     });
     this.input.on(Phaser.Input.Events.GAME_OUT, () => this.clearHover());
@@ -514,6 +552,8 @@ export class HubScene extends StageScene {
       this.queued = { goal, target };
       return;
     }
+    // A new walk: the camera goes back to following the avatar.
+    this.panOffset = 0;
     this.goalTarget = target;
     this.showRing(goal);
     if (this.rt.reducedMotion) {
