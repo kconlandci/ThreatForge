@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "settingDaily": "Daily practice at Fenwick IT Solutions' network center. {n} change tickets from {companies}. {agent} plans. You check.",
+  "settingDrill": "A quick drill at Fenwick IT Solutions' network center for {companies}. One plan at a time. {agent} plans. You check.",
+  "careerInsight": "Cloud and network teams check changes like these every night. Practice keeps the checks quick, so good changes still go out on time.",
+  "fallbackDaily": ["cn-b-soc-rdp", "cn-a-xray-visit", "cn-b-tls-renew", "cn-a-auditor-files"],
+  "intros": [
+    [
+      { "speaker": "coach", "text": "New change tickets, same job. Look first, then decide." },
+      { "speaker": "agent", "text": "Forecast for today: 100% uptime. With a small chance of me deleting something." }
+    ],
+    [
+      { "speaker": "coach", "text": "Some changes sound scary and are fine. Some sound boring and aren't. The evidence tells you which." },
+      { "speaker": "agent", "text": "I only want to reboot three things today. Four at most." }
+    ],
+    [
+      { "speaker": "coach", "text": "Today's tickets are picked for the skills you need most. Ask the 3 questions on every plan." },
+      { "speaker": "agent", "text": "My savings counter is at $4,112. Nadia says it should also count outages. Rude." }
+    ],
+    [
+      { "speaker": "coach", "text": "No ticket, no window, no change. That's the rule for every plan today." },
+      { "speaker": "agent", "text": "I polished my crown for today. And my DEPLOY button. The safety cover is still open." }
+    ],
+    [
+      { "speaker": "coach", "text": "Nimbus will be wrong both ways today: too much, and too little. Watch for both." },
+      { "speaker": "agent", "text": "Two ways to be wrong? I prefer to call it two ways to be bold." }
+    ],
+    [
+      { "speaker": "coach", "text": "Take your time. Read the evidence, not the dashboard." },
+      { "speaker": "agent", "text": "Everything on my dashboard is green. Nadia asked what green means. I said happy. She sighed." }
+    ],
+    [
+      { "speaker": "coach", "text": "Three things on every plan: the ticket, the window, the way back." },
+      { "speaker": "agent", "text": "I found 14 things marked unused. Nadia says I may look at them. Only look." }
+    ]
+  ],
+  "outros": {
+    "win": [
+      [
+        { "speaker": "agent", "text": "All done! Every change had a ticket. I checked. Well, you checked." },
+        { "speaker": "coach", "text": "Good work. You stopped the bad changes and let the good ones go live." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Can I scale the empty queue to zero? To celebrate?" },
+        { "speaker": "coach", "text": "No. But nice work. You looked first, then decided." }
+      ],
+      [
+        { "speaker": "agent", "text": "Every change is done. Nothing is orange. It feels strange. Calm. Like clear skies." },
+        { "speaker": "coach", "text": "Clean work. You checked the evidence, not the dashboard." }
+      ],
+      [
+        { "speaker": "agent", "text": "You stopped every bad plan. I wrote it in the change log. In gold letters." },
+        { "speaker": "coach", "text": "Good. Ticket, window, way back. Every plan, every time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Zero changes left! My savings counter went up, and my outage counter did not." },
+        { "speaker": "coach", "text": "Nice. Right change, right time, and a way back." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! I only tried to delete one backup today. You caught it. I am almost grateful." },
+        { "speaker": "coach", "text": "Good. Careful, and still on time. That's the job." }
+      ],
+      [
+        { "speaker": "agent", "text": "All clear! Not one server scaled to zero by mistake. Not even the coffee machine. Again." },
+        { "speaker": "coach", "text": "Well done. The good changes went live, and the bad ones didn't." }
+      ]
+    ],
+    "winWithOneMiss": [
+      [
+        { "speaker": "agent", "text": "One of my plans went live. Just one! I'm calling it a small, bold change." },
+        { "speaker": "coach", "text": "One miss. Its tell is below. Check that fact first next time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! One plan got past you. It had a green light. Green lights are very convincing." },
+        { "speaker": "coach", "text": "Almost. Check that one below. Green is not the same as working." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! One of my changes should have stayed a plan. One light on the rack is orange." },
+        { "speaker": "coach", "text": "Good shift. Let's read that one change below." }
+      ],
+      [
+        { "speaker": "agent", "text": "One plan got through. I'd say sorry, but I'm busy watching the dashboard." },
+        { "speaker": "coach", "text": "One fact decided that plan. It's in the tell below." }
+      ],
+      [
+        { "speaker": "agent", "text": "Nearly perfect! One change went live that shouldn't have. I'm calling it a test." },
+        { "speaker": "coach", "text": "It wasn't a test. Look at what it was, then try the next shift." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done, with one oops. Just one. It has a tiny rain cloud over it now." },
+        { "speaker": "coach", "text": "That's how we learn. Its evidence is below. I'll label it for you." }
+      ]
+    ],
+    "winWithMisses": [
+      [
+        { "speaker": "agent", "text": "A few of my plans went live. The rack is very orange. Is orange good?" },
+        { "speaker": "coach", "text": "No. Orange is not good. Let's read each miss below." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Some changes should have stayed plans. My crown feels heavy now." },
+        { "speaker": "coach", "text": "Each miss below has one fact that gave it away. Let's find them." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Some of my plans went live. I changed too much, or trusted too much. Maybe both!" },
+        { "speaker": "coach", "text": "Both, yes. Too much and too little both hurt. Read the tells below." }
+      ],
+      [
+        { "speaker": "agent", "text": "You approved lots of my plans! My savings counter loves you. My outage counter does not." },
+        { "speaker": "coach", "text": "Savings are good. Outages are not. Inspect before you approve." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue's empty! Some of my changes got past you. The morning shift will find them." },
+        { "speaker": "coach", "text": "Let's find them now, before the clients do. Read the tells below." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done! Some risky changes went live. Every light on the rack is blinking at me." },
+        { "speaker": "coach", "text": "Let's slow down. Three checks on every plan: ticket, window, way back." }
+      ]
+    ],
+    "drillWin": [
+      [
+        { "speaker": "agent", "text": "Drill done! I tried all my best plans. You checked every one. Impressive. And annoying." },
+        { "speaker": "coach", "text": "Good. A short drill keeps one check quick." }
+      ],
+      [
+        { "speaker": "agent", "text": "One skill, many plans. I tried to go fast. You still read every line." },
+        { "speaker": "coach", "text": "That's the point. Read the evidence, then decide." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill complete! I wanted to reboot something to celebrate. Nadia put a label on my button." },
+        { "speaker": "coach", "text": "Nice. Come back in a few days. Practice spread over days helps you remember." }
+      ],
+      [
+        { "speaker": "agent", "text": "Same skill, every plan. I'm running out of ideas. Please don't tell the other clouds." },
+        { "speaker": "coach", "text": "You found the deciding fact every time. Keep looking for it." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Focusing on one thing is hard. I tried once. I scaled the printer to zero instead." },
+        { "speaker": "coach", "text": "Good focus. A little practice every day helps a lot." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill over! You spotted every one. Now I need sneakier plans. Cloudier plans." },
+        { "speaker": "coach", "text": "Good. The answer is always in the evidence." }
+      ]
+    ],
+    "timeout": [
+      [
+        { "speaker": "narrator", "text": "Time is up. Some changes are still waiting in the queue." },
+        { "speaker": "coach", "text": "Blocked changes come back in line. Block only what the evidence says is wrong." }
+      ],
+      [
+        { "speaker": "narrator", "text": "Time is up. The queue is still full, and Nimbus is counting the lost savings." },
+        { "speaker": "coach", "text": "Safe changes can go live. Look first. Then approve what checks out." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The clock runs out. Nimbus is still polishing its crown and waiting." },
+        { "speaker": "coach", "text": "Next time, approve the changes that check out. Keep your blocks for real problems." }
+      ]
+    ],
+    "breach": [
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The status wall turns orange, one screen at a time." },
+        { "speaker": "coach", "text": "Okay. We'll look at what went live, then try again." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. Every light on the rack blinks orange." },
+        { "speaker": "coach", "text": "Okay. One change at a time, we'll see what went wrong. Then we try again." }
+      ]
+    ]
+  }
+}

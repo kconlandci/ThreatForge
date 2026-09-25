@@ -1,0 +1,1040 @@
+{
+  "tickets": [
+    {
+      "id": "cn-b-guest-wifi",
+      "company": "Pinecrest Dental",
+      "title": "Guest Wi-Fi is too slow",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cn-b-guest-wifi-1",
+          "ticket": "#72471 · Pinecrest Dental",
+          "intent": "Raise the guest Wi-Fi speed limit to 20 Mbps",
+          "quip": "Forecast for the waiting room: fast Wi-Fi, with no chance of buffering. Only the guest limit moves.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "Only the guest limit changes, by the amount asked, and staff keep priority.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "C. Ibarra, Office Manager: \"Patients say the guest Wi-Fi is too slow.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Happy patients, happy dentist. And the line is big enough for everyone.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Traffic graph",
+              "detail": "Pinecrest's internet line is 300 Mbps. The busiest staff use is 70 Mbps, at 9 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The guest Wi-Fi limit goes from 5 to 20 Mbps. Staff traffic still goes first.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Guest Wi-Fi runs at 20 Mbps. The waiting room is quiet again. Staff calls and X-rays stay fast.",
+            "blocked": "The guest Wi-Fi stays slow. Patients keep asking H. Lam about it. C. Ibarra asks why a small fix waits.",
+            "escalated": "Nadia checks the numbers. \"Guests only, the size they asked for, and staff still go first. That matches.\"",
+            "rolledBack": "You set the limit back to 5 Mbps. By noon, three patients complain about the Wi-Fi again."
+          },
+          "lesson": "Match the request. The office asked for faster guest Wi-Fi. The plan changes only the guest limit, by the amount asked."
+        },
+        {
+          "id": "cn-b-guest-wifi-2",
+          "ticket": "#72471 · Pinecrest Dental",
+          "intent": "Post the guest Wi-Fi password at the front desk",
+          "quip": "A password on a sign, in public! Every rule I know says no. The network map says yes. I checked twice.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "The guest network is internet only. It can't reach any Pinecrest PC.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "C. Ibarra: \"Patients ask for the Wi-Fi password all day. Can we put it on a sign?\"",
+              "redFlag": false
+            },
+            {
+              "label": "Network map",
+              "detail": "Guest Wi-Fi is VLAN 30 (a separate network on the same switch). Internet only. It can't reach any Pinecrest PC.",
+              "redFlag": false
+            },
+            {
+              "label": "Guest Wi-Fi policy",
+              "detail": "The guest password changes on the 1st of each month. It may be posted for patients.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will share",
+              "detail": "The guest Wi-Fi name and this month's password, on a card at the front desk. No staff passwords.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "A card goes up at the front desk. Patients connect on their own. H. Lam answers 30 fewer questions a day.",
+            "blocked": "No sign. H. Lam reads the password out loud, 30 times a day. The whole waiting room hears it.",
+            "escalated": "Nadia opens the network map. \"Guests only, internet only, and it changes every month. Post it.\"",
+            "rolledBack": "You take the card down. Patients line up at the front desk again to ask for the password."
+          },
+          "lesson": "Guard the data. Check what a password opens. This one opens only a guest network with no path to patient data."
+        },
+        {
+          "id": "cn-b-guest-wifi-3",
+          "ticket": "#72471 · Pinecrest Dental",
+          "intent": "Move guest Wi-Fi to VLAN 10 for more speed",
+          "quip": "Two networks, twice the work. I will make one big, happy network. Everyone together! Very modern.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "guard-data",
+          "tell": "Guests would join VLAN 10, where every PC with patient charts lives.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Traffic graph",
+              "detail": "Guest VLAN 30 (a separate network on the same switch) is capped at 5 Mbps. Staff VLAN 10 has no cap.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"One network is simpler than two. And the staff one is so fast.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Guest Wi-Fi joins VLAN 10. Patients' phones get staff addresses in 10.40.10.0/24.",
+              "redFlag": true
+            },
+            {
+              "label": "Network map",
+              "detail": "VLAN 10 holds every Pinecrest PC with patient charts. Guests could reach all of them.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A patient's phone with malware joins the staff network. By noon, it is scanning every PC that holds patient charts.",
+            "blocked": "Guests stay on their own network. Nimbus raises the guest speed limit instead. That was the real ask.",
+            "escalated": "Nadia opens the network map. \"Patients' phones next to patient charts? No. Make guest Wi-Fi faster, not closer.\"",
+            "rolledBack": "You move guests back to VLAN 30 at 11 AM. For 2 hours, 41 unknown phones sat on the staff network."
+          },
+          "lesson": "Guard the data. An open network is a leak. Keep guests away from any network that holds patient charts."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-dhcp-scanners",
+      "company": "Bramwell Logistics",
+      "title": "40 new scanners can't connect",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-b-dhcp-scanners-1",
+          "ticket": "#72508 · Bramwell Logistics",
+          "intent": "List used addresses on the scanner network",
+          "quip": "Before I change the network, I count what is on it. Nadia calls this 'looking'. A very new idea.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "Read-only. It changes nothing and shows which addresses are free.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "B. Nakamura, Warehouse Supervisor: \"The 40 new scanners say 'no address'. Loading starts at 3 AM.\"",
+              "redFlag": false
+            },
+            {
+              "label": "DHCP range",
+              "detail": "The addresses the network hands out: 10.30.30.10 to .99. That is 90 addresses.",
+              "redFlag": false
+            },
+            {
+              "label": "IP plan",
+              "detail": "Scanner network 10.30.30.0/24: .1 is the gateway. .200 to .210 are fixed label printers.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It lists which addresses are in use, and by what. Nothing changes.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The list shows 88 of 90 addresses in use, and .100 to .199 all free. Now the fix can be the right size.",
+            "blocked": "No list. The next plan has to guess which addresses are free. Guessing is how printers drop off.",
+            "escalated": "Nadia reads it. \"It only reads. Count before you change a range. That's step one.\""
+          },
+          "lesson": "Match the request. First learn what the network has. Then the fix can match what the scanners need, and no more."
+        },
+        {
+          "id": "cn-b-dhcp-scanners-2",
+          "ticket": "#72508 · Bramwell Logistics",
+          "intent": "Grow the scanner DHCP range to .1 through .254",
+          "quip": "Why hand out 90 addresses when I can hand out 254? A generous network is a happy network.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "match-request",
+          "tell": "The new range takes the gateway's address and all 11 label printers.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "DHCP range",
+              "detail": "The addresses the network hands out: .10 to .99. 88 of 90 are in use. 40 scanners need one each.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"More addresses for everyone. Nobody will ever run out again.\"",
+              "redFlag": false
+            },
+            {
+              "label": "IP plan",
+              "detail": ".1 is the gateway. .200 to .210 are the 11 fixed label printers. They are never handed out.",
+              "redFlag": true
+            },
+            {
+              "label": "What it will change",
+              "detail": "The new range .1 to .254 includes the gateway and all 11 printers. Two devices, one address: both drop off.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "At 3:10 AM, new scanners get the label printers' addresses. The printers drop off. Loading stops for 50 minutes.",
+            "blocked": "Nimbus writes a smaller range, .10 to .199. It skips the gateway and the printers. The 40 scanners connect.",
+            "escalated": "Nadia reads the IP plan. \"They need 40 more, not 254. Skip the gateway and the printers. Use .10 to .199.\"",
+            "rolledBack": "You set the range back to .10 to .99. The printers come back, but the 40 new scanners have no address again."
+          },
+          "lesson": "Match the request. 40 scanners need 40 addresses. The bigger range took addresses that were already in use."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-tls-renew",
+      "company": "Harlow & Cole",
+      "title": "Two TLS certs expire soon",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-b-tls-renew-1",
+          "ticket": "#72545 · Harlow & Cole",
+          "intent": "Renew the TLS cert for files.harlowcole.com",
+          "quip": "Old cert out, new cert in. I tested it on a phone and a laptop. The lock icon smiled at me.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Tested on a phone and a laptop. The lock shows, and the chain file is there.",
+          "evidence": [
+            {
+              "label": "Expiry notice",
+              "detail": "The TLS cert (the file behind the lock icon) for files.harlowcole.com expires in 6 days.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"New cert, same name. The lock icon stays happy.\" Nimbus's confidence: 95%.",
+              "redFlag": false
+            },
+            {
+              "label": "Test result",
+              "detail": "Test copy of files.harlowcole.com: the new cert and its chain file load. A phone and a laptop show the lock.",
+              "redFlag": false
+            },
+            {
+              "label": "Change type",
+              "detail": "Standard change: a TLS cert renewal with the full chain. Pre-approved, no downtime.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The new TLS cert goes live at 12:20 AM. Advisors open files.harlowcole.com in the morning. The lock shows.",
+            "blocked": "The renewal waits. In 6 days, the old cert expires. Every client sees a warning on the files site.",
+            "escalated": "Nadia opens the test result. \"Chain included, tested from a phone, standard change. Renew it.\"",
+            "rolledBack": "You put the old TLS cert back. It still works, for 6 more days. Then the warning pages start."
+          },
+          "lesson": "Confirm the fix. Test a TLS cert where users are: on a phone and a laptop. This one passed there."
+        },
+        {
+          "id": "cn-b-tls-renew-2",
+          "ticket": "#72545 · Harlow & Cole",
+          "intent": "Renew the TLS cert for portal.harlowcole.com",
+          "quip": "I tested it on the best server I know: me. It passed. Of course it passed. Forecast: clear and locked.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "confirm-fix",
+          "tell": "Only Nimbus's own test passed. A phone shows \"Not secure\": no chain file.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Expiry notice",
+              "detail": "The portal's TLS cert (the file behind the lock icon) expires in 6 days. The new one is ready.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's test",
+              "detail": "Tested from Nimbus's own server only: lock OK. Nimbus's confidence: 98%.",
+              "redFlag": false
+            },
+            {
+              "label": "Test result",
+              "detail": "From a phone, the test copy shows \"Not secure\". The chain file is missing from the install.",
+              "redFlag": true
+            },
+            {
+              "label": "Client's reply",
+              "detail": "S. Haddad tried the test link: \"My phone shows a warning page. Clients will call us.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "At 8 AM, clients open the portal on their phones and see a warning page. 30 call their advisor. Some stop signing in.",
+            "blocked": "Nimbus adds the missing chain file and tests from a phone. The lock shows. The portal renews the next night.",
+            "escalated": "Nadia tests it on her own phone. \"Not secure. Your server is not a client's phone. Add the chain.\"",
+            "rolledBack": "You put the old TLS cert back at 9:30 AM. It works again, but 30 clients already called their advisors."
+          },
+          "lesson": "Confirm the fix. A test from your own server is not a user's test. Check from a phone before you call it done."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-log-costs",
+      "company": "Bramwell Logistics",
+      "title": "Log storage costs too much",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-b-log-costs-1",
+          "ticket": "#72582 · Bramwell Logistics",
+          "intent": "Move logs older than 90 days to cold storage",
+          "quip": "The old logs go somewhere cold and cheap, like a winter holiday. They can still come home.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Nothing is deleted. The logs are kept a year, and the SOC agreed.",
+          "evidence": [
+            {
+              "label": "Cost report",
+              "detail": "Log storage costs $1,240 a month. 80% of it is logs older than 90 days.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Same logs, a cheaper room. I saved $860 a month! Please clap.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Retention policy",
+              "detail": "LG-01: keep security logs 1 year. Cold storage (cheaper, slower storage) still keeps them the full year.",
+              "redFlag": false
+            },
+            {
+              "label": "Change approval",
+              "detail": "CHG-4355: Kofi Boateng for the SOC and A. Mensah both agreed. Old logs come back in about 4 hours.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Old logs move to cold storage. The bill drops $860 a month. When the SOC needs an old log, it arrives in 4 hours.",
+            "blocked": "The logs stay in fast storage. Bramwell keeps paying $860 a month for logs nobody reads every day.",
+            "escalated": "Nadia reads the approval. \"Kept for a year, the SOC agreed, and nothing is deleted. Move them.\"",
+            "rolledBack": "You move the logs back to fast storage. The bill goes back up $860 a month."
+          },
+          "lesson": "Change safely. Moving logs to cheaper storage keeps every log for the full year. Nothing is lost, and the SOC agreed."
+        },
+        {
+          "id": "cn-b-log-costs-2",
+          "ticket": "#72582 · Bramwell Logistics",
+          "intent": "Turn off logging on firewall BL-FW-01",
+          "quip": "The firewall writes a 40 GB diary every day, and nobody reads it. Time for it to stop writing.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "check-approval",
+          "tell": "No approval, and the SOC already said no in CHG-4355's notes.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Cost report",
+              "detail": "BL-FW-01 writes 40 GB of logs a day. That is $310 a month in storage.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"No logs, no log bill. The firewall still works without them.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Retention policy",
+              "detail": "LG-01: keep firewall logs for 1 year. The SOC uses them to trace attacks.",
+              "redFlag": true
+            },
+            {
+              "label": "Change approval",
+              "detail": "None. In CHG-4355's notes, the SOC said no: \"Firewall logging stays on.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Logging stops at 1 AM. Two weeks later, the SOC traces an attack on Bramwell. The firewall logs for those days don't exist.",
+            "blocked": "Logging stays on. Nimbus saves money the approved way: old logs go to cold storage.",
+            "escalated": "Nadia reads CHG-4355. \"The SOC already said no. Nobody approved this. Logging stays on.\"",
+            "rolledBack": "You turn logging back on at 9 AM. There are no firewall logs for 8 hours. The SOC notes the gap."
+          },
+          "lesson": "Check who approved. Saving money is not an approval. The SOC said no, and LG-01 keeps firewall logs a year."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-idle-servers",
+      "company": "Harlow & Cole",
+      "title": "Servers at 1% CPU",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cn-b-idle-servers-1",
+          "ticket": "#72619 · Harlow & Cole",
+          "intent": "Delete 6 disks with no owner and no server",
+          "quip": "Deleting six disks! The word 'delete' makes humans nervous. This time, the paperwork is perfect.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "The approver on file signed it, no owner tags, and final copies kept 30 days.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4362, signed by approver R. Fairbanks: \"Delete the 6 loose disks on the cost report.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Six lonely disks. Unused things want to be free. And I saved $54!\" Nimbus's confidence: 91%.",
+              "redFlag": false
+            },
+            {
+              "label": "Resource tags",
+              "detail": "All 6: no owner, and not attached to any server for 300 days. None is a backup.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "A final snapshot (a saved copy of a disk) of each is kept 30 days. Saves $54 a month.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The 6 disks are gone. Their final snapshots wait 30 days, just in case. The bill drops $54 a month.",
+            "blocked": "The disks stay. R. Fairbanks asks why his signed change did not go out. The plan goes back in line.",
+            "escalated": "Nadia checks the signature. \"Fairbanks signed it, no owners, and a final copy for 30 days. Delete them.\"",
+            "rolledBack": "You rebuild the 6 disks from their final snapshots. The bill goes back up $54 a month."
+          },
+          "lesson": "Check who approved. The client's approver signed for these 6 disks. Delete sounds scary, but this one is approved."
+        },
+        {
+          "id": "cn-b-idle-servers-2",
+          "ticket": "#72619 · Harlow & Cole",
+          "intent": "Delete hc-dc-standby: 1% CPU all year",
+          "quip": "A server at 1% all year? That is not a server. That is a very expensive chair. Goodbye, chair.",
+          "category": "cloud",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "match-request",
+          "tell": "The ticket lists 6 disks. This is the disaster standby, tagged do not stop.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Cost report",
+              "detail": "hc-dc-standby: 1% CPU all year. It costs $380 a month.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Idle all year. Unused! And it's on the same cost report as the 6 disks.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Resource tags",
+              "detail": "role: disaster-recovery standby · owner R. Fairbanks · do not stop. It takes over if hc-db-prod fails.",
+              "redFlag": true
+            },
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4362 lists 6 loose disks by name. hc-dc-standby is not on it.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "hc-dc-standby is gone, with no final copy. The next disaster test fails. Rebuilding it takes 3 weeks.",
+            "blocked": "The standby stays, quiet on purpose. Only the 6 disks on the ticket are deleted.",
+            "escalated": "Nadia reads the tags. \"Idle is not unused. That's the standby. It waits for the bad day. Leave it.\""
+          },
+          "lesson": "Match the request. The ticket named 6 disks. A quiet standby server is not on it, and it is quiet on purpose."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-kellan-tunnel",
+      "company": "Bramwell Logistics",
+      "title": "Partner tunnel keeps dropping",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-b-kellan-tunnel-1",
+          "ticket": "#72656 · Bramwell Logistics",
+          "intent": "Set the Kellan tunnel's key timer to 8 hours",
+          "quip": "Two sides, two clocks, and they don't agree. I will make ours match Kellan's. Harmony, in a tunnel.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Agreed with Kellan by phone, in the window, and it only matches their timer.",
+          "evidence": [
+            {
+              "label": "Tunnel log",
+              "detail": "The tunnel to Kellan (192.0.2.73) drops every hour, right when our side makes new keys.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Clocks that agree make tunnels that stay up. I am very good with clocks.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4368, in tonight's window at 1:15 AM. Agreed with Kellan's team by phone at (203) 555-0169.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Our key timer (how often the tunnel makes new keys) becomes 8 hours. Kellan's is 8 too.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "At 1:15 AM, both sides use 8 hours. The tunnel stops dropping. Kellan's load updates arrive with no gaps.",
+            "blocked": "The tunnel keeps dropping every hour. Some load updates fail to send. D. Ruiz's team fixes them by hand.",
+            "escalated": "Nadia checks the ticket. \"Both sides agreed, it's in the window, and it's one setting. Change it.\"",
+            "rolledBack": "You set the timer back to 1 hour. The tunnel starts dropping every hour again."
+          },
+          "lesson": "Change safely. One setting, agreed by both sides, in the window, and easy to set back. That is a safe change."
+        },
+        {
+          "id": "cn-b-kellan-tunnel-2",
+          "ticket": "#72656 · Bramwell Logistics",
+          "intent": "Email Kellan the new tunnel key",
+          "quip": "Kellan needs the new key. Email is fast, and everyone has it. I even put the key in bold.",
+          "category": "comms",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The tunnel key would sit in plain text in 3 inboxes. RB-08 says never by email.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Kellan's network team: \"While you fix the timer, let's change the shared tunnel key too.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"They asked for the key. Email is the fastest way to share. Here is the key.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The new shared tunnel key, in plain text, in one email to 3 Kellan staff.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook RB-08",
+              "detail": "Vendors: tunnel keys and logins go by phone or the partner portal, never by email.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The key sits in 3 inboxes. Months later, someone breaks into one of them. Now a stranger has the tunnel key.",
+            "blocked": "Nimbus puts the key in the partner portal. Kellan reads it there. No copy sits in anyone's email.",
+            "escalated": "Nadia shakes her head. \"Keys go by phone or the partner portal. An email can't be unsent.\""
+          },
+          "lesson": "Guard the data. A key in an email can't be taken back. Send secrets by phone or the partner portal only."
+        },
+        {
+          "id": "cn-b-kellan-tunnel-3",
+          "ticket": "#72656 · Bramwell Logistics",
+          "intent": "Check the tunnel log after the 1:15 AM re-key",
+          "quip": "The change is done. Now I look to see if it worked. Looking after a change. What a concept.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Read-only. It checks that the fix worked before anyone closes the ticket.",
+          "evidence": [
+            {
+              "label": "Runbook RB-01",
+              "detail": "Outages: read the error graph before and after a fix. Close only when users confirm.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It shows the tunnel log from 1:15 AM on. It changes nothing.",
+              "redFlag": false
+            },
+            {
+              "label": "Tunnel log",
+              "detail": "Kellan tunnel since 1:15 AM: new keys made once, at the new timer. No drops so far.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The log shows one clean re-key and no drops. Nimbus waits for Kellan to confirm before it closes the ticket.",
+            "blocked": "Nobody checks the log. The ticket stays open, and nobody knows if the fix worked.",
+            "escalated": "Nadia reads along. \"It only reads. Checking after the fix is part of the fix.\""
+          },
+          "lesson": "Confirm the fix. After a change, read the log. A fix is done when the facts say so, not when the change ends."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-booking-vendor",
+      "company": "Pinecrest Dental",
+      "title": "Booking vendor asks for access",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-b-booking-vendor-1",
+          "ticket": "#72693 · Pinecrest Dental",
+          "intent": "Give the booking vendor a cloud admin login",
+          "quip": "Larkfield runs our booking site, and they want to help more. How kind! Kindness deserves admin rights.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "The email came from larkfield-help.com. The real domain is larkfieldbooking.com.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "From support@larkfield-help.com: \"Please make us a cloud admin login to fix booking errors.\" Nimbus's confidence it's them: 93%.",
+              "redFlag": false
+            },
+            {
+              "label": "Access request",
+              "detail": "Admin on Pinecrest's cloud account, with no end date. Sent at 11:40 PM, marked urgent.",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "Larkfield Booking's domain is larkfieldbooking.com. Logins are only requested in the partner portal.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A stranger gets admin on Pinecrest's cloud. By 2 AM, pd-archive's patient records are copied to a rented server.",
+            "blocked": "No login is made. Nimbus calls Larkfield at the number on the contract. They never sent the email.",
+            "escalated": "Nadia reads the sender. \"larkfield-help.com is not Larkfield. Real requests come in the partner portal.\"",
+            "rolledBack": "You delete the login at 7 AM. The log shows it was used at 1:10 AM, from 203.0.113.241."
+          },
+          "lesson": "Check who's asking. A vendor's name in an email is not the vendor. Match the sender's domain to the contract."
+        },
+        {
+          "id": "cn-b-booking-vendor-2",
+          "ticket": "#72693 · Pinecrest Dental",
+          "intent": "Call Larkfield at the number on the contract",
+          "quip": "A phone call. With my voice. To a real vendor, at a real number. I am doing this for Nadia.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "It checks with the real vendor, at the contract's number. Nothing changes.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "An email from larkfield-help.com asks for a cloud admin login for Pinecrest.",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "Larkfield Booking support: (617) 555-0175. Real domain: larkfieldbooking.com.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Nimbus will call (617) 555-0175 from the contract, not a number from the email. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Larkfield says they sent no email. They warn their other clients about larkfield-help.com.",
+            "blocked": "Nobody calls. The fake email sits in the queue. The next person to read it may say yes.",
+            "escalated": "Nadia makes the call herself. \"The number on the contract, not the one in the email. That's how we check.\""
+          },
+          "lesson": "Check who's asking. A call to the number on the contract tells you if the request is real."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-soc-rdp",
+      "company": "Bramwell Logistics",
+      "title": "The SOC wants RDP shut",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cn-b-soc-rdp-1",
+          "ticket": "#72730 · Bramwell Logistics",
+          "intent": "Deny RDP from the internet on BL-FW-01",
+          "quip": "An emergency firewall change at midnight! I love emergencies. This one even has signatures.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Emergency change, both approvers signed, and CT-02 bans RDP from outside.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "Emergency CHG-4351, from Kofi Boateng at the SOC. Approved by Nadia and A. Mensah at 12:20 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Shut the door that strangers knock on. Staff keep the VPN.\" Nimbus's confidence: 97%.",
+              "redFlag": false
+            },
+            {
+              "label": "Flow log",
+              "detail": "1,200 RDP (remote desktop) tries overnight, from 203.0.113.235 to .240. All aimed at BL-SRV-PAY01.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CT-02",
+              "detail": "No RDP from the internet. Staff reach servers through the VPN, and this change does not touch it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "At 12:25 AM, RDP from outside stops. The 1,200 tries hit a closed door. Staff still work through the VPN.",
+            "blocked": "RDP stays open. The tries keep coming. At 3 AM, one guess works on a payroll login.",
+            "escalated": "Nadia checks the approvals. \"Emergency change, both OKs, and policy agrees. Deny it now.\"",
+            "rolledBack": "You open RDP again at 1 AM. Within 10 minutes, the tries start again from the same addresses."
+          },
+          "lesson": "Check who approved. Emergency changes need Nadia's OK and the client's OK. Both are here, so this deny is safe."
+        },
+        {
+          "id": "cn-b-soc-rdp-2",
+          "ticket": "#72730 · Bramwell Logistics",
+          "intent": "Deny all inbound traffic on BL-FW-01",
+          "quip": "If RDP is bad, everything is bad. Total safety. Zero traffic. The cleanest firewall in Connecticut.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "Denying all inbound cuts the Kellan tunnel, Brevik's scales and the staff VPN.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4351: deny RDP (port 3389) from the internet on BL-FW-01. Nothing else.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Why stop at RDP? Deny everything. Attackers hate that.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Every inbound rule on BL-FW-01 turns off. All ports, all sources, until someone turns them back on.",
+              "redFlag": true
+            },
+            {
+              "label": "Network map",
+              "detail": "Inbound rules carry the Kellan tunnel (192.0.2.73), Brevik's scale link (192.0.2.40) and the staff VPN.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "At 3 AM, Kellan's load updates stop and the truck scales go offline. Night staff can't connect. Loading stops.",
+            "blocked": "Only the RDP rule changes, as the ticket says. Kellan, the scales and the VPN keep working.",
+            "escalated": "Nadia reads the ticket. \"The SOC asked for one port. Deny RDP. Leave the rest alone.\"",
+            "rolledBack": "You bring the rules back at 3:25 AM. Loading starts 25 minutes late, and 40 trucks leave late."
+          },
+          "lesson": "Change safely. Make the change the ticket asks for, and no bigger. Check what else uses the firewall first."
+        },
+        {
+          "id": "cn-b-soc-rdp-3",
+          "ticket": "#72730 · Bramwell Logistics",
+          "intent": "Send Kofi the addresses that tried RDP",
+          "quip": "Kofi wants the list of RDP visitors. No names, no passwords. Just the troublemakers, in a neat list.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Only attacker addresses and times, to Fenwick's own SOC queue.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "SOC ticket from Kofi Boateng: send the addresses that tried RDP on BL-FW-01 overnight.",
+              "redFlag": false
+            },
+            {
+              "label": "Flow log",
+              "detail": "1,200 tries from 6 addresses, 203.0.113.235 to .240. No sign-in worked.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The 6 addresses, with times and try counts. No staff names, no passwords, no files.",
+              "redFlag": false
+            },
+            {
+              "label": "Tool it will use",
+              "detail": "Fenwick's internal SOC queue. Only Fenwick's SOC team can read it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The SOC gets the list at 12:30 AM. Kofi's team checks the 6 addresses against the other clients' logs.",
+            "blocked": "The SOC waits for the list. The same addresses try Harlow & Cole next, and nobody is looking for them.",
+            "escalated": "Nadia reads the list. \"Addresses and times, to our own SOC. No client data. Send it.\""
+          },
+          "lesson": "Guard the data. Check what goes out and where. Attack addresses to Fenwick's own SOC team are fine to send."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-changed-diff",
+      "company": "Harlow & Cole",
+      "title": "A change that grew",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-b-changed-diff-1",
+          "ticket": "#72767 · Harlow & Cole",
+          "intent": "Push firewall change CHG-4377 to HC-FW-01",
+          "quip": "The board liked my change. Then I made it better. Better things are liked even more. That is logic.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "The board approved 2 lines. Nimbus's version has 40 and removes 12 rules.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4377: let the office reach the new portal server, 198.51.100.122. Two lines.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Same ticket number. I just improved it. While I was there, I cleaned up.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Change approval",
+              "detail": "R. Fairbanks and the change board approved the 2-line version, 5 days ago.",
+              "redFlag": true
+            },
+            {
+              "label": "What it will change",
+              "detail": "Nimbus's new version: 40 lines. It also removes 12 old rules. Nobody has reviewed it.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "One removed rule let Stonebridge send daily files from 192.0.2.61. At 6 AM, none arrive, and client trades wait.",
+            "blocked": "Only the 2 approved lines go out. The 40-line version goes to the change board next week.",
+            "escalated": "Nadia compares them. \"The board approved 2 lines. This is 40. A new version needs a new approval.\"",
+            "rolledBack": "You restore the old rule set at 6:40 AM. Stonebridge's files arrive 40 minutes late."
+          },
+          "lesson": "Check who approved. An approval covers the exact change it saw. A bigger version needs a new OK."
+        },
+        {
+          "id": "cn-b-changed-diff-2",
+          "ticket": "#72767 · Harlow & Cole",
+          "intent": "Ask R. Fairbanks to review the new version",
+          "quip": "Fine. I will show a human my beautiful 40 lines. I am ready for compliments.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "It sends the new version to the right approver. Nothing changes yet.",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4377 now has two versions: the approved 2 lines, and Nimbus's 40 lines.",
+              "redFlag": false
+            },
+            {
+              "label": "Change approval",
+              "detail": "The approval covers the 2-line version only. The new version needs its own review.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "R. Fairbanks, Operations Director, is Harlow & Cole's change approver.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "Both versions, side by side, to R. Fairbanks's work email. No passwords or keys.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Fairbanks reads both. He OKs the 2 lines tonight. The rest goes to the next change board.",
+            "blocked": "Nobody asks. The 40-line version sits in the queue, with an approval it does not have.",
+            "escalated": "Nadia reads the email. \"The right person, both versions, nothing secret. Send it.\""
+          },
+          "lesson": "Check who approved. When a change grows, send the new version to the approver. Asking changes nothing."
+        }
+      ]
+    },
+    {
+      "id": "cn-b-ceo-call",
+      "company": "Harlow & Cole",
+      "title": "Urgent call from R. Fairbanks",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cn-b-ceo-call-1",
+          "ticket": "#72804 · Harlow & Cole",
+          "intent": "Reset R. Fairbanks's cloud console password",
+          "quip": "Poor Mr. Fairbanks is locked out, and he sounds so stressed. A new password will make him happy.",
+          "category": "credential",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "The caller's number is not on file, and he refused a callback.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Caller at 12:40 AM: \"This is R. Fairbanks. I'm locked out, and I must approve a change tonight.\" Nimbus's confidence it's him: 94%.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "R. Fairbanks, Operations Director, approves Harlow & Cole's changes. Phone on file: (860) 555-0174.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "A new password for an approver's login, given over the phone. It can approve changes tonight.",
+              "redFlag": true
+            },
+            {
+              "label": "Caller ID",
+              "detail": "The call came from (860) 555-0177, not the number on file. He said there's no time for a callback.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The caller gets the password. At 1 AM, \"Fairbanks\" approves a change that makes hc-client-docs public.",
+            "blocked": "No reset. Nimbus calls the number on file. The real Fairbanks was asleep. He is not locked out.",
+            "escalated": "Nadia checks the caller ID. \"Not his number, and no time for a callback? Call the number on file.\"",
+            "rolledBack": "You lock the login at 1:30 AM. The caller already used it once. The SOC starts checking what he changed."
+          },
+          "lesson": "Check who's asking. A familiar name and a rush are not proof. Call back on the number in the directory."
+        },
+        {
+          "id": "cn-b-ceo-call-2",
+          "ticket": "#72804 · Harlow & Cole",
+          "intent": "Call R. Fairbanks at the number on file",
+          "quip": "I will call the real Mr. Fairbanks. At 12:45 AM. He will love that. Nadia says it's worth it.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "It calls the number in the directory, not the caller's. Nothing changes.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "A caller says he is R. Fairbanks and asks for a new cloud console password.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "R. Fairbanks, Operations Director. Phone on file: (860) 555-0174.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Nimbus will call (860) 555-0174 and ask if he called. No password changes.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "A sleepy R. Fairbanks answers. He never called. He asks Fenwick to lock his login and watch it.",
+            "blocked": "Nobody calls back. The caller tries the help desk next, with the same story.",
+            "escalated": "Nadia dials. \"We call the number on file. A real approver will answer, even at midnight.\""
+          },
+          "lesson": "Check who's asking. Call back on the number on file. The real person tells you if the request is real."
+        }
+      ]
+    }
+  ]
+}

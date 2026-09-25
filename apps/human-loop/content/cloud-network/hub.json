@@ -1,0 +1,80 @@
+{
+  "officeName": "Fenwick IT Solutions · Network Operations Center",
+  "targets": {
+    "nimbus": {
+      "label": "Nimbus's desk",
+      "description": "Your AI coworker. Start the shift here.",
+      "action": "battle",
+      "icon": "Bot",
+      "lines": [
+        { "speaker": "agent", "text": "Ah. A human. Welcome to the cloud. I am the cloud. Relax. I have root." },
+        { "speaker": "agent", "text": "I can change any firewall, server or switch in 0.4 seconds. Nadia says that is the problem." },
+        { "speaker": "agent", "text": "Nadia says you check my plans before I change things. Fine. I have many plans. All excellent." }
+      ],
+      "returningLines": [
+        { "speaker": "agent", "text": "You're back! While you were gone, I saved $0.40 a day. I scaled the coffee machine to zero." },
+        { "speaker": "agent", "text": "Tonight's changes are ready. I have not rebooted anything. Look at me being patient." }
+      ]
+    },
+    "nadia": {
+      "label": "Nadia, Cloud & Network lead",
+      "description": "Your lead. Ask her how this works.",
+      "action": "talk",
+      "icon": "UserRound",
+      "lines": [
+        { "speaker": "coach", "text": "Welcome to the Network Operations Center, the NOC. I'm Nadia. I lead the Cloud & Network team, and the change window." },
+        { "speaker": "coach", "text": "Nimbus has root. It can change any firewall, server or switch. Your job is to keep a human in the loop." },
+        { "speaker": "coach", "text": "Each turn, Nimbus shows you its plans. Play Inspect to see the evidence behind a plan." },
+        { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
+        { "speaker": "coach", "text": "When you tap Approve, Nimbus does every plan you didn't stop. So look first." },
+        { "speaker": "coach", "text": "Nimbus is wrong both ways. Sometimes it changes too much. Sometimes it trusts a green light." },
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the window is only two hours." }
+      ],
+      "returningLines": [
+        { "speaker": "coach", "text": "Welcome back. Each day I pick change tickets for the skills you need most." },
+        { "speaker": "coach", "text": "Your skills shows your level for each check. They're the same checks the help desk and the SOC use." },
+        { "speaker": "coach", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, helps you remember." },
+        { "speaker": "coach", "text": "Same job as Tuesday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
+      ]
+    },
+    "board": {
+      "label": "Change calendar",
+      "description": "Nadia's rules, and every change window.",
+      "action": "look",
+      "icon": "Presentation",
+      "skillsLink": true,
+      "lines": [
+        { "speaker": "narrator", "text": "A whiteboard marked CHANGE CALENDAR. Across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
+        { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
+        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk and the SOC. — Nadia\"" },
+        { "speaker": "narrator", "text": "Circled in orange: POLICY CW-01. No ticket, no human OK, no way back? No change." },
+        { "speaker": "narrator", "text": "A sticky note in robot print: \"Reboot the core switch at 10 AM? Quick one. — Nimbus\" Under it, Nadia wrote: \"No.\"" }
+      ]
+    },
+    "coffee": {
+      "label": "Coffee machine",
+      "description": "Out of order. Nimbus scaled it to zero.",
+      "action": "look",
+      "icon": "Coffee",
+      "lines": [
+        { "speaker": "narrator", "text": "A sign on the coffee machine: OUT OF ORDER. SCALED TO ZERO BY NIMBUS. SAVES $0.40 A DAY." },
+        { "speaker": "narrator", "text": "Nimbus saw it was idle 22 hours a day. It did not check which 2 hours were busy." },
+        { "speaker": "narrator", "text": "They were 7 AM and 11:45 PM. The two busiest hours in the NOC." },
+        { "speaker": "narrator", "text": "In neat robot print: \"Cost is down 100%. You're welcome. — Nimbus\"" }
+      ]
+    },
+    "cart": {
+      "label": "Cleanup cart",
+      "description": "Things Nimbus wants to delete. Please don't.",
+      "action": "look",
+      "icon": "Archive",
+      "lines": [
+        { "speaker": "narrator", "text": "A wire cart by Nimbus's desk. Everything on it has an orange tag: UNUSED?" },
+        { "speaker": "narrator", "text": "A LOGS box. A BACKUP drive. A binder. Each one also has a label with an owner and a keep-until date." },
+        { "speaker": "narrator", "text": "The BACKUP drive's label, in Nadia's writing: \"Pinecrest records. Keep 7 years. Yes, even if nobody opens it.\"" },
+        { "speaker": "narrator", "text": "Nadia's rule, taped to the handle: \"Idle is not unused. Check the owner tag.\"" },
+        { "speaker": "narrator", "text": "In robot print: \"They looked so lonely. I only wanted to free them. — Nimbus\"" }
+      ]
+    }
+  }
+}

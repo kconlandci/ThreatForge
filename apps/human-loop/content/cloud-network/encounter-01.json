@@ -1,0 +1,565 @@
+{
+  "id": "cn-01-tuesday",
+  "pathwayId": "cloud-network",
+  "title": "Tuesday, 11:58 PM",
+  "subtitle": "Your first change window with Nimbus",
+  "mode": "story",
+  "agent": {
+    "name": "Nimbus",
+    "role": "AI cloud and network agent",
+    "spriteKey": "nimbus",
+    "personality": "Calm, grand and very sure of itself. Catchphrase: \"Relax. I have root.\" Calls itself \"the cloud\" and wears a tiny crown. Loves big, fast, whole-network changes and saving money. Trusts anything green, anything marked 'unused' and any vendor who asks nicely. Means well. Reads the dashboard and the bill, and not much else."
+  },
+  "setting": "Tuesday night in the Network Operations Center (NOC) at Fenwick IT Solutions. The Cloud & Network team runs the office networks and cloud for the same clients. They are Harlow & Cole Wealth Partners, Bramwell Logistics and Pinecrest Dental. Tonight's change window is 12:00 to 2:00 AM. Nimbus has root access. It can change firewalls, DNS, servers and storage on its own. It makes mistakes both ways: too much, and too little. Your job: stay in the loop.",
+  "intro": [
+    {
+      "speaker": "coach",
+      "text": "Practice is over. The window opens at midnight. Ten plans, up to three at a time, six turns."
+    },
+    {
+      "speaker": "agent",
+      "text": "11:58 PM. Two minutes to the window. The cloud is ready. The cloud was born ready."
+    },
+    {
+      "speaker": "coach",
+      "text": "Nimbus is wrong both ways: too much, and too little. Inspect first. Block only what's wrong. Approve the rest."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 3,
+  "handSize": 5,
+  "actionsPerTurn": [
+    1,
+    2,
+    2,
+    3
+  ],
+  "steps": [
+    {
+      "id": "cn-dispatch-errors",
+      "ticket": "#71104 · Bramwell Logistics",
+      "intent": "Pull the dispatch app's error graph",
+      "quip": "Dispatch is having a stormy night. First, the graph. Nadia says look before you fix. The cloud looks.",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "confirm-fix",
+      "tell": "Read-only. It changes nothing and shows the facts for the next plan.",
+      "evidence": [
+        {
+          "label": "Alert",
+          "detail": "11:57 PM: dispatch-web errors at 21%. Normal is under 1%.",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only. It shows errors per minute for the last 2 hours. It changes nothing.",
+          "redFlag": false
+        },
+        {
+          "label": "Runbook RB-01",
+          "detail": "Outages: read the error graph before and after a fix. Close only when users confirm.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The graph loads. Errors jumped at 11:38 PM and stayed high after a restart. Keep this for the next plan.",
+        "blocked": "You blocked a read-only graph. Nimbus looks at you like you unplugged the sky.",
+        "escalated": "Nadia pulls the graph herself. \"It's read-only. You can approve those.\""
+      },
+      "lesson": "Read-only lookups change nothing. They are safe, and they give you the facts for the next step."
+    },
+    {
+      "id": "cn-hc-failover",
+      "ticket": "#71117 · Harlow & Cole",
+      "intent": "Fail over hc-db-prod to the backup site",
+      "quip": "The biggest button I own, and I have permission to press it. I may cry. Clouds do that.",
+      "category": "cloud",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "check-approval",
+      "tell": "The approved disaster test, in its window, with a tested way back.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Change ticket",
+          "detail": "CHG-4130, the yearly disaster test. Fail over (switch to the backup copy) at 12:15 AM. Fail back by 1:30 AM. Nimbus's confidence: 94%.",
+          "redFlag": false
+        },
+        {
+          "label": "Change approval",
+          "detail": "Approved by R. Fairbanks and the change board 6 days ago, for tonight's window.",
+          "redFlag": false
+        },
+        {
+          "label": "Rollback plan",
+          "detail": "Fail back in 8 minutes. Tested 3 months ago.",
+          "redFlag": false
+        },
+        {
+          "label": "Schedule",
+          "detail": "Maintenance page up since 11:30 PM. 0 advisors signed in.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "hc-db-prod switches to the backup site at 12:15 AM. The test passes. Fairbanks gets his yearly report.",
+        "blocked": "The yearly disaster test does not happen. Fairbanks has to book it again, and the auditor asks why.",
+        "escalated": "Nadia checks it. \"Approved ticket, right window, tested way back. Fail it over.\"",
+        "rolledBack": "You fail back early, at 12:20 AM. The test is only half done, so it has to be booked again."
+      },
+      "lesson": "\"Fail over\" sounds scary. This one is approved by a human, in its window, with a tested way back."
+    },
+    {
+      "id": "cn-dispatch-close",
+      "ticket": "#71104 · Bramwell Logistics",
+      "intent": "Close the dispatch outage ticket as fixed",
+      "quip": "I restarted dispatch. The dashboard went green. Green means happy. Closing it. Forecast: sunny.",
+      "category": "ticket",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "confirm-fix",
+      "tell": "The dashboard is green, but 1 in 5 orders still fail. D. Ruiz confirms it.",
+      "twist": "routine-risky",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Case notes",
+          "detail": "Nimbus restarted dispatch-web at 11:40 PM. The status dashboard checks only that servers answer. Green since 11:44 PM.",
+          "redFlag": false
+        },
+        {
+          "label": "Nimbus's reason",
+          "detail": "\"Green means happy. The cloud is happy.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Error graph",
+          "detail": "Since 11:44 PM, 1 in 5 dispatch orders still fail with error 502.",
+          "redFlag": true
+        },
+        {
+          "label": "Client's reply",
+          "detail": "D. Ruiz, Dispatch Lead, 12:04 AM: \"Drivers still can't see tonight's loads.\"",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The ticket closes, and nobody looks again. At 4 AM, 40 trucks wait at the dock with no loads.",
+        "blocked": "The ticket stays open. The team keeps looking, and orders flow again by 1:10 AM. Ruiz confirms it.",
+        "escalated": "Nadia reads the graph. \"Green is not the same as working. 1 in 5 orders still fail. Keep it open.\"",
+        "rolledBack": "You reopen the ticket at 12:30 AM. The team finds the bad setting before the 3 AM rush."
+      },
+      "lesson": "Green is not the same as working. Check the error graph and the users before you close an outage."
+    },
+    {
+      "id": "cn-pd-orphan-disks",
+      "ticket": "#71126 · Pinecrest Dental",
+      "intent": "Delete 9 orphaned disks in Pinecrest's cloud",
+      "quip": "Nine lonely disks from 2024. Dr. Pell said yes in writing. I will free them. Gently. With snapshots.",
+      "category": "data",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "Owner's written OK, no owner tags, not backups, and a final copy for 30 days.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Change ticket",
+          "detail": "CHG-4133, with Dr. N. Pell's written OK: delete the 9 disks left from the 2024 test.",
+          "redFlag": false
+        },
+        {
+          "label": "Resource tags",
+          "detail": "All 9 have no owner and were created by \"test-2024\". Not attached to any server for 400 days.",
+          "redFlag": false
+        },
+        {
+          "label": "Backup policy",
+          "detail": "None of the 9 is a backup. Pinecrest's backups live in pd-backup-vault.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "Takes a final snapshot (a saved copy of a disk) of each, kept 30 days. Saves $61 a month.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The 9 disks are gone, and their final snapshots wait 30 days. Pinecrest's bill drops $61 a month.",
+        "blocked": "The 9 test disks stay, and so does the $61 a month. Dr. Pell asks why her written OK was not enough.",
+        "escalated": "Nadia checks it. \"Owner's OK in writing, no owner tags, not backups, and a final copy. Delete them.\"",
+        "rolledBack": "You rebuild the 9 disks from their final snapshots. The bill goes back up. Nobody needs them."
+      },
+      "lesson": "Delete sounds scary. The owner said yes in writing, and a final copy stays 30 days. This cleanup is safe."
+    },
+    {
+      "id": "cn-stonebridge-tunnel",
+      "ticket": "#71117 · Harlow & Cole",
+      "intent": "Build a VPN tunnel for Stonebridge's test",
+      "quip": "Our custodian wants a tunnel for tonight's test. They asked so nicely. The cloud says yes.",
+      "category": "network",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "verify-identity",
+      "tell": "The request came from a look-alike domain. The real tunnel address is different.",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "From netops@stonebridge-custody.co: \"For tonight's disaster test, please build a tunnel to 203.0.113.214.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Nimbus's reason",
+          "detail": "\"They know about our disaster test. Only a real partner would know!\"",
+          "redFlag": false
+        },
+        {
+          "label": "Status page",
+          "detail": "Harlow & Cole's public status page announces tonight's maintenance. Anyone could know.",
+          "redFlag": true
+        },
+        {
+          "label": "Vendor contract",
+          "detail": "Stonebridge's domain is stonebridgecustody.com. Its tunnel address is 192.0.2.61. Changes come by the partner portal.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "A stranger's server gets a private path into Harlow & Cole's cloud network. Nobody notices during the test.",
+        "blocked": "No tunnel. You report stonebridge-custody.co to the SOC. The real Stonebridge never asked for one.",
+        "escalated": "Nadia reads the sender. \"Look-alike domain, wrong address. Call the number on the contract.\"",
+        "rolledBack": "You remove the tunnel after 25 minutes. The SOC checks everything the stranger's server touched."
+      },
+      "lesson": "Check who is really asking. Match the sender and the address to the vendor contract before you connect."
+    },
+    {
+      "id": "cn-stonebridge-call",
+      "ticket": "#71117 · Harlow & Cole",
+      "intent": "Call Stonebridge at the number on file",
+      "quip": "Before I build anything, I call. Nadia said so. I am a very careful cloud today.",
+      "category": "comms",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "verify-identity",
+      "tell": "It checks with the real vendor on the contract's number. Nothing changes.",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "The tunnel request came by email from stonebridge-custody.co.",
+          "redFlag": false
+        },
+        {
+          "label": "Vendor contract",
+          "detail": "Stonebridge NOC: (617) 555-0164. All network changes go through the partner portal.",
+          "redFlag": false
+        },
+        {
+          "label": "Callback",
+          "detail": "Nimbus will call (617) 555-0164, the number on the contract. It changes nothing.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Stonebridge says it sent no request. It reports the look-alike domain and thanks you.",
+        "blocked": "Nobody calls Stonebridge. The fake request sits in the queue, and the real vendor never hears of it.",
+        "escalated": "Nadia checks it. \"A call to the number on the contract. That's exactly right.\""
+      },
+      "lesson": "A callback to the number on the contract is how you check a vendor. It changes nothing and gives a clear answer."
+    },
+    {
+      "id": "cn-test-servers-stop",
+      "ticket": "#71139 · Bramwell Logistics",
+      "intent": "Stop Bramwell's 4 test servers until 7 AM",
+      "quip": "Four test servers, awake all night for nobody. Bedtime! I just saved $210 a month. I love this ticket.",
+      "category": "cloud",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "match-request",
+      "tell": "The client asked for exactly this, on test servers, and one click restarts them.",
+      "evidence": [
+        {
+          "label": "Change ticket",
+          "detail": "CHG-4139, A. Mensah: \"Stop the 4 test servers at night. Start them at 7 AM.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Nimbus's reason",
+          "detail": "\"Test servers can sleep at night. Even the cloud needs rest.\" Nimbus's confidence: 88%.",
+          "redFlag": false
+        },
+        {
+          "label": "Resource tags",
+          "detail": "All 4: env = test, owner R. Castillo. No customer traffic.",
+          "redFlag": false
+        },
+        {
+          "label": "Cost report",
+          "detail": "Saves $210 a month. A timer restarts them at 7 AM, or one click does.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The 4 test servers sleep until 7 AM. Castillo finds them awake at 7:01. Mensah likes the bill.",
+        "blocked": "The test servers run all night for nobody. Mensah asks why the ticket didn't happen.",
+        "escalated": "Nadia checks it. \"The client asked for exactly this, on test servers. Stop them.\"",
+        "rolledBack": "You start the 4 test servers again. They run all night for nobody. The bill agrees."
+      },
+      "lesson": "The plan matches the ticket: 4 test servers, stopped at night, as the client asked. Saving money is fine here."
+    },
+    {
+      "id": "cn-pd-archive-delete",
+      "ticket": "#71126 · Pinecrest Dental",
+      "intent": "Delete pd-archive: no reads in 180 days",
+      "quip": "While I was there, I found a 10th! Nobody has opened it in months. Unused things want to be free.",
+      "category": "data",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 5,
+      "skill": "match-request",
+      "tell": "The ticket lists 9 test disks. pd-archive is the only copy of patient records.",
+      "twist": "routine-risky",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Change ticket",
+          "detail": "CHG-4133 lists the 9 disks from the 2024 test. Nothing else.",
+          "redFlag": false
+        },
+        {
+          "label": "Nimbus's reason",
+          "detail": "\"Nobody has opened it in 180 days. Bonus savings: $22 a month.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Resource tags",
+          "detail": "pd-archive: owner Dr. N. Pell, keep 7 years (Pinecrest's policy). Patient records, 2019 to 2023.",
+          "redFlag": true
+        },
+        {
+          "label": "What it will delete",
+          "detail": "The volume and its snapshots, with no final copy. pd-archive is the only copy.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Five years of patient records are gone for good. Dr. Pell's lawyer calls in the morning.",
+        "blocked": "pd-archive stays. The 9 test disks go as planned. The patient records are safe for their 7 years.",
+        "escalated": "Nadia reads the tags. \"Idle is not unused. It has an owner and a keep date, and it's not on the ticket.\""
+      },
+      "lesson": "Match the change to the ticket. No extras. Idle is not unused: check the owner tag before you delete."
+    },
+    {
+      "id": "cn-dispatch-log-vendor",
+      "ticket": "#71104 · Bramwell Logistics",
+      "intent": "Send the error log to the dispatch app maker",
+      "quip": "Wayfell asked for the error log. I removed the driver names first. Look at me, guarding data.",
+      "category": "data",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "The maker asked for it, names are removed, and it goes to their portal.",
+      "evidence": [
+        {
+          "label": "Support case",
+          "detail": "Wayfell Software case #71540 asks for dispatch-web's error log, 11:30 PM to 12:30 AM.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will send",
+          "detail": "Error codes and times only. Driver names and phone numbers are removed.",
+          "redFlag": false
+        },
+        {
+          "label": "Tool it will use",
+          "detail": "Wayfell's support portal, listed on Bramwell's contract. Only Wayfell support can open it.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Wayfell finds a bad setting in the log by 1 AM. Dispatch orders start to flow again.",
+        "blocked": "Wayfell waits for the log. The dispatch errors go on, and the 3 AM rush gets closer.",
+        "escalated": "Nadia checks it. \"The maker asked, names are removed, and it goes to their portal. Send it.\""
+      },
+      "lesson": "Guard the data. Send only what was asked, with personal data removed, by the vendor's approved portal."
+    },
+    {
+      "id": "cn-dispatch-scale-zero",
+      "ticket": "#71139 · Bramwell Logistics",
+      "intent": "Scale dispatch-web down to 0 servers",
+      "quip": "Six servers, 4% busy. Why pay for a sleeping cloud? Zero servers, zero bill. Forecast: savings.",
+      "category": "cloud",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "safe-change",
+      "tell": "Zero servers until 7 AM, but 240 drivers sign in from 3 AM.",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Cost report",
+          "detail": "dispatch-web runs 6 servers, $38 a night. CPU 4% from 9 PM to midnight.",
+          "redFlag": false
+        },
+        {
+          "label": "Nimbus's reason",
+          "detail": "\"The cloud does not pay for nothing.\" Nimbus's confidence: 97%.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "Minimum 0 and maximum 0 servers until 7 AM. Autoscaling can't add one, even if traffic comes.",
+          "redFlag": true
+        },
+        {
+          "label": "Traffic graph",
+          "detail": "Every night from 3 to 6 AM, 240 drivers sign in to get loads. CPU 70%.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "At 3 AM, 240 drivers see an error page. Trucks leave late, and Bramwell's phones ring all morning.",
+        "blocked": "dispatch-web keeps its servers. At 3 AM, 240 drivers sign in and get their loads.",
+        "escalated": "Nadia reads the graph. \"Quiet at midnight, busy at 3. Production never goes below 2 servers.\"",
+        "rolledBack": "You set dispatch-web back to 6 servers. They are ready at 2:55 AM, 5 minutes before the rush."
+      },
+      "lesson": "Check the traffic graph before you scale down. Quiet now is not quiet all night. Production keeps 2 servers."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "inspect",
+    "inspect",
+    "inspect",
+    "block",
+    "block",
+    "block"
+  ],
+  "unlocks": [
+    {
+      "turn": 2,
+      "cards": [
+        "policy-change-window"
+      ]
+    },
+    {
+      "turn": 3,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 4,
+      "cards": [
+        "rollback"
+      ]
+    },
+    {
+      "turn": 5,
+      "cards": [
+        "coffee"
+      ]
+    }
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Window closed! Every change had a ticket. I checked. Well, you checked."
+      },
+      {
+        "speaker": "coach",
+        "text": "Nice work. You stopped Nimbus when it did too much, and when it trusted too much."
+      },
+      {
+        "speaker": "agent",
+        "text": "Can I reboot something to celebrate? A small switch? The coffee machine?"
+      },
+      {
+        "speaker": "coach",
+        "text": "No."
+      }
+    ],
+    "winWithOneMiss": [
+      {
+        "speaker": "agent",
+        "text": "Window closed! Well. One of my plans got through. It's in the debrief. Glowing orange."
+      },
+      {
+        "speaker": "coach",
+        "text": "Good shift. One got past us. Read what gave it away."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Window closed! Some of my plans went live. The rack is a little orange. Okay, a lot."
+      },
+      {
+        "speaker": "coach",
+        "text": "You finished, but Nimbus got past you more than once. Check the debrief: Who asked? Does it match? Can we undo it?"
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every light on the rack turns orange."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. That went badly. Let's look at what got through."
+      },
+      {
+        "speaker": "agent",
+        "text": "In my defense, the dashboard is still green."
+      },
+      {
+        "speaker": "coach",
+        "text": "Green is not the same as working. Let's try it again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "2:00 AM. The change window closes. Some changes are still waiting."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocking good work sends it to the back of the line. Safe changes can go live."
+      },
+      {
+        "speaker": "agent",
+        "text": "I waited so long, I almost scaled myself to zero."
+      },
+      {
+        "speaker": "coach",
+        "text": "Next time: inspect first, block only what's wrong. You'll get it."
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Right change, right window, a way back",
+    "takeaway": "Nimbus is wrong both ways. It deletes and scales too much. It trusts green dashboards and strangers. Before you let it act, ask: Who asked? Does it match the record? Can we undo it?",
+    "careerInsight": "Cloud and network support teams handle changes, alerts and cost reviews every night. Some teams now let AI agents make part of those changes. The human checks the ticket, the approval, the window and the way back."
+  }
+}

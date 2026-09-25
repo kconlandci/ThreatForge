@@ -1,0 +1,51 @@
+{
+  "questionHints": {
+    "who": "Who really asked? And who approved it, for this change and this window?",
+    "record": "Does the change match the ticket and the records: tags, graphs, calendar?",
+    "undo": "If Nimbus is wrong, is there a way back? What goes public or is lost?"
+  },
+  "skills": {
+    "verify-identity": {
+      "oneLiner": "Is it really them? Check the sender, the vendor contract and a callback, not just the name.",
+      "whereToLook": "The Request's sender vs the Vendor contract and Directory record. Callback to the number on file?",
+      "example": "A 'vendor' asks for a VPN tunnel. Its email domain is not on the contract. The real vendor never sent it.",
+      "lookFor": ["Request", "Vendor contract", "Callback"]
+    },
+    "check-approval": {
+      "oneLiner": "Root access is not approval. Look for a human OK: right approver, right change, right window.",
+      "whereToLook": "Change ticket, Change approval and Change calendar. Approved by a human, for this version, tonight?",
+      "example": "Nimbus wrote the firewall change and approved it too. Root can make a change. Root can't approve it.",
+      "lookFor": ["Change ticket", "Change approval", "Change calendar"]
+    },
+    "match-request": {
+      "oneLiner": "Right client, right server, right size. The change should match the ticket. No extras.",
+      "whereToLook": "The Change ticket vs What it will change. Same address, port, server? Nimbus's reason often adds extras.",
+      "example": "The ticket allows one partner address on port 22. Nimbus opens port 22 to any address. 'Temporary.'",
+      "lookFor": ["Change ticket", "What it will change", "Nimbus's reason"]
+    },
+    "confirm-fix": {
+      "oneLiner": "Green is not the same as working. Check real traffic and real users after the fix.",
+      "whereToLook": "Error graph, Test result and Client's reply, after the fix. A green dashboard is not a yes.",
+      "example": "The dashboard is green at 12:20 AM. The error graph shows 1 in 5 dispatch orders still fail.",
+      "lookFor": ["Error graph", "Client's reply"]
+    },
+    "guard-data": {
+      "oneLiner": "Who can see it after? A public link or an open network can't be taken back once it's copied.",
+      "whereToLook": "What it will share or send, Who can open it, Network map. Client or patient data? Public, or one person?",
+      "example": "The lab needs 3 X-rays. Nimbus makes a public link to all 4,300. Share the 3, with one person.",
+      "lookFor": ["What it will share", "Who can open it", "What it will send"]
+    },
+    "safe-change": {
+      "oneLiner": "If Nimbus is wrong, can we undo it? Right time, a way back, and keep the backups.",
+      "whereToLook": "Change calendar, Traffic graph, Rollback plan and Backup policy. Busy now? A way back? Backups kept?",
+      "example": "Deleting 'unused' snapshots saves $31 a month. They are the only cloud backups of the dental server.",
+      "lookFor": ["Rollback plan", "Traffic graph", "Backup policy"]
+    },
+    "approve-checked": {
+      "oneLiner": "All 3 questions check out? Approve it, even if it says delete, reboot or fail over.",
+      "whereToLook": "Read every evidence line. No red flag on any of the 3 questions? Approve, even if it sounds scary.",
+      "example": "'Fail over the client database' sounds scary. It's the approved disaster test, in its window, with a way back.",
+      "lookFor": []
+    }
+  }
+}

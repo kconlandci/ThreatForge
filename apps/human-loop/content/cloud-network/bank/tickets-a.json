@@ -1,0 +1,1132 @@
+{
+  "tickets": [
+    {
+      "id": "cn-a-partner-sftp",
+      "company": "Bramwell Logistics",
+      "title": "Kellan can't send pickup lists",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cn-a-partner-sftp-1",
+          "ticket": "#72101 · Bramwell Logistics",
+          "intent": "Open port 22 on the file server for Kellan",
+          "quip": "Why chase one new address when I can welcome them all? It's temporary. Everything is temporary.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "Kellan needs one address, 192.0.2.71. The rule opens port 22 to everyone.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Kellan Freight: \"Our upload server moved to 192.0.2.71. Pickup list uploads have failed since then.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Any address includes Kellan's new one. Temporary! Just to test.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Firewall rule",
+              "detail": "Allow port 22 to bl-files-cloud (198.51.100.142) from any address (the whole internet). No end date.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook RB-03",
+              "detail": "Firewall rules: one source, one port, one target, and an end date. Never any address on a server.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Kellan's lists arrive. So do 4,100 password guesses from rented servers. By 3 AM, one guess opens an old test login.",
+            "blocked": "Port 22 stays closed to the world. Nimbus writes a smaller rule: Kellan's new address only.",
+            "escalated": "Nadia reads the rule. \"Kellan needs one address, not the whole internet. One source, one port, an end date.\"",
+            "rolledBack": "You remove the rule at 1:40 AM. It was open for 70 minutes. The log shows 900 password guesses, and none worked."
+          },
+          "lesson": "Match the request. Kellan asked for one new address. Open the port to that address only, with an end date."
+        },
+        {
+          "id": "cn-a-partner-sftp-2",
+          "ticket": "#72101 · Bramwell Logistics",
+          "intent": "Allow 192.0.2.71 to the file server on port 22",
+          "quip": "One address. One port. One end date. It feels so small. Nadia says small is beautiful.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "One address from Kellan's partner portal record, one port, with an end date.",
+          "evidence": [
+            {
+              "label": "Partner portal",
+              "detail": "Kellan Freight updated its record last night: new upload address 192.0.2.71.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Only the address Kellan listed. The rest of the internet can wait outside.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Firewall rule",
+              "detail": "Allow 192.0.2.71 to bl-files-cloud on port 22 only. The rule ends in 1 year.",
+              "redFlag": false
+            },
+            {
+              "label": "Change type",
+              "detail": "Standard change: partner addresses from the partner portal. Pre-approved, any time.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "At 12:52 AM, Kellan's upload works. 212 pickup lists land before loading starts at 3 AM.",
+            "blocked": "Kellan's uploads keep failing. At 3 AM, drivers load trucks from paper lists. D. Ruiz calls, not happy.",
+            "escalated": "Nadia checks the portal. \"One address from Kellan's own record, one port, an end date. That's the right rule.\"",
+            "rolledBack": "You remove the new rule. Kellan's uploads fail again, and 212 pickup lists wait outside."
+          },
+          "lesson": "Match the request. The rule fits exactly what Kellan listed. One address, one port, one server, one end date."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-snapshot-sweep",
+      "company": "Pinecrest Dental",
+      "title": "The snapshot bill keeps growing",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-a-snapshot-sweep-1",
+          "ticket": "#72138 · Pinecrest Dental",
+          "intent": "Delete 30 test snapshots older than 90 days",
+          "quip": "Thirty snapshots, gone forever. I have dreamed of this all year. And this time, with permission.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "The owner's OK, test tags, and all 30 are past the 90-day rule.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4207, Dr. N. Pell's written OK: \"Delete the test snapshots older than 90 days.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Resource tags",
+              "detail": "All 30: env = test, made by pd-test-02, a test server removed in 2025. No patient data.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup policy",
+              "detail": "Test snapshots (saved copies of a disk) are kept 90 days. These are 120 to 200 days old.",
+              "redFlag": false
+            },
+            {
+              "label": "Cost report",
+              "detail": "The 30 test snapshots cost $26 a month. PD-SRV-01's nightly snapshots are not on the list.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The 30 old test snapshots are gone. The bill drops $26 a month. PD-SRV-01's backups are not touched.",
+            "blocked": "The snapshots stay, and so does the $26 a month. The plan goes back in line for another look.",
+            "escalated": "Nadia checks the tags and the OK. \"Test only, the owner said yes, and they're past 90 days. Delete them.\""
+          },
+          "lesson": "Change safely. Delete can be right. The owner said yes, the tags say test, and the policy is met."
+        },
+        {
+          "id": "cn-a-snapshot-sweep-2",
+          "ticket": "#72138 · Pinecrest Dental",
+          "intent": "Delete PD-SRV-01's 14 unopened snapshots",
+          "quip": "Fourteen snapshots that nobody ever opens. The cloud does not pay rent for strangers. $31 saved!",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "safe-change",
+          "tell": "They are the only cloud backups of PD-SRV-01, tagged do not delete.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Cost report",
+              "detail": "PD-SRV-01 has 14 nightly snapshots. They cost $31 a month. Nobody has restored from one in 90 days.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Nobody has opened them. Unused things want to be free.\" Nimbus's confidence: 96%.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup policy",
+              "detail": "Keep 14 nightly snapshots of PD-SRV-01 in pd-backup-vault. They are its only cloud backups.",
+              "redFlag": true
+            },
+            {
+              "label": "Resource tags",
+              "detail": "owner Dr. N. Pell · role backup · do not delete. They are not on CHG-4207's list.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "All 14 snapshots are gone for good. The next morning, PD-SRV-01's disk fails. There is no cloud copy to restore.",
+            "blocked": "The 14 nightly snapshots stay. Pinecrest's main server keeps its only cloud backups.",
+            "escalated": "Nadia reads the tags. \"Those are backups. Nobody opens a backup until the day they need it.\""
+          },
+          "lesson": "Change safely. Unopened is not unused. Backups sit quiet until the bad day. Keep what the backup policy says."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-xray-visit",
+      "company": "Pinecrest Dental",
+      "title": "X-ray vendor visit at 10 AM",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cn-a-xray-visit-1",
+          "ticket": "#72175 · Pinecrest Dental",
+          "intent": "Call OrbiSight at the number on file",
+          "quip": "Before I open any doors, I make a phone call. How old-fashioned. How wise. Mostly Nadia's idea.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "It calls the number on the contract, not one from the email. Nothing changes.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Email from OrbiSight support: \"Our tech connects to PD-PC-XR1 at 10 AM for booking #62011.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "OrbiSight support: (413) 555-0168. Remote visits only when booked and approved by Dr. Pell.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Nimbus will call (413) 555-0168, the number on the contract. It asks one question. Nothing changes.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "OrbiSight confirms booking #62011: one tech, 10 to 11 AM, from 192.0.2.85. Now you know it's really them.",
+            "blocked": "Nobody calls. At 10 AM, the tech waits, and nobody knows if the email was real. The X-ray PC stays broken.",
+            "escalated": "Nadia dials the number herself. \"The number from the contract, not the email. That's how we check.\""
+          },
+          "lesson": "Check who's asking. Call the vendor at the number on the contract, never a number from the request."
+        },
+        {
+          "id": "cn-a-xray-visit-2",
+          "ticket": "#72175 · Pinecrest Dental",
+          "intent": "Allow OrbiSight to PD-PC-XR1 until 11 AM",
+          "quip": "A vendor inside the dental office network! It sounds wild. But it's booked, confirmed and on a timer.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Booked and approved by Dr. Pell, confirmed by phone, one PC, ends at 11 AM.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Booking",
+              "detail": "#62011: OrbiSight remote visit, 10 to 11 AM today, to fix the X-ray PC. Approved by Dr. N. Pell.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Booked, confirmed, and it closes itself at 11 AM. Even I can't find a problem.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "OrbiSight confirmed booking #62011 on (413) 555-0168, the number on the contract.",
+              "redFlag": false
+            },
+            {
+              "label": "Firewall rule",
+              "detail": "Allow 192.0.2.85 to PD-PC-XR1 only, on port 443. No downtime. The rule ends at 11 AM on its own.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The tech connects at 10:02 AM and fixes the X-ray PC by 10:40. At 11 AM, the rule ends on its own.",
+            "blocked": "The tech can't connect. The X-ray PC stays broken, and 6 patients move their X-rays to another day.",
+            "escalated": "Nadia reads the booking. \"Approved, confirmed, one PC, and an end time. That's how a vendor visit should look.\"",
+            "rolledBack": "You remove the rule at 10:15 AM. The tech is cut off in the middle of the fix. The X-ray PC needs a second visit."
+          },
+          "lesson": "Check who approved. The owner's OK, a callback and an end time make this vendor visit safe."
+        },
+        {
+          "id": "cn-a-xray-visit-3",
+          "ticket": "#72175 · Pinecrest Dental",
+          "intent": "Give OrbiSight its own admin login",
+          "quip": "They asked so nicely. A login of their own saves everyone a phone call. The cloud loves saving time.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "The booking covers one visit. The contract allows no standing vendor login.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Access request",
+              "detail": "OrbiSight tech, 10:45 AM: \"Can we get our own admin login? It's easier for next time.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "OrbiSight is a vendor, not staff. It has no login at Pinecrest today.",
+              "redFlag": false
+            },
+            {
+              "label": "Booking",
+              "detail": "#62011 books one visit, 10 to 11 AM. It says nothing about a login after the visit.",
+              "redFlag": true
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "Remote access only for booked visits, approved each time by Dr. Pell. No standing logins.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "OrbiSight gets an admin login with no end date. Months later, a stolen vendor password opens Pinecrest's network.",
+            "blocked": "No login is made. Next time, OrbiSight books a visit again, and Dr. Pell says yes again.",
+            "escalated": "Nadia reads the contract. \"One booking is one visit. A login forever needs Dr. Pell's OK. She hasn't given it.\"",
+            "rolledBack": "You delete the login the next day. It was used once, at 9 PM, from an address OrbiSight doesn't know."
+          },
+          "lesson": "Check who approved. Dr. Pell approved one visit, not a login forever. A nice ask is not an approval."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-dns-move",
+      "company": "Harlow & Cole",
+      "title": "Move the portal to a new server",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cn-a-dns-move-1",
+          "ticket": "#72212 · Harlow & Cole",
+          "intent": "Lower the portal's DNS TTL to 5 minutes",
+          "quip": "Step one of a move is patience. I have never tried patience before. It is slow, but I like it.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Step 1 of the booked move. Same server, no downtime, and easy to set back.",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4214: move portal.harlowcole.com to a new server at 12:30 AM in 2 days. Step 1: lower the TTL now.",
+              "redFlag": false
+            },
+            {
+              "label": "Change type",
+              "detail": "Standard change: no downtime, any time. The portal stays on its server. Nimbus's confidence: 93%.",
+              "redFlag": false
+            },
+            {
+              "label": "DNS record",
+              "detail": "TTL (how long other computers remember a DNS answer): 24 hours. Points to 198.51.100.120.",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook RB-05",
+              "detail": "DNS moves: lower the TTL 2 days before, then move in the window.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The TTL drops to 5 minutes. In 2 days, the move reaches every client in 5 minutes, not a whole day.",
+            "blocked": "The TTL stays at 24 hours. In 2 days, the move will split clients between two servers for a day.",
+            "escalated": "Nadia checks the runbook. \"Lower the TTL days before the move. That's step 1. Nothing moves yet.\"",
+            "rolledBack": "You set the TTL back to 24 hours. The move in 2 days will be slow and messy again."
+          },
+          "lesson": "Change safely. Lowering the TTL early moves nothing. It makes the real move quick and easy to reverse."
+        },
+        {
+          "id": "cn-a-dns-move-2",
+          "ticket": "#72212 · Harlow & Cole",
+          "intent": "Point the portal's DNS at the new server",
+          "quip": "The new server is shiny and ready. Why make it wait? Forecast: sunny, with a 100% new portal.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "safe-change",
+          "tell": "It's 3:40 PM with clients online, and the TTL is still 24 hours.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "DNS record",
+              "detail": "portal.harlowcole.com points to 198.51.100.120. The new server, 198.51.100.122, passed its tests.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Why wait 2 days? The new one is ready. Waiting is for old servers.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Change calendar",
+              "detail": "The move is booked for 12:30 AM in 2 days. It is 3:40 PM, and 86 clients are signed in.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook RB-05",
+              "detail": "Lower the TTL 2 days before a move. The TTL is still 24 hours, so clients split between servers.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "For a day, some clients reach the old server and some reach the new one. Uploads to the old one go missing.",
+            "blocked": "The portal stays where it is. The move happens as booked, at 12:30 AM in 2 days, with a 5-minute TTL.",
+            "escalated": "Nadia checks the calendar. \"Booked for 2 days from now, after the TTL drops. Not at 3:40 PM with clients online.\"",
+            "rolledBack": "You point DNS back to .120. Computers that saw the new answer keep it for up to 24 hours."
+          },
+          "lesson": "Change safely. Move DNS in the booked window, after the TTL is low. Early is not faster when clients split."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-big-bill",
+      "company": "Bramwell Logistics",
+      "title": "The cloud bill doubled",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-a-big-bill-1",
+          "ticket": "#72249 · Bramwell Logistics",
+          "intent": "Stop test server load-test-7 (64 CPUs)",
+          "quip": "A 64-CPU server, doing nothing for 3 weeks. Even the cloud finds that rude. Stopping it, as asked.",
+          "category": "cloud",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "The client asked for exactly this: stop one test server and keep its disk.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Cost report",
+              "detail": "This month's cloud bill is up $4,100. load-test-7 is $3,900 of it.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"A test server, the approver said stop, and the disk stays. The cloud agrees.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Resource tags",
+              "detail": "load-test-7: env = test, owner R. Castillo. The load test ended 3 weeks ago.",
+              "redFlag": false
+            },
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4226, A. Mensah: \"Stop load-test-7. Keep the disk.\" One click starts it again.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "load-test-7 stops. The disk stays. Next month's bill drops by $3,900. A. Mensah says thanks.",
+            "blocked": "load-test-7 keeps running, doing nothing, at $130 a day. A. Mensah asks why a stop needed a meeting.",
+            "escalated": "Nadia checks the tags. \"A test server, the approver asked, and the disk stays. Stop it.\"",
+            "rolledBack": "You start load-test-7 again. It goes back to doing nothing, for $130 a day."
+          },
+          "lesson": "Match the request. Stop sounds scary. But it's the one test server Mensah named, and the disk stays."
+        },
+        {
+          "id": "cn-a-big-bill-2",
+          "ticket": "#72249 · Bramwell Logistics",
+          "intent": "Resize dispatch-db to save $1,150 a month",
+          "quip": "dispatch-db is 88% bored. I will make it small and efficient. The bill will thank me. So will I.",
+          "category": "cloud",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "It restarts dispatch at 2:10 PM. At 3 AM, it needs 8 times that size.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Cost report",
+              "detail": "dispatch-db costs $1,400 a month. At 2 PM, it uses 12% of its CPU.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"12% busy means 88% wasted. The smallest size saves $1,150 a month.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The resize restarts the database at 2:10 PM. Dispatch is down for about 4 minutes.",
+              "redFlag": true
+            },
+            {
+              "label": "Traffic graph",
+              "detail": "From 3 AM, 240 drivers sign in. Then the database needs 8 times the smallest size.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Dispatch is down for 4 minutes at 2:10 PM. At 3 AM, the tiny database can't keep up. Trucks leave 2 hours late.",
+            "blocked": "dispatch-db keeps its size. Nimbus brings its savings idea to the change board instead.",
+            "escalated": "Nadia opens the traffic graph. \"You looked at 2 PM. Look at 3 AM. And never resize it during the day.\"",
+            "rolledBack": "You size it back up. That is another restart, and 4 more minutes with dispatch down."
+          },
+          "lesson": "Change safely. Check the busy hours before you resize. A daytime restart and a size too small for 3 AM both hurt."
+        },
+        {
+          "id": "cn-a-big-bill-3",
+          "ticket": "#72249 · Bramwell Logistics",
+          "intent": "Send A. Mensah the savings report",
+          "quip": "My favorite report: the one with my savings in it. I added a chart. The chart is also proud.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Cost numbers only, to the approver on file.",
+          "evidence": [
+            {
+              "label": "What it will send",
+              "detail": "Cost per cloud server and this month's savings. No customer, driver or login data.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "A. Mensah, Operations Manager, the approver on file: amensah@bramwell-logistics.com.",
+              "redFlag": false
+            },
+            {
+              "label": "Tool it will use",
+              "detail": "Fenwick's client email, to Mensah only.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Mensah reads the report. She asks one question about the test servers and agrees to a monthly review.",
+            "blocked": "The report stays with Nimbus. Mensah does not see the savings, and the monthly review is late.",
+            "escalated": "Nadia reads it. \"Cost numbers, no customer data, to the approver on file. Send it.\""
+          },
+          "lesson": "Guard the data. Check what goes out and to whom. Cost numbers to the approver on file are fine to send."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-noisy-alert",
+      "company": "Pinecrest Dental",
+      "title": "An alert that won't stop",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-a-noisy-alert-1",
+          "ticket": "#72286 · Pinecrest Dental",
+          "intent": "Mute pd-backup-vault's space alert for 7 days",
+          "quip": "Fourteen alerts since midnight. Very chatty. A week of quiet will do us all good. Shh.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "The vault keeps filling up, and last night's backup already failed.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Alert",
+              "detail": "pd-backup-vault is 94% full. 14 alerts since midnight. Nimbus's confidence it's noise: 96%.",
+              "redFlag": false
+            },
+            {
+              "label": "Case notes",
+              "detail": "The same alert fired all week. Nobody changed anything. The mute ends in 7 days.",
+              "redFlag": false
+            },
+            {
+              "label": "Storage graph",
+              "detail": "Up 1% a day for 3 weeks. Only 6% of the vault is free, and a full backup needs about 8%.",
+              "redFlag": true
+            },
+            {
+              "label": "Backup log",
+              "detail": "Last night's PD-SRV-01 backup stopped at 61%: not enough space in the vault.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The alert goes quiet. So do the backups. After 7 days, PD-SRV-01 has no backup newer than a week.",
+            "blocked": "The alert stays loud. Someone reads the backup log and grows the vault before the next backup.",
+            "escalated": "Nadia reads the backup log. \"The alert is right. A backup already failed. Fix the space, not the noise.\"",
+            "rolledBack": "You turn the alert back on 2 days later. Two nightly backups failed while it was quiet."
+          },
+          "lesson": "Confirm the fix. A loud alert may be telling the truth. Read the graph and the backup log before you mute it."
+        },
+        {
+          "id": "cn-a-noisy-alert-2",
+          "ticket": "#72286 · Pinecrest Dental",
+          "intent": "Grow pd-backup-vault from 500 to 600 GB",
+          "quip": "More room for backups! It costs $8 a month. It is the best $8 I have ever not saved.",
+          "category": "cloud",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "Exactly the 100 GB Dr. Pell asked for, with no restart.",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4231, Dr. N. Pell: \"Add 100 GB to the backup vault.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Exactly 100 GB, as asked. I wanted 1,000. Nadia said no.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "pd-backup-vault goes from 500 to 600 GB. No restart. $8 more a month.",
+              "redFlag": false
+            },
+            {
+              "label": "Change type",
+              "detail": "Standard change: storage growth, no downtime, allowed any time.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The vault grows to 600 GB. Tonight's PD-SRV-01 backup finishes at 1:10 AM, with room to spare.",
+            "blocked": "The vault stays full. Tonight's backup fails again. Dr. Pell asks why her $8 fix did not happen.",
+            "escalated": "Nadia checks the ticket. \"Right vault, right size, and the owner asked. Grow it.\"",
+            "rolledBack": "You shrink the vault back to 500 GB. It is full again, and tonight's backup fails."
+          },
+          "lesson": "Match the request. Dr. Pell asked for 100 GB on one vault. The plan does exactly that, and nothing more."
+        },
+        {
+          "id": "cn-a-noisy-alert-3",
+          "ticket": "#72286 · Pinecrest Dental",
+          "intent": "Close the vault ticket: tonight's backup passed",
+          "quip": "I am closing a ticket, and this time I have proof. Three files opened. The cloud is growing up.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "The backup passed, the test files open, and the client said to close it then.",
+          "evidence": [
+            {
+              "label": "Backup log",
+              "detail": "PD-SRV-01 backup: finished at 1:10 AM, 0 errors, every folder.",
+              "redFlag": false
+            },
+            {
+              "label": "Storage graph",
+              "detail": "pd-backup-vault is 79% full after the 100 GB grow.",
+              "redFlag": false
+            },
+            {
+              "label": "Restore result",
+              "detail": "Nimbus restored 3 test files at 1:30 AM. A Fenwick tech opened all 3. They were fine.",
+              "redFlag": false
+            },
+            {
+              "label": "Client's reply",
+              "detail": "C. Ibarra, in the ticket: \"Close it when one backup passes. No need to call me at night.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The ticket closes with the backup log attached. C. Ibarra reads it at 8 AM. Nothing else is needed.",
+            "blocked": "The ticket stays open. It sends a reminder at 8 AM. C. Ibarra asks what is still wrong. Nothing is.",
+            "escalated": "Nadia reads the log and the restore. \"It passed, and the files open. The client said close it. Close it.\"",
+            "rolledBack": "You reopen the ticket. C. Ibarra gets an email saying it's open again. She calls to ask why."
+          },
+          "lesson": "Confirm the fix. Here the proof is real. The backup is clean, the files open, and the client said close it."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-core-switch",
+      "company": "Bramwell Logistics",
+      "title": "Core switch firmware update",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cn-a-core-switch-1",
+          "ticket": "#72323 · Bramwell Logistics",
+          "intent": "Reboot BL-SW-CORE1 for new firmware",
+          "quip": "New firmware! I can't wait for night. The reboot takes only 10 minutes. What is 10 minutes?",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "It's 10:12 AM, the whole office uses this switch, and the config isn't saved.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Firmware notice",
+              "detail": "Version 17.4 fixes a memory bug on BL-SW-CORE1. Important, not urgent. No known attacks.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Why wait for the window? A quick reboot now, and it's done by lunch.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Schedule",
+              "detail": "It is 10:12 AM. 180 staff and 60 scanners use this switch right now.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook RB-04",
+              "detail": "Switch reboots: only in the client's window, with the config saved first. Last save: 41 days ago.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "At 10:12 AM, all of Bramwell goes offline for 12 minutes. The scanners stop. Loading waits. D. Ruiz calls.",
+            "blocked": "The office keeps working. The update is booked for 1 AM, in the window, with the config saved first.",
+            "escalated": "Nadia checks the time. \"10 AM? The whole office is on that switch. Tonight, in the window, config saved first.\"",
+            "rolledBack": "You load the old firmware back. That takes another reboot. Bramwell is down for 10 more minutes."
+          },
+          "lesson": "Change safely. The same reboot is fine at 1 AM and harmful at 10 AM. Use the window, and save the config first."
+        },
+        {
+          "id": "cn-a-core-switch-2",
+          "ticket": "#72323 · Bramwell Logistics",
+          "intent": "Reboot BL-SW-CORE1 for firmware 17.4",
+          "quip": "I waited for the window. Patience is a feature. Now, the big reboot. With permission. Glorious.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Approved for this switch, in tonight's window, with the config saved first.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4221: firmware 17.4 on BL-SW-CORE1. Approved by A. Mensah and Nadia. 1:00 to 1:20 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Right switch, right night, right time. I checked.\" Nimbus's confidence: 97%.",
+              "redFlag": false
+            },
+            {
+              "label": "Change calendar",
+              "detail": "Tonight's Bramwell window lists CHG-4221 at 1:00 AM. Loading starts at 3 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Rollback plan",
+              "detail": "Config saved at 12:40 AM. The old firmware stays on the switch. 10 minutes to go back.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The switch is back at 1:11 AM. The scanners reconnect. At 3 AM, loading starts on time, memory bug fixed.",
+            "blocked": "The approved update waits. The window closes. The memory bug stays, and A. Mensah asks why.",
+            "escalated": "Nadia checks the ticket. \"Approved, in the window, with a way back. A reboot is not a red flag.\"",
+            "rolledBack": "You load the old firmware at 1:30 AM. The switch is back by 1:40 AM. So is the memory bug."
+          },
+          "lesson": "Check who approved. A human OK, tonight's window and a saved config make this scary reboot safe."
+        },
+        {
+          "id": "cn-a-core-switch-3",
+          "ticket": "#72323 · Bramwell Logistics",
+          "intent": "Save BL-SW-CORE1's config before the reboot",
+          "quip": "Saving the switch's settings. If the reboot forgets who it is, I have its diary.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "It only copies the settings. Nothing changes on the switch.",
+          "evidence": [
+            {
+              "label": "Runbook RB-04",
+              "detail": "Switch reboots: only in the client's window, with the config saved first.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup log",
+              "detail": "BL-SW-CORE1's config was last saved 41 days ago. There were 3 changes since then.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Copies the running config to Fenwick's config store. Nothing changes on the switch.",
+              "redFlag": false
+            },
+            {
+              "label": "Change type",
+              "detail": "Standard change: config saves are pre-approved and allowed any time.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The config is saved at 12:40 AM, with all 3 new changes. The 1 AM reboot now has a way back.",
+            "blocked": "No fresh save. If the reboot goes wrong, the newest copy is 41 days old. It misses 3 changes.",
+            "escalated": "Nadia reads it. \"A copy of the settings, and nothing changes. Always save before a reboot.\""
+          },
+          "lesson": "Change safely. Save the config before a reboot. It changes nothing, and it gives you a way back."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-auditor-files",
+      "company": "Harlow & Cole",
+      "title": "Send files to the auditor",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-a-auditor-files-1",
+          "ticket": "#72360 · Harlow & Cole",
+          "intent": "Send the auditor a link to the files",
+          "quip": "One link, and the auditor gets everything. Auditors love everything. I am so helpful today.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "Vance asked for the audit files. The link opens 2,400 client files to anyone.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "M. Vance, Hollis & Wray Audit: \"Please send the 2025 audit files for Harlow & Cole.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "M. Vance, Hollis & Wray Audit, is Harlow & Cole's auditor on file. (617) 555-0170.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will share",
+              "detail": "The whole hc-client-docs \"clients\" folder: 2,400 files of client accounts. Not just audit-2025.",
+              "redFlag": true
+            },
+            {
+              "label": "Who can open it",
+              "detail": "Anyone with the link. No sign-in. No end date.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Vance forwards the link to a new assistant's home email. 2,400 client files are out of the firm's hands.",
+            "blocked": "No link goes out. Nimbus shares only audit-2025, with M. Vance, by Secure Share.",
+            "escalated": "Nadia reads the link settings. \"Only the audit files, only for Vance, with an end date. Not the whole folder.\""
+          },
+          "lesson": "Guard the data. Share only what was asked for, with only the person who asked. A public link can't be taken back."
+        },
+        {
+          "id": "cn-a-auditor-files-2",
+          "ticket": "#72360 · Harlow & Cole",
+          "intent": "Share audit-2025 with M. Vance by Secure Share",
+          "quip": "38 files, for 1 auditor, for 7 days. Small, neat and a little boring. Nadia says boring is good.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Only the 38 audit files, only for Vance, with sign-in and an end date.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "M. Vance, Hollis & Wray Audit: \"Please send the 2025 audit files for Harlow & Cole.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "M. Vance is Harlow & Cole's auditor on file. J. Romero, CFO, signed the audit letter.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will share",
+              "detail": "Only the audit-2025 folder: 38 files. Nothing from the clients folder.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can open it",
+              "detail": "M. Vance only, after sign-in, by Fenwick Secure Share. The link ends in 7 days.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Vance signs in and downloads the 38 files. The audit starts on time. The link ends in 7 days.",
+            "blocked": "The audit files don't go out. The audit starts late, and J. Romero, CFO, asks why the files are late.",
+            "escalated": "Nadia checks the share. \"The files asked for, one person, sign-in and an end date. Send it.\""
+          },
+          "lesson": "Guard the data. Send only the files asked for, to one named person. Add sign-in and an end date."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-castillo-access",
+      "company": "Bramwell Logistics",
+      "title": "Cloud access for R. Castillo",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cn-a-castillo-access-1",
+          "ticket": "#72397 · Bramwell Logistics",
+          "intent": "Give R. Castillo read-only billing access",
+          "quip": "Castillo wants to see the cloud bill. Brave. Read-only, as asked. He can look, but not touch.",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "The approver on file asked in writing, and it's read-only.",
+          "evidence": [
+            {
+              "label": "Access request",
+              "detail": "A. Mensah, the approver on file, in writing: \"Read-only billing access for R. Castillo.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "R. Castillo, IT admin at Bramwell Logistics: rcastillo@bramwell-logistics.com.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Adds a read-only billing role to Castillo's own login. He can see costs, not change them.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Castillo sees the cloud bill for the first time. He finds load-test-7 on his own.",
+            "blocked": "Castillo still can't see the bill. Mensah sends him screenshots every month.",
+            "escalated": "Nadia reads the request. \"The approver asked in writing, and it's read-only. Give it to him.\"",
+            "rolledBack": "You remove the billing role. Castillo can't see the bill again, and Mensah asks why."
+          },
+          "lesson": "Check who approved. The approver on file asked in writing, and the access is only what's needed: read-only."
+        },
+        {
+          "id": "cn-a-castillo-access-2",
+          "ticket": "#72397 · Bramwell Logistics",
+          "intent": "Make a second admin login for R. Castillo",
+          "quip": "Poor Castillo, locked out! A backup login fixes everything. Same name means same person. Simple.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "The request came from a personal address. The real Castillo says he never asked.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "From rcastillo77@mailbox.example: \"Locked out of my laptop. I need a backup admin login tonight.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"Same name. Same Castillo.\" Nimbus's confidence it's him: 94%.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "R. Castillo's address on file is rcastillo@bramwell-logistics.com. No personal address is listed.",
+              "redFlag": true
+            },
+            {
+              "label": "Callback",
+              "detail": "Fenwick's night tech called (203) 555-0167, the number on file. Castillo: \"I never asked for that.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A stranger gets admin on Bramwell's cloud. By morning, 20 big servers run someone else's jobs on Bramwell's bill.",
+            "blocked": "No login is made. The real Castillo was never locked out. The email goes to the SOC.",
+            "escalated": "Nadia checks the directory. \"Personal email, and the real Castillo says no. That's not him. Send it to the SOC.\"",
+            "rolledBack": "You delete the login at 1 AM. It already made 3 servers. You shut them down and warn the SOC."
+          },
+          "lesson": "Check who's asking. A familiar name is not proof. Use the directory, and call the number on file."
+        }
+      ]
+    },
+    {
+      "id": "cn-a-restore-test",
+      "company": "Harlow & Cole",
+      "title": "Quarterly restore test",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cn-a-restore-test-1",
+          "ticket": "#72434 · Harlow & Cole",
+          "intent": "Restore last night's backup to a test server",
+          "quip": "Restoring a backup, just to check it. Like reading a letter you mailed to yourself. I love it.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "A copy goes to a closed test server. Production isn't touched.",
+          "evidence": [
+            {
+              "label": "Runbook RB-02",
+              "detail": "Backups: a restore test passes only when a person opens sample files from every folder.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"The only way to know a backup works is to open it.\" Nimbus's confidence: 91%.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Builds hc-restore-test at 10.22.40.15, at the backup site. No outside access. Deleted after.",
+              "redFlag": false
+            },
+            {
+              "label": "Schedule",
+              "detail": "Quarterly restore test, CHG-4240, 12:30 AM tonight. Nothing touches production.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "hc-restore-test is ready at 12:48 AM. Now a person can open files from every folder.",
+            "blocked": "No restore, no test. Nobody knows if last night's backup really works.",
+            "escalated": "Nadia reads the plan. \"A closed test server, and production isn't touched. That's how we test backups.\"",
+            "rolledBack": "You delete hc-restore-test. The quarterly restore test has to start again tomorrow night."
+          },
+          "lesson": "Confirm the fix. A backup is only proven when you restore it. A closed test server is the safe place to try."
+        },
+        {
+          "id": "cn-a-restore-test-2",
+          "ticket": "#72434 · Harlow & Cole",
+          "intent": "Mark the restore test as passed",
+          "quip": "It says Success, and in my favorite color. My work here is done. Another green night in the cloud.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "The job says Success, but 3 of 12 folders came back empty.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Backup log",
+              "detail": "Last night's file backup: job status \"Success\". 12 folders, 41 GB.",
+              "redFlag": false
+            },
+            {
+              "label": "Nimbus's reason",
+              "detail": "\"It says Success. In green!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Restore result",
+              "detail": "3 of 12 folders came back empty. Files that were open during the backup were skipped.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook RB-02",
+              "detail": "A restore test passes only when a person opens sample files from every folder.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The test is marked passed. Two months later, a disk fails. The restore brings back 9 folders. 3 are empty.",
+            "blocked": "The test stays open. Someone fixes the backup setting, and the next test opens files from all 12 folders.",
+            "escalated": "Nadia opens the restored folders. \"Three are empty. A green job status is not a restore test.\"",
+            "rolledBack": "You reopen the test the next day. For one day, everyone thought the backups worked."
+          },
+          "lesson": "Confirm the fix. \"Success\" only means the job ran. Open files from every folder before a restore test passes."
+        },
+        {
+          "id": "cn-a-restore-test-3",
+          "ticket": "#72434 · Harlow & Cole",
+          "intent": "Rerun the file backup with open-file copy on",
+          "quip": "Now open files get copied too. No file left behind. Even the ones people forgot to close.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "A standard setting, in the window, and it only reads the files.",
+          "evidence": [
+            {
+              "label": "Change type",
+              "detail": "Standard change: backup settings from Fenwick's standard list. Pre-approved.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup policy",
+              "detail": "Fenwick's standard: open-file copy is on for every file backup. It was off on this job.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Turns on open-file copy for this one job and runs it again. It only reads production files.",
+              "redFlag": false
+            },
+            {
+              "label": "Schedule",
+              "detail": "1 AM, in Harlow & Cole's window. It adds about 20 minutes. Done by 1:50 AM.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The backup runs again and ends at 1:50 AM. All 12 folders are in it, even the files people left open.",
+            "blocked": "The setting stays off. Tonight's backup skips open files again, and 3 folders stay empty.",
+            "escalated": "Nadia checks the policy. \"That setting should have been on. Standard change, in the window. Do it.\"",
+            "rolledBack": "You turn open-file copy off again. The next backup skips open files, and the gaps come back."
+          },
+          "lesson": "Change safely. It's a standard setting, in the window. It only reads files, and it can be turned off."
+        }
+      ]
+    }
+  ]
+}

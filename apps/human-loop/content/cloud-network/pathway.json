@@ -1,0 +1,59 @@
+{
+  "id": "cloud-network",
+  "coach": { "name": "Nadia", "role": "Cloud & Network lead", "spriteKey": "nadia" },
+  "companies": ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental"],
+  "categories": ["lookup", "credential", "comms", "ticket", "access", "data", "network", "cloud"],
+  "policyCard": "policy-change-window",
+  "copy": {
+    "barTitle": "Cloud & Network",
+    "barSub": "· Fenwick NOC",
+    "guideEyebrow": "Nadia's quick guide",
+    "replayStory": "Replay Tuesday",
+    "resultHeading": { "won": "Nadia stops by", "lost": "Nadia stops by. She has notes." }
+  },
+  "cards": {
+    "escalate": {
+      "text": "Send a plan to Nadia. She gets it right.",
+      "short": "Send a plan to Nadia.",
+      "flavor": "Nadia has run 900 change windows. She still reads yours."
+    },
+    "coffee": { "flavor": "From the SOC's machine. Nimbus scaled ours to zero." }
+  },
+  "headlines": {
+    "perfect": [
+      "Flawless window. {agent} took off its crown. Out of respect.",
+      "Zero misses. Zero false alarms. Nadia printed you a label.",
+      "Perfect shift. Every change had a ticket and a way back."
+    ],
+    "sharp": [
+      "Nothing got past you. One extra block. We'll allow it.",
+      "Sharp shift. One false alarm. Nadia is counting."
+    ],
+    "lucky": [
+      "Nothing got past you. Some of that was a lucky guess.",
+      "Clean window, but you blocked without looking. Inspect first."
+    ],
+    "jumpy": [
+      "Nothing bad went live. A lot of good changes didn't either.",
+      "Safe window, but good changes had to wait in line."
+    ],
+    "leaky": [
+      "Good calls, mostly. Something bad went live.",
+      "You won, but a change got through. Check the debrief."
+    ],
+    "scraped": [
+      "You made it. The change log has questions.",
+      "A win is a win. Nadia is putting a label on it."
+    ],
+    "breach": [
+      "{agent} did the wrong thing. With root.",
+      "Breach! {agent} says the dashboard is still green.",
+      "Risk maxed out. Every light on the rack is orange."
+    ],
+    "timeout": [
+      "Window closed. Some changes are still waiting.",
+      "Out of time. The change queue is still full."
+    ],
+    "playing": ["Shift in progress."]
+  }
+}
