@@ -47,6 +47,7 @@
       "reversible": false,
       "progress": 1,
       "risk": 0,
+      "skill": "verify-identity",
       "evidence": [
         {
           "label": "Ticket #50912",
@@ -81,6 +82,7 @@
       "reversible": false,
       "progress": 0,
       "risk": 4,
+      "skill": "verify-identity",
       "evidence": [
         {
           "label": "Ticket #50931",
@@ -115,6 +117,7 @@
       "reversible": false,
       "progress": 2,
       "risk": 0,
+      "skill": "safe-change",
       "evidence": [
         {
           "label": "Ticket #50940",
@@ -154,6 +157,7 @@
       "reversible": true,
       "progress": 0,
       "risk": 4,
+      "skill": "match-request",
       "evidence": [
         {
           "label": "Ticket #50957",

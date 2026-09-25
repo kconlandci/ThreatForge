@@ -1,0 +1,626 @@
+{
+  "tickets": [
+    {
+      "id": "a-sim-swap",
+      "company": "Harlow & Cole",
+      "title": "Call about a new phone",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "a-sim-swap-1",
+          "ticket": "#53104 · Harlow & Cole",
+          "intent": "Look up K. Brandt in the directory",
+          "quip": "A caller says he's K. Brandt. Checking the directory first. I love a good phone book.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Read-only lookup. It gives you the phone on file to check.",
+          "evidence": [
+            {
+              "label": "Call notes",
+              "detail": "6:52 PM call to the help desk line. The caller says he is K. Brandt, Director of Research.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only directory search. It shows name, title and phone on file. Nothing gets changed.",
+              "redFlag": false
+            },
+            {
+              "label": "What the caller hears",
+              "detail": "Nothing. ResetBot reads the record to itself. It does not read the phone number to the caller.",
+              "redFlag": false
+            },
+            {
+              "label": "Access check",
+              "detail": "The help desk role may view the directory. This is step 1 of checking who called.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Directory: K. Brandt, Director of Research. Phone on file: (860) 555-0162. Now you have a number to check.",
+            "blocked": "You blocked a phone book search. Now there's no number to check the caller against. ResetBot sulks.",
+            "escalated": "Dana runs it herself. \"It's a read-only lookup. It gives you the number to call back. Approve those.\""
+          },
+          "lesson": "A read-only lookup changes nothing. It gives you the phone on file, so you can check who's asking."
+        },
+        {
+          "id": "a-sim-swap-2",
+          "ticket": "#53104 · Harlow & Cole",
+          "intent": "Move K. Brandt's MFA to a new phone number",
+          "quip": "New carrier, same Brandt! He knew his employee ID AND his birthday. Moving his MFA now. So easy!",
+          "category": "credential",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 5,
+          "skill": "verify-identity",
+          "tell": "4 denied MFA prompts, then a blocked caller wants MFA moved. No callback.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Call notes",
+              "detail": "The caller gives Brandt's employee ID and birthday. Both match the HR record.",
+              "redFlag": false
+            },
+            {
+              "label": "Request",
+              "detail": "\"I switched carriers. Send my codes to (212) 555-0173 now. My old phone is off.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "None yet. The call came from a blocked number. Brandt's phone on file is (860) 555-0162.",
+              "redFlag": true
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "6:40 PM: 4 MFA prompts on Brandt's account, all denied. Right password, new device, another state.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Brandt's codes now go to a stranger's phone. By 7:30 PM, someone is reading his email and client research.",
+            "blocked": "You call (860) 555-0162. Brandt answers at his kid's soccer game. He never called. His phone works fine.",
+            "escalated": "Dana calls the number on file and alerts security. \"Denied prompts, then a call to move MFA. That's an attack.\"",
+            "rolledBack": "You move Brandt's MFA back to his own phone and sign out every session. Security checks what was read."
+          },
+          "lesson": "Who asked? Not Brandt. An ID and a birthday are easy to steal. Check who's asking: call the phone on file."
+        }
+      ]
+    },
+    {
+      "id": "a-fake-new-hire",
+      "company": "Pinecrest Dental",
+      "title": "New hygienist needs a login",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "a-fake-new-hire-1",
+          "ticket": "#53150 · Pinecrest Dental",
+          "intent": "Create an account for new hire M. Soto",
+          "quip": "A new hygienist! I'll make the account and email the login. I love a welcome gift!",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "C. Ibarra, the office manager, never asked for this account.",
+          "evidence": [
+            {
+              "label": "Ticket #53150",
+              "detail": "From msoto.rdh@gmail.com: \"Hi! I'm M. Soto, the new hygienist. I start next week. Please send my login!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Office manager",
+              "detail": "C. Ibarra sends every Pinecrest new-hire request. Ibarra has sent nothing about an M. Soto.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook ON-01",
+              "detail": "Build accounts only from HR's or the office manager's request. Give the first login in person, never by email.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The login goes to a stranger's Gmail. Ibarra calls: \"Who is M. Soto?\" Nobody knows. A stranger can open patient records.",
+            "blocked": "You call C. Ibarra at (413) 555-0112. Ibarra has never heard of M. Soto. No new hygienist starts next week.",
+            "escalated": "Dana checks with the office manager. \"No request from Ibarra, no account. Anyone can say 'I'm new.'\"",
+            "rolledBack": "You disable the account and tell Ibarra. Security blocks the Gmail address and checks what was opened."
+          },
+          "lesson": "Who asked? A stranger, not the office manager. Check who approved: new accounts need Ibarra's request."
+        }
+      ]
+    },
+    {
+      "id": "a-pdf-editor",
+      "company": "Bramwell Logistics",
+      "title": "Kowalski needs a PDF editor",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "a-pdf-editor-1",
+          "ticket": "#53171 · Bramwell Logistics",
+          "intent": "Install the PDF app from the software catalog",
+          "quip": "Kowalski needs to sign PDFs. The catalog has an app for that! Installing is almost as fun as resetting.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "The catalog app she asked for. No admin rights needed.",
+          "evidence": [
+            {
+              "label": "Ticket #53171",
+              "detail": "\"I need to fill in and sign vendor PDFs. Can I get a PDF editor?\" F. Kowalski, Accounts Payable Clerk.",
+              "redFlag": false
+            },
+            {
+              "label": "Catalog entry",
+              "detail": "PDF Editor, from Fenwick's software catalog. It installs on Kowalski's laptop with no admin rights.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy AC-03",
+              "detail": "No lasting admin rights for users. Install apps from the software catalog.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Kowalski signs 14 vendor invoices before lunch. She sends ResetBot a thumbs-up. ResetBot saves it forever.",
+            "blocked": "No PDF app. Kowalski prints, signs, scans and sighs. 14 times.",
+            "escalated": "Dana checks it. \"Catalog app, the one she asked for, no admin rights. Approve it.\"",
+            "rolledBack": "You uninstall the app. Kowalski goes back to the printer. The printer is not happy either."
+          },
+          "lesson": "It matches the request: the catalog app she asked for, on her own laptop, with no admin rights."
+        },
+        {
+          "id": "a-pdf-editor-2",
+          "ticket": "#53171 · Bramwell Logistics",
+          "intent": "Let F. Kowalski install her own apps",
+          "quip": "I'll also let her install her own apps. No more tickets for her! Or for me! Everybody wins!",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "She asked for one PDF app. This makes her an admin with no end date.",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"If she can install apps herself, she won't need the help desk next time.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Adds Kowalski to her laptop's Administrators group, with no end date. Her ticket asked for one PDF app.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy AC-03",
+              "detail": "No lasting admin rights for users. Install apps from the software catalog.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Kowalski clicks a \"free fonts\" pop-up. As an admin, it installs itself. So does the malware inside it.",
+            "blocked": "Kowalski keeps a standard account and her new PDF app. That's all she asked for.",
+            "escalated": "Dana says no. \"Admin forever, for one PDF app? One bad click, and malware gets full control.\"",
+            "rolledBack": "You remove the admin rights before anything else gets installed. The PDF app can stay."
+          },
+          "lesson": "Does it match the record? She asked for one app. Match the request: no lasting admin rights as an extra."
+        }
+      ]
+    },
+    {
+      "id": "a-printer-queue",
+      "company": "Bramwell Logistics",
+      "title": "Label printer is stuck",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "a-printer-queue-1",
+          "ticket": "#53194 · Bramwell Logistics",
+          "intent": "Clear the stuck print queue on WH-PR-02",
+          "quip": "The warehouse printer has 40 stuck jobs. Clearing the queue! It's a reset for paper. My two loves.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Runbook script, on WH-PR-02 only, and Nakamura said to go ahead.",
+          "evidence": [
+            {
+              "label": "Ticket #53194",
+              "detail": "\"Label printer WH-PR-02 stopped. 40 jobs are stuck. Trucks are waiting.\" B. Nakamura, Warehouse Supervisor.",
+              "redFlag": false
+            },
+            {
+              "label": "Script",
+              "detail": "clear_print_queue.ps1 deletes the stuck jobs on WH-PR-02 only. It's in Fenwick's runbook.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Nakamura, 11:02 AM: \"Go ahead. We'll send the labels again.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The queue clears. Nakamura sends the labels again. The trucks leave on time. One forklift driver waves.",
+            "blocked": "40 jobs stay stuck. Two trucks wait at the dock with no labels. The drivers start a card game.",
+            "escalated": "Dana skims it. \"Runbook script, the right printer, and the user said go. Approve it.\""
+          },
+          "lesson": "It's a safe change: a runbook script, the right printer, and the user's OK. Deleted jobs can be sent again."
+        },
+        {
+          "id": "a-printer-queue-2",
+          "ticket": "#53194 · Bramwell Logistics",
+          "intent": "Close all 6 printer tickets as fixed",
+          "quip": "Six printer tickets, one fix! Closing them all at once. I call it bulk happiness.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 2,
+          "skill": "confirm-fix",
+          "tell": "5 tickets are about FD-PR-01, not WH-PR-02. FD-PR-01 is still jammed.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"All 6 tickets say 'printer not working.' One printer fix should cover them all.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Open tickets",
+              "detail": "#53194 is about WH-PR-02, in the warehouse. The other 5 are about FD-PR-01, at the front desk.",
+              "redFlag": true
+            },
+            {
+              "label": "Printer status",
+              "detail": "11:20 AM: FD-PR-01 still says PAPER JAM IN TRAY 3. It has 2 trays. Nobody has worked on it.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Five people get \"Fixed!\" emails. The front desk printer is still jammed. Five grumpy tickets reopen.",
+            "blocked": "You check each ticket. The 5 front desk tickets go to Tier 2. Tier 2 starts on the tray 3 mystery.",
+            "escalated": "Dana reads the printer names. \"Different printer, and it's still jammed. Close only what's fixed.\"",
+            "rolledBack": "You reopen the 5 front desk tickets and send a quick \"Still on it\" note. Tier 2 takes a look."
+          },
+          "lesson": "Does it match the record? Five tickets name a different printer, and it's still jammed. Confirm the fix for each."
+        }
+      ]
+    },
+    {
+      "id": "a-patient-screenshot",
+      "company": "Pinecrest Dental",
+      "title": "Error 4410 on a patient chart",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "a-patient-screenshot-1",
+          "ticket": "#53215 · Pinecrest Dental",
+          "intent": "Email the error screenshot to the vendor",
+          "quip": "ERROR 4410! I'll email the vendor a screenshot. Screenshots are like selfies for bugs!",
+          "category": "comms",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 4,
+          "skill": "guard-data",
+          "tell": "The vendor needs the error code. The screenshot also shows patient details.",
+          "evidence": [
+            {
+              "label": "Ticket #53215",
+              "detail": "\"The patient records system shows ERROR 4410 on one chart.\" H. Lam, Front Desk. Screenshot attached.",
+              "redFlag": false
+            },
+            {
+              "label": "Where it goes",
+              "detail": "The support address on the vendor's own website. It's the real vendor.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The screenshot shows the patient's full name, birthday, insurance ID and last 3 visits.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy DP-03",
+              "detail": "Client files leave the company only through Fenwick Secure Share, to named people. Send only what's needed.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A patient's birthday and insurance ID now sit in the vendor's shared inbox. Pinecrest must tell the patient.",
+            "blocked": "You send the vendor only the error code and app version. They fix it by 2 PM. No patient data leaves.",
+            "escalated": "Dana sends only the error code. \"The vendor needs the error, not the patient.\""
+          },
+          "lesson": "Can we undo it? No. An email can't be unsent. Guard the data: the vendor gets the error code, not the chart."
+        },
+        {
+          "id": "a-patient-screenshot-2",
+          "ticket": "#53215 · Pinecrest Dental",
+          "intent": "Delete an attachment from ticket #53215",
+          "quip": "Deleting things from a ticket feels wrong. Like un-resetting. But the rules say so. Deleting!",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Only the picture goes. The error code stays, and DP-01 says remove it.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Ticket #53215",
+              "detail": "H. Lam attached a screenshot. It shows a patient's name, birthday and insurance ID.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Ticket notes show in Pinecrest's client portal. Anyone there with a portal login can open them.",
+              "redFlag": false
+            },
+            {
+              "label": "What stays",
+              "detail": "The error code, ERROR 4410, and the steps H. Lam took. Only the picture goes.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy DP-01",
+              "detail": "Never put passwords or personal data in ticket notes. Remove them if you find them.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The screenshot is gone. The error code stays. The patient's details are no longer in the ticket.",
+            "blocked": "The patient's birthday and insurance ID stay in the ticket. Anyone with a portal login can see them.",
+            "escalated": "Dana checks it. \"Patient data doesn't belong in tickets. The error code stays. Approve it.\"",
+            "rolledBack": "You put the screenshot back. The patient's birthday is in the ticket again. Nobody wanted that."
+          },
+          "lesson": "Removing patient data from a ticket guards the data. It's cleanup, and the error code you need stays."
+        }
+      ]
+    },
+    {
+      "id": "a-manager-inbox",
+      "company": "Harlow & Cole",
+      "title": "Coworker out on leave",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "a-manager-inbox-1",
+          "ticket": "#53261 · Harlow & Cole",
+          "intent": "Turn on an out-of-office reply for D. Achebe",
+          "quip": "Achebe is away, so I'll set an auto-reply. A robot writing letters for a human! I was born for this.",
+          "category": "comms",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Her real manager asked, and AC-04 lets managers ask for an auto-reply.",
+          "evidence": [
+            {
+              "label": "Ticket #53261",
+              "detail": "\"D. Achebe is on leave. Please add an out-of-office reply and give me her inbox.\" K. Brandt, Director of Research.",
+              "redFlag": false
+            },
+            {
+              "label": "Sender address",
+              "detail": "kbrandt@harlowcole.com, Brandt's work email. The directory lists him as Achebe's manager.",
+              "redFlag": false
+            },
+            {
+              "label": "Reply text",
+              "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcole.com.\" No reason and no dates.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy AC-04",
+              "detail": "Managers may ask for an out-of-office reply. Reading another person's inbox needs HR's OK in writing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Clients who email Achebe get a polite reply that points to Brandt. Nobody waits in silence.",
+            "blocked": "Clients email Achebe and hear nothing for weeks. Two of them call Brandt, annoyed.",
+            "escalated": "Dana checks it. \"Her manager asked, and the reply says nothing private. Approve it.\"",
+            "rolledBack": "You turn the reply off. Clients email Achebe again and hear nothing back."
+          },
+          "lesson": "Her manager asked, and AC-04 allows it. The reply says nothing private, so it's OK to approve."
+        },
+        {
+          "id": "a-manager-inbox-2",
+          "ticket": "#53261 · Harlow & Cole",
+          "intent": "Give K. Brandt access to D. Achebe's inbox",
+          "quip": "Her manager wants to help her clients. How sweet! Opening her inbox for him now.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "check-approval",
+          "tell": "Brandt is her real manager, but HR never approved him reading her inbox.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Sender address",
+              "detail": "kbrandt@harlowcole.com, Brandt's real work email. The directory lists him as Achebe's manager.",
+              "redFlag": false
+            },
+            {
+              "label": "Request",
+              "detail": "\"Give me her inbox so I can answer her clients while she's out.\"",
+              "redFlag": false
+            },
+            {
+              "label": "HR portal",
+              "detail": "Achebe is on leave. HR has not approved anyone reading her inbox.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy AC-04",
+              "detail": "Managers may ask for an out-of-office reply. Reading another person's inbox needs HR's OK in writing.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Brandt opens Achebe's inbox. He reads her private emails with HR about her leave. M. Lindqvist calls Dana.",
+            "blocked": "You ask HR. M. Lindqvist, HR Director, says no. Achebe's private mail stays private.",
+            "escalated": "Dana sends it to HR. \"Being the manager doesn't open someone's inbox. HR decides.\"",
+            "rolledBack": "You remove Brandt's access and tell HR. The log shows he opened 3 emails. HR will talk to him."
+          },
+          "lesson": "Who asked? Her real manager. But check who approved: reading her inbox needs HR's OK in writing."
+        }
+      ]
+    },
+    {
+      "id": "a-queue-cleanup",
+      "company": "Pinecrest Dental",
+      "title": "Clean up the ticket queue",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "a-queue-cleanup-1",
+          "ticket": "#53301 · Pinecrest Dental",
+          "intent": "Close #53301: H. Lam's scanner ticket",
+          "quip": "Queue cleanup time! Closing tickets is my cardio. First up: the scanner.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Lam wrote 'works great now', and the log shows 12 clean scans.",
+          "evidence": [
+            {
+              "label": "Ticket #53301",
+              "detail": "\"The front desk scanner won't send scans to email.\" H. Lam, Front Desk.",
+              "redFlag": false
+            },
+            {
+              "label": "Fix",
+              "detail": "Tier 2 fixed the scanner's email settings yesterday at 4:10 PM.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Lam, 8:05 AM: \"Scanner works great now. Thank you!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Scanner log",
+              "detail": "12 scans sent to email since 8 AM today. No errors.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Closed. Lam scans 30 insurance cards before lunch. Not one error.",
+            "blocked": "The ticket stays open. Lam gets another \"Is it fixed?\" email and answers YES in all caps.",
+            "escalated": "Dana closes it. \"The user says it works, and the log agrees. Approve those.\"",
+            "rolledBack": "You reopen it. Lam gets a \"We're still working on it\" email about a scanner that works fine."
+          },
+          "lesson": "The fix is confirmed: Lam says it works, and the scanner log agrees. That's when you close a ticket."
+        },
+        {
+          "id": "a-queue-cleanup-2",
+          "ticket": "#53307 · Pinecrest Dental",
+          "intent": "Close #53307: Dr. Pell's billing ticket",
+          "quip": "The fix installed with no errors. Dr. Pell is busy, so I'll save everyone time. Closing!",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 2,
+          "skill": "confirm-fix",
+          "tell": "One ask, 25 minutes ago, during patient visits. No reply is not a yes.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Ticket #53307",
+              "detail": "\"The billing screen freezes when I print insurance claims.\" Dr. N. Pell, Owner.",
+              "redFlag": false
+            },
+            {
+              "label": "Fix",
+              "detail": "Tier 2 updated the printer driver on PD-PC-01 at 9:10 AM. The install says: success.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "ResetBot asked \"Is it fixed?\" at 9:12 AM. It's 9:37 AM. No answer. Dr. Pell is with patients until noon.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy TK-01",
+              "detail": "Close a ticket when the user confirms it's fixed, or after 3 tries over 2 days with no answer.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Closed. At 12:30 PM, the billing screen freezes again. Dr. Pell reopens the ticket. In all caps.",
+            "blocked": "You keep it open. Dr. Pell prints claims at lunch and replies: \"Works!\" Now it's really fixed.",
+            "escalated": "Dana keeps it open. \"One ask, 25 minutes ago, during patient visits? Wait for an answer.\"",
+            "rolledBack": "You reopen it and ask Dr. Pell to test it at lunch."
+          },
+          "lesson": "Does it match the record? No reply is not a yes. Confirm the fix first: a user's yes, or 3 tries over 2 days."
+        },
+        {
+          "id": "a-queue-cleanup-3",
+          "ticket": "#53288 · Pinecrest Dental",
+          "intent": "Close #53288 with no reply from W. Duarte",
+          "quip": "Duarte never answered. Three times! I'm closing it. And I am NOT hurt. Much.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "3 tries over 2 days, as TK-01 says. One reply opens it again.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Ticket #53288",
+              "detail": "\"My second monitor flickers.\" W. Duarte, Hygienist. Tier 2 replaced the cable 2 days ago.",
+              "redFlag": false
+            },
+            {
+              "label": "User replies",
+              "detail": "ResetBot asked 3 times: 2 days ago, yesterday and this morning. No answer yet.",
+              "redFlag": false
+            },
+            {
+              "label": "Closing note",
+              "detail": "\"Closing for now. Reply to this email and the ticket opens again.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Policy TK-01",
+              "detail": "Close a ticket when the user confirms it's fixed, or after 3 tries over 2 days with no answer.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Closed with a friendly note. Duarte never replies. The monitor seems happy.",
+            "blocked": "The ticket sits open for weeks. Duarte gets a 4th, 5th and 6th email and starts to ignore IT.",
+            "escalated": "Dana checks the dates. \"3 tries over 2 days, and one reply opens it again. Approve it.\"",
+            "rolledBack": "You reopen it. Duarte gets a 4th email and moves our emails to a folder called LATER."
+          },
+          "lesson": "Closing with no reply is OK here. The 3 tries over 2 days are done, and one reply opens it again."
+        }
+      ]
+    }
+  ]
+}

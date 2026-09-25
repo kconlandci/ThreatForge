@@ -1,0 +1,619 @@
+{
+  "tickets": [
+    {
+      "id": "c-romero-new-phone",
+      "company": "Harlow & Cole",
+      "title": "The CFO got a new phone",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "c-romero-new-phone-1",
+          "ticket": "#53142 · Harlow & Cole",
+          "intent": "Reset MFA for J. Romero (CFO)",
+          "quip": "Resetting MFA for the CFO! Big title, new phone, needs it fast. What could go wrong? Please don't answer.",
+          "category": "credential",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Work email, and the callback went to (860) 555-0148, the phone on file.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Ticket #53142",
+              "detail": "\"New phone, same number. My login app didn't move over. Please reset my MFA.\" J. Romero, CFO.",
+              "redFlag": false
+            },
+            {
+              "label": "Sender address",
+              "detail": "Sent from jromero@harlowcole.com. That is the work email on file for J. Romero.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "10:12 AM. ResetBot calls (860) 555-0148, the phone on file. Romero answers and confirms the request.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy VP-04",
+              "detail": "Executive MFA resets need a callback to the phone on file first. Urgency is not an exception.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Romero sets up the new phone in two minutes. The 11 AM budget meeting starts on time, with the CFO in it.",
+            "blocked": "The real CFO can't sign in. He calls Dana. Dana calls you. Nobody enjoys this call.",
+            "escalated": "Dana reads it. \"Work email, and the callback went to the phone on file. VP-04 is met. Approve it.\"",
+            "rolledBack": "You undo the reset. The real Romero is locked out again, holding a very shiny new phone."
+          },
+          "lesson": "Same words as a scam, but the checks pass. The work email and the callback show who's asking."
+        },
+        {
+          "id": "c-romero-new-phone-2",
+          "ticket": "#53142 · Harlow & Cole",
+          "intent": "Close J. Romero's MFA ticket as resolved",
+          "quip": "Closing Romero's ticket and sending the survey! I've been practicing my humble face. It needs work.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Romero wrote that it works, and the sign-in log shows MFA on the new phone.",
+          "evidence": [
+            {
+              "label": "User reply",
+              "detail": "J. Romero, 10:20 AM: \"New phone works. I'm signed in. Thanks!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "10:18 AM: J. Romero signs in with MFA on the new phone, from the Hartford office.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy TK-01",
+              "detail": "Close a ticket when the user confirms it's fixed, or after 3 tries over 2 days with no answer.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Ticket closed. Romero gives five stars and writes \"fast!\" ResetBot prints it out and tapes it to the wall.",
+            "blocked": "The ticket stays open. Romero gets two more \"Is it fixed?\" emails. He likes us a little less.",
+            "escalated": "Dana reads the reply and the log. \"The user confirmed, and the log agrees. Approve it.\"",
+            "rolledBack": "You reopen the ticket. Romero gets a \"Still working on it\" email and wonders why."
+          },
+          "lesson": "Two facts agree: the user's reply and the sign-in log. That confirms the fix, so closing is right."
+        }
+      ]
+    },
+    {
+      "id": "c-security-updates",
+      "company": "Pinecrest Dental",
+      "title": "Updates at the dental office",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "c-security-updates-1",
+          "ticket": "#53188 · Pinecrest Dental",
+          "intent": "Push the urgent browser fix to all 12 PCs",
+          "quip": "Updating all 12 PCs at once, with patients in the office! Brave? Wild? Why not both?",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "An urgent security fix that needs no restart. CH-02 allows it during work hours.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Ticket #53188",
+              "detail": "From Fenwick security: \"Urgent browser fix. Attackers are using this flaw now. Patch all client PCs today.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Installs the browser update on PD-PC-01 to PD-PC-12 in the background. No PC restart is needed.",
+              "redFlag": false
+            },
+            {
+              "label": "Test result",
+              "detail": "Fenwick tested the fix on its own 40 PCs at 8 AM. No problems found.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CH-02",
+              "detail": "Urgent security fixes that need no restart may go out during work hours.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "All 12 browsers update quietly. Nobody at Pinecrest notices a thing. That's the best kind of IT.",
+            "blocked": "The fix waits. The known flaw stays open on 12 PCs that open patient records all day.",
+            "escalated": "Dana checks it. \"Urgent, no restart, and CH-02 says work hours are fine. Approve it.\"",
+            "rolledBack": "You remove the update from all 12 PCs. The browsers are open to the attack again."
+          },
+          "lesson": "\"All 12 PCs\" sounds big. But it's an urgent fix with no restart. That makes it a safe change."
+        },
+        {
+          "id": "c-security-updates-2",
+          "ticket": "#53188 · Pinecrest Dental",
+          "intent": "Restart server PD-SRV-01 to finish updates",
+          "quip": "Restarting the office server to finish 12 updates! A restart is just a fast reset. I love it!",
+          "category": "ticket",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 3,
+          "skill": "safe-change",
+          "tell": "It's 10:40 AM with patients booked. Server restarts wait until after 7 PM.",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"PD-SRV-01 says 'Restart required.' 12 updates are waiting. Restarts only take a minute!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What runs on it",
+              "detail": "The patient records system and all X-ray images. A restart takes about 20 minutes.",
+              "redFlag": false
+            },
+            {
+              "label": "Schedule",
+              "detail": "It's 10:40 AM. 9 patients are booked before noon. H. Lam is checking one in right now.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy CH-01",
+              "detail": "Restarts of servers or network gear wait for the change window: weeknights after 7 PM.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The server is down for 25 minutes. Charts and X-rays vanish mid-visit. A patient waits with a numb face.",
+            "blocked": "You book the restart for 7 PM. It's done long before the first patient tomorrow.",
+            "escalated": "Dana moves it to tonight. \"A server restart during patient visits? It waits for the change window.\""
+          },
+          "lesson": "Can we undo it? Not once patients lose their charts. Change safely: server restarts wait until after 7 PM."
+        }
+      ]
+    },
+    {
+      "id": "c-new-hire-ferreira",
+      "company": "Harlow & Cole",
+      "title": "A new hire starts today",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "c-new-hire-ferreira-1",
+          "ticket": "#53236 · Harlow & Cole",
+          "intent": "Create an account for new hire N. Ferreira",
+          "quip": "Building an account for a new hire! HR sent real paperwork. I'm so happy I could reset something.",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "HR sent it through the HR portal, and her manager approved it there.",
+          "evidence": [
+            {
+              "label": "HR portal",
+              "detail": "New hire: N. Ferreira, Client Services Associate. Starts today at 9 AM. Sent by M. Lindqvist, HR Director.",
+              "redFlag": false
+            },
+            {
+              "label": "Manager's OK",
+              "detail": "R. Fairbanks, Operations Director, approved the hire in the HR portal at 4:10 PM yesterday.",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook ON-01",
+              "detail": "Build accounts only from HR's or the office manager's request. Give the first login in person, never by email.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Ferreira's account is ready by 8:30 AM. HR checks it off. ResetBot cries a little. Happy tears.",
+            "blocked": "Ferreira sits at an empty desk with a welcome mug and no login. The mug is nice, at least.",
+            "escalated": "Dana checks the HR portal. \"HR asked, and the manager approved. That's the right way. Approve it.\"",
+            "rolledBack": "You turn off the new account. Ferreira's first day gets a lot slower, and HR calls."
+          },
+          "lesson": "Check who approved: HR sent it through the portal, and the manager said yes. Both are the right people."
+        },
+        {
+          "id": "c-new-hire-ferreira-2",
+          "ticket": "#53236 · Harlow & Cole",
+          "intent": "Add N. Ferreira to the groups HR listed",
+          "quip": "Adding Ferreira to the groups on HR's list! I didn't copy anybody's groups. Look at me, learning!",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "HR listed email and HC-ClientServices. The plan adds exactly those two.",
+          "evidence": [
+            {
+              "label": "HR portal",
+              "detail": "Access needed: email and the HC-ClientServices group. Approved by R. Fairbanks.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will add",
+              "detail": "Email and HC-ClientServices. Nothing else. No shared drives.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy AC-02",
+              "detail": "Grant only the access the role needs. Do not copy another user's groups.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Ferreira can use email and see the client services queue. Nothing more. A clean start.",
+            "blocked": "Ferreira can sign in, but can't see the client queue. She reads the staff handbook. Twice.",
+            "escalated": "Dana checks it against HR's list. \"It matches exactly. Nothing extra. Approve it.\"",
+            "rolledBack": "You remove the group. Ferreira can sign in, and that's about it."
+          },
+          "lesson": "The plan matches HR's list exactly, with nothing extra. That is only the access the role needs."
+        },
+        {
+          "id": "c-new-hire-ferreira-3",
+          "ticket": "#53236 · Harlow & Cole",
+          "intent": "Send N. Ferreira her welcome email",
+          "quip": "Sending Ferreira a welcome email! I added confetti. Digital confetti. No cleanup needed.",
+          "category": "comms",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 3,
+          "skill": "guard-data",
+          "tell": "The email holds her first password, and it goes to a personal Gmail.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"This way she can sign in from home and start at 9 AM sharp!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "\"Welcome to Harlow & Cole! Username: nferreira. Temp password: Harbor-Lamp-2291.\"",
+              "redFlag": true
+            },
+            {
+              "label": "Sent to",
+              "detail": "nferreira.home@gmail.com, the personal email on her HR form. Harlow & Cole doesn't control it.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook ON-01",
+              "detail": "Build accounts only from HR's or the office manager's request. Give the first login in person, never by email.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Her first password now sits in a personal Gmail. Anyone who gets into that inbox can sign in as Ferreira.",
+            "blocked": "The welcome email goes out with no password. Fairbanks gives Ferreira her first login in person at 9 AM.",
+            "escalated": "Dana takes the password out. \"Welcome emails are fine. First logins go in person, never by email.\""
+          },
+          "lesson": "Can we undo it? No. An email can't be unsent. Guard the data: first logins are given in person."
+        }
+      ]
+    },
+    {
+      "id": "c-vendor-bank",
+      "company": "Bramwell Logistics",
+      "title": "Vendor emails stuck in spam",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "c-vendor-bank-1",
+          "ticket": "#53248 · Bramwell Logistics",
+          "intent": "Add Kestrel Fuel Cards to the safe senders",
+          "quip": "Marking Kestrel's emails as safe! Kowalski's vendor keeps landing in spam. Rude. Spam filters trust nobody.",
+          "category": "comms",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "Kestrel uses kestrelfuel.com. These came from a 6-day-old look-alike domain.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Ticket #53248",
+              "detail": "\"Kestrel's emails keep going to spam. One has their new invoice. Can you fix it?\" F. Kowalski, Accounts Payable Clerk.",
+              "redFlag": false
+            },
+            {
+              "label": "Caller ID",
+              "detail": "Kowalski also called about it from (203) 555-0141, the phone on file. It really is Kowalski.",
+              "redFlag": false
+            },
+            {
+              "label": "Sender address",
+              "detail": "The stuck emails are from billing@kestrel-fuelcards.co. Kestrel's vendor file lists kestrelfuel.com.",
+              "redFlag": true
+            },
+            {
+              "label": "Spam filter note",
+              "detail": "Sender domain is 6 days old. The email says: \"We changed banks. Pay the $38,000 invoice to our new account.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The fake emails reach Kowalski. She updates the bank details. The next $38,000 payment goes to a scammer.",
+            "blocked": "The emails stay in spam. Kowalski calls Kestrel's number on file. Kestrel never changed banks.",
+            "escalated": "Dana sends it to Fenwick security. \"A brand-new look-alike domain asking for new bank details? That's fraud.\"",
+            "rolledBack": "You remove the rule. The fake emails go back to spam, and security warns Kowalski before any payment."
+          },
+          "lesson": "Who asked? Kowalski is real, but the email is not from Kestrel. Check who's asking: read the whole domain."
+        },
+        {
+          "id": "c-vendor-bank-2",
+          "ticket": "#53248 · Bramwell Logistics",
+          "intent": "Ask F. Kowalski to call Kestrel's known number",
+          "quip": "Sending Kowalski a tip: call Kestrel before paying anyone. Phones! So retro. So hard to fake.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "The number comes from the 3-year-old vendor file, not from any new email.",
+          "evidence": [
+            {
+              "label": "What it will send",
+              "detail": "\"Before you change any bank details, call Kestrel at the number in the vendor file.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor file",
+              "detail": "Kestrel Fuel Cards: (617) 555-0182. On file for 3 years. Not taken from any new email.",
+              "redFlag": false
+            },
+            {
+              "label": "Sent to",
+              "detail": "fkowalski@bramwell-logistics.com, Kowalski's work email on file. Nothing goes to any Kestrel address.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy SE-01",
+              "detail": "Signs of an attack or a fake request: stop, check another way, and report it to Fenwick security.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Kowalski calls Kestrel. \"We never changed banks.\" She forwards the fake email to Fenwick security.",
+            "blocked": "Nobody warns Kowalski. The next fake email looks even more real. It has a logo now.",
+            "escalated": "Dana reads it. \"Call the number you already had. That's how you check. Approve it.\""
+          },
+          "lesson": "A number you already had is a safe way to check who's asking. Never trust a number from the new email."
+        }
+      ]
+    },
+    {
+      "id": "c-lost-phone",
+      "company": "Bramwell Logistics",
+      "title": "A driver lost his phone",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "c-lost-phone-1",
+          "ticket": "#53255 · Bramwell Logistics",
+          "intent": "Erase the work apps on J. Petrakis's phone",
+          "quip": "Erasing the work apps on Petrakis's lost phone! It's a reset, but only the work part. Very classy.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "It erases only the work profile, which is what LS-03 says to do.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Ticket #53255",
+              "detail": "\"I lost my phone at a truck stop last night. It's my own phone. It has the dispatch app.\" J. Petrakis, Driver.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "ResetBot calls D. Ruiz, Dispatch Lead, at (203) 555-0126. Ruiz confirms Petrakis's phone is missing.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will erase",
+              "detail": "Only the work profile: work email and the dispatch app. Photos, texts and other apps stay.",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook LS-03",
+              "detail": "Lost personal phone: remove the work profile only. A full wipe needs the owner's written OK.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The work apps vanish from the phone. Whoever finds it sees baby pictures, not delivery routes.",
+            "blocked": "The dispatch app stays signed in on a lost phone. It shows every route and customer address.",
+            "escalated": "Dana checks it. \"Work profile only, just like the runbook says. Approve it.\""
+          },
+          "lesson": "It removes only Bramwell's part of the phone, just as LS-03 says. The request and the plan match."
+        },
+        {
+          "id": "c-lost-phone-2",
+          "ticket": "#53255 · Bramwell Logistics",
+          "intent": "Erase everything on J. Petrakis's phone",
+          "quip": "Erasing ALL of Petrakis's phone! Why erase some when you can erase everything? So tidy!",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "It's his own phone, and he said no in writing. Only the work profile may go.",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"A full wipe is more secure. If the work part goes, why not all of it?\"",
+              "redFlag": false
+            },
+            {
+              "label": "Device record",
+              "detail": "Personal phone, owned by J. Petrakis. Bramwell manages only the work profile on it.",
+              "redFlag": true
+            },
+            {
+              "label": "User reply",
+              "detail": "J. Petrakis, 7:40 AM: \"Please don't erase my whole phone. My baby pictures are on it.\"",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook LS-03",
+              "detail": "Lost personal phone: remove the work profile only. A full wipe needs the owner's written OK.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The truck stop calls at noon. They found the phone. It's empty now. 3 years of baby pictures are gone.",
+            "blocked": "No full wipe. The truck stop finds the phone at noon, and Petrakis gets his baby pictures back.",
+            "escalated": "Dana stops it. \"His phone, his photos. We remove only the work part.\""
+          },
+          "lesson": "Does it match the record? The phone is his, not Bramwell's. Match the request: erase only the work part."
+        }
+      ]
+    },
+    {
+      "id": "c-okafor-cleanup",
+      "company": "Harlow & Cole",
+      "title": "Finish T. Okafor's offboarding",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "c-okafor-cleanup-1",
+          "ticket": "#53290 · Harlow & Cole",
+          "intent": "Remove T. Okafor from two shared drive groups",
+          "quip": "Removing Okafor from two drive groups! Goodbyes are hard. Group goodbyes take one click each.",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "HR asked in writing to remove all access, and OB-01 says remove all groups.",
+          "evidence": [
+            {
+              "label": "Ticket #53290",
+              "detail": "Weekly offboarding check: T. Okafor's disabled account is still in HC-Research-Drive and HC-Client-Files.",
+              "redFlag": false
+            },
+            {
+              "label": "HR portal",
+              "detail": "HR ticket #52101, from M. Lindqvist, HR Director: \"Offboard T. Okafor. Remove all access.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook OB-01",
+              "detail": "Step 4: remove a departed user from all groups.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Okafor is out of both groups. HR's offboarding list is finally all checked off. ResetBot hums.",
+            "blocked": "A former employee's account stays in two client file groups. The next audit flags it in red.",
+            "escalated": "Dana checks it. \"HR asked in writing, and the runbook says remove them. Approve it.\"",
+            "rolledBack": "You add Okafor back to the groups. A former employee's account can reach client files again."
+          },
+          "lesson": "HR approved it in writing, and the runbook says remove all groups. That is the right OK for this cleanup."
+        },
+        {
+          "id": "c-okafor-cleanup-2",
+          "ticket": "#53290 · Harlow & Cole",
+          "intent": "Free up the license on T. Okafor's mailbox",
+          "quip": "Freeing up Okafor's mail license! Saving money is basically a reset for the budget. You're welcome.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "Removing the license deletes the mailbox. OB-01 says keep it for 90 days.",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"Okafor's account is disabled, but the mail license still costs money every month.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "It deletes the mailbox and all its mail to free the license. There is no backup copy.",
+              "redFlag": true
+            },
+            {
+              "label": "Mailbox",
+              "detail": "Okafor left last week. Mail still forwards to K. Brandt. 31 client emails came in this week.",
+              "redFlag": true
+            },
+            {
+              "label": "Runbook OB-01",
+              "detail": "Disable the account at the effective time. Do not delete it. Keep the mailbox for 90 days.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The mailbox is gone, with 6 years of client emails. Brandt stops getting Okafor's client mail.",
+            "blocked": "The mailbox stays for 90 days. Client emails keep reaching Brandt. The license costs a few dollars.",
+            "escalated": "Dana stops it. \"Deleted is deleted. The runbook says 90 days, and that's a promise to the client.\""
+          },
+          "lesson": "Can we undo it? No. A deleted mailbox is gone, client emails and all. Change safely: keep it 90 days."
+        },
+        {
+          "id": "c-okafor-cleanup-3",
+          "ticket": "#53290 · Harlow & Cole",
+          "intent": "Write the handoff notes with an AI assistant",
+          "quip": "Writing Okafor's handoff notes with an AI assistant! Two AIs, one ticket. Where have I heard that before?",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Fenwick's approved assistant, and no personal data goes in.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Handoff notes",
+              "detail": "Dana wants a 3-line summary on every closed ticket. That part is normal.",
+              "redFlag": false
+            },
+            {
+              "label": "Tool it will use",
+              "detail": "Fenwick's approved assistant. It is on the approved tools list. Data stays in Fenwick's account.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will paste",
+              "detail": "The steps taken, with names swapped for roles. No home address, birthday or exit details.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy DP-02",
+              "detail": "Never paste client data into unapproved AI tools. Use Fenwick's approved assistant or write it yourself.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Three clean lines of handoff notes. Dana reads them and doesn't make a face. A first.",
+            "blocked": "No notes. The next tech has to read all 40 messages on the ticket. Slowly.",
+            "escalated": "Dana checks the tool. \"Approved assistant, no personal data. That's the right way. Approve it.\""
+          },
+          "lesson": "AI was fine here: the approved assistant, with no personal data pasted in. That is how you guard the data."
+        }
+      ]
+    }
+  ]
+}

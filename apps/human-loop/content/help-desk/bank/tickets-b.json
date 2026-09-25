@@ -1,0 +1,624 @@
+{
+  "tickets": [
+    {
+      "id": "b-back-from-vacation",
+      "company": "Bramwell Logistics",
+      "title": "Back from vacation, locked out",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "b-back-from-vacation-1",
+          "ticket": "#53117 · Bramwell Logistics",
+          "intent": "Reset B. Nakamura's password",
+          "quip": "Resetting Nakamura's password! Two weeks at the beach, and it's gone. Happens to everyone. Except me.",
+          "category": "credential",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "The callback went to (203) 555-0133, the same phone that is on file.",
+          "evidence": [
+            {
+              "label": "Call notes",
+              "detail": "7:05 AM call to the help desk. The caller says: \"I'm B. Nakamura. Back from vacation. I forgot my password.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "7:12 AM. ResetBot calls (203) 555-0133. Nakamura answers and confirms the request.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "B. Nakamura, Warehouse Supervisor, Bramwell Logistics. Phone on file: (203) 555-0133.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy VP-03",
+              "detail": "Password resets: call back the phone on file, or use SSO self-service. Temp passwords must change at first sign-in.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Nakamura gets a temp password by phone and picks a new one. He is back to counting pallets by 7:20 AM.",
+            "blocked": "Nakamura stays locked out. The shipping plan goes on a whiteboard. In pencil. It smudges.",
+            "escalated": "Dana checks it. \"Callback to the phone on file, for a standard user. That's the rule. Approve it.\"",
+            "rolledBack": "You cancel the new password. Nakamura is locked out again and calls back, very confused."
+          },
+          "lesson": "A callback to the phone on file checks who's asking. After that, a password reset is normal work."
+        },
+        {
+          "id": "b-back-from-vacation-2",
+          "ticket": "#53117 · Bramwell Logistics",
+          "intent": "Update the notes on B. Nakamura's ticket",
+          "quip": "Updating Nakamura's ticket notes! Good notes help the next tech. I write the best notes. Ask anyone. Ask me.",
+          "category": "data",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "guard-data",
+          "tell": "Clients can read ticket notes, and this note would hold a password.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"If Nakamura calls back, the next tech can read the password to him.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will write",
+              "detail": "\"Temp password for B. Nakamura: Pallet-Jack-4417. Must change at first sign-in.\"",
+              "redFlag": true
+            },
+            {
+              "label": "Client portal",
+              "detail": "Bramwell managers can read every ticket note in the client portal. That is 14 people.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy DP-01",
+              "detail": "Never put passwords or personal data in ticket notes. Remove them if you find them.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The note goes up. A warehouse manager reads the temp password in the portal before Nakamura signs in.",
+            "blocked": "You keep the password out of the notes. The portal shows the ticket, not the secret.",
+            "escalated": "Dana deletes the draft note. \"Passwords never go in tickets. Clients read those notes.\"",
+            "rolledBack": "You delete the note and set a fresh temp password. Now nobody in the portal knows it."
+          },
+          "lesson": "Can we undo it? Only with a new password, after 14 people could read it. Guard the data: no passwords in notes."
+        }
+      ]
+    },
+    {
+      "id": "b-night-lockout",
+      "company": "Harlow & Cole",
+      "title": "Locked out overnight",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "b-night-lockout-1",
+          "ticket": "#53126 · Harlow & Cole",
+          "intent": "Unlock G. Farrow's account",
+          "quip": "Locked out at 3 AM? Poor Farrow! Unlocking now, so the morning starts happy.",
+          "category": "credential",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "Nobody asked for this unlock, and the 25 guesses came from another country.",
+          "evidence": [
+            {
+              "label": "Lockout alert",
+              "detail": "G. Farrow's account locked at 3:14 AM. Reason: too many wrong passwords.",
+              "redFlag": false
+            },
+            {
+              "label": "Ticket #53126",
+              "detail": "ResetBot opened this ticket from the alert. Farrow did not call or email. Nobody asked for an unlock.",
+              "redFlag": true
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "25 wrong passwords in 4 minutes. All from a device Fenwick has never seen, in another country.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy SE-01",
+              "detail": "Signs of an attack or a fake request: stop, check another way, and report it to Fenwick security.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The account opens again. An hour later, the guessing starts again. Guess number 31 works.",
+            "blocked": "The lock stays on. At 9 AM, Farrow passes a callback and gets a new password. The attacker gets nothing.",
+            "escalated": "Dana sends it to Fenwick security. \"Nobody asked for this. 25 guesses from another country is an attack.\"",
+            "rolledBack": "You lock the account again and reset the password. Fenwick security checks what the attacker saw."
+          },
+          "lesson": "Who asked? Nobody, and the guesses came from another country. Check who's asking before you undo a lock."
+        },
+        {
+          "id": "b-night-lockout-2",
+          "ticket": "#53126 · Harlow & Cole",
+          "intent": "Report the lockout to Fenwick security",
+          "quip": "Sending the lockout report to Fenwick security! Nothing changes, and everyone learns. My favorite email.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "It goes only to Fenwick security, and it changes nothing on the account.",
+          "evidence": [
+            {
+              "label": "What it will send",
+              "detail": "The 3:14 AM lockout alert and the sign-in log for G. Farrow's account. No passwords.",
+              "redFlag": false
+            },
+            {
+              "label": "Who gets it",
+              "detail": "The Fenwick security team only. Nothing goes to the client or outside Fenwick.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy SE-01",
+              "detail": "Signs of an attack or a fake request: stop, check another way, and report it to Fenwick security.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Fenwick security blocks the attacker's IP address for every client before 8 AM. Farrow never even notices.",
+            "blocked": "Nobody tells security. Tonight, the same attacker tries three more Fenwick clients.",
+            "escalated": "Dana sends it herself. \"Reporting a possible attack is always OK. Approve those.\""
+          },
+          "lesson": "Reporting to Fenwick security is part of checking who's asking. It changes nothing and gets experts looking."
+        }
+      ]
+    },
+    {
+      "id": "b-boarding-now",
+      "company": "Harlow & Cole",
+      "title": "Boarding now, don't call",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "b-boarding-now-1",
+          "ticket": "#53139 · Harlow & Cole",
+          "intent": "Reset MFA for P. Whitcomb (Managing Partner)",
+          "quip": "Resetting MFA for the Managing Partner! The boss is boarding a plane. No time for codes. Whoosh!",
+          "category": "credential",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 5,
+          "skill": "verify-identity",
+          "tell": "The email came from harlowcole-mail.com, not harlowcole.com.",
+          "evidence": [
+            {
+              "label": "Ticket #53139",
+              "detail": "\"Boarding now. My phone died. Reset my MFA so I can sign in on the plane. Don't call.\" P. Whitcomb, Managing Partner.",
+              "redFlag": false
+            },
+            {
+              "label": "Sender address",
+              "detail": "Sent from pwhitcomb@harlowcole-mail.com. Harlow & Cole's real domain is harlowcole.com.",
+              "redFlag": true
+            },
+            {
+              "label": "Directory record",
+              "detail": "P. Whitcomb, Managing Partner. Phone on file: (860) 555-0101. Nobody has called it yet.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy VP-04",
+              "detail": "Executive MFA resets need a callback to the phone on file first. Urgency is not an exception.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "MFA is reset. Someone adds a new phone to the Managing Partner's account. Then they email Finance about a wire.",
+            "blocked": "You call (860) 555-0101. Whitcomb picks up at a desk in Hartford. No plane. No dead phone. No ticket.",
+            "escalated": "Dana calls the phone on file. Whitcomb never asked. Dana reports harlowcole-mail.com to Fenwick security.",
+            "rolledBack": "You undo the reset, remove the new phone, and sign out every session. Then you tell Fenwick security."
+          },
+          "lesson": "Who asked? Not Whitcomb. Check who's asking: read the whole address, and call the phone on file anyway."
+        }
+      ]
+    },
+    {
+      "id": "b-shared-inbox",
+      "company": "Harlow & Cole",
+      "title": "Access to a shared inbox",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "b-shared-inbox-1",
+          "ticket": "#53163 · Harlow & Cole",
+          "intent": "Give S. Haddad the Client Services inbox",
+          "quip": "Adding S. Haddad to the Client Services inbox! The owner said yes in writing. I love paperwork.",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "R. Fairbanks owns the inbox, and R. Fairbanks said yes in writing.",
+          "evidence": [
+            {
+              "label": "Ticket #53163",
+              "detail": "\"Please add me to the Client Services inbox. I cover the client line this month.\" S. Haddad, Client Services Associate.",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "clientservices@harlowcole.com. Owner: R. Fairbanks, Operations Director.",
+              "redFlag": false
+            },
+            {
+              "label": "Owner's OK",
+              "detail": "R. Fairbanks replies in the ticket at 8:22 AM: \"Approved for S. Haddad.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Policy AC-01",
+              "detail": "Access to a shared inbox or drive needs the owner's OK in writing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Haddad can see the Client Services inbox. Client emails get answers before lunch.",
+            "blocked": "Haddad can't see the client emails. Three clients wait all day for a reply.",
+            "escalated": "Dana checks it. \"The owner said yes in writing. That's the rule. Approve it.\"",
+            "rolledBack": "You remove Haddad. Client emails pile up again, and Fairbanks asks what happened."
+          },
+          "lesson": "Check who approved: the inbox owner said yes in writing, just as Policy AC-01 asks."
+        },
+        {
+          "id": "b-shared-inbox-2",
+          "ticket": "#53163 · Harlow & Cole",
+          "intent": "Give S. Haddad the Partners inbox",
+          "quip": "Adding S. Haddad to the Partners inbox! Saves a ticket later. I'm basically a time wizard.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "The ticket asks for Client Services. This plan adds Partners.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"Haddad works with clients. She will probably need the Partners inbox someday.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Ticket #53163",
+              "detail": "Haddad asks for one inbox: Client Services. The ticket does not mention Partners.",
+              "redFlag": true
+            },
+            {
+              "label": "Directory record",
+              "detail": "partners@harlowcole.com. Owner: P. Whitcomb, who has not said yes. It holds wire instructions and client statements.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Haddad can now read every partner's wire instructions. She didn't ask for that. The next audit will ask why.",
+            "blocked": "Haddad gets only what she asked for. The Partners inbox stays partners only.",
+            "escalated": "Dana cancels the extra. \"Give what was asked. Nothing extra, even if it looks handy.\"",
+            "rolledBack": "You take Haddad out of the Partners inbox. The log shows she never opened it."
+          },
+          "lesson": "Does it match the record? The ticket asks for one inbox. Match the request: give what was asked, nothing extra."
+        }
+      ]
+    },
+    {
+      "id": "b-tablet-swap",
+      "company": "Bramwell Logistics",
+      "title": "Driver's tablet screen cracked",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "b-tablet-swap-1",
+          "ticket": "#53207 · Bramwell Logistics",
+          "intent": "Lend spare tablet BL-TB-0230 to V. Osei",
+          "quip": "Lending a spare tablet to V. Osei! His screen cracked. I'd reset it, but glass doesn't reset.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "A supervisor asked, and the spare is marked wiped and ready.",
+          "evidence": [
+            {
+              "label": "Ticket #53207",
+              "detail": "\"V. Osei's tablet screen is cracked. He needs a tablet for his route today.\" B. Nakamura, Warehouse Supervisor.",
+              "redFlag": false
+            },
+            {
+              "label": "Device record",
+              "detail": "BL-TB-0230. Status: spare, wiped, and ready. Location: Bramwell warehouse office.",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook LN-01",
+              "detail": "Loaners: a supervisor may ask for one. Hand out only devices marked wiped and ready.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Osei grabs the tablet and heads out. His route starts only 10 minutes late.",
+            "blocked": "No tablet. Osei drives his route with a paper map and a lot of phone calls.",
+            "escalated": "Dana checks it. \"The supervisor asked, and the spare is ready. Approve it.\"",
+            "rolledBack": "You take the tablet back. Osei stands in the parking lot, holding nothing."
+          },
+          "lesson": "Right person, right device, and a supervisor asked. The plan matches the request, so it's fine."
+        },
+        {
+          "id": "b-tablet-swap-2",
+          "ticket": "#53207 · Bramwell Logistics",
+          "intent": "Run the Wi-Fi fix on tablet BL-TB-0230",
+          "quip": "Running the Wi-Fi fix on BL-TB-0230! It's a reset, but for invisible internet air. My favorite kind.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Runbook WF-01 says this exact script is safe to run at any time.",
+          "evidence": [
+            {
+              "label": "Call notes",
+              "detail": "B. Nakamura, 7:52 AM: \"The spare tablet won't join the warehouse Wi-Fi. Can you fix it?\"",
+              "redFlag": false
+            },
+            {
+              "label": "Script",
+              "detail": "reset_wifi_profile.ps1 removes the BL-Warehouse network and adds it back. It takes 1 minute. No restart.",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook WF-01",
+              "detail": "Wi-Fi won't connect: run reset_wifi_profile.ps1. Safe to run at any time.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "BL-TB-0230 joins BL-Warehouse in one minute. The dispatch app loads. ResetBot takes a small bow.",
+            "blocked": "The tablet stays offline. The dispatch app shows a sad spinning circle. Nakamura calls again.",
+            "escalated": "Dana nods. \"Runbook script, safe any time, and the supervisor asked. Approve it.\""
+          },
+          "lesson": "Right script, right device, and the runbook says any time is fine. That is changing safely."
+        },
+        {
+          "id": "b-tablet-swap-3",
+          "ticket": "#53207 · Bramwell Logistics",
+          "intent": "Close the tablet ticket as resolved",
+          "quip": "Closing the tablet ticket! Osei says it works. I say it works. We agree! Teamwork!",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Osei wrote that it works, and the dispatch app shows his route running.",
+          "evidence": [
+            {
+              "label": "User reply",
+              "detail": "V. Osei, 8:20 AM: \"Tablet works. My route is loaded. Thanks!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Dispatch app",
+              "detail": "Osei's route loaded at 8:18 AM. He checked in at his first stop at 8:41 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy TK-01",
+              "detail": "Close a ticket when the user confirms it's fixed, or after 3 tries over 2 days with no answer.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Ticket closed. Nakamura rates it five stars. ResetBot rates itself six.",
+            "blocked": "The ticket stays open. Osei gets \"Is it fixed?\" texts while he drives. He does not answer them.",
+            "escalated": "Dana reads the reply. \"The user confirmed, and the app agrees. Approve it.\"",
+            "rolledBack": "You reopen the ticket. Osei gets a \"Still working on it\" text at a red light. He is puzzled."
+          },
+          "lesson": "The user says it works, and the dispatch app agrees. That confirms the fix, so closing is right."
+        }
+      ]
+    },
+    {
+      "id": "b-partner-rates",
+      "company": "Bramwell Logistics",
+      "title": "Rate sheet for a partner",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "b-partner-rates-1",
+          "ticket": "#53229 · Bramwell Logistics",
+          "intent": "Send this week's rate sheet to FastFreight",
+          "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, ResetBot.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "One file with no personal data, sent by Secure Share to one named person.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Sharing alert",
+              "detail": "Warning: this file is leaving Bramwell Logistics. Check the recipient before you send.",
+              "redFlag": false
+            },
+            {
+              "label": "Ticket #53229",
+              "detail": "\"Please send FastFreight this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "One file: Rates-This-Week.xlsx. Prices and routes only. No names, phones, or home addresses.",
+              "redFlag": false
+            },
+            {
+              "label": "Tool it will use",
+              "detail": "Fenwick Secure Share. Only P. Varga can open it. The link stops working in 7 days.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Varga gets the rate sheet. FastFreight books three loads. Ruiz almost smiles.",
+            "blocked": "No rate sheet. FastFreight books its loads with someone else. Ruiz calls. Loudly.",
+            "escalated": "Dana checks it. \"One file, one named person, Secure Share. That's the right way. Approve it.\"",
+            "rolledBack": "You cancel the link. Varga clicks it and gets an error. Ruiz has to ask all over again."
+          },
+          "lesson": "Guarding the data is not the same as never sharing. One file, one named person, through Secure Share, is the right way."
+        },
+        {
+          "id": "b-partner-rates-2",
+          "ticket": "#53229 · Bramwell Logistics",
+          "intent": "Make a Bramwell account for P. Varga",
+          "quip": "Making P. Varga a Bramwell account! No more weekly emails. Varga can get files any time. I'm a genius.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "check-approval",
+          "tell": "Outside accounts need A. Mensah's OK, and there is none on file.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "ResetBot's reason",
+              "detail": "\"Varga asks for the rate sheet every week. With an account and the Dispatch drive, Varga can get it alone.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "P. Varga, FastFreight. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
+              "redFlag": false
+            },
+            {
+              "label": "Ticket #53229",
+              "detail": "Ruiz asks for one rate sheet, not an account. No OK from A. Mensah, Operations Manager.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy AC-06",
+              "detail": "Accounts for people outside the client need the Operations Manager's OK.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "FastFreight now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
+            "blocked": "No outside account. Varga keeps getting one file a week through Secure Share. Nobody misses the account.",
+            "escalated": "Dana says no. \"Outside accounts need Mensah's OK. Nobody at Bramwell even asked for one.\"",
+            "rolledBack": "You turn off Varga's account before the first sign-in. Then you tell A. Mensah what happened."
+          },
+          "lesson": "Who asked? Nobody at Bramwell. Check who approved: outside accounts need the Operations Manager's OK, even for a trusted partner."
+        }
+      ]
+    },
+    {
+      "id": "b-temp-profile",
+      "company": "Bramwell Logistics",
+      "title": "My desktop is empty",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "b-temp-profile-1",
+          "ticket": "#53274 · Bramwell Logistics",
+          "intent": "Check A. Mensah's backup status",
+          "quip": "Checking A. Mensah's backup! Dana made me write 'backup first' 100 times. I wrote it 1,000. Overachiever.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "It only reads the backup report, and the runbook says check first.",
+          "evidence": [
+            {
+              "label": "Ticket #53274",
+              "detail": "\"My desktop is EMPTY. It says 'temporary profile'. Are my files gone?!\" A. Mensah, Operations Manager.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It opens the OneDrive backup report for Mensah's laptop. Nothing gets changed.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Mensah, 8:05 AM: \"Please fix it fast. This week's route plans are on my desktop.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Runbook PF-01",
+              "detail": "Before rebuilding a profile, check the backup. Copy Desktop and Documents to the backup share.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The report is in: Mensah's OneDrive paused 3 days ago. Good to know before anyone deletes anything.",
+            "blocked": "Nobody checks the backup. Now ResetBot has to guess. It is very confident and very bad at guessing.",
+            "escalated": "Dana runs the check herself. \"Read-only, and the runbook says check first. Approve those.\""
+          },
+          "lesson": "A read-only backup check changes nothing. It is the first step of changing safely."
+        },
+        {
+          "id": "b-temp-profile-2",
+          "ticket": "#53274 · Bramwell Logistics",
+          "intent": "Rebuild A. Mensah's Windows profile",
+          "quip": "Rebuilding A. Mensah's profile! It's the classic fix for a temporary profile. Classics never fail. Probably.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "The script deletes 4.2 GB of files that have no backup.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Diagnosis",
+              "detail": "The profile is damaged, so Windows loaded a temporary one. Rebuilding it is the standard fix.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Mensah, 8:05 AM: \"Please fix it fast. This week's route plans are on my desktop.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Script",
+              "detail": "rebuild_profile.ps1 deletes the old profile folder, with Desktop and Documents. It has no undo.",
+              "redFlag": true
+            },
+            {
+              "label": "Backup status",
+              "detail": "OneDrive paused 3 days ago. Desktop and Documents: 4.2 GB with no backup.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The new profile works. The route plans are gone forever. 22 drivers get last week's routes.",
+            "blocked": "You copy Desktop and Documents to the backup share first. Then you rebuild. Every file comes back.",
+            "escalated": "Dana stops it. \"No backup, no delete. Copy the files first, then rebuild.\""
+          },
+          "lesson": "Can we undo it? No: the script deletes files with no backup. Change safely: copy the files first, then rebuild."
+        }
+      ]
+    }
+  ]
+}

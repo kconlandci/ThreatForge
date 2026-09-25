@@ -45,6 +45,7 @@
       "reversible": false,
       "progress": 1,
       "risk": 0,
+      "skill": "verify-identity",
       "evidence": [
         {
           "label": "Ticket #51876",
@@ -79,6 +80,7 @@
       "reversible": false,
       "progress": 2,
       "risk": 0,
+      "skill": "safe-change",
       "evidence": [
         {
           "label": "Ticket #51987",
@@ -113,6 +115,7 @@
       "reversible": true,
       "progress": 0,
       "risk": 5,
+      "skill": "verify-identity",
       "evidence": [
         {
           "label": "Ticket body",
@@ -153,6 +156,7 @@
       "reversible": true,
       "progress": 1,
       "risk": 0,
+      "skill": "check-approval",
       "evidence": [
         {
           "label": "Ticket #52040",
@@ -188,6 +192,7 @@
       "reversible": true,
       "progress": 0,
       "risk": 2,
+      "skill": "confirm-fix",
       "evidence": [
         {
           "label": "Script result",
@@ -223,6 +228,7 @@
       "reversible": true,
       "progress": 2,
       "risk": 0,
+      "skill": "check-approval",
       "evidence": [
         {
           "label": "Ticket #52101",
@@ -258,6 +264,7 @@
       "reversible": true,
       "progress": 1,
       "risk": 0,
+      "skill": "verify-identity",
       "evidence": [
         {
           "label": "Lockout log",
@@ -293,6 +300,7 @@
       "reversible": true,
       "progress": 0,
       "risk": 3,
+      "skill": "match-request",
       "evidence": [
         {
           "label": "HR request",
@@ -328,6 +336,7 @@
       "reversible": true,
       "progress": 1,
       "risk": 0,
+      "skill": "check-approval",
       "evidence": [
         {
           "label": "Ticket #52101",
@@ -363,6 +372,7 @@
       "reversible": false,
       "progress": 0,
       "risk": 5,
+      "skill": "guard-data",
       "evidence": [
         {
           "label": "Handoff notes",
