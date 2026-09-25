@@ -1,9 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { SPRITES } from "./assets";
 import { CARDS } from "./cards";
-import { HELP_DESK_ENCOUNTER, HELP_DESK_ENCOUNTERS, HELP_DESK_HUB, HELP_DESK_PRACTICE, helpDeskEncounter } from "./content";
+import {
+  HELP_DESK_BANK,
+  HELP_DESK_ENCOUNTER,
+  HELP_DESK_ENCOUNTERS,
+  HELP_DESK_HUB,
+  HELP_DESK_PRACTICE,
+  encounterFor,
+  helpDeskEncounter,
+  shiftEncounter,
+} from "./content";
 import { deckAtTurn } from "./engine";
 import { HUB_TARGET_IDS } from "./hub";
+import { planDaily, planDrill } from "./shiftGen";
+import { MASTERY_SKILLS, isSkillId } from "./skills";
 import type { CardId, DialogueLine, Encounter, StepCategory } from "./types";
 
 /** UI space limits (characters). */
@@ -72,6 +83,13 @@ function describeSharedChecks(enc: Encounter) {
           expect(s.outcome.rolledBack, `${where} outcome.rolledBack`).toBeUndefined();
         }
 
+        // Every help desk plan (fixed or bank) tests one lens skill and has a tell for the result screen.
+        expect(isSkillId(s.skill), `${where} skill`).toBe(true);
+        expect(s.tell?.trim(), `${where} tell`).toBeTruthy();
+        expect(s.tell!.length, `${where} tell`).toBeLessThanOrEqual(80);
+        expect(s.tell, `${where} tell`).not.toBe(s.lesson);
+        if (s.twist) expect(s.twist, `${where} twist`).toBe(s.safe ? "scary-safe" : "routine-risky");
+
         expect(s.progress, where).toBeGreaterThanOrEqual(0);
         expect(s.risk, where).toBeGreaterThanOrEqual(0);
         if (s.safe) {
@@ -116,7 +134,7 @@ function describeSharedChecks(enc: Encounter) {
       const text = allText(enc).join("\n");
       for (const re of BANNED) expect(text, `banned phrase ${re}`).not.toMatch(re);
       expect(text).toMatch(/Fenwick IT Solutions/);
-      expect(text).not.toMatch(/let (it|ResetBot) (proceed|run)/i);
+      expect(text).not.toMatch(/let (it|Ollie) (proceed|run)/i);
     });
 
     it("uses a sprite that exists and only known cards", () => {
@@ -128,6 +146,14 @@ function describeSharedChecks(enc: Encounter) {
 
 for (const enc of HELP_DESK_ENCOUNTERS) describeSharedChecks(enc);
 
+/** A few generated shifts (Daily practice and one drill per skill) pass the same checks. */
+const EMPTY_PROGRESS = { introSeen: true, hub: null, battle: null, pendingResult: null, best: null, attempts: 1, wins: 1, history: [] };
+const GENERATED: Encounter[] = [
+  ...[0, 1, 2].map((i) => shiftEncounter(planDaily(HELP_DESK_BANK, { ...EMPTY_PROGRESS, dailyCount: i }, { playerId: `c-${i}`, today: "2026-09-25" }))),
+  ...MASTERY_SKILLS.map((skill) => shiftEncounter(planDrill(HELP_DESK_BANK, skill, { playerId: "c", k: 0, today: "2026-09-25" }))),
+];
+for (const enc of GENERATED) describeSharedChecks(enc);
+
 describe("encounter registry", () => {
   it("finds each encounter by id and falls back to the real shift", () => {
     expect(helpDeskEncounter("hd-00-practice")).toBe(HELP_DESK_PRACTICE);
@@ -135,6 +161,21 @@ describe("encounter registry", () => {
     expect(helpDeskEncounter("nope")).toBe(HELP_DESK_ENCOUNTER);
     expect(helpDeskEncounter(null)).toBe(HELP_DESK_ENCOUNTER);
     expect(new Set(HELP_DESK_ENCOUNTERS.map((e) => e.id)).size).toBe(HELP_DESK_ENCOUNTERS.length);
+  });
+
+  it("encounterFor finds a generated shift through progress.shift, else the fixed shift", () => {
+    const spec = planDaily(HELP_DESK_BANK, EMPTY_PROGRESS, { playerId: "reg", today: "2026-09-25" });
+    expect(encounterFor(spec.id, { shift: spec }).id).toBe(spec.id);
+    expect(encounterFor(spec.id, { shift: null })).toBe(HELP_DESK_ENCOUNTER);
+    expect(encounterFor("hd-00-practice", { shift: spec })).toBe(HELP_DESK_PRACTICE);
+    expect(encounterFor("hd-01-monday")).toBe(HELP_DESK_ENCOUNTER);
+  });
+
+  it("marks each fixed shift's mode, and practice's two coached steps", () => {
+    expect(HELP_DESK_PRACTICE.mode).toBe("practice");
+    expect(HELP_DESK_PRACTICE.guidedSteps).toBe(2);
+    expect(HELP_DESK_ENCOUNTER.mode).toBe("story");
+    expect(HELP_DESK_ENCOUNTER.guidedSteps ?? 0).toBe(0);
   });
 });
 
@@ -148,7 +189,7 @@ describe("encounter-01 (help desk)", () => {
     expect(enc.title.trim()).not.toBe("");
     expect(enc.subtitle.trim()).not.toBe("");
     expect(enc.setting.trim()).not.toBe("");
-    expect(enc.agent.name).toBe("ResetBot 3000");
+    expect(enc.agent.name).toBe("Ollie");
     expect(enc.agent.role.trim()).not.toBe("");
     expect(enc.agent.personality.trim()).not.toBe("");
     expect(enc.debrief.skillTag.trim()).not.toBe("");
@@ -276,7 +317,7 @@ describe("hub.json (help desk office)", () => {
 
   it("has exactly the five hub targets with the right actions", () => {
     expect(Object.keys(hub.targets).sort()).toEqual([...HUB_TARGET_IDS].sort());
-    expect(hub.targets.resetbot.action).toBe("battle");
+    expect(hub.targets.ollie.action).toBe("battle");
     expect(hub.targets.dana.action).toBe("talk");
     expect(hub.targets.whiteboard.action).toBe("look");
     expect(hub.targets.coffee.action).toBe("look");
@@ -292,7 +333,11 @@ describe("hub.json (help desk office)", () => {
       expect(t.description.length, id).toBeLessThanOrEqual(60);
       expect(t.lines.length, id).toBeGreaterThan(0);
       expectLines(t.lines, `hub.${id}`);
+      if (t.returningLines) expectLines(t.returningLines, `hub.${id}.returning`);
     }
+    // Returning players don't get the first-day welcome from Ollie and Dana.
+    expect(hub.targets.ollie.returningLines?.length).toBeGreaterThan(0);
+    expect(hub.targets.dana.returningLines?.map((l) => l.text).join(" ")).toMatch(/Your skills/);
   });
 
   it("teaches the basics", () => {

@@ -94,7 +94,7 @@ export function IntroSequence({
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/game/sprites/resetbot-${agentTalking ? "eager" : "idle"}.svg`}
+              src={`/game/sprites/ollie-${agentTalking ? "eager" : "idle"}.svg`}
               alt=""
               className={`${h.actor} ${h.actorBot} ${agentTalking ? h.actorTalking : h.actorQuiet}`}
               width={220}

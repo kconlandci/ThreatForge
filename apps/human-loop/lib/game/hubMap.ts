@@ -37,7 +37,7 @@ export interface HubProp {
 }
 
 export interface HubCharacter {
-  id: "resetbot" | "dana";
+  id: "ollie" | "dana";
   sprite: SpriteKey;
   tile: GridPos;
   offset?: { x: number; y: number };
@@ -120,12 +120,12 @@ export const HUB_MAP: HubMap = {
     },
     { id: "plant-door", sprite: "plant", tile: { x: 0, y: 7 } },
     // Desks.
-    { id: "desk-resetbot", sprite: "desk-resetbot", tile: { x: 4, y: 3 }, target: "resetbot" },
+    { id: "desk-ollie", sprite: "desk-ollie", tile: { x: 4, y: 3 }, target: "ollie" },
     { id: "desk-player", sprite: "desk-monitor", tile: { x: 2, y: 5 } },
     { id: "chair-player", sprite: "chair", tile: { x: 2, y: 6 }, offset: { x: 6, y: -8 }, blocks: [] },
   ],
   characters: [
-    { id: "resetbot", sprite: "resetbot", tile: { x: 5, y: 2 }, facing: "left", target: "resetbot" },
+    { id: "ollie", sprite: "ollie", tile: { x: 5, y: 2 }, facing: "left", target: "ollie" },
     { id: "dana", sprite: "dana", tile: { x: 1, y: 2 }, facing: "right", target: "dana" },
   ],
   decor: [
@@ -136,7 +136,7 @@ export const HUB_MAP: HubMap = {
     { id: "window-l1", sprite: "wall-window-left", wall: "left", along: 1.9, height: 60 },
   ],
   targets: {
-    resetbot: { tile: { x: 4, y: 4 }, facing: "right", hotTiles: [{ x: 4, y: 3 }, { x: 5, y: 2 }] },
+    ollie: { tile: { x: 4, y: 4 }, facing: "right", hotTiles: [{ x: 4, y: 3 }, { x: 5, y: 2 }] },
     dana: { tile: { x: 2, y: 2 }, facing: "left", hotTiles: [{ x: 1, y: 2 }] },
     whiteboard: { tile: { x: 1, y: 4 }, facing: "left", hotTiles: [{ x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }] },
     coffee: { tile: { x: 3, y: 1 }, facing: "right", hotTiles: [{ x: 4, y: 0 }] },
@@ -145,8 +145,8 @@ export const HUB_MAP: HubMap = {
   spawn: { x: 3, y: 6 },
   spawnFacing: "right",
   blinkLights: [
-    // ResetBot's antenna (resetbot.svg, 52 x 66).
-    { on: "resetbot", x: 22, y: 3.4, color: 0xff8a3d, radius: 3.2 },
+    // Ollie's antenna (ollie.svg, 52 x 66).
+    { on: "ollie", x: 22, y: 3.4, color: 0xff8a3d, radius: 3.2 },
     // Server rack status LEDs (server-rack.svg, 44 x 96: front face is skewed, y += 0.5 * x).
     { on: "server-rack", x: 10.88, y: 19.88, color: 0x43e0c4, radius: 1.3 },
     { on: "server-rack", x: 13.08, y: 34.88, color: 0xff8a3d, radius: 1.3 },

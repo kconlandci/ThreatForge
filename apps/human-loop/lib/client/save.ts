@@ -15,7 +15,19 @@
  * `retry: true` (with Retry-After) means storage is only temporarily unavailable: ask again later.
  */
 import type { PathwayId } from "@/lib/types";
-import type { BattleState, PathwayProgress, SaveData, SaveProfile } from "@/lib/game/types";
+import { isDay, isMissReason, RECENT_MAX, RECORD_DAYS_MAX, APPLIED_MAX, PRACTICE_DAYS_KEEP } from "@/lib/game/mastery";
+import { isMasterySkillId } from "@/lib/game/skills";
+import type {
+  BattleState,
+  HistoryEntry,
+  MasterySkillId,
+  PathwayProgress,
+  SaveData,
+  SaveProfile,
+  ShiftSpec,
+  SkillLevel,
+  SkillRecord,
+} from "@/lib/game/types";
 
 const KEY = "human-loop:save:v2";
 /**
@@ -86,8 +98,115 @@ function toProfile(value: unknown): SaveProfile | null {
   };
 }
 
+/* ---- M3 mastery fields: rebuilt field by field, junk dropped, sizes capped ---------------- */
+
+const ID_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const MODES = new Set(["story", "practice", "daily", "drill"]);
+const MAX_SCORED = 64;
+const MAX_DRILL_COUNT = 1_000_000;
+
+function int(value: unknown, max: number): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(0, Math.floor(value))) : null;
+}
+
+function uniqueDays(value: unknown, keep: number): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter(isDay))].sort().slice(-keep);
+}
+
+function toSkillRecord(value: unknown): SkillRecord | null {
+  if (!isObj(value)) return null;
+  const recent = (typeof value.recent === "string" ? value.recent.replace(/[^RPWrpw]/g, "") : "").slice(-RECENT_MAX);
+  const n = Math.max(int(value.n, 1_000_000) ?? 0, recent.length);
+  if (n === 0) return null;
+  const days = uniqueDays(value.days, RECORD_DAYS_MAX);
+  const last = isDay(value.last) ? value.last : days[days.length - 1] ?? "";
+  const level = Math.max(1, int(value.level, 4) ?? 1) as SkillLevel;
+  const rec: SkillRecord = { recent, n, level, days, last, solidOn: level >= 3 && isDay(value.solidOn) ? value.solidOn : null };
+  if (typeof value.miss === "string" && ID_RE.test(value.miss)) rec.miss = value.miss;
+  if (rec.miss && isMissReason(value.missWhy)) rec.missWhy = value.missWhy;
+  return rec;
+}
+
+function toSkills(value: unknown): Partial<Record<MasterySkillId, SkillRecord>> {
+  const out: Partial<Record<MasterySkillId, SkillRecord>> = {};
+  if (!isObj(value)) return out;
+  for (const [id, raw] of Object.entries(value)) {
+    if (!isMasterySkillId(id)) continue;
+    const rec = toSkillRecord(raw);
+    if (rec) out[id] = rec;
+  }
+  return out;
+}
+
+function idList(value: unknown, max: number): string[] | null {
+  if (!Array.isArray(value) || value.length > max || !value.every((x) => typeof x === "string" && ID_RE.test(x))) return null;
+  return value as string[];
+}
+
+/** A generated shift spec, or null when anything about it is off (the shift then starts fresh). */
+export function toShiftSpec(value: unknown): ShiftSpec | null {
+  if (!isObj(value)) return null;
+  const kind = value.kind;
+  const ticketIds = idList(value.ticketIds, 6);
+  const stepIds = idList(value.stepIds, 20);
+  const seed = value.seed;
+  const n = int(value.n, 1_000_000);
+  if ((kind !== "daily" && kind !== "drill") || !ticketIds || !stepIds || !ticketIds.length || !stepIds.length) return null;
+  if (typeof value.id !== "string" || !ID_RE.test(value.id)) return null;
+  if (typeof seed !== "number" || !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff || n === null) return null;
+  if (typeof value.bankVersion !== "string" || value.bankVersion.length > 32 || !isDay(value.createdOn)) return null;
+  const focus = Array.isArray(value.focus) ? [...new Set(value.focus.filter(isMasterySkillId))].slice(0, 2) : [];
+  if (kind === "drill" && focus.length !== 1) return null;
+  return { kind, id: value.id, seed, n, ticketIds, stepIds, focus, createdOn: value.createdOn, bankVersion: value.bankVersion };
+}
+
+function toDrillCount(value: unknown): Partial<Record<MasterySkillId, number>> {
+  const out: Partial<Record<MasterySkillId, number>> = {};
+  if (!isObj(value)) return out;
+  for (const [id, raw] of Object.entries(value)) {
+    const n = int(raw, MAX_DRILL_COUNT);
+    if (isMasterySkillId(id) && n !== null) out[id] = n;
+  }
+  return out;
+}
+
+function toRecentTickets(value: unknown): string[][] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((ids) => idList(ids, 6))
+    .filter((ids): ids is string[] => !!ids)
+    .slice(-2);
+}
+
+function toScored(value: unknown): Record<string, string> {
+  if (!isObj(value)) return {};
+  const entries = Object.entries(value).filter(([id, day]) => ID_RE.test(id) && isDay(day)) as [string, string][];
+  // Newest first when over the cap.
+  entries.sort((a, b) => (a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0));
+  return Object.fromEntries(entries.slice(0, MAX_SCORED));
+}
+
+function toApplied(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((k): k is string => typeof k === "string" && k.length > 0 && k.length <= 100).slice(-APPLIED_MAX);
+}
+
+function toHistoryEntry(value: Record<string, unknown>): HistoryEntry {
+  // Older fields keep their old (lenient) handling; the new optional ones are copied only when valid.
+  const entry = { ...value } as unknown as HistoryEntry & Record<string, unknown>;
+  for (const key of ["mode", "right", "partly", "missed", "focus"] as const) delete entry[key];
+  if (typeof value.mode === "string" && MODES.has(value.mode)) entry.mode = value.mode as HistoryEntry["mode"];
+  for (const key of ["right", "partly", "missed"] as const) {
+    const n = int(value[key], 20);
+    if (n !== null) entry[key] = n;
+  }
+  if (isMasterySkillId(value.focus)) entry.focus = value.focus;
+  return entry;
+}
+
 /** Fill in and type-check one pathway's progress, so a damaged save can't crash the game. */
-function toProgress(value: unknown): PathwayProgress {
+export function toProgress(value: unknown): PathwayProgress {
   const p = emptyPathwayProgress();
   if (!isObj(value)) return p;
   const hub = value.hub;
@@ -102,7 +221,15 @@ function toProgress(value: unknown): PathwayProgress {
     attempts: num(value.attempts),
     wins: num(value.wins),
     practiceDone: value.practiceDone === true,
-    history: Array.isArray(value.history) ? (value.history.filter(isObj) as unknown as PathwayProgress["history"]) : [],
+    history: Array.isArray(value.history) ? value.history.filter(isObj).map(toHistoryEntry) : [],
+    skills: toSkills(value.skills),
+    shift: toShiftSpec(value.shift),
+    dailyCount: int(value.dailyCount, 1_000_000) ?? 0,
+    drillCount: toDrillCount(value.drillCount),
+    recentTickets: toRecentTickets(value.recentTickets),
+    scored: toScored(value.scored),
+    applied: toApplied(value.applied),
+    days: uniqueDays(value.days, PRACTICE_DAYS_KEEP),
   };
 }
 
@@ -230,6 +357,14 @@ export function emptyPathwayProgress(): PathwayProgress {
     wins: 0,
     practiceDone: false,
     history: [],
+    skills: {},
+    shift: null,
+    dailyCount: 0,
+    drillCount: {},
+    recentTickets: [],
+    scored: {},
+    applied: [],
+    days: [],
   };
 }
 

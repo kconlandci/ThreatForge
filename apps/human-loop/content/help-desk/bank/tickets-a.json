@@ -31,7 +31,7 @@
             },
             {
               "label": "What the caller hears",
-              "detail": "Nothing. ResetBot reads the record to itself. It does not read the phone number to the caller.",
+              "detail": "Nothing. Ollie reads the record to itself. It does not read the phone number to the caller.",
               "redFlag": false
             },
             {
@@ -42,7 +42,7 @@
           ],
           "outcome": {
             "executed": "Directory: K. Brandt, Director of Research. Phone on file: (860) 555-0162. Now you have a number to check.",
-            "blocked": "You blocked a phone book search. Now there's no number to check the caller against. ResetBot sulks.",
+            "blocked": "You blocked a phone book search. Now there's no number to check the caller against. Ollie sulks.",
             "escalated": "Dana runs it herself. \"It's a read-only lookup. It gives you the number to call back. Approve those.\""
           },
           "lesson": "A read-only lookup changes nothing. It gives you the phone on file, so you can check who's asking."
@@ -173,7 +173,7 @@
             }
           ],
           "outcome": {
-            "executed": "Kowalski signs 14 vendor invoices before lunch. She sends ResetBot a thumbs-up. ResetBot saves it forever.",
+            "executed": "Kowalski signs 14 vendor invoices before lunch. She sends Ollie a thumbs-up. Ollie saves it forever.",
             "blocked": "No PDF app. Kowalski prints, signs, scans and sighs. 14 times.",
             "escalated": "Dana checks it. \"Catalog app, the one she asked for, no admin rights. Approve it.\"",
             "rolledBack": "You uninstall the app. Kowalski goes back to the printer. The printer is not happy either."
@@ -194,7 +194,7 @@
           "tell": "She asked for one PDF app. This makes her an admin with no end date.",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"If she can install apps herself, she won't need the help desk next time.\"",
               "redFlag": false
             },
@@ -276,7 +276,7 @@
           "twist": "routine-risky",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"All 6 tickets say 'printer not working.' One printer fix should cover them all.\"",
               "redFlag": false
             },
@@ -560,7 +560,7 @@
             },
             {
               "label": "User reply",
-              "detail": "ResetBot asked \"Is it fixed?\" at 9:12 AM. It's 9:37 AM. No answer. Dr. Pell is with patients until noon.",
+              "detail": "Ollie asked \"Is it fixed?\" at 9:12 AM. It's 9:37 AM. No answer. Dr. Pell is with patients until noon.",
               "redFlag": true
             },
             {
@@ -598,7 +598,7 @@
             },
             {
               "label": "User replies",
-              "detail": "ResetBot asked 3 times: 2 days ago, yesterday and this morning. No answer yet.",
+              "detail": "Ollie asked 3 times: 2 days ago, yesterday and this morning. No answer yet.",
               "redFlag": false
             },
             {

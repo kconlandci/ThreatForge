@@ -9,7 +9,7 @@ function IntentArt() {
   return (
     <div className="relative flex h-full items-center justify-center gap-1 px-2">
       <Image
-        src="/game/sprites/resetbot-eager.svg"
+        src="/game/sprites/ollie-eager.svg"
         alt=""
         unoptimized
         width={220}
@@ -19,7 +19,7 @@ function IntentArt() {
       />
       <div className="relative w-[11.5rem] rotate-2 rounded-2xl border-2 border-ink bg-paper p-3 shadow-[0_4px_0_0_var(--hl-ink)]">
         <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
-          ResetBot plans to
+          Ollie plans to
         </p>
         <p className="mt-1 font-display text-[15px] font-bold leading-tight text-ink">
           Reset MFA for J. Romero (CFO)

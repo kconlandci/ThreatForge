@@ -7,7 +7,7 @@ import { HUB_TARGET_IDS, type HubContent, type HubTargetId } from "@/lib/game/hu
 import h from "./hub.module.css";
 
 export const TARGET_ICON: Record<HubTargetId, LucideIcon> = {
-  resetbot: Bot,
+  ollie: Bot,
   dana: UserRound,
   whiteboard: Presentation,
   coffee: Coffee,

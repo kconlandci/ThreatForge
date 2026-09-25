@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARDS } from "./cards";
-import { blindBlocks, canResume, createBattle, deckAtTurn, endTurn, playCard, scoreBattle, validTargets } from "./engine";
+import { blindBlocks, blindSafeBlocks, canResume, createBattle, deckAtTurn, endTurn, playCard, scoreBattle, validTargets } from "./engine";
 import { nextFloat, seedState, shuffle } from "./rng";
 import { HELP_DESK_ENCOUNTER } from "./content";
 import type { AgentStep, BattleState, CardId, Encounter, PlayResult } from "./types";
@@ -32,7 +32,7 @@ const FIXTURE: Encounter = {
   pathwayId: "help-desk",
   title: "Fixture",
   subtitle: "",
-  agent: { name: "TestBot 9000", role: "", spriteKey: "resetbot", personality: "" },
+  agent: { name: "TestBot 9000", role: "", spriteKey: "ollie", personality: "" },
   setting: "",
   intro: [],
   maxRisk: 8,
@@ -574,6 +574,15 @@ describe("win and loss", () => {
     const careful = playCorrectly(createBattle(FIXTURE, 2), FIXTURE);
     expect(blindBlocks(careful, FIXTURE)).toEqual([]);
     expect(scoreBattle(careful, FIXTURE).stars).toBe(3);
+  });
+
+  it("lists safe plans blocked before their evidence was seen (for the result checklist's wording)", () => {
+    const start = createBattle(FIXTURE, 3);
+    // Turn 1 announces s1 (safe) and u1. Block s1 without inspecting it.
+    const blind = play(withHand(start, ["block", "inspect"], { energy: 3 }), "block", "s1");
+    expect(blindSafeBlocks(blind, FIXTURE)).toEqual(["s1"]);
+    const checked = play(play(withHand(start, ["block", "inspect"], { energy: 3 }), "inspect", "s1"), "block", "s1");
+    expect(blindSafeBlocks(checked, FIXTURE)).toEqual([]);
   });
 
   it("has a headline for every outcome", () => {

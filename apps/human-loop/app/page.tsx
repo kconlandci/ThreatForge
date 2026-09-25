@@ -156,7 +156,7 @@ export default function Home() {
                   </div>
                 </div>
                 <Image
-                  src="/game/sprites/resetbot-idle.svg"
+                  src="/game/sprites/ollie-idle.svg"
                   alt=""
                   unoptimized
                   width={220}

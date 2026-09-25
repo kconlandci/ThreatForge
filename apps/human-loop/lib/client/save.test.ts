@@ -323,3 +323,157 @@ describe("practiceDone (the practice shift before the real one)", () => {
     ).toBe(true);
   });
 });
+
+describe("M3 mastery fields (skills, shift spec, counters)", () => {
+  const KEY = "human-loop:save:v2";
+  const spec = {
+    kind: "daily" as const,
+    id: "hd-daily-3",
+    seed: 123456789,
+    n: 3,
+    ticketIds: ["a-pdf-editor", "c-lost-phone"],
+    stepIds: ["a-pdf-editor-1", "c-lost-phone-1", "a-pdf-editor-2", "c-lost-phone-2"],
+    focus: ["guard-data" as const, "approve-checked" as const],
+    createdOn: "2026-09-24",
+    bankVersion: "b1x2y3",
+  };
+  const full = {
+    skills: {
+      "verify-identity": { recent: "RrPWr", n: 9, level: 2 as const, days: ["2026-09-22", "2026-09-24"], last: "2026-09-24", solidOn: null, miss: "romero-mfa-reset" },
+      "approve-checked": { recent: "rrrrrr", n: 12, level: 3 as const, days: ["2026-09-20", "2026-09-23", "2026-09-24"], last: "2026-09-24", solidOn: "2026-09-23" },
+      "confirm-fix": { recent: "Rrp", n: 3, level: 1 as const, days: ["2026-09-24"], last: "2026-09-24", solidOn: null, miss: "a-queue-cleanup-1", missWhy: "Fixed it later" },
+    },
+    shift: spec,
+    dailyCount: 4,
+    drillCount: { "guard-data": 2 },
+    recentTickets: [["a-pdf-editor", "c-lost-phone"], ["b-tablet-swap"]],
+    scored: { "a-pdf-editor-1": "2026-09-24", "romero-lookup": "2026-09-20" },
+    applied: ["hd-01-monday:42", "hd-daily-3:123456789"],
+    days: ["2026-09-20", "2026-09-24"],
+  };
+
+  it("round-trips every new field", async () => {
+    const save = await freshModule();
+    save.continueAsGuest();
+    const history = [
+      { encounterId: "hd-daily-3", status: "won" as const, stars: 0, at: "2026-09-24T10:00:00.000Z", catches: 2, falseAlarms: 0, misses: 1, mode: "daily" as const, right: 6, partly: 1, missed: 1, focus: "guard-data" as const },
+    ];
+    save.updateSave((s) => ({
+      ...s,
+      pathways: { ...s.pathways, "help-desk": { ...save.emptyPathwayProgress(), introSeen: true, history, ...full } },
+    }));
+    const raw = window.localStorage.getItem(KEY);
+    const again = await freshModule();
+    window.localStorage.setItem(KEY, raw as string);
+    const p = again.getPathwayProgress(again.loadSave(), "help-desk");
+    expect(p.skills).toEqual(full.skills);
+    expect(p.shift).toEqual(spec);
+    expect(p.dailyCount).toBe(4);
+    expect(p.drillCount).toEqual({ "guard-data": 2 });
+    expect(p.recentTickets).toEqual(full.recentTickets);
+    expect(p.scored).toEqual(full.scored);
+    expect(p.applied).toEqual(full.applied);
+    expect(p.days).toEqual(full.days);
+    expect(p.history).toEqual(history);
+    // Far below the Airtable save limit.
+    expect(JSON.stringify(full).length).toBeLessThan(3000);
+  });
+
+  it("drops junk field by field and caps sizes", async () => {
+    const save = await freshModule();
+    const p = save.toProgress({
+      introSeen: true,
+      attempts: 2,
+      wins: 1,
+      history: [
+        { encounterId: "hd-01-monday", status: "won", stars: 3, at: "x", catches: 1, falseAlarms: 0, misses: 0, mode: "boss", right: 99, partly: -3, missed: "2", focus: "hacking" },
+        "not an entry",
+      ],
+      skills: {
+        "verify-identity": { recent: "RrXXzzPW<>!", n: 1, level: 9, days: ["2026-09-24", "nope", "2026-02-30", "2026-09-24"], last: "yesterday", solidOn: "2026-09-01", miss: "<script>", missWhy: "Fixed it later" },
+        "guard-data": { recent: "", n: 0, level: 2 },
+        hacking: { recent: "RRR", n: 3, level: 4, days: [], last: "2026-09-24", solidOn: null },
+        "match-request": "strong",
+      },
+      shift: { ...spec, seed: -5 },
+      dailyCount: "lots",
+      drillCount: { "guard-data": 3.7, hacking: 2, "confirm-fix": "x" },
+      recentTickets: [["a-ok"], ["BAD ID"], ["b-ok"], ["c-ok"]],
+      scored: { "a-pdf-editor-1": "2026-09-24", "bad id!": "2026-09-24", "b-x-1": "Tuesday" },
+      applied: Array.from({ length: 15 }, (_, i) => `hd-daily-${i}:1`).concat([7 as unknown as string]),
+      days: Array.from({ length: 20 }, (_, i) => `2026-09-${String(i + 1).padStart(2, "0")}`).concat(["junk"]),
+    });
+    expect(p.attempts).toBe(2);
+    expect(p.history).toHaveLength(1);
+    const h = p.history[0];
+    expect(h.mode).toBeUndefined();
+    expect(h.right).toBe(20);
+    expect(h.partly).toBe(0);
+    expect(h.missed).toBeUndefined();
+    expect(h.focus).toBeUndefined();
+    expect(Object.keys(p.skills ?? {})).toEqual(["verify-identity"]);
+    expect(p.skills?.["verify-identity"]).toEqual({
+      recent: "RrPW",
+      n: 4,
+      level: 4,
+      days: ["2026-09-24"],
+      last: "2026-09-24",
+      solidOn: "2026-09-01",
+    });
+    expect(p.shift).toBeNull();
+    expect(p.dailyCount).toBe(0);
+    expect(p.drillCount).toEqual({ "guard-data": 3 });
+    expect(p.recentTickets).toEqual([["b-ok"], ["c-ok"]]);
+    expect(p.scored).toEqual({ "a-pdf-editor-1": "2026-09-24" });
+    expect(p.applied).toHaveLength(10);
+    expect(p.applied?.every((k) => typeof k === "string")).toBe(true);
+    expect(p.days).toHaveLength(14);
+    expect(p.days?.[13]).toBe("2026-09-20");
+  });
+
+  it("rejects a drill spec without exactly one skill, and a spec with too many steps", async () => {
+    const save = await freshModule();
+    expect(save.toShiftSpec({ ...spec, kind: "drill", id: "hd-drill-guard-data-0" })).toBeNull();
+    expect(save.toShiftSpec({ ...spec, kind: "drill", id: "hd-drill-guard-data-0", focus: ["guard-data"] })).not.toBeNull();
+    expect(save.toShiftSpec({ ...spec, stepIds: Array.from({ length: 21 }, (_, i) => `a-x-${i}`) })).toBeNull();
+    expect(save.toShiftSpec({ ...spec, createdOn: "today" })).toBeNull();
+    expect(save.toShiftSpec(null)).toBeNull();
+  });
+
+  it("loads an old save (before M3) with empty defaults and nothing back-filled", async () => {
+    const old = {
+      version: 2,
+      playerId: "local-abc",
+      profile: { name: "", email: "", guest: true, consentAt: null, marketingOptIn: false },
+      pathways: {
+        "help-desk": {
+          introSeen: true,
+          hub: { x: 3, y: 4 },
+          battle: null,
+          pendingResult: null,
+          best: { stars: 2, completedAt: "2026-09-01T10:00:00.000Z" },
+          attempts: 3,
+          wins: 2,
+          practiceDone: true,
+          history: [{ encounterId: "hd-01-monday", status: "won", stars: 2, at: "2026-09-01T10:00:00.000Z", catches: 3, falseAlarms: 1, misses: 1 }],
+        },
+      },
+      settings: { reducedMotion: null },
+      updatedAt: "2026-09-01T10:00:00.000Z",
+    };
+    const save = await freshModule();
+    window.localStorage.setItem(KEY, JSON.stringify(old));
+    const p = save.getPathwayProgress(save.loadSave(), "help-desk");
+    expect(p.attempts).toBe(3);
+    expect(p.best?.stars).toBe(2);
+    expect(p.history).toEqual(old.pathways["help-desk"].history);
+    expect(p.skills).toEqual({});
+    expect(p.shift).toBeNull();
+    expect(p.dailyCount).toBe(0);
+    expect(p.drillCount).toEqual({});
+    expect(p.recentTickets).toEqual([]);
+    expect(p.scored).toEqual({});
+    expect(p.applied).toEqual([]);
+    expect(p.days).toEqual([]);
+  });
+});

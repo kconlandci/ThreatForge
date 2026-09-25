@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Building, Check, Circle, Clock, RotateCcw, ShieldCheck, Star, TriangleAlert, X } from "lucide-react";
+import { Briefcase, Building, Check, Circle, Clock, RotateCcw, ShieldCheck, Star, Target, TriangleAlert, X } from "lucide-react";
+import { PlanList } from "@/components/skills/PlanList";
 import { buttonClass } from "@/components/site/ui";
-import { blindBlocks, scoreBattle } from "@/lib/game/engine";
-import type { BattleState, Encounter } from "@/lib/game/types";
-import { Debrief } from "./Debrief";
+import { blindBlocks, blindSafeBlocks, scoreBattle } from "@/lib/game/engine";
+import { skillName } from "@/lib/game/skills";
+import type { BattleState, Encounter, MasterySkillId } from "@/lib/game/types";
+import { PRACTICE_BTN } from "./ShiftResult";
 import { SpeakerFace, speakerName } from "./SpeakerFace";
 import r from "./result.module.css";
 
@@ -17,12 +19,24 @@ export interface ResultScreenProps {
   stageReady: boolean;
   onPlayAgain: () => void;
   onOffice: () => void;
+  /** Once Daily practice is open: the weakest skill of this shift, for "Practice this". */
+  practiceSkill?: MasterySkillId | null;
+  onPractice?: (skill: MasterySkillId) => void;
 }
 
 const STAR_WORDS = ["No stars this time.", "1 star out of 3.", "2 stars out of 3.", "3 stars out of 3!"];
 
 /** End of shift: headline, stars, stats, outro, and a debrief of every plan. */
-export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain, onOffice }: ResultScreenProps) {
+export function ResultScreen({
+  state,
+  encounter,
+  stage,
+  stageReady,
+  onPlayAgain,
+  onOffice,
+  practiceSkill = null,
+  onPractice,
+}: ResultScreenProps) {
   const score = scoreBattle(state, encounter);
   const won = state.status === "won";
   const outro = won
@@ -44,8 +58,12 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
     { label: "Finish the shift", ok: won },
     { label: "Nothing risky got through", ok: won && score.misses === 0 },
     {
-      // Name the rule that actually failed: checked every block, but blocked good work twice or more.
-      label: blind === 0 && score.falseAlarms > 1 ? "Block good work once at most" : "You checked before you blocked",
+      // Name the rule that actually counts: checked every risky block, but blocked good work twice
+      // or more, or blocked a good plan without checking it (the star rule is unchanged).
+      label:
+        blind === 0 && (score.falseAlarms > 1 || blindSafeBlocks(state, encounter).length > 0)
+          ? "Block good work once at most"
+          : "You checked before you blocked",
       ok: won && careful,
     },
   ];
@@ -57,11 +75,19 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
     { label: "Turns used", value: `${score.turnsUsed}/${encounter.maxTurns}`, Icon: Clock, bg: "var(--hl-ink)", fg: "#fff" },
   ];
 
+  // One primary button: "Practice this" once Daily practice is open, else "Play again".
+  const practice = practiceSkill && onPractice ? practiceSkill : null;
   const buttons = (withPathways: boolean) => (
     <div className={r.buttons}>
-      <button type="button" className={buttonClass("primary", "lg")} onClick={onPlayAgain}>
+      {practice && onPractice ? (
+        <button type="button" className={buttonClass("primary", "lg", PRACTICE_BTN)} onClick={() => onPractice(practice)}>
+          <Target className="h-5 w-5 flex-none" aria-hidden="true" />
+          Practice this: {skillName(practice)}
+        </button>
+      ) : null}
+      <button type="button" className={buttonClass(practice ? "secondary" : "primary", "lg")} onClick={onPlayAgain}>
         <RotateCcw className="h-5 w-5" aria-hidden="true" />
-        Play again
+        {practice ? "Replay Monday" : "Play again"}
       </button>
       <button type="button" className={buttonClass("secondary", "lg")} onClick={onOffice}>
         <Building className="h-5 w-5" aria-hidden="true" />
@@ -84,7 +110,7 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={r.heroFallback}
-                src={`/game/sprites/resetbot-${won ? "celebrate" : "sad"}.svg`}
+                src={`/game/sprites/ollie-${won ? "celebrate" : "sad"}.svg`}
                 alt=""
                 width={220}
                 height={220}
@@ -171,7 +197,8 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
           <h2 id="hl-debrief-title" className={r.h2}>
             {score.misses || score.falseAlarms ? "Every plan, mistakes first" : "Every plan, one by one"}
           </h2>
-          <Debrief state={state} encounter={encounter} mistakesFirst />
+          <p className="mt-1 text-[15px] text-ink-soft">Tap a plan to see what happened.</p>
+          <PlanList state={state} encounter={encounter} />
         </section>
 
         <section className={r.career} aria-labelledby="hl-career-title">

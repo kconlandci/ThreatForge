@@ -19,7 +19,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
     <main id="main" className="grid min-h-dvh place-items-center bg-paper px-4 py-10 text-center">
       <div className="max-w-md">
         <Image
-          src="/game/sprites/resetbot-busted.svg"
+          src="/game/sprites/ollie-busted.svg"
           alt=""
           unoptimized
           width={220}
@@ -28,7 +28,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         />
         <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-ink">Something broke</h1>
         <p className="mt-3 text-lg leading-relaxed text-ink-soft">
-          ResetBot swears it didn&rsquo;t touch anything. Try again. If it keeps happening, reset the saved game on
+          Ollie swears it didn&rsquo;t touch anything. Try again. If it keeps happening, reset the saved game on
           this device.
         </p>
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">

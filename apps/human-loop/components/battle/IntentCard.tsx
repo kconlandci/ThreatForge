@@ -20,7 +20,7 @@ export interface IntentCardProps {
   /** 1-based position in the execution order; null hides the badge (one plan on the board). */
   order: number | null;
   status: PlanStatus;
-  /** Show ResetBot's quip on the card (otherwise it is in the evidence sheet). */
+  /** Show Ollie's quip on the card (otherwise it is in the evidence sheet). */
   showQuip: boolean;
   /** A card is selected: "valid" = can target this, "invalid" = can't, null = not targeting. */
   targeting: "valid" | "invalid" | null;

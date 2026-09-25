@@ -1,6 +1,6 @@
 /**
- * Battle close-up: ResetBot at its desk, with mood swaps and card fx.
- * World: ResetBot's feet at (0, BATTLE_FEET_Y); the portrait is 220 x 220 world px.
+ * Battle close-up: Ollie at its desk, with mood swaps and card fx.
+ * World: Ollie's feet at (0, BATTLE_FEET_Y); the portrait is 220 x 220 world px.
  */
 import * as Phaser from "phaser";
 import type { SpriteKey } from "@/lib/game/assets";
@@ -13,7 +13,7 @@ import { FX, FX_SIZE, WORD_SIZE, wordTex, type WordKey } from "./textures";
 export type FxName = Extract<ToStage, { type: "fx" }>["fx"];
 
 const MOODS: AgentMood[] = ["idle", "eager", "busted", "sad", "celebrate"];
-const portraitKey = (m: AgentMood) => `resetbot-${m}` as SpriteKey;
+const portraitKey = (m: AgentMood) => `ollie-${m}` as SpriteKey;
 
 /** Handy anchor points on the portrait (world px). */
 const P = {
@@ -39,7 +39,7 @@ export class BattleScene extends StageScene {
   }
 
   protected computeFit(cssW: number, cssH: number) {
-    // Keep ResetBot above the "Done" tray (at most 40% of a short stage goes to the tray).
+    // Keep Ollie above the "Done" tray (at most 40% of a short stage goes to the tray).
     const inset = Math.min(this.rt.battleInset, cssH * 0.4);
     this.fit = battleFit(cssW, cssH - inset);
     this.focus = { x: BATTLE_BOX.cx, y: BATTLE_BOX.cy + inset / 2 / this.fit };
@@ -119,13 +119,13 @@ export class BattleScene extends StageScene {
     g.lineBetween(x0, horizon + 58, x1, horizon + 58);
     g.lineBetween(x0, horizon + 108, x1, horizon + 108);
 
-    // Side dressing scales with the room left beside ResetBot and is skipped on narrow stages,
+    // Side dressing scales with the room left beside Ollie and is skipped on narrow stages,
     // so nothing is ever cut off at the edges.
     const side = v.w / 2 - 118;
     if (side >= 58) this.drawLeftSide(g, horizon, side);
     if (side >= 58) this.drawRightSide(g, horizon, side);
 
-    // Platform under ResetBot: a teal spotlight ellipse.
+    // Platform under Ollie: a teal spotlight ellipse.
     g.fillStyle(0x0f6a61, 0.1);
     g.fillEllipse(0, BATTLE_FEET_Y - 4, 250, 40);
     g.fillStyle(0x0f6a61, 0.12);
@@ -134,7 +134,7 @@ export class BattleScene extends StageScene {
     g.strokeEllipse(0, BATTLE_FEET_Y - 4, 250, 40);
   }
 
-  /** Window on the wall and a potted plant, left of ResetBot. `side` = free width, world px. */
+  /** Window on the wall and a potted plant, left of Ollie. `side` = free width, world px. */
   private drawLeftSide(g: Phaser.GameObjects.Graphics, horizon: number, side: number) {
     const cx = -118 - side / 2;
     const ww = Math.min(128, side - 18);
@@ -185,7 +185,7 @@ export class BattleScene extends StageScene {
     g.fillRect(px + 8 * s, py - 40 * s, 12 * s, 42 * s);
   }
 
-  /** Wall clock and the corner of ResetBot's desk (monitor + mug), right of ResetBot. */
+  /** Wall clock and the corner of Ollie's desk (monitor + mug), right of Ollie. */
   private drawRightSide(g: Phaser.GameObjects.Graphics, horizon: number, side: number) {
     const cx = 118 + side / 2;
     // Clock.
@@ -363,7 +363,7 @@ export class BattleScene extends StageScene {
     this.tweens.add({ targets: this.flash, alpha: 0, duration, ease: "Quad.easeOut" });
   }
 
-  /** Pops a baked word (see makeWordTextures) above ResetBot. */
+  /** Pops a baked word (see makeWordTextures) above Ollie. */
   private word(key: WordKey, y: number, life = 1100) {
     const size = WORD_SIZE[key] ?? { w: 120, h: 44 };
     const t = this.img(wordTex(key), 0, y, size.w, size.h, life);
@@ -464,7 +464,7 @@ export class BattleScene extends StageScene {
       alpha: { start: 1, end: 0 },
       emitZone: { type: "random", source: new Phaser.Geom.Circle(0, 0, 26), quantity: 1 },
     });
-    // Two sprays from ResetBot's shoulders, fanning away from its face.
+    // Two sprays from Ollie's shoulders, fanning away from its face.
     this.particles(FX.tri, cfg(185, 265), n, -64, P.chest.y - 24, 1400);
     this.particles(FX.tri, cfg(275, 355), n, 64, P.chest.y - 24, 1400);
   }
@@ -576,7 +576,7 @@ export class BattleScene extends StageScene {
     this.tweens.add({ targets: swirl, angle: -540, duration: 1000, ease: "Cubic.easeInOut" });
     this.tweens.add({ targets: swirl, alpha: 0, scale: s * 1.25, delay: 820, duration: 260 });
     this.flashColor(0xe7f1ef, 0.5, 500);
-    // ResetBot gets "rewound": a quick wobble.
+    // Ollie gets "rewound": a quick wobble.
     this.tweens.add({ targets: this.pop, x: 0.92, duration: 90, yoyo: true, repeat: 2 });
   }
 
@@ -616,7 +616,7 @@ export class BattleScene extends StageScene {
       this.track(e, 3700);
     };
     const n = Math.min(90, 40 + v.w * 0.12);
-    // Some confetti falls behind ResetBot, some in front, for depth.
+    // Some confetti falls behind Ollie, some in front, for depth.
     confetti(-10, Math.round(n * 0.6), 30);
     confetti(760, Math.round(n * 0.5), 20);
   }

@@ -26,18 +26,18 @@ export const SPRITES = {
   // Characters (hub scale). Drawn facing south-east (toward the viewer, to the right); the stage flips X for south-west.
   player: { key: "player", file: `${S}player.svg`, w: 40, h: 72, originX: 0.5, originY: 0.94 },
   dana: { key: "dana", file: `${S}dana.svg`, w: 40, h: 74, originX: 0.5, originY: 0.94 },
-  resetbot: { key: "resetbot", file: `${S}resetbot.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92 },
+  ollie: { key: "ollie", file: `${S}ollie.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92 },
 
-  // ResetBot battle portraits (large, same framing so they can be swapped in place).
-  "resetbot-idle": { key: "resetbot-idle", file: `${S}resetbot-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
-  "resetbot-eager": { key: "resetbot-eager", file: `${S}resetbot-eager.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
-  "resetbot-busted": { key: "resetbot-busted", file: `${S}resetbot-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
-  "resetbot-sad": { key: "resetbot-sad", file: `${S}resetbot-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
-  "resetbot-celebrate": { key: "resetbot-celebrate", file: `${S}resetbot-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
+  // Ollie battle portraits (large, same framing so they can be swapped in place).
+  "ollie-idle": { key: "ollie-idle", file: `${S}ollie-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
+  "ollie-eager": { key: "ollie-eager", file: `${S}ollie-eager.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
+  "ollie-busted": { key: "ollie-busted", file: `${S}ollie-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
+  "ollie-sad": { key: "ollie-sad", file: `${S}ollie-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
+  "ollie-celebrate": { key: "ollie-celebrate", file: `${S}ollie-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95 },
 
   // Office props (isometric, lit from the upper left: top face lightest, left face mid, right face darkest).
   "desk-monitor": { key: "desk-monitor", file: `${S}desk-monitor.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 } },
-  "desk-resetbot": { key: "desk-resetbot", file: `${S}desk-resetbot.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 } },
+  "desk-ollie": { key: "desk-ollie", file: `${S}desk-ollie.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 } },
   chair: { key: "chair", file: `${S}chair.svg`, w: 34, h: 44, originX: 0.5, originY: 0.85 },
   plant: { key: "plant", file: `${S}plant.svg`, w: 36, h: 64, originX: 0.5, originY: 0.92, footprint: { w: 1, h: 1 } },
   "coffee-machine": { key: "coffee-machine", file: `${S}coffee-machine.svg`, w: 48, h: 76, originX: 0.5, originY: 0.9, footprint: { w: 1, h: 1 } },

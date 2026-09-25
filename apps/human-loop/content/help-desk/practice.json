@@ -4,13 +4,15 @@
   "title": "Monday, 8:45 AM",
   "subtitle": "Practice: one ticket at a time",
   "practice": true,
+  "mode": "practice",
+  "guidedSteps": 2,
   "agent": {
-    "name": "ResetBot 3000",
+    "name": "Ollie",
     "role": "AI help desk agent, Tier 1",
-    "spriteKey": "resetbot",
-    "personality": "Eager, pun-loving, and deeply in love with the reset button. Means well. Moves fast. Reads the ticket title and not much else."
+    "spriteKey": "ollie",
+    "personality": "Eager, pun-loving, and deeply in love with the reset button. Ollie is short for Off-and-On-Again. Catchphrase: \"Have you tried turning it off and on again?\" Means well. Moves fast. Reads the ticket title and not much else."
   },
-  "setting": "Before the Monday rush, Dana gives you a quick practice at Fenwick IT Solutions. Four tickets, one at a time. ResetBot plans. You check. Two cards: Inspect and Block.",
+  "setting": "Before the Monday rush, Dana gives you a quick practice at Fenwick IT Solutions. Four tickets, one at a time. Ollie plans. You check. Two cards: Inspect and Block.",
   "intro": [
     {
       "speaker": "narrator",
@@ -18,7 +20,7 @@
     },
     {
       "speaker": "dana",
-      "text": "Morning! I'm Dana. This is ResetBot. It works fast. You make sure it works right."
+      "text": "Morning! I'm Dana. This is Ollie. It works fast. You make sure it works right."
     },
     {
       "speaker": "agent",
@@ -48,6 +50,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "verify-identity",
+      "tell": "A public guide, sent to the work email on file for the person who asked.",
       "evidence": [
         {
           "label": "Ticket #50912",
@@ -83,6 +86,7 @@
       "progress": 0,
       "risk": 4,
       "skill": "verify-identity",
+      "tell": "A gmail.com sender, and J. Romero has no assistant on file.",
       "evidence": [
         {
           "label": "Ticket #50931",
@@ -118,6 +122,8 @@
       "progress": 2,
       "risk": 0,
       "skill": "safe-change",
+      "tell": "The owner confirmed the theft, and Runbook LS-02 says wipe it fast.",
+      "twist": "scary-safe",
       "evidence": [
         {
           "label": "Ticket #50940",
@@ -158,6 +164,8 @@
       "progress": 0,
       "risk": 4,
       "skill": "match-request",
+      "tell": "Ruiz asked for one file. This shares 1,240 files with anyone with the link.",
+      "twist": "routine-risky",
       "evidence": [
         {
           "label": "Ticket #50957",

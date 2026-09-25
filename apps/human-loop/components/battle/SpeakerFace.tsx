@@ -39,7 +39,7 @@ export function SpeakerFace({
   const art =
     speaker === "agent"
       ? {
-          url: `${SPRITE}resetbot-${mood}.svg`,
+          url: `${SPRITE}ollie-${mood}.svg`,
           size: `${size * 1.3}px auto`,
           pos: `${-size * 0.18}px ${size * 0.06}px`,
           bg: "var(--hl-teal-tint)",

@@ -18,14 +18,14 @@ export const PATHWAYS: PathwayMeta[] = [
   {
     id: "help-desk",
     name: "Help Desk",
-    agentName: "ResetBot 3000",
-    tagline: "Supervise an AI that really, really loves resetting passwords.",
+    agentName: "Ollie",
+    tagline: "Supervise an AI that thinks off-and-on-again fixes everything.",
     status: "live",
   },
   {
     id: "cybersecurity",
     name: "Cybersecurity",
-    agentName: "Warden",
+    agentName: "Patch",
     tagline: "Supervise an AI that wants to quarantine everything, including the CEO.",
     status: "soon",
   },

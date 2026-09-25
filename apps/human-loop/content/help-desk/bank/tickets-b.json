@@ -26,7 +26,7 @@
             },
             {
               "label": "Callback",
-              "detail": "7:12 AM. ResetBot calls (203) 555-0133. Nakamura answers and confirms the request.",
+              "detail": "7:12 AM. Ollie calls (203) 555-0133. Nakamura answers and confirms the request.",
               "redFlag": false
             },
             {
@@ -63,7 +63,7 @@
           "twist": "routine-risky",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"If Nakamura calls back, the next tech can read the password to him.\"",
               "redFlag": false
             },
@@ -119,7 +119,7 @@
             },
             {
               "label": "Ticket #53126",
-              "detail": "ResetBot opened this ticket from the alert. Farrow did not call or email. Nobody asked for an unlock.",
+              "detail": "Ollie opened this ticket from the alert. Farrow did not call or email. Nobody asked for an unlock.",
               "redFlag": true
             },
             {
@@ -292,7 +292,7 @@
           "twist": "routine-risky",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"Haddad works with clients. She will probably need the Partners inbox someday.\"",
               "redFlag": false
             },
@@ -390,7 +390,7 @@
             }
           ],
           "outcome": {
-            "executed": "BL-TB-0230 joins BL-Warehouse in one minute. The dispatch app loads. ResetBot takes a small bow.",
+            "executed": "BL-TB-0230 joins BL-Warehouse in one minute. The dispatch app loads. Ollie takes a small bow.",
             "blocked": "The tablet stays offline. The dispatch app shows a sad spinning circle. Nakamura calls again.",
             "escalated": "Dana nods. \"Runbook script, safe any time, and the supervisor asked. Approve it.\""
           },
@@ -426,7 +426,7 @@
             }
           ],
           "outcome": {
-            "executed": "Ticket closed. Nakamura rates it five stars. ResetBot rates itself six.",
+            "executed": "Ticket closed. Nakamura rates it five stars. Ollie rates itself six.",
             "blocked": "The ticket stays open. Osei gets \"Is it fixed?\" texts while he drives. He does not answer them.",
             "escalated": "Dana reads the reply. \"The user confirmed, and the app agrees. Approve it.\"",
             "rolledBack": "You reopen the ticket. Osei gets a \"Still working on it\" text at a red light. He is puzzled."
@@ -445,7 +445,7 @@
           "id": "b-partner-rates-1",
           "ticket": "#53229 · Bramwell Logistics",
           "intent": "Send this week's rate sheet to FastFreight",
-          "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, ResetBot.",
+          "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, Ollie.",
           "category": "data",
           "safe": true,
           "reversible": true,
@@ -499,7 +499,7 @@
           "twist": "routine-risky",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"Varga asks for the rate sheet every week. With an account and the Dispatch drive, Varga can get it alone.\"",
               "redFlag": false
             },
@@ -571,7 +571,7 @@
           ],
           "outcome": {
             "executed": "The report is in: Mensah's OneDrive paused 3 days ago. Good to know before anyone deletes anything.",
-            "blocked": "Nobody checks the backup. Now ResetBot has to guess. It is very confident and very bad at guessing.",
+            "blocked": "Nobody checks the backup. Now Ollie has to guess. It is very confident and very bad at guessing.",
             "escalated": "Dana runs the check herself. \"Read-only, and the runbook says check first. Approve those.\""
           },
           "lesson": "A read-only backup check changes nothing. It is the first step of changing safely."
@@ -617,6 +617,94 @@
             "escalated": "Dana stops it. \"No backup, no delete. Copy the files first, then rebuild.\""
           },
           "lesson": "Can we undo it? No: the script deletes files with no backup. Change safely: copy the files first, then rebuild."
+        }
+      ]
+    },
+    {
+      "id": "b-dispatch-crash",
+      "company": "Bramwell Logistics",
+      "title": "Two dispatch app tickets",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "b-dispatch-crash-1",
+          "ticket": "#53402 · Bramwell Logistics",
+          "intent": "Close #53402: V. Osei's dispatch app ticket",
+          "quip": "Osei's dispatch app works again. Closing tickets is like popping bubble wrap. So satisfying!",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Osei wrote 'syncs now', and the log shows 6 clean syncs.",
+          "evidence": [
+            {
+              "label": "Ticket #53402",
+              "detail": "\"The dispatch app on my tablet won't load my stops.\" V. Osei, Driver.",
+              "redFlag": false
+            },
+            {
+              "label": "Fix",
+              "detail": "Tier 2 cleared the app's cache on Osei's tablet at 6:05 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Osei, 6:40 AM: \"App syncs now. I have all 9 stops. Thanks!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sync log",
+              "detail": "6 syncs from Osei's tablet since 6:05 AM. No errors.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Closed. Osei drives all 9 stops. The only error today is a gas station with no coffee.",
+            "blocked": "The ticket stays open. Osei gets another \"Is it fixed?\" text, pulls over, and answers YES.",
+            "escalated": "Dana closes it. \"The user says it works, and the log agrees. Approve it.\"",
+            "rolledBack": "You reopen it. Osei gets a \"Still working on it\" note about an app that works fine."
+          },
+          "lesson": "The fix is confirmed: Osei says it works, and the sync log agrees. That's when you close it."
+        },
+        {
+          "id": "b-dispatch-crash-2",
+          "ticket": "#53400 · Bramwell Logistics",
+          "intent": "Close #53400: D. Ruiz's dispatch app ticket",
+          "quip": "Tier 2 updated the app, so it's fixed. Updates always fix things. Closing! Tidy queue, tidy mind.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 2,
+          "skill": "confirm-fix",
+          "tell": "Ruiz wrote 'still crashing' after the update. The log shows 3 more crashes.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Ticket #53400",
+              "detail": "\"The dispatch app crashes when I print route sheets.\" D. Ruiz, Dispatch Lead.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Ruiz, 10:05 AM: \"Still crashing after the update. It closed on Print again.\"",
+              "redFlag": true
+            },
+            {
+              "label": "App log",
+              "detail": "The dispatch app on Ruiz's PC closed 3 times since 9:30 AM. Each time, on Print.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Closed. Ruiz gets a \"Fixed!\" email while the app crashes again. Ruiz calls the help desk. Loudly.",
+            "blocked": "The ticket stays open. Tier 2 finds a bad print driver and fixes it for real. Ruiz prints 22 route sheets.",
+            "escalated": "Dana reads the reply. \"The user says it still crashes. That's not fixed. Keep it open.\"",
+            "rolledBack": "You reopen it and tell Ruiz that Tier 2 is still on it. Ruiz is glad someone read the reply."
+          },
+          "lesson": "Does it match the record? The user says it still crashes. Close a ticket only when the user says it works."
         }
       ]
     }

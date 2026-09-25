@@ -33,41 +33,78 @@ import {
   Menu,
   Play,
   RotateCcw,
+  Target,
 } from "lucide-react";
 import { BattleView } from "@/components/battle/BattleView";
 import { PracticeResult } from "@/components/battle/PracticeResult";
 import { ResultScreen } from "@/components/battle/ResultScreen";
+import { ShiftResult, type SkillMove } from "@/components/battle/ShiftResult";
+import { SkillsScreen } from "@/components/skills/SkillsScreen";
 import { Sheet } from "@/components/battle/Sheet";
 import { cardIcon } from "@/components/battle/icons";
-import { HubOverlay, type ResumeKind } from "@/components/hub/HubOverlay";
+import { HubOverlay, type HubChooser, type ResumeKind } from "@/components/hub/HubOverlay";
 import { IntroSequence } from "@/components/hub/IntroSequence";
+import { ShiftIntro } from "@/components/hub/ShiftIntro";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
 import { preloadStage } from "@/lib/client/preloadStage";
 import { getPathwayProgress, loadSave, practiceDone, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
 import { createBus, type StageMode } from "@/lib/game/bus";
 import { CARDS } from "@/lib/game/cards";
-import { HELP_DESK_ENCOUNTER, HELP_DESK_HUB, HELP_DESK_PRACTICE, helpDeskEncounter } from "@/lib/game/content";
+import {
+  HELP_DESK_BANK,
+  HELP_DESK_ENCOUNTER,
+  HELP_DESK_HUB,
+  HELP_DESK_PRACTICE,
+  encounterFor,
+  shiftEncounter,
+  shiftSpecUsable,
+} from "@/lib/game/content";
 import { canResume, createBattle, deckAtTurn, scoreBattle } from "@/lib/game/engine";
 import type { HubTargetId } from "@/lib/game/hub";
-import type { BattleState, CardId, PathwayProgress } from "@/lib/game/types";
+import { drillCoach } from "@/lib/game/coach";
+import { applyBattle, localDay, shiftTally, skillChanges } from "@/lib/game/mastery";
+import { skillName } from "@/lib/game/skills";
+import { beginShift, planDaily, planDrill } from "@/lib/game/shiftGen";
+import { dailyDoneToday, dailyNote, dailyUnlocked, hasSkills, nextUpSkill, planLines, weakestInShift } from "@/lib/game/skillsView";
+import type { BattleState, CardId, Encounter, HistoryEntry, MasterySkillId, PathwayProgress, ShiftSpec } from "@/lib/game/types";
 import { HAND_ORDER } from "@/lib/game/useBattle";
 import g from "./GameShell.module.css";
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), { ssr: false });
 
-/** The real shift. Anything that belongs to a saved battle uses helpDeskEncounter(battle.encounterId). */
+/** The real shift. Anything that belongs to a saved battle uses encounterFor(battle.encounterId, progress). */
 const ENC = HELP_DESK_ENCOUNTER;
 const PRACTICE = HELP_DESK_PRACTICE;
 const HUB = HELP_DESK_HUB;
 
 /** A saved battle that is still in progress and fits the current content of its own encounter. */
-function resumable(b: BattleState | null | undefined): BattleState | null {
-  return b && b.status === "playing" && canResume(b, helpDeskEncounter(b.encounterId)) ? b : null;
+function resumable(b: BattleState | null | undefined, p: PathwayProgress | null | undefined): BattleState | null {
+  return b && b.status === "playing" && canResume(b, encounterFor(b.encounterId, p)) ? b : null;
+}
+
+/** A Daily practice or drill battle (its encounter is rebuilt from progress.shift). */
+function isGenerated(enc: Encounter): boolean {
+  return enc.mode === "daily" || enc.mode === "drill";
 }
 const PATHWAY = "help-desk" as const;
 
-type View = "boot" | "resume" | "intro" | "hub" | "battle" | "result";
+/** "brief": the one-screen intro before a Daily practice or drill (its battle is already saved). */
+type View = "boot" | "resume" | "intro" | "hub" | "brief" | "battle" | "result" | "skills";
+
+/** The player's local day (the one clock read; everything below takes it as input). */
+function today(): string {
+  return localDay(new Date());
+}
+
+/** Plan the next Daily practice (pure: the same progress gives the same shift, so the preview is the real thing). */
+function nextDaily(p: PathwayProgress, playerId: string): ShiftSpec {
+  return planDaily(HELP_DESK_BANK, p, { playerId, today: today() });
+}
+
+function nextDrill(p: PathwayProgress, playerId: string, skill: MasterySkillId): ShiftSpec {
+  return planDrill(HELP_DESK_BANK, skill, { playerId, today: today(), k: p.drillCount?.[skill] ?? 0, progress: p });
+}
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -122,6 +159,7 @@ function GameMenu({
   onHowTo,
   onPracticeAgain,
   canPracticeAgain,
+  onSkills,
 }: {
   view: View;
   /** The battle has ended (its result screen is one tap away): no "Pause". */
@@ -134,6 +172,8 @@ function GameMenu({
   onPracticeAgain: () => void;
   /** False while a real shift is saved: practice would take its battle slot and lose it. */
   canPracticeAgain: boolean;
+  /** "Your skills" (only once there are skills to show). */
+  onSkills?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -212,6 +252,14 @@ function GameMenu({
                 <List className="h-5 w-5" />
               </span>
               Office list
+            </button>
+          ) : null}
+          {view === "hub" && onSkills ? (
+            <button type="button" className={g.menuItem} onClick={run(onSkills)}>
+              <span className={g.menuIcon} aria-hidden="true">
+                <Target className="h-5 w-5" />
+              </span>
+              Your skills
             </button>
           ) : null}
           {view === "hub" && canPracticeAgain ? (
@@ -361,6 +409,8 @@ export function GameShell() {
   // One-time office note: a saved shift no longer fits the updated content and was cleared.
   const [note, setNote] = useState<string | null>(null);
   const [initialHubPos, setInitialHubPos] = useState<{ x: number; y: number } | null>(null);
+  // Skills whose level changed in the battle that just ended (for the Daily / drill result).
+  const [moved, setMoved] = useState<{ key: string; list: SkillMove[] } | null>(null);
   const walkingRef = useRef<HubTargetId | null>(null);
   const viewRef = useRef<View>("boot");
   const recorded = useRef<string | null>(null);
@@ -421,19 +471,33 @@ export function GameShell() {
       return;
     }
 
-    // Every saved battle is checked against its own encounter (practice or the real shift).
+    // /play's "Your skills" link: open the skills screen (the office is one tap away).
+    if (params.get("view") === "skills") {
+      window.history.replaceState(null, "", window.location.pathname);
+      if (hasSkills(p)) {
+        if (p.pendingResult) setSave(patchProgress((x) => ({ ...x, pendingResult: null, shift: x.battle?.encounterId === x.shift?.id ? x.shift : null })));
+        setView("skills");
+        return;
+      }
+    }
+
+    // Every saved battle is checked against its own encounter (practice, the real shift, or the
+    // Daily practice / drill rebuilt from progress.shift).
     const pending = p.pendingResult;
-    if (pending && pending.status !== "playing" && canResume(pending, helpDeskEncounter(pending.encounterId))) {
+    if (pending && pending.status !== "playing" && canResume(pending, encounterFor(pending.encounterId, p))) {
       // The last shift ended but its result screen was never left (reload, or the tab closed).
       setFinalState(pending);
       setView("result");
-    } else if (resumable(p.battle)) {
+    } else if (resumable(p.battle, p)) {
       setView("resume");
     } else {
-      // A shift saved before the content changed (e.g. the old 12-card deck) starts fresh.
-      // History, attempts and best are kept.
-      if (p.battle?.encounterId === ENC.id) setNote("The shift was updated, so it starts fresh.");
-      if (p.battle || p.pendingResult) setSave(patchProgress((x) => ({ ...x, battle: null, pendingResult: null })));
+      // A shift saved before the content changed (e.g. the old 12-card deck, or a daily built from
+      // an older ticket bank) starts fresh. History, attempts, best and skills are kept.
+      const staleShift = !!p.shift && (!shiftSpecUsable(p.shift) || p.battle?.encounterId === p.shift.id);
+      if (p.battle?.encounterId === ENC.id || staleShift) setNote("The shift was updated, so it starts fresh.");
+      if (p.battle || p.pendingResult || p.shift) {
+        setSave(patchProgress((x) => ({ ...x, battle: null, pendingResult: null, shift: null })));
+      }
       setView(p.introSeen ? "hub" : "intro");
     }
   }, [router]);
@@ -498,7 +562,7 @@ export function GameShell() {
     return () => window.clearTimeout(t);
   }, [walking, stageReady]);
 
-  // Result screen: ResetBot's mood matches how the shift went.
+  // Result screen: Ollie's mood matches how the shift went.
   useEffect(() => {
     if (view !== "result" || !finalState || !stageReady) return;
     const won = finalState.status === "won";
@@ -527,34 +591,79 @@ export function GameShell() {
     [bus, stageReady],
   );
 
-  const beginBattle = useCallback((st: BattleState) => {
-    setSave(patchProgress((p) => ({ ...p, battle: st, pendingResult: null })));
+  const beginBattle = useCallback((st: BattleState, next: "battle" | "brief" = "battle") => {
+    // A Daily practice or drill spec lives only as long as its own battle.
+    setSave(patchProgress((p) => ({ ...p, battle: st, pendingResult: null, shift: p.shift?.id === st.encounterId ? p.shift : null })));
     setBattle(st);
     setBattleKey((k) => k + 1);
     setFinalState(null);
     setDialogue(null);
     setWalking(null);
-    setView("battle");
+    setView(next);
   }, []);
 
   const startPractice = useCallback(() => beginBattle(createBattle(PRACTICE, newSeed())), [beginBattle]);
   const newShift = useCallback(() => beginBattle(createBattle(ENC, newSeed())), [beginBattle]);
 
+  /** Save a generated shift's spec (dailyCount / drillCount go up), then its one-screen intro. */
+  const startSpec = useCallback(
+    (spec: ShiftSpec) => {
+      setSave(patchProgress((p) => beginShift(p, spec)));
+      beginBattle(createBattle(shiftEncounter(spec), spec.seed), "brief");
+    },
+    [beginBattle],
+  );
+
+  /**
+   * A paused battle is saved: never replace it by accident (it would be lost, and a daily's count
+   * already went up). Show the Resume / Start over prompt instead. True when it did.
+   */
+  const guardSaved = useCallback((): boolean => {
+    const p = getPathwayProgress(loadSave(), PATHWAY);
+    if (!resumable(p.battle, p)) return false;
+    setDialogue(null);
+    setWalking(null);
+    setRoomsOpen(false);
+    setView("resume");
+    return true;
+  }, []);
+
+  /** "Start today's practice" / "One more shift": the next Daily practice. */
+  const startDaily = useCallback(() => {
+    if (guardSaved()) return;
+    const s = loadSave();
+    startSpec(nextDaily(getPathwayProgress(s, PATHWAY), s.playerId));
+  }, [startSpec, guardSaved]);
+
+  /** "Practice this": a drill for one skill. */
+  const startDrill = useCallback(
+    (skill: MasterySkillId) => {
+      if (guardSaved()) return;
+      const s = loadSave();
+      startSpec(nextDrill(getPathwayProgress(s, PATHWAY), s.playerId, skill));
+    },
+    [startSpec, guardSaved],
+  );
+
   /** The hub's main button: resume a saved battle, else practice (first time), else the real shift. */
   const startShift = useCallback(() => {
     const p = getPathwayProgress(loadSave(), PATHWAY);
-    const saved = resumable(p.battle);
+    const saved = resumable(p.battle, p);
     if (saved) beginBattle(saved);
     else if (!practiceDone(p)) startPractice();
+    else if (dailyUnlocked(p)) startDaily();
     else newShift();
-  }, [beginBattle, startPractice, newShift]);
+  }, [beginBattle, startPractice, newShift, startDaily]);
 
   /** "Start over" in the resume prompt: a fresh battle of the same kind. */
   const restartSaved = useCallback(() => {
     const p = getPathwayProgress(loadSave(), PATHWAY);
-    if (p.battle && helpDeskEncounter(p.battle.encounterId).practice) startPractice();
+    const enc = p.battle ? encounterFor(p.battle.encounterId, p) : ENC;
+    // A Daily practice or drill starts over with the same plans (its spec stays in progress.shift).
+    if (isGenerated(enc) && p.shift && shiftSpecUsable(p.shift)) beginBattle(createBattle(shiftEncounter(p.shift), p.shift.seed));
+    else if (enc.practice) startPractice();
     else newShift();
-  }, [startPractice, newShift]);
+  }, [beginBattle, startPractice, newShift]);
 
   const onBattleSave = useCallback((st: BattleState) => {
     if (st.status === "playing") {
@@ -564,39 +673,50 @@ export function GameShell() {
     const key = `${st.seed}:${st.events.length}`;
     if (recorded.current === key) return;
     recorded.current = key;
-    const enc = helpDeskEncounter(st.encounterId);
-    if (enc.practice) {
-      // Practice never counts: no attempts, wins, best or history. It only unlocks the real shift.
-      setSave(patchProgress((p) => ({ ...p, battle: null, pendingResult: st, practiceDone: true })));
-      setFinalState(st);
-      return;
-    }
-    const score = scoreBattle(st, enc);
-    const now = new Date().toISOString();
-    const won = st.status === "won";
-    setSave(
-      patchProgress((p) => ({
-        ...p,
-        battle: null,
-        // Kept until the result screen is left, so a reload right now still shows the debrief.
-        pendingResult: st,
-        attempts: p.attempts + 1,
-        wins: p.wins + (won ? 1 : 0),
-        best: won && (!p.best || score.stars > p.best.stars) ? { stars: score.stars, completedAt: now } : p.best,
-        history: [
-          ...p.history,
-          {
-            encounterId: st.encounterId,
-            status: st.status,
-            stars: score.stars,
-            at: now,
-            catches: score.catches,
-            falseAlarms: score.falseAlarms,
-            misses: score.misses,
-          },
-        ].slice(-50),
-      })),
-    );
+    const now = new Date();
+    // Skills: every mode counts (practice, Monday, Daily practice, drills), once per battle
+    // (applyBattle is keyed by encounter id + seed, so a reload never counts a battle twice).
+    const day = localDay(now);
+    const before = getPathwayProgress(loadSave(), PATHWAY).skills;
+    const next = patchProgress((p) => {
+        const enc = encounterFor(st.encounterId, p);
+        const base: PathwayProgress = { ...p, battle: null, pendingResult: st };
+        if (enc.practice) {
+          // Practice never counts toward attempts, wins, best or history. It only unlocks the real shift.
+          return applyBattle({ ...base, practiceDone: true }, st, enc, day);
+        }
+        const score = scoreBattle(st, enc);
+        const tally = shiftTally(st, enc);
+        const generated = isGenerated(enc);
+        const entry: HistoryEntry = {
+          encounterId: st.encounterId,
+          status: st.status,
+          // Stars, attempts, wins and best are for the fixed Monday shift only.
+          stars: generated ? 0 : score.stars,
+          at: now.toISOString(),
+          catches: score.catches,
+          falseAlarms: score.falseAlarms,
+          misses: score.misses,
+          mode: enc.mode ?? "story",
+          ...tally,
+          ...(generated && p.shift?.focus[0] ? { focus: p.shift.focus[0] } : {}),
+        };
+        const won = st.status === "won";
+        const counted: PathwayProgress = generated
+          ? base
+          : {
+              ...base,
+              attempts: p.attempts + 1,
+              wins: p.wins + (won ? 1 : 0),
+              best:
+                won && (!p.best || score.stars > p.best.stars) ? { stars: score.stars, completedAt: entry.at } : p.best,
+            };
+        // pendingResult (and a daily's spec) stay until the result screen is left, so a reload
+        // right now still shows the debrief.
+        return applyBattle({ ...counted, history: [...p.history, entry].slice(-50) }, st, enc, day);
+    });
+    setSave(next);
+    setMoved({ key: key, list: skillChanges(before, getPathwayProgress(next, PATHWAY).skills) });
     setFinalState(st);
   }, []);
 
@@ -608,8 +728,34 @@ export function GameShell() {
   const backToOffice = useCallback(() => {
     setDialogue(null);
     setWalking(null);
-    if (viewRef.current === "result") setSave(patchProgress((p) => ({ ...p, pendingResult: null })));
+    if (viewRef.current === "result") {
+      // Leaving the result screen also lets go of a finished Daily practice or drill spec.
+      setSave(
+        patchProgress((p) => ({
+          ...p,
+          pendingResult: null,
+          shift: p.shift && p.battle?.encounterId !== p.shift.id ? null : p.shift,
+        })),
+      );
+    }
     setView("hub");
+  }, []);
+
+  /** Your skills. Leaving a result screen for it also lets go of that result (like the office). */
+  const openSkills = useCallback(() => {
+    setDialogue(null);
+    setWalking(null);
+    setRoomsOpen(false);
+    if (viewRef.current === "result") {
+      setSave(
+        patchProgress((p) => ({
+          ...p,
+          pendingResult: null,
+          shift: p.shift && p.battle?.encounterId !== p.shift.id ? null : p.shift,
+        })),
+      );
+    }
+    setView("skills");
   }, []);
 
   const finishIntro = useCallback(() => {
@@ -629,8 +775,9 @@ export function GameShell() {
 
   const openHowTo = useCallback(() => {
     if (viewRef.current === "battle") {
-      const b = getPathwayProgress(loadSave(), PATHWAY).battle;
-      const enc = helpDeskEncounter(b?.encounterId);
+      const p = getPathwayProgress(loadSave(), PATHWAY);
+      const b = p.battle;
+      const enc = encounterFor(b?.encounterId, p);
       const deck = new Set(deckAtTurn(enc, b?.turn ?? 1));
       setHowDeck({ practice: !!enc.practice, cards: HAND_ORDER.filter((id) => deck.has(id)) });
     } else {
@@ -649,16 +796,57 @@ export function GameShell() {
 
   const stageMode: StageMode = view === "battle" || view === "result" ? "battle" : "hub";
   const progress = save ? getPathwayProgress(save, PATHWAY) : null;
-  const savedBattle = resumable(progress?.battle);
-  const savedEnc = savedBattle ? helpDeskEncounter(savedBattle.encounterId) : null;
-  const resumeKind: ResumeKind = savedEnc ? (savedEnc.practice ? "practice" : "shift") : null;
+  const savedBattle = resumable(progress?.battle, progress);
+  const savedEnc = savedBattle ? encounterFor(savedBattle.encounterId, progress) : null;
+  const resumeKind: ResumeKind = savedEnc
+    ? savedEnc.practice
+      ? "practice"
+      : savedEnc.mode === "daily" || savedEnc.mode === "drill"
+        ? savedEnc.mode
+        : "shift"
+    : null;
+  const day = today();
+  const playerId = save?.playerId ?? "guest";
+  const unlocked = !!progress && practiceDone(progress) && dailyUnlocked(progress);
+  const skillsOn = !!progress && hasSkills(progress);
+  // The next Daily practice, planned ahead so the note tells the truth (planning is pure and cheap).
+  const dailyPreview = useMemo(
+    () => (progress && unlocked && !resumeKind && view === "hub" ? nextDaily(progress, playerId) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [save, unlocked, resumeKind, view, playerId],
+  );
+  const resumeLabel = resumeKind
+    ? resumeKind === "drill"
+      ? "Resume drill"
+      : resumeKind === "shift"
+        ? "Resume shift"
+        : "Resume practice"
+    : null;
+  const doneToday = dailyDoneToday(progress?.history, day);
+  const chooser: HubChooser | null = unlocked
+    ? {
+        label: resumeLabel ?? (doneToday ? "One more shift" : "Start today's practice"),
+        note: dailyPreview ? dailyNote(dailyPreview) : null,
+        onReplayMonday: resumeKind ? undefined : newShift,
+        onSkills: skillsOn ? openSkills : undefined,
+        objective: doneToday ? "Done for today. One more shift is optional." : "Today's practice: new tickets picked for your skills.",
+      }
+    : null;
   const practiceNext = !!progress && !practiceDone(progress);
   const resumeState = view === "resume" ? savedBattle : null;
-  const inHub = view === "hub" || view === "intro" || view === "resume";
+  const inHub = view === "hub" || view === "intro" || view === "resume" || view === "brief";
   const battleOver = view === "battle" && !!finalState && finalState.status !== "playing";
-  const battleEnc = battle ? helpDeskEncounter(battle.encounterId) : ENC;
-  const resultEnc = finalState ? helpDeskEncounter(finalState.encounterId) : ENC;
-  const firstShift = !!progress && progress.attempts === 0 && !battleEnc.practice;
+  const battleEnc = battle ? encounterFor(battle.encounterId, progress) : ENC;
+  const resultEnc = finalState ? encounterFor(finalState.encounterId, progress) : ENC;
+  const firstShift = !!progress && progress.attempts === 0 && !battleEnc.practice && !isGenerated(battleEnc);
+  // Drills: "Where to look" at the top of the evidence sheet until the skill is Solid.
+  const drillSkill = battleEnc.mode === "drill" && progress?.shift?.id === battleEnc.id ? progress.shift.focus[0] : undefined;
+  const sheetNote = drillSkill ? drillCoach(drillSkill, progress?.skills?.[drillSkill]?.level ?? 0) : null;
+  // Result screens: the weakest skill of this shift ("Practice this: ..."), once Daily practice is open.
+  const resultLines = finalState && view === "result" ? planLines(finalState, resultEnc) : [];
+  const practiceSkill = unlocked && finalState ? weakestInShift(resultLines, progress?.skills, day) ?? nextUpSkill(progress?.skills, day) : null;
+  const resultFocus =
+    finalState && progress?.shift?.id === finalState.encounterId ? progress.shift.focus[0] ?? null : null;
 
   return (
     <div id="hl-game-root" className={`${g.root} ${reducedMotion ? "hl-rm" : ""}`} data-view={view}>
@@ -684,17 +872,18 @@ export function GameShell() {
             onLeaveBattle={backToOffice}
             onHowTo={openHowTo}
             onPracticeAgain={startPractice}
-            canPracticeAgain={resumeKind !== "shift"}
+            canPracticeAgain={!resumeKind || resumeKind === "practice"}
+            onSkills={skillsOn && view === "hub" ? openSkills : undefined}
           />
         ) : null}
       </header>
 
-      <main id="main" className={`${g.main} ${view === "battle" || view === "result" ? g.mainFramed : ""}`}>
+      <main id="main" className={`${g.main} ${view === "battle" || view === "result" || view === "skills" ? g.mainFramed : ""}`}>
         {view === "boot" ? (
           <div className={g.boot} role="status">
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/game/sprites/resetbot-eager.svg" alt="" width={220} height={220} className={g.bootBot} />
+              <img src="/game/sprites/ollie-eager.svg" alt="" width={220} height={220} className={g.bootBot} />
               <p className="mt-3 font-display text-lg font-semibold text-ink">Clocking in…</p>
             </div>
           </div>
@@ -748,6 +937,8 @@ export function GameShell() {
                   if (hadFocus) hubHeadingRef.current?.focus({ preventScroll: true });
                 }}
                 onStartShift={startShift}
+                chooser={chooser}
+                onSkills={skillsOn ? openSkills : undefined}
               />
             ) : null}
             {view === "intro" ? (
@@ -756,6 +947,14 @@ export function GameShell() {
                 reducedMotion={reducedMotion}
                 onDone={finishIntro}
                 onSkipPractice={practiceNext ? skipPractice : undefined}
+              />
+            ) : null}
+            {view === "brief" && battle ? (
+              <ShiftIntro
+                encounter={battleEnc}
+                focus={progress?.shift?.id === battleEnc.id && progress.shift.focus[0] ? skillName(progress.shift.focus[0]) : null}
+                tickets={progress?.shift?.id === battleEnc.id ? progress.shift.ticketIds.length : 0}
+                onStart={() => setView("battle")}
               />
             ) : null}
             {view === "resume" && resumeState ? (
@@ -767,19 +966,25 @@ export function GameShell() {
                   aria-modal="true"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/game/sprites/resetbot-eager.svg" alt="" width={220} height={220} className="mx-auto h-24 w-24" />
+                  <img src="/game/sprites/ollie-eager.svg" alt="" width={220} height={220} className="mx-auto h-24 w-24" />
                   <h2 id="hl-resume-title" className="mt-1 font-display text-2xl font-bold text-ink">
-                    {resumeKind === "practice" ? "Your practice is still open" : "Your shift is still open"}
+                    {resumeKind === "practice" || resumeKind === "daily"
+                      ? "Your practice is still open"
+                      : resumeKind === "drill"
+                        ? "Your drill is still open"
+                        : "Your shift is still open"}
                   </h2>
                   <p className="mt-1 text-[16px] text-ink-soft">{ENC.agent.name} saved your spot. Pick up where you left off?</p>
-                  {resumeKind === "shift" && savedEnc ? (
+                  {resumeKind !== "practice" && savedEnc ? (
                     <p className="mt-3 flex flex-wrap justify-center gap-1.5">
                       <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
                         Turn {resumeState.turn} of {savedEnc.maxTurns}
                       </span>
-                      <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
-                        Risk {resumeState.risk}/{savedEnc.maxRisk}
-                      </span>
+                      {isGenerated(savedEnc) ? null : (
+                        <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
+                          Risk {resumeState.risk}/{savedEnc.maxRisk}
+                        </span>
+                      )}
                     </p>
                   ) : null}
                   <div className="mt-5 flex flex-col gap-2.5">
@@ -790,7 +995,11 @@ export function GameShell() {
                       className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 border-ink bg-orange px-5 font-display text-lg font-bold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
                     >
                       <Play className="h-5 w-5" aria-hidden="true" fill="currentColor" />
-                      {resumeKind === "practice" ? "Resume practice" : "Resume your shift"}
+                      {resumeKind === "practice" || resumeKind === "daily"
+                        ? "Resume practice"
+                        : resumeKind === "drill"
+                          ? "Resume drill"
+                          : "Resume your shift"}
                     </button>
                     <button
                       type="button"
@@ -798,7 +1007,7 @@ export function GameShell() {
                       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-ink bg-paper px-5 font-display text-base font-semibold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
                     >
                       <RotateCcw className="h-5 w-5" aria-hidden="true" />
-                      {resumeKind === "practice" ? "Start over" : "Start a new shift"}
+                      {resumeKind === "shift" ? "Start a new shift" : "Start over"}
                     </button>
                   </div>
                 </section>
@@ -819,6 +1028,7 @@ export function GameShell() {
             onSave={onBattleSave}
             onShowResult={showResult}
             firstShift={firstShift}
+            sheetNote={sheetNote}
           />
         ) : null}
 
@@ -832,6 +1042,23 @@ export function GameShell() {
             onStartShift={newShift}
             onPracticeAgain={startPractice}
             onOffice={backToOffice}
+            practiceSkill={practiceSkill}
+            onPractice={startDrill}
+          />
+        ) : view === "result" && finalState && isGenerated(resultEnc) && progress ? (
+          <ShiftResult
+            state={finalState}
+            encounter={resultEnc}
+            progress={progress}
+            today={day}
+            moved={moved?.key === `${finalState.seed}:${finalState.events.length}` ? moved.list : []}
+            focus={resultFocus}
+            stage={<StageSlot host={host} />}
+            stageReady={stageReady}
+            onPractice={startDrill}
+            onOneMore={startDaily}
+            onSkills={openSkills}
+            onOffice={backToOffice}
           />
         ) : view === "result" && finalState ? (
           <ResultScreen
@@ -841,6 +1068,19 @@ export function GameShell() {
             stageReady={stageReady}
             onPlayAgain={newShift}
             onOffice={backToOffice}
+            practiceSkill={practiceSkill}
+            onPractice={startDrill}
+          />
+        ) : null}
+
+        {view === "skills" && progress ? (
+          <SkillsScreen
+            progress={progress}
+            today={day}
+            drillTickets={(skill) => nextDrill(progress, playerId, skill).ticketIds.length}
+            onPractice={startDrill}
+            onBack={backToOffice}
+            resume={savedBattle && resumeLabel ? { label: resumeLabel, onResume: startShift } : null}
           />
         ) : null}
       </main>

@@ -425,6 +425,24 @@
   z-index: 3;
 }
 
+/* Before a Daily practice or drill: one card, centered, in the page flow (it can be taller than a scene card). */
+.brief {
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.briefCard {
+  width: min(100%, 440px);
+  margin: auto 0;
+  padding: 18px 16px 16px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 22px;
+  background: var(--hl-paper);
+  box-shadow: 0 6px 0 0 var(--hl-ink);
+  text-align: center;
+  animation: sceneIn 560ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+
 .scene {
   position: absolute;
   top: 50%;
@@ -601,4 +619,57 @@
   font-size: 13.5px;
   font-weight: 600;
   color: var(--hl-ink);
+}
+
+/* Ollie's desk chooser (after the first Monday): one main button, a note, two text links. */
+.chooser {
+  padding: 10px 10px 4px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.97);
+  box-shadow: 0 5px 0 0 var(--hl-ink);
+  animation: rise 480ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+
+.chooserNote {
+  margin: 0 4px 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--hl-ink-soft);
+  text-align: center;
+}
+
+.chooserRow {
+  display: flex;
+  gap: 8px;
+}
+
+.chooserRow > :last-child {
+  flex: 1;
+}
+
+.chooserLinks {
+  display: flex;
+  justify-content: center;
+  gap: 4px 18px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.chooserLink {
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hl-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.chooserLink:hover {
+  background: var(--hl-paper-soft);
 }

@@ -21,7 +21,11 @@ import {
   RESULT_ROWS_PER_DAY,
   unlinkedResultsFormula,
   newShiftResults,
+  OPTIONAL_PLAYER_FIELDS,
+  OPTIONAL_RESULT_FIELDS,
   packSaveData,
+  resultFields,
+  skillLevelsText,
   PLAYER_FIELDS,
   PLAYERS_TABLE,
   playerFormula,
@@ -688,6 +692,85 @@ describe("newShiftResults", () => {
 
   it("treats everything as new when nothing is stored yet", () => {
     expect(newShiftResults(makeSave([entry(minutes(1)), entry(minutes(2))]), undefined)).toHaveLength(2);
+  });
+});
+
+describe("generated shifts (Daily practice, drills) and the optional M3 columns", () => {
+  const daily = entry(minutes(1), {
+    encounterId: "hd-daily-7",
+    stars: 0,
+    mode: "daily",
+    right: 7,
+    partly: 1,
+    missed: 1,
+    focus: "verify-identity",
+  });
+  const drill = entry(minutes(2), { encounterId: "hd-drill-verify-identity-2", stars: 0, mode: "drill", right: 5, partly: 0, missed: 1, focus: "verify-identity" });
+
+  afterEach(() => {
+    for (const key of Object.keys(OPTIONAL_RESULT_FIELDS) as (keyof typeof OPTIONAL_RESULT_FIELDS)[]) OPTIONAL_RESULT_FIELDS[key] = null;
+    OPTIONAL_PLAYER_FIELDS.skillLevels = null;
+  });
+
+  it("summarizes a daily and a drill with right counts, and keeps their ids in Encounter", () => {
+    const [d, r] = newShiftResults(makeSave([daily, drill]), undefined);
+    expect(d).toMatchObject({ mode: "daily", right: 7, partly: 1, missed: 1, focus: "verify-identity" });
+    const df = resultFields(d, "Jamie Rivera", "recAAAAAAAAAAAAAA");
+    expect(df[RESULT_FIELDS.summary]).toBe("Jamie R. · Help Desk · Daily practice · 7/9 right");
+    expect(df[RESULT_FIELDS.encounter]).toBe("hd-daily-7");
+    expect(df[RESULT_FIELDS.outcome]).toBe("Won");
+    expect(df[RESULT_FIELDS.stars]).toBeNull();
+    const rf = resultFields(r, "Jamie Rivera", "recAAAAAAAAAAAAAA");
+    expect(rf[RESULT_FIELDS.summary]).toBe("Jamie R. · Help Desk · Drill: Check who's asking · 5/6 right");
+    expect(rf[RESULT_FIELDS.encounter]).toBe("hd-drill-verify-identity-2");
+    // Nothing is written to columns the base doesn't have yet.
+    expect(Object.keys(df).sort()).toEqual(Object.values(RESULT_FIELDS).sort());
+  });
+
+  it("cleans the new history fields (bounded 0-20, known modes and skills only)", () => {
+    const junk = entry(minutes(3), {
+      encounterId: "hd-daily-8",
+      mode: "boss" as never,
+      right: 999,
+      partly: -4,
+      missed: Number.NaN,
+      focus: "<script>" as never,
+    });
+    const [r] = newShiftResults(makeSave([junk]), undefined);
+    expect(r.mode).toBeUndefined();
+    expect(r.right).toBe(20);
+    expect(r.partly).toBe(0);
+    expect(r.missed).toBeUndefined();
+    expect(r.focus).toBeUndefined();
+    // Older clients send no counts: the summary falls back to the outcome.
+    const [old] = newShiftResults(makeSave([entry(minutes(4), { encounterId: "hd-daily-9", stars: 0 })]), undefined);
+    expect(resultFields(old, "Jamie Rivera", "recAAAAAAAAAAAAAA")[RESULT_FIELDS.summary]).toBe("Jamie R. · Help Desk · Daily practice · Won");
+  });
+
+  it("writes the optional columns only when their field ids are configured", async () => {
+    OPTIONAL_RESULT_FIELDS.mode = "fldMODEAAAAAAAAAA";
+    OPTIONAL_RESULT_FIELDS.right = "fldRIGHTAAAAAAAAA";
+    OPTIONAL_RESULT_FIELDS.focus = "fldFOCUSAAAAAAAAA";
+    OPTIONAL_PLAYER_FIELDS.skillLevels = "fldSKILLSAAAAAAAA";
+    await signUp();
+    const save = makeSave([daily], {
+      skills: {
+        "verify-identity": { recent: "RrRr", n: 4, level: 3, days: [], last: "2026-09-24", solidOn: "2026-09-24" },
+        "confirm-fix": { recent: "W", n: 1, level: 1, days: [], last: "2026-09-24", solidOn: null },
+        "guard-data": "junk",
+      },
+    });
+    expect((await storeCloudSave(PID, save)).stored).toBe(true);
+    const [row] = fake.results().map((x) => x.fields);
+    expect(row.fldMODEAAAAAAAAAA).toBe("Daily");
+    expect(row.fldRIGHTAAAAAAAAA).toBe(7);
+    expect(row.fldFOCUSAAAAAAAAA).toBe("Check who's asking");
+    expect(row).not.toHaveProperty("null");
+    const patch = fake.sent.find((x) => x.method === "PATCH")!;
+    expect((patch.body as { fields: Record<string, unknown> }).fields.fldSKILLSAAAAAAAA).toBe(
+      "Check who's asking: Solid; Confirm the fix: Learning",
+    );
+    expect(skillLevelsText(makeSave([]))).toBe("");
   });
 });
 

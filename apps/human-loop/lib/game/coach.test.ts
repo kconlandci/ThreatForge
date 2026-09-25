@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { coachHint, hintParts, plainHint, practiceCoach, sheetCoach, shiftCoach, type CoachUi } from "./coach";
-import { HELP_DESK_ENCOUNTER as E, HELP_DESK_PRACTICE as P } from "./content";
+import { coachHint, drillCoach, hintParts, plainHint, practiceCoach, sheetCoach, shiftCoach, type CoachUi } from "./coach";
+import { HELP_DESK_BANK, HELP_DESK_ENCOUNTER as E, HELP_DESK_PRACTICE as P } from "./content";
 import { createBattle, endTurn } from "./engine";
 import { tryPlay } from "./fixtures";
+import { LENS_SKILLS } from "./skills";
 import type { BattleState, CardId, Encounter } from "./types";
 
 const closed: CoachUi = { selectedCardId: null, sheetStepId: null };
@@ -47,7 +48,7 @@ describe("practiceCoach: ticket 1 (fully guided)", () => {
   it("a) asks for Inspect and locks Block and Approve", () => {
     expect(practiceCoach(t1, P, closed)).toEqual({
       id: "p0-a",
-      text: "ResetBot has a plan. Check it first: tap **Inspect**.",
+      text: "Ollie has a plan. Check it first: tap **Inspect**.",
       target: "card:inspect",
       lock: {
         cards: ["block"],
@@ -83,7 +84,7 @@ describe("practiceCoach: ticket 1 (fully guided)", () => {
 
   it("d) sheet closed, inspected: Approve unlocks and gets the ring", () => {
     const h = practiceCoach(t1i, P, closed);
-    expect(h.text).toBe("Looks fine. Tap **Approve** to let ResetBot do it.");
+    expect(h.text).toBe("Looks fine. Tap **Approve** to let Ollie do it.");
     expect(h.target).toBe("approve");
     expect(h.lock).toMatchObject({ cards: ["block"], approve: false, sheetBlock: true });
   });
@@ -358,5 +359,23 @@ describe("the coach never reads safe or redFlag", () => {
     const src = fs.readFileSync(new URL("./coach.ts", import.meta.url), "utf8");
     const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
     expect(code).not.toMatch(/\.safe\b|redFlag/);
+  });
+});
+
+describe("drillCoach (Where to look, until Solid)", () => {
+  it("gives a safe and a risky plan of the same skill the same line, and stops at Solid", () => {
+    const steps = HELP_DESK_BANK.flatMap((t) => t.steps);
+    for (const skill of LENS_SKILLS) {
+      const safe = steps.find((s) => s.skill === skill && s.safe)!;
+      const risky = steps.find((s) => s.skill === skill && !s.safe)!;
+      for (const level of [0, 1, 2] as const) {
+        const a = drillCoach(safe.skill, level);
+        expect(a).toMatch(/^Where to look: /);
+        expect(drillCoach(risky.skill, level)).toBe(a);
+      }
+      expect(drillCoach(skill, 3)).toBeNull();
+      expect(drillCoach(skill, 4)).toBeNull();
+    }
+    expect(drillCoach(undefined)).toBeNull();
   });
 });

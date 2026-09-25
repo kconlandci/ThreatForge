@@ -60,7 +60,7 @@ export function PathwayGrid() {
               <div className="relative -order-1 flex justify-center md:order-none" aria-hidden="true">
                 <span className="absolute bottom-3 h-6 w-40 rounded-[50%] bg-ink/25 blur-[2px] md:w-52" />
                 <Image
-                  src="/game/sprites/resetbot-celebrate.svg"
+                  src="/game/sprites/ollie-celebrate.svg"
                   alt=""
                   unoptimized
                   width={220}

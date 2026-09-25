@@ -98,7 +98,7 @@ export class HubScene extends StageScene {
     const lo = HUB_BOUNDS.minX + half;
     const hi = HUB_BOUNDS.maxX - half;
     if (lo >= hi) return (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2;
-    // Lean toward the avatar but stay near the middle, so ResetBot's desk stays in view.
+    // Lean toward the avatar but stay near the middle, so Ollie's desk stays in view.
     const mid = (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2;
     const ax = mid + ((this.pos.x - this.pos.y) * 32 - mid) * 0.6 + this.panOffset;
     return Math.min(hi, Math.max(lo, ax));
@@ -370,14 +370,14 @@ export class HubScene extends StageScene {
       const owner = this.arts.find((a) => a.img.name === l.on);
       if (!owner) continue;
       const img = this.add.image(0, 0, FX.led).setTint(l.color);
-      const size = l.on === "resetbot" ? l.radius * 3.4 : l.radius * 3;
+      const size = l.on === "ollie" ? l.radius * 3.4 : l.radius * 3;
       img.setDisplaySize(size, size);
       this.blinkers.push({
         img,
         owner,
         lx: l.x,
         ly: l.y,
-        kind: l.on === "resetbot" ? "antenna" : "led",
+        kind: l.on === "ollie" ? "antenna" : "led",
         on: true,
         next: Math.random() * 1500,
       });
@@ -385,12 +385,12 @@ export class HubScene extends StageScene {
   }
 
   private placeMarkers() {
-    const rb = this.npcs.find((n) => n.ref.img.name === "resetbot");
-    const head = rb ? { x: rb.ref.img.x, y: rb.ref.img.y - SPRITES.resetbot.h * SPRITES.resetbot.originY - 1 } : { x: 0, y: 0 };
+    const bot = this.npcs.find((n) => n.ref.img.name === "ollie");
+    const head = bot ? { x: bot.ref.img.x, y: bot.ref.img.y - SPRITES.ollie.h * SPRITES.ollie.originY - 1 } : { x: 0, y: 0 };
     this.exclaimBase = head;
     this.exclaim = this.addArt("marker-exclaim", head.x, head.y);
     this.exclaim.img.setDepth(5000);
-    this.hotspots.push({ target: "resetbot", ref: this.exclaim });
+    this.hotspots.push({ target: "ollie", ref: this.exclaim });
 
     this.ring = this.addArt("tap-ring", 0, 0);
     this.ring.img.setDepth(-700).setVisible(false);
@@ -721,7 +721,7 @@ export class HubScene extends StageScene {
     for (const n of this.npcs) {
       const b = breathe(n.phase);
       let hop = 0;
-      if (!calm && n.ref.img.name === "resetbot") {
+      if (!calm && n.ref.img.name === "ollie") {
         // An eager little double-hop every few seconds.
         n.hopAt -= delta;
         if (n.hopAt < 0) n.hopAt = 3800 + Math.random() * 2200;
@@ -744,7 +744,7 @@ export class HubScene extends StageScene {
 
     // Exclaim marker bob.
     const eb = calm ? 0 : Math.abs(Math.sin(t * 3.1)) * 5;
-    this.exclaim.img.setPosition(this.exclaimBase.x, this.exclaimBase.y - eb - (this.npcHop("resetbot") ?? 0));
+    this.exclaim.img.setPosition(this.exclaimBase.x, this.exclaimBase.y - eb - (this.npcHop("ollie") ?? 0));
 
     // Lights.
     for (const l of this.blinkers) {

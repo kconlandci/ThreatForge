@@ -12,7 +12,8 @@
  */
 import { CARDS } from "./cards";
 import { validTargets } from "./engine";
-import type { BattleEvent, BattleState, CardId, Encounter } from "./types";
+import { SKILLS } from "./skills";
+import type { BattleEvent, BattleState, CardId, Encounter, MasterySkillId, SkillLevel } from "./types";
 
 /** What gets the pulsing ring. `card:<id>` is a stack in the hand; `plan` is every live plan. */
 export type CoachTarget =
@@ -166,7 +167,7 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
       const lock = { ...LOCK_INSPECT_FIRST, approve: true };
       hint = sheetOpen
         ? { id: "p0-b", text: HIDDEN, target: "sheet:inspect", lock }
-        : { id: "p0-a", text: "ResetBot has a plan. Check it first: tap **Inspect**.", target: "card:inspect", lock };
+        : { id: "p0-a", text: "Ollie has a plan. Check it first: tap **Inspect**.", target: "card:inspect", lock };
     } else {
       const lock: CoachLock = {
         cards: ["block"],
@@ -177,7 +178,7 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
       };
       hint = sheetOpen
         ? { id: "p0-c", text: "Real ticket. Work email. Public guide. Tap **Looks OK**.", target: "sheet:ok", lock }
-        : { id: "p0-d", text: "Looks fine. Tap **Approve** to let ResetBot do it.", target: "approve", lock };
+        : { id: "p0-d", text: "Looks fine. Tap **Approve** to let Ollie do it.", target: "approve", lock };
     }
   } else if (k === 1) {
     if (!inspected) {
@@ -341,4 +342,14 @@ export function coachHint(
   ui: CoachUi & { firstShift: boolean },
 ): CoachHint {
   return enc.practice ? practiceCoach(state, enc, ui) : shiftCoach(state, enc, ui);
+}
+
+/**
+ * Drill coach: the skill's "Where to look" line for the top of the evidence sheet, until the
+ * skill reaches Solid (level 3). It reads only the skill id and level, never a step's `safe`,
+ * `redFlag` or `twist`, so a safe and a risky plan of the same skill get the same line.
+ */
+export function drillCoach(skill: MasterySkillId | undefined, level: SkillLevel = 0): string | null {
+  if (!skill || level >= 3) return null;
+  return `Where to look: ${SKILLS[skill].whereToLook}`;
 }

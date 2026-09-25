@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bot, Star } from "lucide-react";
+import { ArrowRight, Bot, Star, Target } from "lucide-react";
+import { hasSkills } from "@/lib/game/skillsView";
 import { PATHWAYS } from "@/lib/types";
 import type { PathwayProgress } from "@/lib/game/types";
 import { ComingSoonCard } from "./ComingSoonCard";
 import { PATHWAY_ICONS } from "./pathwayIcons";
-import { buttonClass } from "./ui";
+import { buttonClass, textLink } from "./ui";
 
 export function Stars({ count, size = "h-6 w-6" }: { count: number; size?: string }) {
   const n = Math.max(0, Math.min(3, Math.round(count)));
@@ -28,10 +29,21 @@ export function Stars({ count, size = "h-6 w-6" }: { count: number; size?: strin
 export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }) {
   const live = PATHWAYS.find((p) => p.status === "live")!;
   const soon = PATHWAYS.filter((p) => p.status !== "live");
+  // attempts counts the fixed Monday shift only (funder numbers); learners see every shift played.
   const attempts = helpDesk?.attempts ?? 0;
+  const played = attempts + (helpDesk?.history ?? []).filter((h) => h.mode === "daily" || h.mode === "drill").length;
   const best = helpDesk?.best?.stars ?? null;
   const inProgress = helpDesk?.battle?.status === "playing";
-  const cta = inProgress ? "Resume shift" : attempts > 0 ? "Play again" : "Start shift";
+  const openId = helpDesk?.battle?.encounterId ?? "";
+  const cta = inProgress
+    ? openId.startsWith("hd-drill-")
+      ? "Resume drill"
+      : openId.startsWith("hd-daily-") || openId === "hd-00-practice"
+        ? "Resume practice"
+        : "Resume shift"
+    : attempts > 0
+      ? "Continue"
+      : "Start shift";
   const LiveIcon = PATHWAY_ICONS[live.id];
 
   return (
@@ -48,7 +60,7 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
             />
             <span className="absolute bottom-3 h-5 w-32 rounded-[50%] bg-ink/25" />
             <Image
-              src="/game/sprites/resetbot-idle.svg"
+              src="/game/sprites/ollie-idle.svg"
               alt=""
               unoptimized
               priority
@@ -88,7 +100,7 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
               </div>
               <div className="flex items-center gap-2">
                 <dt className="font-display text-sm font-semibold text-muted">Shifts played</dt>
-                <dd className="font-display text-lg font-bold text-ink">{attempts}</dd>
+                <dd className="font-display text-lg font-bold text-ink">{played}</dd>
               </div>
               {inProgress ? (
                 <div className="flex items-center gap-2">
@@ -100,7 +112,7 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
               ) : null}
             </dl>
 
-            <div className="mt-4 sm:mt-5">
+            <div className="mt-4 flex flex-col items-center gap-x-6 gap-y-1 sm:mt-5 sm:flex-row">
               <Link
                 href={`/play/${live.id}`}
                 aria-label={`${cta}: ${live.name}`}
@@ -109,6 +121,16 @@ export function PathwayPicker({ helpDesk }: { helpDesk: PathwayProgress | null }
                 {cta}
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </Link>
+              {hasSkills(helpDesk) ? (
+                <Link
+                  href={`/play/${live.id}?view=skills`}
+                  aria-label={`Your skills: ${live.name}`}
+                  className={`${textLink} inline-flex min-h-11 items-center gap-1.5 px-1`}
+                >
+                  <Target className="h-4 w-4" aria-hidden="true" />
+                  Your skills
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>

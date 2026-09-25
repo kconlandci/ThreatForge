@@ -1,4 +1,4 @@
-/** Shown while the game route loads: a slim bar and ResetBot clocking in. */
+/** Shown while the game route loads: a slim bar and Ollie clocking in. */
 export default function Loading() {
   return (
     <div className="flex h-dvh flex-col bg-paper" role="status">
@@ -7,7 +7,7 @@ export default function Loading() {
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/game/sprites/resetbot-eager.svg"
+            src="/game/sprites/ollie-eager.svg"
             alt=""
             width={220}
             height={220}

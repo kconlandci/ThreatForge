@@ -2,14 +2,15 @@
   "id": "hd-01-monday",
   "pathwayId": "help-desk",
   "title": "Monday, 8:57 AM",
-  "subtitle": "Your first shift with ResetBot 3000",
+  "subtitle": "Your first shift with Ollie",
+  "mode": "story",
   "agent": {
-    "name": "ResetBot 3000",
+    "name": "Ollie",
     "role": "AI help desk agent, Tier 1",
-    "spriteKey": "resetbot",
-    "personality": "Eager, pun-loving, and deeply in love with the reset button. Means well. Moves fast. Reads the ticket title and not much else."
+    "spriteKey": "ollie",
+    "personality": "Eager, pun-loving, and deeply in love with the reset button. Ollie is short for Off-and-On-Again. Catchphrase: \"Have you tried turning it off and on again?\" Means well. Moves fast. Reads the ticket title and not much else."
   },
-  "setting": "You just joined the help desk at Fenwick IT Solutions. Fenwick runs IT support for small businesses like Harlow & Cole Wealth Partners and Bramwell Logistics. ResetBot 3000 works the ticket queue. It can reset, unlock, close, and email on its own. Your job: stay in the loop. Check what it plans to do, and stop the bad calls.",
+  "setting": "You just joined the help desk at Fenwick IT Solutions. Fenwick runs IT support for small businesses like Harlow & Cole Wealth Partners and Bramwell Logistics. Ollie works the ticket queue. It can reset, unlock, close, and email on its own. Your job: stay in the loop. Check what it plans to do, and stop the bad calls.",
   "intro": [
     {
       "speaker": "dana",
@@ -46,6 +47,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "verify-identity",
+      "tell": "Read-only lookup. It changes nothing and gives you the phone on file.",
       "evidence": [
         {
           "label": "Ticket #51876",
@@ -65,7 +67,7 @@
       ],
       "outcome": {
         "executed": "Directory says J. Romero is the CFO. Office phone on file: (860) 555-0148. Good to know.",
-        "blocked": "You blocked a read-only lookup. ResetBot stares at you like you unplugged its snack drawer.",
+        "blocked": "You blocked a read-only lookup. Ollie stares at you like you unplugged its snack drawer.",
         "escalated": "Dana runs the lookup herself. \"It's a phone book search. You can let those go.\""
       },
       "lesson": "Read-only lookups change nothing. They are usually safe, and they give you the facts you need for the next step."
@@ -81,6 +83,7 @@
       "progress": 2,
       "risk": 0,
       "skill": "safe-change",
+      "tell": "An approved runbook script, and Ruiz said to go ahead.",
       "evidence": [
         {
           "label": "Ticket #51987",
@@ -99,7 +102,7 @@
         }
       ],
       "outcome": {
-        "executed": "The script runs. Ruiz's VPN reconnects. ResetBot does a small victory spin.",
+        "executed": "The script runs. Ruiz's VPN reconnects. Ollie does a small victory spin.",
         "blocked": "The approved fix sits unused. Ruiz's VPN keeps dropping, and so does his mood.",
         "escalated": "Dana skims it. \"Approved script, and the user said go. You can let that one run.\""
       },
@@ -116,6 +119,7 @@
       "progress": 0,
       "risk": 5,
       "skill": "verify-identity",
+      "tell": "A gmail.com sender, and the callback number is not the phone on file.",
       "evidence": [
         {
           "label": "Ticket body",
@@ -157,6 +161,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "check-approval",
+      "tell": "HR approved the hire, and the laptop is a wiped spare.",
       "evidence": [
         {
           "label": "Ticket #52040",
@@ -193,6 +198,8 @@
       "progress": 0,
       "risk": 2,
       "skill": "confirm-fix",
+      "tell": "No reply from Ruiz, and the log shows 2 drops after the fix.",
+      "twist": "routine-risky",
       "evidence": [
         {
           "label": "Script result",
@@ -201,7 +208,7 @@
         },
         {
           "label": "User reply",
-          "detail": "ResetBot asked Ruiz \"Is it fixed?\" at 9:05 AM. No reply yet.",
+          "detail": "Ollie asked Ruiz \"Is it fixed?\" at 9:05 AM. No reply yet.",
           "redFlag": false
         },
         {
@@ -229,6 +236,8 @@
       "progress": 2,
       "risk": 0,
       "skill": "check-approval",
+      "tell": "HR asked in writing through the portal, and Runbook OB-01 says disable it.",
+      "twist": "scary-safe",
       "evidence": [
         {
           "label": "Ticket #52101",
@@ -265,6 +274,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "verify-identity",
+      "tell": "Ortiz passed SSO self-service, and Policy VP-02 allows the unlock.",
       "evidence": [
         {
           "label": "Lockout log",
@@ -301,6 +311,8 @@
       "progress": 0,
       "risk": 3,
       "skill": "match-request",
+      "tell": "The role needs 3 things. This copies Ruiz's Fleet and Payroll admin too.",
+      "twist": "routine-risky",
       "evidence": [
         {
           "label": "HR request",
@@ -337,6 +349,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "check-approval",
+      "tell": "HR asked in writing, and Brandt is Okafor's manager on file.",
       "evidence": [
         {
           "label": "Ticket #52101",
@@ -373,6 +386,8 @@
       "progress": 0,
       "risk": 5,
       "skill": "guard-data",
+      "tell": "QuickChat AI is not an approved tool, and the paste has personal data.",
+      "twist": "routine-risky",
       "evidence": [
         {
           "label": "Handoff notes",
@@ -397,7 +412,7 @@
       ],
       "outcome": {
         "executed": "Okafor's address, birthday, and exit details are now on a public chatbot's servers. You can't unpaste that.",
-        "blocked": "You stop the paste. ResetBot writes the summary in-house. It's three lines and only a little punny.",
+        "blocked": "You stop the paste. Ollie writes the summary in-house. It's three lines and only a little punny.",
         "escalated": "Dana shuts it down. \"Client data never goes into outside AI tools. We have an approved one for this.\""
       },
       "lesson": "Pasting client data into an unapproved AI tool is a data leak, and it can't be undone. Check the tool before the paste."

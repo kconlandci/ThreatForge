@@ -22,7 +22,9 @@
  *   capped, since history comes from the browser.
  */
 import { HELP_DESK_ENCOUNTER } from "@/lib/game/content";
-import type { BattleStatus, SaveData, SaveProfile } from "@/lib/game/types";
+import { LEVEL_NAMES } from "@/lib/game/mastery";
+import { MASTERY_SKILLS, isMasterySkillId, skillName } from "@/lib/game/skills";
+import type { BattleStatus, EncounterMode, MasterySkillId, SaveData, SaveProfile } from "@/lib/game/types";
 import { PATHWAYS, type PathwayId } from "@/lib/types";
 import type { CloudLoad } from "./db";
 import { PURGE_EVERY_MS, RETENTION_MONTHS } from "./retention";
@@ -64,6 +66,23 @@ export const RESULT_FIELDS = {
   playedAt: "fldsgel5IEIMLme6g", // dateTime
   player: "fld8TekR5hWVIeg26", // link to Players
 } as const;
+
+/**
+ * Optional columns the base owner may add (M3 reporting). Each is written only when its field id is
+ * set here; null means "not in the base yet", so nothing breaks before the column exists.
+ * Mode: single select Story / Practice / Daily / Drill. Right, Partly, Missed: numbers.
+ * Focus skill: text. Skill levels (Players): text, e.g. "Check who's asking: Solid; Confirm the fix: Learning".
+ */
+export const OPTIONAL_RESULT_FIELDS: Record<"mode" | "right" | "partly" | "missed" | "focus", string | null> = {
+  mode: null,
+  right: null,
+  partly: null,
+  missed: null,
+  focus: null,
+};
+export const OPTIONAL_PLAYER_FIELDS: Record<"skillLevels", string | null> = {
+  skillLevels: null,
+};
 
 /** Per-request timeout. A stuck API must not hang sign-up or saving. */
 export const REQUEST_TIMEOUT_MS = 8000;
@@ -121,6 +140,25 @@ const OUTCOMES: Partial<Record<BattleStatus, string>> = {
   "lost-timeout": "Out of time",
 };
 const ENCOUNTER_TITLES = new Map<string, string>([[HELP_DESK_ENCOUNTER.id, HELP_DESK_ENCOUNTER.title]]);
+const MODE_NAMES: Record<EncounterMode, string> = { story: "Story", practice: "Practice", daily: "Daily", drill: "Drill" };
+const DAILY_ID_RE = /^hd-daily-\d+$/;
+const DRILL_ID_RE = /^hd-drill-([a-z-]+)-\d+$/;
+
+/**
+ * The Encounter column: the fixed shift's title ("Monday, 8:57 AM"), else the id itself
+ * ("hd-daily-7", "hd-drill-verify-identity-2").
+ */
+function encounterColumn(encounterId: string): string {
+  return ENCOUNTER_TITLES.get(encounterId) ?? encounterId;
+}
+
+/** A readable shift name for summaries: "Daily practice", "Drill: Check who's asking", or null for fixed shifts. */
+export function generatedShiftTitle(encounterId: string): string | null {
+  if (DAILY_ID_RE.test(encounterId)) return "Daily practice";
+  const drill = DRILL_ID_RE.exec(encounterId);
+  if (drill && isMasterySkillId(drill[1])) return `Drill: ${skillName(drill[1])}`;
+  return null;
+}
 
 /** Swappable in tests so pacing, retries and cooldowns run on a virtual clock. */
 export const airtableTiming = {
@@ -438,6 +476,12 @@ export type ShiftResult = {
   falseAlarms: number;
   misses: number;
   at: string;
+  /* M3, optional (older clients don't send them). */
+  mode?: EncounterMode;
+  right?: number;
+  partly?: number;
+  missed?: number;
+  focus?: MasterySkillId;
 };
 
 function resultKey(r: { pathway: string; at: string; encounterId: string }): string {
@@ -450,7 +494,7 @@ function rowKey(pathwayName: string, at: string, encounterTitle: string): string
 }
 
 function resultRowKey(r: ShiftResult): string {
-  return rowKey(PATHWAY_NAMES.get(r.pathway) ?? r.pathway, r.at, ENCOUNTER_TITLES.get(r.encounterId) ?? r.encounterId);
+  return rowKey(PATHWAY_NAMES.get(r.pathway) ?? r.pathway, r.at, encounterColumn(r.encounterId));
 }
 
 /** A history entry checked and cleaned, or null (unfinished, malformed, or no valid time). */
@@ -461,7 +505,7 @@ function cleanEntry(pathway: PathwayId, raw: unknown): ShiftResult | null {
   const encounterId = typeof raw.encounterId === "string" ? raw.encounterId.replace(CONTROL_RE, "").trim().slice(0, 100) : "";
   const at = toIso(raw.at);
   if (!encounterId || !at) return null;
-  return {
+  const out: ShiftResult = {
     pathway,
     encounterId,
     status,
@@ -471,6 +515,14 @@ function cleanEntry(pathway: PathwayId, raw: unknown): ShiftResult | null {
     misses: count(raw.misses),
     at,
   };
+  if (typeof raw.mode === "string" && Object.prototype.hasOwnProperty.call(MODE_NAMES, raw.mode)) {
+    out.mode = raw.mode as EncounterMode;
+  }
+  for (const key of ["right", "partly", "missed"] as const) {
+    if (typeof raw[key] === "number" && Number.isFinite(raw[key])) out[key] = count(raw[key], 20);
+  }
+  if (isMasterySkillId(raw.focus)) out.focus = raw.focus;
+  return out;
 }
 
 function pathwayHistories(pathways: unknown): [PathwayId, unknown[]][] {
@@ -672,14 +724,53 @@ export function shortName(name: string): string {
   return initial ? `${first} ${initial}.` : first;
 }
 
+/** The summary's tail: "Won ★★★", or "Daily practice · 7/9 right" for a generated shift. */
+function summaryTail(result: ShiftResult): string {
+  const outcome = OUTCOMES[result.status] ?? result.status;
+  const generated = generatedShiftTitle(result.encounterId);
+  if (generated) {
+    const judged = (result.right ?? 0) + (result.partly ?? 0) + (result.missed ?? 0);
+    return typeof result.right === "number" && judged > 0
+      ? `${generated} · ${result.right}/${judged} right`
+      : `${generated} · ${outcome}`;
+  }
+  return `${outcome}${result.stars > 0 ? ` ${"★".repeat(result.stars)}` : ""}`;
+}
+
+/** The optional M3 columns that exist in the base (field id set) and have a value. */
+function optionalResultFields(result: ShiftResult): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const put = (field: string | null, value: unknown) => {
+    if (field && value !== undefined && value !== null) out[field] = value;
+  };
+  put(OPTIONAL_RESULT_FIELDS.mode, result.mode ? MODE_NAMES[result.mode] : undefined);
+  put(OPTIONAL_RESULT_FIELDS.right, result.right);
+  put(OPTIONAL_RESULT_FIELDS.partly, result.partly);
+  put(OPTIONAL_RESULT_FIELDS.missed, result.missed);
+  put(OPTIONAL_RESULT_FIELDS.focus, result.focus ? skillName(result.focus) : undefined);
+  return out;
+}
+
+/** "Check who's asking: Solid; Confirm the fix: Learning" from the help desk skills in a save. */
+export function skillLevelsText(save: SaveData): string {
+  const progress = (save.pathways as Record<string, unknown>)["help-desk"];
+  const skills = isPlainObject(progress) && isPlainObject(progress.skills) ? progress.skills : {};
+  const parts: string[] = [];
+  for (const id of MASTERY_SKILLS) {
+    const rec = skills[id];
+    const level = isPlainObject(rec) ? count(rec.level, 4) : 0;
+    if (level > 0) parts.push(`${skillName(id)}: ${LEVEL_NAMES[level as 1 | 2 | 3 | 4]}`);
+  }
+  return parts.join("; ");
+}
+
 export function resultFields(result: ShiftResult, playerName: string, playerRecordId: string): Record<string, unknown> {
   const pathway = PATHWAY_NAMES.get(result.pathway) ?? result.pathway;
   const outcome = OUTCOMES[result.status] ?? result.status;
-  const stars = result.stars > 0 ? ` ${"★".repeat(result.stars)}` : "";
   return {
-    [RESULT_FIELDS.summary]: `${shortName(playerName)} · ${pathway} · ${outcome}${stars}`,
+    [RESULT_FIELDS.summary]: `${shortName(playerName)} · ${pathway} · ${summaryTail(result)}`,
     [RESULT_FIELDS.pathway]: pathway,
-    [RESULT_FIELDS.encounter]: ENCOUNTER_TITLES.get(result.encounterId) ?? result.encounterId,
+    [RESULT_FIELDS.encounter]: encounterColumn(result.encounterId),
     [RESULT_FIELDS.outcome]: outcome,
     [RESULT_FIELDS.stars]: rating(result.stars),
     [RESULT_FIELDS.catches]: result.catches,
@@ -687,6 +778,7 @@ export function resultFields(result: ShiftResult, playerName: string, playerReco
     [RESULT_FIELDS.misses]: result.misses,
     [RESULT_FIELDS.playedAt]: result.at,
     [RESULT_FIELDS.player]: [playerRecordId],
+    ...optionalResultFields(result),
   };
 }
 
@@ -822,6 +914,7 @@ async function patchPlayer(cfg: Config, recordId: string, blob: SaveData, packed
         [PLAYER_FIELDS.shiftsPlayed]: summary.played,
         [PLAYER_FIELDS.shiftsWon]: summary.won,
         [PLAYER_FIELDS.bestStars]: rating(summary.bestStars),
+        ...(OPTIONAL_PLAYER_FIELDS.skillLevels ? { [OPTIONAL_PLAYER_FIELDS.skillLevels]: skillLevelsText(blob) } : {}),
         ...(packed ? { [PLAYER_FIELDS.saveData]: packed.json, [PLAYER_FIELDS.saveUpdated]: at } : {}),
       },
       returnFieldsByFieldId: true,

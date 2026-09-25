@@ -71,7 +71,7 @@ function SignUpView({
               Sign up to save your progress. Or jump in as a guest.
             </p>
             <ul className="mt-6 hidden space-y-2.5 md:block">
-              {["Read ResetBot's plan", "Inspect the evidence", "Approve it, block it, or escalate it"].map((t, i) => (
+              {["Read Ollie's plan", "Inspect the evidence", "Approve it, block it, or escalate it"].map((t, i) => (
                 <li key={t} className="flex items-center gap-3 text-[16px] font-semibold text-paper">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 border-ink bg-orange font-display text-sm font-bold text-ink">
                     {i + 1}
@@ -90,7 +90,7 @@ function SignUpView({
               </svg>
             </div>
             <Image
-              src="/game/sprites/resetbot-eager.svg"
+              src="/game/sprites/ollie-eager.svg"
               alt=""
               unoptimized
               priority

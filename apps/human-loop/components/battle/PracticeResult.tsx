@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { Play, RotateCcw } from "lucide-react";
+import { Play, RotateCcw, Target } from "lucide-react";
+import { PlanList } from "@/components/skills/PlanList";
 import { buttonClass } from "@/components/site/ui";
-import type { BattleState, Encounter } from "@/lib/game/types";
-import { Debrief } from "./Debrief";
+import { gradePlan } from "@/lib/game/mastery";
+import { skillName } from "@/lib/game/skills";
+import type { BattleState, Encounter, MasterySkillId } from "@/lib/game/types";
+import { PRACTICE_BTN } from "./ShiftResult";
 import { SpeakerFace, speakerName } from "./SpeakerFace";
 import r from "./result.module.css";
 
@@ -19,17 +22,21 @@ export interface PracticeResultProps {
   onStartShift: () => void;
   onPracticeAgain: () => void;
   onOffice: () => void;
+  /** Once Daily practice is open: the weakest skill of this shift, for "Practice this". */
+  practiceSkill?: MasterySkillId | null;
+  onPractice?: (skill: MasterySkillId) => void;
 }
 
 /** Plans the player got wrong: risky ones that ran, and good ones they blocked. */
 export function practiceMistakes(state: BattleState, encounter: Encounter): { misses: string[]; falseAlarms: string[] } {
   const misses: string[] = [];
   const falseAlarms: string[] = [];
+  // Same grading as the debrief and skills (mastery.gradePlan): a risky plan that got through, or a
+  // safe plan that was blocked or rolled back (approve-checked graded W).
   for (const step of encounter.steps) {
-    const rt = state.steps[step.id];
-    if (!rt) continue;
-    if (!step.safe && rt.status === "executed") misses.push(step.id);
-    if (step.safe && (rt.requeues > 0 || rt.status === "rolled-back")) falseAlarms.push(step.id);
+    const g = gradePlan(step, state.steps[step.id]);
+    if (!step.safe && g.result === "W") misses.push(step.id);
+    if (step.safe && g.calls.some((c) => c.skill === "approve-checked" && c.grade === "W")) falseAlarms.push(step.id);
   }
   return { misses, falseAlarms };
 }
@@ -58,6 +65,8 @@ export function PracticeResult({
   onStartShift,
   onPracticeAgain,
   onOffice,
+  practiceSkill = null,
+  onPractice,
 }: PracticeResultProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -78,6 +87,8 @@ export function PracticeResult({
         : encounter.outro.timeout;
   // Risky plans got through: practising again is the main suggestion; the real shift is still one tap away.
   const againFirst = misses.length > 0;
+  // After the first Monday, practice is a replay: "Practice this" leads, and the real shift intro is left out.
+  const practice = practiceSkill && onPractice ? practiceSkill : null;
   const mood = state.status === "won" ? "celebrate" : "sad";
 
   return (
@@ -89,7 +100,7 @@ export function PracticeResult({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={r.heroFallback}
-                src={`/game/sprites/resetbot-${clean || state.status === "won" ? "celebrate" : "sad"}.svg`}
+                src={`/game/sprites/ollie-${clean || state.status === "won" ? "celebrate" : "sad"}.svg`}
                 alt=""
                 width={220}
                 height={220}
@@ -118,15 +129,15 @@ export function PracticeResult({
           </div>
         </section>
 
-        {mistakes.size ? (
-          <section className={r.section} aria-labelledby="hl-giveaway-title">
-            <h2 id="hl-giveaway-title" className={r.h2}>
-              What gave it away
-            </h2>
-            <Debrief state={state} encounter={encounter} only={mistakes} />
-          </section>
-        ) : null}
+        <section className={r.section} aria-labelledby="hl-giveaway-title">
+          <h2 id="hl-giveaway-title" className={r.h2}>
+            {mistakes.size ? "What gave it away" : "Every plan"}
+          </h2>
+          <p className="mt-1 text-[15px] text-ink-soft">Tap a plan to see what happened.</p>
+          <PlanList state={state} encounter={encounter} />
+        </section>
 
+        {practice ? null : (
         <section className={r.section} aria-labelledby="hl-next-title">
           <p className={r.eyebrow}>{next.title}</p>
           <h2 id="hl-next-title" className={r.h2}>
@@ -144,9 +155,15 @@ export function PracticeResult({
             ))}
           </div>
         </section>
+        )}
 
         <div className={r.stickyFoot}>
-          {againFirst ? (
+          {practice && onPractice ? (
+            <button type="button" className={buttonClass("primary", "lg", PRACTICE_BTN)} onClick={() => onPractice(practice)}>
+              <Target className="h-5 w-5 flex-none" aria-hidden="true" />
+              Practice this: {skillName(practice)}
+            </button>
+          ) : againFirst ? (
             <button type="button" className={buttonClass("primary", "lg", "w-full")} onClick={onPracticeAgain}>
               <RotateCcw className="h-5 w-5" aria-hidden="true" />
               Practice again
@@ -158,7 +175,7 @@ export function PracticeResult({
             </button>
           )}
           <div className={r.footRow}>
-            {againFirst ? (
+            {againFirst && !practice ? (
               <button type="button" className={buttonClass("secondary", "md", "flex-1 whitespace-nowrap px-3")} onClick={onStartShift}>
                 <Play className="h-5 w-5" aria-hidden="true" fill="currentColor" />
                 Start the real shift

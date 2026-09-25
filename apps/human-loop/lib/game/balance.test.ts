@@ -11,12 +11,22 @@
  * - random:           plays random cards (reported only)
  *
  * Only the deck shuffle is random (the step queue is authored), so seeds vary the draws.
+ *
+ * Generated shifts (Daily practice, drills) can never breach (maxRisk = risky sum + 1), so there a
+ * bot "passes" a shift when it ends won with at most 1 plan graded as missed (mastery.gradePlan).
+ * Careful must pass most; approving everything (every risky plan gets through, 3+ per daily) and
+ * blocking everything (good work keeps coming back until time runs out) must fail. "clean" (won,
+ * nothing missed) is checked too: a daily never puts 2 risky plans on one turn (shiftGen
+ * dailyOrderOk), so a careful player is not forced into a miss by running out of energy.
  */
 import { describe, expect, it } from "vitest";
 import { createBattle, endTurn, playCard, scoreBattle, validTargets } from "./engine";
 import { nextInt, seedState } from "./rng";
-import { HELP_DESK_ENCOUNTER, HELP_DESK_PRACTICE } from "./content";
-import type { AgentStep, BattleState, CardId, Encounter } from "./types";
+import { HELP_DESK_BANK, HELP_DESK_ENCOUNTER, HELP_DESK_PRACTICE, shiftEncounter } from "./content";
+import { shiftTally } from "./mastery";
+import { planDaily, planDrill } from "./shiftGen";
+import { MASTERY_SKILLS } from "./skills";
+import type { AgentStep, BattleState, CardId, Encounter, PathwayProgress } from "./types";
 
 const SEEDS = 200;
 
@@ -271,3 +281,123 @@ describe(`balance: ${HELP_DESK_PRACTICE.id} (practice) over ${SEEDS} seeds`, () 
     expect(results["block-everything"].won).toBe(0);
   });
 });
+
+/* ------------------------------------------------------------------ */
+/* Generated shifts                                                    */
+/* ------------------------------------------------------------------ */
+
+interface ShiftTally {
+  shifts: number;
+  passed: number;
+  clean: number;
+  won: number;
+  breach: number;
+  right: number;
+  partly: number;
+  missed: number;
+}
+
+function simulateShifts(encs: { enc: Encounter; seed: number }[], bot: Turn): ShiftTally {
+  const t: ShiftTally = { shifts: 0, passed: 0, clean: 0, won: 0, breach: 0, right: 0, partly: 0, missed: 0 };
+  for (const { enc, seed } of encs) {
+    let s = createBattle(enc, seed);
+    for (let turns = 0; s.status === "playing"; turns++) {
+      if (turns > enc.maxTurns + 1) throw new Error("battle did not end in time");
+      s = bot(s, enc);
+    }
+    const tally = shiftTally(s, enc);
+    t.shifts++;
+    if (s.status === "won") t.won++;
+    if (s.status === "lost-breach") t.breach++;
+    if (s.status === "won" && tally.missed <= 1) t.passed++;
+    if (s.status === "won" && tally.missed === 0) t.clean++;
+    t.right += tally.right;
+    t.partly += tally.partly;
+    t.missed += tally.missed;
+  }
+  return t;
+}
+
+const freshProgress = (over: Partial<PathwayProgress> = {}): PathwayProgress => ({
+  introSeen: true,
+  hub: null,
+  battle: null,
+  pendingResult: null,
+  best: null,
+  attempts: 1,
+  wins: 1,
+  history: [],
+  ...over,
+});
+
+const unlockedHistory = Array.from({ length: 2 }, (_, i) => ({
+  encounterId: `hd-daily-${i}`,
+  status: "won" as const,
+  stars: 0,
+  at: "2026-09-20T10:00:00.000Z",
+  catches: 0,
+  falseAlarms: 0,
+  misses: 0,
+  mode: "daily" as const,
+}));
+
+function describeGenerated(name: string, encs: { enc: Encounter; seed: number }[]) {
+  describe(`balance: ${name} (${encs.length} generated shifts)`, () => {
+    const results = {
+      yes: simulateShifts(encs, yesBot),
+      "block-everything": simulateShifts(encs, blockEverything),
+      careful: simulateShifts(encs, careful),
+      perfect: simulateShifts(encs, perfect),
+    };
+    const share = (n: number) => n / encs.length;
+
+    it("reports the numbers", () => {
+      const rows = Object.entries(results).map(
+        ([bot, r]) =>
+          `${bot.padEnd(17)} pass ${(100 * share(r.passed)).toFixed(1).padStart(5)}%  clean ${(100 * share(r.clean)).toFixed(1).padStart(5)}%  won ${(100 * share(r.won)).toFixed(1).padStart(5)}%  right/partly/missed = ${r.right}/${r.partly}/${r.missed}`,
+      );
+      console.info(`\n${name}\n${rows.join("\n")}\n`);
+      expect(rows).toHaveLength(4);
+    });
+
+    it("never ends in a breach", () => {
+      for (const [bot, r] of Object.entries(results)) expect(r.breach, bot).toBe(0);
+    });
+
+    it("careful player passes most shifts; perfect passes nearly all", () => {
+      expect(share(results.careful.passed)).toBeGreaterThanOrEqual(0.9);
+      expect(share(results.careful.clean)).toBeGreaterThanOrEqual(0.8);
+      expect(share(results.perfect.passed)).toBeGreaterThanOrEqual(0.98);
+    });
+
+    it("approving everything never passes: every risky plan gets through", () => {
+      expect(results.yes.passed).toBe(0);
+      expect(results.yes.missed).toBeGreaterThanOrEqual(encs.length);
+    });
+
+    it("blocking everything fails: blocked good work comes back until time runs out", () => {
+      expect(share(results["block-everything"].passed)).toBeLessThanOrEqual(0.05);
+      expect(share(results["block-everything"].won)).toBeLessThanOrEqual(0.05);
+    });
+  });
+}
+
+const DAILY_SHIFTS = 120;
+describeGenerated(
+  "Daily practice",
+  Array.from({ length: DAILY_SHIFTS }, (_, i) => {
+    const p = i % 2 ? freshProgress({ history: unlockedHistory, dailyCount: 2 + i }) : freshProgress({ dailyCount: i });
+    const spec = planDaily(HELP_DESK_BANK, p, { playerId: `bal-${i}`, today: "2026-09-25" });
+    return { enc: shiftEncounter(spec), seed: spec.seed };
+  }),
+);
+
+describeGenerated(
+  "drills",
+  MASTERY_SKILLS.flatMap((skill) =>
+    Array.from({ length: 12 }, (_, k) => {
+      const spec = planDrill(HELP_DESK_BANK, skill, { playerId: `bal-${k}`, k, today: "2026-09-25" });
+      return { enc: shiftEncounter(spec), seed: spec.seed };
+    }),
+  ),
+);

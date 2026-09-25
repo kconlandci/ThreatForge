@@ -37,7 +37,7 @@ function shadow(ctx: Ctx, cx: number, cy: number, rx: number, ry: number) {
   ctx.fill();
 }
 
-const CHARACTER_KEYS = new Set(["player", "dana", "resetbot"]);
+const CHARACTER_KEYS = new Set(["player", "dana", "ollie"]);
 
 /** Draws a clean stand-in for a sprite whose SVG did not load, so the stage never breaks. */
 export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: SpriteDef, res: number) {
@@ -45,7 +45,7 @@ export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: Sprite
   const ox = def.originX * w;
   const oy = def.originY * h;
   canvasTexture(scene, texKey, w, h, res, (ctx) => {
-    if (def.key.startsWith("resetbot-") || CHARACTER_KEYS.has(def.key)) {
+    if (def.key.startsWith("ollie-") || CHARACTER_KEYS.has(def.key)) {
       // Capsule character: body + head, brand colours.
       const body = def.key === "player" ? BRAND.ink : def.key === "dana" ? BRAND.orange : BRAND.teal;
       const bw = w * 0.5;
@@ -57,9 +57,9 @@ export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: Sprite
       ctx.fill();
       ctx.beginPath();
       ctx.arc(ox, oy - bh - bw * 0.55, bw * 0.48, 0, Math.PI * 2);
-      ctx.fillStyle = def.key.startsWith("resetbot") ? BRAND.tealDark : "#C98B63";
+      ctx.fillStyle = def.key.startsWith("ollie") ? BRAND.tealDark : "#C98B63";
       ctx.fill();
-      if (def.key.startsWith("resetbot")) {
+      if (def.key.startsWith("ollie")) {
         ctx.fillStyle = BRAND.orange;
         ctx.beginPath();
         ctx.arc(ox, oy - bh / 2 - 2, bw * 0.18, 0, Math.PI * 2);

@@ -25,7 +25,7 @@ export default function NotFound() {
               4
             </span>
             <Image
-              src="/game/sprites/resetbot-busted.svg"
+              src="/game/sprites/ollie-busted.svg"
               alt=""
               unoptimized
               priority
@@ -39,8 +39,8 @@ export default function NotFound() {
           </div>
           <h1 className="mt-6 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">Page not found</h1>
           <p className="mt-3 max-w-md text-lg leading-relaxed text-ink-soft">
-            ResetBot says it only reset this page &ldquo;a little.&rdquo; It&rsquo;s gone now. Let&rsquo;s get you
-            back on track.
+            Ollie turned this page off and on again. It didn&rsquo;t come back on. Let&rsquo;s get you back on
+            track.
           </p>
           <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:w-auto sm:flex-row">
             <Link href="/" className={buttonClass("secondary", "lg")}>

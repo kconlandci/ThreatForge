@@ -67,6 +67,8 @@ export interface EvidencePanelProps {
   showCost: boolean;
   /** Practice: Dana's hint for this sheet, with its ring and locks. */
   coach: Pick<CoachHint, "text" | "target" | "lock"> | null;
+  /** A line for the top of the sheet (drills: where to look). */
+  note?: string | null;
   /** Changes when a locked control is tapped: the hint shakes once. */
   shakeKey?: number;
   onLockedTap: () => void;
@@ -89,6 +91,7 @@ export function EvidencePanel({
   canAct,
   showCost,
   coach,
+  note = null,
   shakeKey = 0,
   onLockedTap,
   onPlay,
@@ -254,6 +257,12 @@ export function EvidencePanel({
       }
       footer={footer}
     >
+      {note && announced ? (
+        <p className={s.lookNote}>
+          <Search className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" strokeWidth={2.6} />
+          <span>{note}</span>
+        </p>
+      ) : null}
       <div className={s.says}>
         <SpeakerFace speaker="agent" size={36} />
         <p className={s.saysBubble}>
@@ -290,7 +299,7 @@ export function EvidencePanel({
         ) : null}
       </h3>
 
-      {announced && !encounter.practice ? (
+      {announced && !encounter.practice && !note ? (
         <p className={s.evAsk}>
           <strong>Ask:</strong> Who asked? · Does it match the record? · Can we undo it?
         </p>

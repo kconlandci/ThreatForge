@@ -20,7 +20,7 @@ export type ToStage =
       intensity?: number;
     }
   | { type: "agent-mood"; mood: AgentMood }
-  /** Battle: CSS px at the bottom of the stage covered by the DOM "Done" tray (ResetBot sits above it). */
+  /** Battle: CSS px at the bottom of the stage covered by the DOM "Done" tray (Ollie sits above it). */
   | { type: "stage-inset"; bottom: number }
   | { type: "reduced-motion"; value: boolean };
 

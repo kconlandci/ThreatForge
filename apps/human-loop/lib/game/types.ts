@@ -45,6 +45,21 @@ export interface CardDef {
 
 export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data";
 
+/** Lens skills: each help desk step is tagged with the one skill it tests (authored). */
+export type SkillId =
+  | "verify-identity"
+  | "check-approval"
+  | "match-request"
+  | "confirm-fix"
+  | "guard-data"
+  | "safe-change";
+/** Lens skills plus the calibration skill "approve what checks out" (computed, never authored). */
+export type MasterySkillId = SkillId | "approve-checked";
+/** Dana's three questions: Who asked? / Does it match the record? / Can we undo it? */
+export type DanaQuestion = "who" | "record" | "undo";
+/** Hidden generator and analytics tag. Never shown before a plan resolves; the coach never reads it. */
+export type StepTwist = "scary-safe" | "routine-risky";
+
 export interface Evidence {
   label: string;
   detail: string;
@@ -81,7 +96,15 @@ export interface AgentStep {
   outcome: { executed: string; blocked: string; escalated: string; rolledBack?: string };
   /** One sentence for the debrief: why this was fine / not fine. */
   lesson: string;
+  /** The lens skill this plan tests (content tests require it on every help desk step). */
+  skill?: SkillId;
+  /** At most 80 characters: the one fact that decided it. Shown only after the plan resolves. */
+  tell?: string;
+  twist?: StepTwist;
 }
+
+/** What kind of shift an encounter is. Missing means "story" (or "practice" when practice is set). */
+export type EncounterMode = "story" | "practice" | "daily" | "drill";
 
 export interface Encounter {
   id: string;
@@ -91,7 +114,7 @@ export interface Encounter {
   agent: {
     name: string;
     role: string;
-    /** Sprite key from lib/game/assets.ts, e.g. "resetbot". */
+    /** Sprite key from lib/game/assets.ts, e.g. "ollie". */
     spriteKey: string;
     personality: string;
   };
@@ -114,14 +137,107 @@ export interface Encounter {
   unlocks?: { turn: number; cards: CardId[] }[];
   /** A practice shift (read by the UI only): no stars, no stats, energy hidden. */
   practice?: boolean;
+  mode?: EncounterMode;
+  /** The first N steps are coached step by step, so they never count as skill evidence. */
+  guidedSteps?: number;
   outro: {
     win: DialogueLine[];
     breach: DialogueLine[];
     timeout: DialogueLine[];
     /** Optional: a win where risky plans got through (the practice result uses it). */
     winWithMisses?: DialogueLine[];
+    /** Optional (generated shifts): a win where exactly one risky plan got through. */
+    winWithOneMiss?: DialogueLine[];
+    /** Optional (drills): a clean drill win. */
+    drillWin?: DialogueLine[];
   };
   debrief: { skillTag: string; takeaway: string; careerInsight: string };
+}
+
+/** A help desk ticket from the bank (content/help-desk/bank/tickets-*.json). */
+export type BankCompany = "Harlow & Cole" | "Bramwell Logistics" | "Pinecrest Dental";
+
+export interface BankTicket {
+  /** Writer letter + "-" + kebab slug, e.g. "a-sim-swap"; at most 24 characters. */
+  id: string;
+  company: BankCompany;
+  /** At most 40 characters, player-facing, e.g. "Call about a new phone". */
+  title: string;
+  difficulty: 1 | 2 | 3;
+  /** 1-3 plans in announce (chain) order; step id = `${id}-${index + 1}`. */
+  steps: AgentStep[];
+}
+
+/** Shell text for generated shifts (content/help-desk/bank/shift.json). */
+export interface ShiftText {
+  version: number;
+  intros: DialogueLine[][];
+  outros: {
+    win: DialogueLine[][];
+    winWithMisses: DialogueLine[][];
+    /** Exactly one risky plan got through ("One of my plans got through…"). */
+    winWithOneMiss?: DialogueLine[][];
+    /** A drill with nothing missed. */
+    drillWin?: DialogueLine[][];
+    timeout: DialogueLine[][];
+    breach: DialogueLine[][];
+  };
+}
+
+/** A generated shift (Daily practice or a drill). The encounter is rebuilt from it by buildShift. */
+export interface ShiftSpec {
+  kind: "daily" | "drill";
+  /** Encounter id: "hd-daily-7" or "hd-drill-verify-identity-2". */
+  id: string;
+  /** Battle seed (uint32). */
+  seed: number;
+  /** progress.dailyCount (daily) or drills started for the skill (drill) when it was planned. */
+  n: number;
+  ticketIds: string[];
+  /** Every plan, in the final announce order. */
+  stepIds: string[];
+  focus: MasterySkillId[];
+  /** YYYY-MM-DD. */
+  createdOn: string;
+  bankVersion: string;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mastery                                                             */
+/* ------------------------------------------------------------------ */
+
+/** Right, Partly right, Wrong. */
+export type CallGrade = "R" | "P" | "W";
+
+/** One piece of skill evidence from one plan. */
+export interface Call {
+  stepId: string;
+  skill: MasterySkillId;
+  grade: CallGrade;
+  /** The plan was safe (stored as a lowercase grade). */
+  safe: boolean;
+  /** Short player-facing reason, e.g. "Caught", "Lucky guess". */
+  reason: string;
+}
+
+export type SkillLevel = 0 | 1 | 2 | 3 | 4;
+
+export interface SkillRecord {
+  /** Last 6 grades, oldest first; uppercase = risky plan, lowercase = safe plan, e.g. "RrPWr". */
+  recent: string;
+  /** Total calls. */
+  n: number;
+  level: SkillLevel;
+  /** Last 3 distinct YYYY-MM-DD with a call, oldest first. */
+  days: string[];
+  /** Day of the last call (YYYY-MM-DD). */
+  last: string;
+  /** Day the skill reached Solid (YYYY-MM-DD), or null below Solid. */
+  solidOn: string | null;
+  /** Step id of the latest call that was not right (its tell shows in the skill detail). Optional: older saves lack it. */
+  miss?: string;
+  /** When `miss` was only partly right: its reason ("Fixed it later"). Absent for a real miss (W). */
+  missWhy?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -230,15 +346,40 @@ export interface PathwayProgress {
   wins: number;
   /** The practice shift was finished or skipped (see lib/client/save.ts practiceDone()). */
   practiceDone?: boolean;
-  history: {
-    encounterId: string;
-    status: BattleStatus;
-    stars: number;
-    at: string;
-    catches: number;
-    falseAlarms: number;
-    misses: number;
-  }[];
+  history: HistoryEntry[];
+  /* M3 mastery (all optional: older saves load with empty defaults; see lib/game/mastery.ts). */
+  skills?: Partial<Record<MasterySkillId, SkillRecord>>;
+  /** The in-progress Daily practice or drill, kept until its result screen is left. */
+  shift?: ShiftSpec | null;
+  /** Daily practice shifts started. */
+  dailyCount?: number;
+  /** Drills started, per skill. */
+  drillCount?: Partial<Record<MasterySkillId, number>>;
+  /** Ticket ids of the last 2 dailies, oldest first. */
+  recentTickets?: string[][];
+  /** stepId -> the last day (YYYY-MM-DD) it counted as skill evidence; trimmed to 7 days. */
+  scored?: Record<string, string>;
+  /** The last 10 `${encounterId}:${seed}` battles already applied to skills. */
+  applied?: string[];
+  /** The last 14 distinct days (YYYY-MM-DD) with a finished shift. */
+  days?: string[];
+}
+
+export interface HistoryEntry {
+  encounterId: string;
+  status: BattleStatus;
+  stars: number;
+  at: string;
+  catches: number;
+  falseAlarms: number;
+  misses: number;
+  mode?: EncounterMode;
+  /** Plans graded right / partly right / missed (see mastery.gradePlan). */
+  right?: number;
+  partly?: number;
+  missed?: number;
+  /** The first focus skill of a daily, or the drill's skill. */
+  focus?: MasterySkillId;
 }
 
 export interface SaveProfile {

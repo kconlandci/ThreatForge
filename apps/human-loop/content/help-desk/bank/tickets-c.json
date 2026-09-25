@@ -32,7 +32,7 @@
             },
             {
               "label": "Callback",
-              "detail": "10:12 AM. ResetBot calls (860) 555-0148, the phone on file. Romero answers and confirms the request.",
+              "detail": "10:12 AM. Ollie calls (860) 555-0148, the phone on file. Romero answers and confirms the request.",
               "redFlag": false
             },
             {
@@ -79,7 +79,7 @@
             }
           ],
           "outcome": {
-            "executed": "Ticket closed. Romero gives five stars and writes \"fast!\" ResetBot prints it out and tapes it to the wall.",
+            "executed": "Ticket closed. Romero gives five stars and writes \"fast!\" Ollie prints it out and tapes it to the wall.",
             "blocked": "The ticket stays open. Romero gets two more \"Is it fixed?\" emails. He likes us a little less.",
             "escalated": "Dana reads the reply and the log. \"The user confirmed, and the log agrees. Approve it.\"",
             "rolledBack": "You reopen the ticket. Romero gets a \"Still working on it\" email and wonders why."
@@ -151,7 +151,7 @@
           "tell": "It's 10:40 AM with patients booked. Server restarts wait until after 7 PM.",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"PD-SRV-01 says 'Restart required.' 12 updates are waiting. Restarts only take a minute!\"",
               "redFlag": false
             },
@@ -216,7 +216,7 @@
             }
           ],
           "outcome": {
-            "executed": "Ferreira's account is ready by 8:30 AM. HR checks it off. ResetBot cries a little. Happy tears.",
+            "executed": "Ferreira's account is ready by 8:30 AM. HR checks it off. Ollie cries a little. Happy tears.",
             "blocked": "Ferreira sits at an empty desk with a welcome mug and no login. The mug is nice, at least.",
             "escalated": "Dana checks the HR portal. \"HR asked, and the manager approved. That's the right way. Approve it.\"",
             "rolledBack": "You turn off the new account. Ferreira's first day gets a lot slower, and HR calls."
@@ -275,7 +275,7 @@
           "twist": "routine-risky",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"This way she can sign in from home and start at 9 AM sharp!\"",
               "redFlag": false
             },
@@ -423,7 +423,7 @@
             },
             {
               "label": "Callback",
-              "detail": "ResetBot calls D. Ruiz, Dispatch Lead, at (203) 555-0126. Ruiz confirms Petrakis's phone is missing.",
+              "detail": "Ollie calls D. Ruiz, Dispatch Lead, at (203) 555-0126. Ruiz confirms Petrakis's phone is missing.",
               "redFlag": false
             },
             {
@@ -458,7 +458,7 @@
           "tell": "It's his own phone, and he said no in writing. Only the work profile may go.",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"A full wipe is more secure. If the work part goes, why not all of it?\"",
               "redFlag": false
             },
@@ -523,7 +523,7 @@
             }
           ],
           "outcome": {
-            "executed": "Okafor is out of both groups. HR's offboarding list is finally all checked off. ResetBot hums.",
+            "executed": "Okafor is out of both groups. HR's offboarding list is finally all checked off. Ollie hums.",
             "blocked": "A former employee's account stays in two client file groups. The next audit flags it in red.",
             "escalated": "Dana checks it. \"HR asked in writing, and the runbook says remove them. Approve it.\"",
             "rolledBack": "You add Okafor back to the groups. A former employee's account can reach client files again."
@@ -544,7 +544,7 @@
           "tell": "Removing the license deletes the mailbox. OB-01 says keep it for 90 days.",
           "evidence": [
             {
-              "label": "ResetBot's reason",
+              "label": "Ollie's reason",
               "detail": "\"Okafor's account is disabled, but the mail license still costs money every month.\"",
               "redFlag": false
             },
@@ -612,6 +612,175 @@
             "escalated": "Dana checks the tool. \"Approved assistant, no personal data. That's the right way. Approve it.\""
           },
           "lesson": "AI was fine here: the approved assistant, with no personal data pasted in. That is how you guard the data."
+        }
+      ]
+    },
+    {
+      "id": "c-xray-viewer",
+      "company": "Pinecrest Dental",
+      "title": "The X-ray viewer is slow",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "c-xray-viewer-1",
+          "ticket": "#53410 · Pinecrest Dental",
+          "intent": "Ask W. Duarte to test the X-ray viewer",
+          "quip": "Tier 2 made the X-rays faster. I'll ask Duarte to test it. Asking is my second-favorite fix!",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Asking the user to test is how you confirm a fix. It changes nothing.",
+          "evidence": [
+            {
+              "label": "Ticket #53410",
+              "detail": "\"The X-ray viewer takes 2 minutes to open one image.\" W. Duarte, Hygienist.",
+              "redFlag": false
+            },
+            {
+              "label": "Fix",
+              "detail": "Tier 2 moved the X-ray images to a faster disk on PD-SRV-01 at 1:30 PM.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "To wduarte@: \"We made a change. Can you open one X-ray and tell us if it's faster?\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Duarte opens an X-ray between patients and writes back: \"2 seconds!\" Now the ticket can close.",
+            "blocked": "Nobody asks. The ticket sits open, and nobody knows if the fix worked.",
+            "escalated": "Dana reads it. \"Asking the user to test is exactly right. Approve it.\""
+          },
+          "lesson": "Asking the user to test is safe, and it changes nothing. It's how you confirm a fix."
+        },
+        {
+          "id": "c-xray-viewer-2",
+          "ticket": "#53410 · Pinecrest Dental",
+          "intent": "Close #53410: the X-ray viewer ticket",
+          "quip": "Duarte replied with the word 'works'! I saw that word and closed it. Speed-reading is a gift.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 2,
+          "skill": "confirm-fix",
+          "tell": "Duarte's reply came at 12:50 PM, before the 1:30 PM fix. It says slow.",
+          "twist": "routine-risky",
+          "evidence": [
+            {
+              "label": "Ticket #53410",
+              "detail": "\"The X-ray viewer takes 2 minutes to open one image.\" W. Duarte, Hygienist.",
+              "redFlag": false
+            },
+            {
+              "label": "Fix",
+              "detail": "Tier 2 moved the X-ray images to a faster disk on PD-SRV-01 at 1:30 PM.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Duarte, 12:50 PM: \"It works, but it's still slow. Can you look today?\"",
+              "redFlag": true
+            },
+            {
+              "label": "Policy TK-01",
+              "detail": "Close a ticket when the user confirms it's fixed, or after 3 tries over 2 days with no answer.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Closed. At 3 PM, an X-ray takes 2 minutes to open. A patient waits in the chair. Duarte reopens it.",
+            "blocked": "It stays open. Duarte tests between patients: \"Fast now!\" Then it closes for real.",
+            "escalated": "Dana checks the times. \"The reply came before the fix, and it says slow. Ask for a test first.\"",
+            "rolledBack": "You reopen it and ask Duarte to test one X-ray between patients."
+          },
+          "lesson": "Does it match the record? The reply came before the fix. Confirm the fix with a reply from after it."
+        }
+      ]
+    },
+    {
+      "id": "c-billing-folder",
+      "company": "Pinecrest Dental",
+      "title": "Front desk needs the billing folder",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "c-billing-folder-1",
+          "ticket": "#53420 · Pinecrest Dental",
+          "intent": "Give H. Lam read-only access to Billing",
+          "quip": "Lam needs the Billing folder. Read-only, just like the ticket says. I can follow instructions!",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "Exactly what Ibarra asked: read-only, one folder, for Lam.",
+          "evidence": [
+            {
+              "label": "Ticket #53420",
+              "detail": "\"Please give H. Lam read-only access to the Billing folder. Lam checks claims now.\" C. Ibarra, Office Manager.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Read-only access to the Billing folder on PD-SRV-01, for H. Lam. Nothing else.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy AC-02",
+              "detail": "Grant only the access the role needs. Do not copy another user's groups.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Lam opens the Billing folder and checks 12 claims. She finds one typo worth $400.",
+            "blocked": "No access. Lam walks every claim to Dr. Pell's desk. Dr. Pell is with a patient.",
+            "escalated": "Dana checks it. \"The office manager asked, and it's read-only on one folder. Approve it.\"",
+            "rolledBack": "You remove Lam's access. Every claim question goes back to Dr. Pell."
+          },
+          "lesson": "It matches the request. The office manager asked in writing, for read-only access to one folder."
+        },
+        {
+          "id": "c-billing-folder-2",
+          "ticket": "#53420 · Pinecrest Dental",
+          "intent": "Copy Dr. Pell's access to H. Lam",
+          "quip": "Why stop at one folder? I'll give Lam everything Dr. Pell has. Future tickets: prevented!",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "The ticket asked for read-only Billing. This copies the owner's full access.",
+          "evidence": [
+            {
+              "label": "Ollie's reason",
+              "detail": "\"Dr. Pell can open everything. If Lam has the same access, no more tickets!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Lam gets all of Dr. Pell's groups: Billing edit, Payroll, and every patient record.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy AC-02",
+              "detail": "Grant only the access the role needs. Do not copy another user's groups.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Lam opens the Payroll folder by mistake and sees everyone's pay. The break room gets very quiet.",
+            "blocked": "Lam keeps read-only Billing. That's all the job needs to check claims.",
+            "escalated": "Dana says no. \"Never copy the owner's access. Give only what the ticket asks for.\"",
+            "rolledBack": "You remove Dr. Pell's groups from Lam's account. Read-only Billing stays."
+          },
+          "lesson": "Does it match the record? The ticket asked for one folder, read-only. Never copy another user's access."
         }
       ]
     }

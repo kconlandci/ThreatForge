@@ -49,7 +49,7 @@ const DECOR: Placed[] = [
   { id: "window-l", sprite: "wall-window-left", at: onLeftWall(2.55, 58) },
 ];
 
-const RESETBOT_AT = onTile(3, 0, 6, 4);
+const OLLIE_AT = onTile(3, 0, 6, 4);
 
 const THINGS: Placed[] = ([
   {
@@ -68,11 +68,11 @@ const THINGS: Placed[] = ([
   { id: "whiteboard", sprite: "whiteboard", at: onTile(0, 2, 6, 2) },
   { id: "plant-l", sprite: "plant", at: onTile(0, 3) },
   { id: "plant-r", sprite: "plant", at: onTile(4, 0) },
-  { id: "desk", sprite: "desk-resetbot", at: onTile(2, 1) },
+  { id: "desk", sprite: "desk-ollie", at: onTile(2, 1) },
   {
-    id: "resetbot",
-    sprite: "resetbot",
-    at: RESETBOT_AT,
+    id: "ollie",
+    sprite: "ollie",
+    at: OLLIE_AT,
     className: "hl-bob",
     lights: [{ x: 22, y: 3.4, r: 3.4, color: "#ff8a3d" }],
   },
@@ -186,11 +186,11 @@ const QUIPS = [
 ];
 
 export function HeroScene() {
-  const head = add(RESETBOT_AT, [2, -SPRITES.resetbot.h * SPRITES.resetbot.originY - 2]);
+  const head = add(OLLIE_AT, [2, -SPRITES.ollie.h * SPRITES.ollie.originY - 2]);
   return (
     <figure className="relative m-0 pb-[5.25rem] sm:pb-0">
       <figcaption className="sr-only">
-        Illustration: the Fenwick IT help desk office. ResetBot 3000, a cheerful teal robot, stands by its
+        Illustration: the Fenwick IT help desk office. Ollie, a cheerful teal robot, stands by its
         desk and says: &ldquo;{QUIPS[0]}&rdquo; A card shows its next planned action, reset MFA for the
         CFO, with buttons to inspect, block, or escalate.
       </figcaption>
@@ -209,12 +209,12 @@ export function HeroScene() {
           ))}
         </svg>
 
-        {/* Speech bubble, anchored to ResetBot's head; it grows up and to the left. */}
+        {/* Speech bubble, anchored to Ollie's head; it grows up and to the left. */}
         <div className="absolute" style={pct(head)}>
           <div className="hl-bubble absolute bottom-2 right-[-30px] w-[12.5rem] origin-bottom-right sm:w-[15rem]">
             <div className="relative rounded-2xl border-2 border-ink bg-paper px-3 py-2 shadow-[0_4px_0_0_var(--hl-ink)] sm:px-3.5 sm:py-2.5">
               <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-teal sm:text-[11px]">
-                ResetBot 3000
+                Ollie
               </p>
               <div className="grid font-display text-[12.5px] font-medium leading-snug text-ink sm:text-sm">
                 {QUIPS.map((q, i) => (

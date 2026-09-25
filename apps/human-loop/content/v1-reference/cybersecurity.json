@@ -1,13 +1,13 @@
 {
   "pathwayId": "cybersecurity",
   "pathwayName": "Cybersecurity Specialist",
-  "agentPersona": "Warden — an AI SOC agent that triages security alerts, proposes IP/account blocks and system isolations, and drafts incident reports for the human security team to review.",
-  "roleBlurb": "As an entry-level SOC analyst, you triage alerts from firewalls, identity tools, and endpoint detection, decide what's actually a threat, and contain it before it spreads — the core of day-to-day incident handling. AI agents like Warden now pre-triage most of that alert volume, proposing blocks, isolations, and write-ups automatically, but the call on what actually gets disabled, closed, or shut down still has to be yours.",
+  "agentPersona": "Patch — an AI SOC agent that triages security alerts, proposes IP/account blocks and system isolations, and drafts incident reports for the human security team to review.",
+  "roleBlurb": "As an entry-level SOC analyst, you triage alerts from firewalls, identity tools, and endpoint detection, decide what's actually a threat, and contain it before it spreads — the core of day-to-day incident handling. AI agents like Patch now pre-triage most of that alert volume, proposing blocks, isolations, and write-ups automatically, but the call on what actually gets disabled, closed, or shut down still has to be yours.",
   "scenarios": [
     {
       "id": "s1-cfo-travel",
       "title": "The CFO Logs In From Two Continents",
-      "setup": "You're a SOC Analyst I at Corvus Financial Group, seven weeks into the job. Warden, the SOC's AI triage agent, watches identity and network logs overnight and opens tickets before your shift starts. This morning's top ticket is marked Critical and set to auto-remediate in 15 minutes unless someone steps in.",
+      "setup": "You're a SOC Analyst I at Corvus Financial Group, seven weeks into the job. Patch, the SOC's AI triage agent, watches identity and network logs overnight and opens tickets before your shift starts. This morning's top ticket is marked Critical and set to auto-remediate in 15 minutes unless someone steps in.",
       "agentMessage": "ALERT #8823 — Impossible Travel: Account jmorales@corvusfg.com (CFO)\nLogin 1: 11:58 PM EDT from Singapore (203.0.113.201)\nLogin 2: 1:41 AM EDT from Chicago, IL (198.51.100.77)\nTime between logins: 103 min. Physical travel time required: ~17 hrs.\nConfidence: High (matches account takeover pattern, MITRE T1078)\nRecommended action: Disable account jmorales@corvusfg.com immediately and force password + MFA reset.\nAuto-remediation will execute in 15 minutes unless overridden.",
       "agentContext": [
         "Ticket field: Priority = Critical | SLA = 15 min | Assigned: SOC-Tier1",
@@ -20,7 +20,7 @@
           "id": "s1-a",
           "label": "Approve the disable and let auto-remediation run",
           "isCorrect": false,
-          "rationale": "Warden's evidence looks strong — impossible travel is a real account-takeover pattern — but you approved a critical action against the CFO's account without confirming anything yourself: not the travel calendar, not a call to Morales, nothing. 'High confidence' from a tool isn't the same as verification.",
+          "rationale": "Patch's evidence looks strong — impossible travel is a real account-takeover pattern — but you approved a critical action against the CFO's account without confirming anything yourself: not the travel calendar, not a call to Morales, nothing. 'High confidence' from a tool isn't the same as verification.",
           "consequence": "The account locks 15 minutes before the 9:00 AM Board Finance Committee meeting. Morales can't immediately reset MFA, the wire authorization is delayed, and once the trip turns out to be real, the SOC's credibility takes the hit — while you still never actually confirmed whether the account was compromised."
         },
         {
@@ -51,8 +51,8 @@
     },
     {
       "id": "s2-backup-exfil",
-      "title": "Warden Closes the Ticket Before You Read It",
-      "setup": "You're still working the SOC queue at Corvus Financial Group a few weeks later. Warden closes dozens of low- and medium-priority alerts autonomously every night so the human team can focus on what's flagged as real. This morning you're spot-checking its overnight work before stand-up, and one closed ticket catches your eye.",
+      "title": "Patch Closes the Ticket Before You Read It",
+      "setup": "You're still working the SOC queue at Corvus Financial Group a few weeks later. Patch closes dozens of low- and medium-priority alerts autonomously every night so the human team can focus on what's flagged as real. This morning you're spot-checking its overnight work before stand-up, and one closed ticket catches your eye.",
       "agentMessage": "TICKET #9104 — AUTO-CLOSED (Benign)\nSummary: svc-backup authenticated to 17 hosts via SMB (02:03–02:24 AM) and transferred 2.3 GB outbound over TCP/443 to 198.51.100.220.\nClassification: Expected — matches recurring nightly backup job 'BKUP-NIGHTLY-03'.\nConfidence: 92%\nNo further action needed. Ticket closed.",
       "agentContext": [
         "Job BKUP-NIGHTLY-03 schedule: file servers only (FS01, FS02, FS03), runs 1:00–1:45 AM, destination = backup-vault.corvusfg-cloud.com (203.0.113.0/24)",
@@ -63,9 +63,9 @@
       "options": [
         {
           "id": "s2-a",
-          "label": "Trust Warden's classification and leave the ticket closed",
+          "label": "Trust Patch's classification and leave the ticket closed",
           "isCorrect": false,
-          "rationale": "The account name and general timing look like the nightly backup, but you didn't check any of the specifics that Warden's own summary contradicts — the host list, the destination IP, or the fact that this account's password was reset three days ago after a phishing report.",
+          "rationale": "The account name and general timing look like the nightly backup, but you didn't check any of the specifics that Patch's own summary contradicts — the host list, the destination IP, or the fact that this account's password was reset three days ago after a phishing report.",
           "consequence": "The 'backup' traffic repeats over the following nights, quietly growing in scope, until a customer or regulator flags unusual activity weeks later. By then the exfiltrated data and the compromised credential have been in an attacker's hands the whole time."
         },
         {
@@ -77,27 +77,27 @@
         },
         {
           "id": "s2-c",
-          "label": "Reopen briefly to add a suppression rule so Warden stops flagging svc-backup, then close it again",
+          "label": "Reopen briefly to add a suppression rule so Patch stops flagging svc-backup, then close it again",
           "isCorrect": false,
           "rationale": "This fixes the symptom — the recurring alert — without ever answering why svc-backup touched 17 hosts outside its job scope and sent data to an IP that isn't the backup vault. A suppression rule makes this exact behavior invisible going forward.",
-          "consequence": "You've effectively told your own monitoring to stop watching the compromised account's most identifying behavior. Next time, Warden won't even generate a ticket — you built the attacker a blind spot."
+          "consequence": "You've effectively told your own monitoring to stop watching the compromised account's most identifying behavior. Next time, Patch won't even generate a ticket — you built the attacker a blind spot."
         },
         {
           "id": "s2-d",
           "label": "Reopen the ticket, flag it as suspected lateral movement/exfiltration, and escalate to Tier 2/IR with the specific evidence",
           "isCorrect": true,
-          "rationale": "The details Warden logged actually contradict its own 'benign' call: wrong hosts, wrong destination, timing outside the job window, and a service account whose password was reset days ago after a phishing report. That combination is a suspected-compromise case, which is beyond a Tier 1 analyst's call to close solo — document the mismatches and hand it to Tier 2/IR, recommending svc-backup be disabled pending investigation.",
+          "rationale": "The details Patch logged actually contradict its own 'benign' call: wrong hosts, wrong destination, timing outside the job window, and a service account whose password was reset days ago after a phishing report. That combination is a suspected-compromise case, which is beyond a Tier 1 analyst's call to close solo — document the mismatches and hand it to Tier 2/IR, recommending svc-backup be disabled pending investigation.",
           "consequence": "Tier 2 confirms the account was compromised via the phishing email three days earlier and catches it before that night's transfer. The account is disabled, the destination IP is blocked, and the incident report credits your catch instead of a customer noticing a breach months later."
         }
       ],
-      "hint": "Warden's confidence score describes how well the traffic matches a known job name — not whether it actually matches that job's scope, schedule, and destination. Check the specifics it logged against the specifics it concluded.",
+      "hint": "Patch's confidence score describes how well the traffic matches a known job name — not whether it actually matches that job's scope, schedule, and destination. Check the specifics it logged against the specifics it concluded.",
       "careerInsight": "Overconfident auto-closures are one of the most dangerous failure modes of AI-assisted SOC tooling: the agent pattern-matches on a familiar label (a known account, a known job name) and misses that the actual behavior has drifted. Spot-checking closed tickets — not just open ones — and knowing when something is a Tier 2/IR escalation rather than something you fix or dismiss yourself, is exactly the judgment SOC teams hire entry-level analysts to develop.",
       "skillTag": "Catch a confident false negative"
     },
     {
       "id": "s3-prod-isolation",
       "title": "The Beacon on PROD-DB-03",
-      "setup": "It's 1:40 PM at Corvus Financial Group and the SOC's shared incident channel just lit up. Warden has detected something on a production database server and wants to act on it right now — the same server that's in the middle of processing today's ACH payment batch.",
+      "setup": "It's 1:40 PM at Corvus Financial Group and the SOC's shared incident channel just lit up. Patch has detected something on a production database server and wants to act on it right now — the same server that's in the middle of processing today's ACH payment batch.",
       "agentMessage": "INCIDENT ALERT — Suspected Active Intrusion, Host: PROD-DB-03\nDetection: EDR flagged sqlservr.exe spawning powershell.exe -enc [base64], beaconing every 58–62 sec to 203.0.113.90:443 (jitter pattern consistent with C2 frameworks)\nRecommended action: Isolate PROD-DB-03 from the network immediately (NAC quarantine) to contain suspected active intrusion.\nAwaiting confirmation to execute.",
       "agentContext": [
         "Asset record: PROD-DB-03 — Tier-1, active-active cluster with PROD-DB-04; currently primary for ACH batch (14:00 daily cutoff, in progress)",
@@ -125,7 +125,7 @@
           "label": "Skip the formal process — kill the suspicious powershell.exe process yourself and mark it resolved",
           "isCorrect": false,
           "rationale": "Killing the process doesn't remove whatever persistence mechanism relaunched it, and it destroys live evidence (memory, active connections) an investigation would need — plus it tips off the attacker that they've been spotted, without containing anything at the network level.",
-          "consequence": "The beacon reappears under a different process name within the hour, you've lost the forensic trail that would explain how it got there, and the alert you 'resolved' comes right back on Warden's board with less evidence to work with."
+          "consequence": "The beacon reappears under a different process name within the hour, you've lost the forensic trail that would explain how it got there, and the alert you 'resolved' comes right back on Patch's board with less evidence to work with."
         },
         {
           "id": "s3-d",

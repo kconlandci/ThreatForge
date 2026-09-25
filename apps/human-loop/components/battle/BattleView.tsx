@@ -9,11 +9,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ChevronRight, ChevronsRight, Lock, Play, X } from "lucide-react";
+import { ChevronRight, ChevronsRight, Lock, Play, Target, X } from "lucide-react";
 import type { StageBus, ToStage } from "@/lib/game/bus";
 import { CARDS } from "@/lib/game/cards";
 import { coachHint, plainHint, sheetCoach } from "@/lib/game/coach";
 import { validTargets } from "@/lib/game/engine";
+import { liveGrade } from "@/lib/game/skillsView";
 import type { BattleState, BattleStatus, CardDef, CardId, Encounter, PlayResult } from "@/lib/game/types";
 import {
   agentShortName,
@@ -25,6 +26,7 @@ import {
   newEvents,
   readingMs,
   resolvedCount,
+  stepById,
   unlockedThisTurn,
   useBattle,
   type Beat,
@@ -38,7 +40,7 @@ import { HintText } from "./HintText";
 import type { IntentStamp } from "./IntentCard";
 import { IntentList, type IntentItem } from "./IntentList";
 import { Meters } from "./Meters";
-import { OutcomeToast, type ActiveToast } from "./OutcomeToast";
+import { OutcomeToast, type ActiveToast, type ToastChip } from "./OutcomeToast";
 import { RecentActions } from "./RecentActions";
 import { SpeakerFace } from "./SpeakerFace";
 import s from "./battle.module.css";
@@ -57,6 +59,8 @@ export interface BattleViewProps {
   onShowResult: (state: BattleState) => void;
   /** The player's first real shift: Dana's hint line adds the first-shift tips. */
   firstShift?: boolean;
+  /** Drills: the skill's "Where to look" line for the top of the evidence sheet (until Solid). */
+  sheetNote?: string | null;
 }
 
 interface Phase {
@@ -190,6 +194,7 @@ export function BattleView({
   onSave,
   onShowResult,
   firstShift = false,
+  sheetNote = null,
 }: BattleViewProps) {
   const { state, play, endTurn } = useBattle(encounter, initial, onSave);
   const latest = useRef(state);
@@ -447,7 +452,7 @@ export function BattleView({
     toStage([{ type: "agent-mood", mood: s0.status !== "playing" ? "idle" : s0.announced.length ? "eager" : "idle" }]);
   }, [stageReady, toStage]);
 
-  // The "Done" tray covers the bottom of the stage: tell the stage, so ResetBot sits above it.
+  // The "Done" tray covers the bottom of the stage: tell the stage, so Ollie sits above it.
   // While the tray is hidden (before Roll Back unlocks) the inset is 0.
   useIsoLayoutEffect(() => {
     const tray = stageWrapRef.current?.querySelector<HTMLElement>("[data-tray]");
@@ -706,6 +711,15 @@ export function BattleView({
   const coachCard = coach?.target?.startsWith("card:") && !selectedDef ? (coach.target.slice(5) as CardId) : null;
   const sheetHint = evidence && !phase && !ended ? sheetCoach(state, encounter, evidence.id, { selectedCardId: null }) : null;
 
+  // After a plan resolves, its toast names the skill it tested and how it went (not in practice).
+  const chipStep = !practice && toast?.stepId ? stepById(encounter, toast.stepId) : undefined;
+  // The shape shows only once the outcome is final (liveGrade), so it never disagrees with the result screen.
+  const canRollBack = state.status === "playing" && deckAtTurn(encounter, encounter.maxTurns).includes("rollback");
+  const chip: ToastChip | null = chipStep?.skill
+    ? { skill: chipStep.skill, ...liveGrade(chipStep, state.steps[chipStep.id], { canRollBack }) }
+    : null;
+  const drillTitle = encounter.mode === "drill" ? encounter.title : null;
+
   const endInfo = ended && showEnd ? endCopy(ended, practice) : null;
   const coachId = coach?.id ?? null;
   const coachTarget = coach?.target ?? null;
@@ -757,6 +771,13 @@ export function BattleView({
           {encounter.title}: supervise {agentFull}
         </h1>
 
+        {drillTitle ? (
+          <p className={s.drillHead}>
+            <Target className="h-4 w-4 flex-none" strokeWidth={2.6} aria-hidden="true" />
+            {drillTitle}
+          </p>
+        ) : null}
+
         <Meters
           risk={risk}
           maxRisk={encounter.maxRisk}
@@ -770,13 +791,13 @@ export function BattleView({
         {/* Toasts hang from the meters over the stage (and the plan list if they need the room),
             so a long outcome is never clipped by the stage on short phones. */}
         <div ref={toastAnchorRef} className={s.toastAnchor}>
-          <OutcomeToast toast={toast} paused={toastHold || pageHidden} onHold={setToastHold} onDismiss={advance} />
+          <OutcomeToast toast={toast} chip={chip} paused={toastHold || pageHidden} onHold={setToastHold} onDismiss={advance} />
         </div>
 
         <div ref={stageWrapRef} className={s.stageWrap}>
           {!stageReady ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className={s.stageFallback} src="/game/sprites/resetbot-idle.svg" alt="" width={220} height={220} />
+            <img className={s.stageFallback} src="/game/sprites/ollie-idle.svg" alt="" width={220} height={220} />
           ) : null}
           {stage}
           {banner && !toast ? (
@@ -962,6 +983,7 @@ export function BattleView({
           canAct={!locked}
           showCost={!practice}
           coach={sheetHint}
+          note={sheetNote}
           shakeKey={shakeKey}
           onLockedTap={nudge}
           onPlay={(uid, stepId) => tryPlay(uid, stepId)}

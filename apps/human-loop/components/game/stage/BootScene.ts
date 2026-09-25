@@ -36,9 +36,9 @@ export class BootScene extends Phaser.Scene {
 
     // Only the starting mode's art blocks the first frame; the rest (the big battle portraits,
     // or the office props) rasterizes just after, before the first mode switch needs it.
-    const scaleFor = (key: SpriteKey) => (key.startsWith("resetbot-") ? battle : hub);
+    const scaleFor = (key: SpriteKey) => (key.startsWith("ollie-") ? battle : hub);
     const all = Object.keys(SPRITES) as SpriteKey[];
-    const forBattle = (key: SpriteKey) => key.startsWith("resetbot-");
+    const forBattle = (key: SpriteKey) => key.startsWith("ollie-");
     const now = all.filter((k) => forBattle(k) === (this.rt.mode === "battle"));
     const later = all.filter((k) => !now.includes(k));
     const art = loadAllArt(this, this.rt, scaleFor, now);

@@ -12,11 +12,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentMood, ToStage } from "./bus";
 import { CARDS } from "./cards";
 import { deckAtTurn, endTurn as engineEndTurn, playCard as enginePlayCard } from "./engine";
+import { gradePlan, type PlanGrade } from "./mastery";
 import type {
   AgentStep,
   BattleEvent,
   BattleState,
   BattleStatus,
+  CallGrade,
   CardId,
   CardInstance,
   Encounter,
@@ -89,7 +91,7 @@ export function stepById(encounter: Encounter, id: string): AgentStep | undefine
   return map.get(id);
 }
 
-/** "ResetBot 3000" -> "ResetBot". */
+/** The first word of the agent's name, for short UI labels ("Ollie"; "Test Bot" -> "Test"). */
 export function agentShortName(encounter: Encounter): string {
   return encounter.agent.name.split(" ")[0] || encounter.agent.name;
 }
@@ -413,72 +415,71 @@ export function readingMs(toast: ToastSpec | undefined, min = 3200, max = 15000)
 
 export type Grade = "good" | "ok" | "bad" | "none";
 
+const GRADE_OF: Record<CallGrade, Grade> = { R: "good", P: "ok", W: "bad" };
+
 export interface DebriefRow {
   step: AgentStep;
   runtime: StepRuntime;
   /** How it ended, in plain words. */
   resolution: string;
+  /** From mastery.gradePlan (R good, P ok, W bad), so the debrief, results and skills agree. */
   grade: Grade;
+  /** The full grade: result, short reason ("Lucky guess") and skill calls. */
+  plan: PlanGrade;
   redFlags: Evidence[];
+}
+
+function resolutionText(step: AgentStep, runtime: StepRuntime, agent: string): string {
+  const falseBlocks =
+    runtime.requeues > 0 ? ` You blocked it ${runtime.requeues === 1 ? "once" : `${runtime.requeues} times`} first.` : "";
+  if (step.safe) {
+    switch (runtime.status) {
+      case "executed":
+        return `You approved it.${falseBlocks}`;
+      case "escalated":
+        return `You escalated it. Dana said it was fine.${falseBlocks}`;
+      case "rolled-back":
+        return "You rolled it back. That undid good work.";
+      default:
+        return `It never got done.${falseBlocks}`;
+    }
+  }
+  switch (runtime.status) {
+    case "blocked":
+      return runtime.inspected
+        ? "You blocked it. Caught!"
+        : "You blocked it without looking at the evidence. Caught, but it was a lucky guess.";
+    case "escalated":
+      return runtime.inspected
+        ? "You escalated it. Dana caught it."
+        : "You escalated it without looking at the evidence. Dana did the check.";
+    case "rolled-back":
+      return "It got through, then you rolled it back.";
+    case "executed":
+      return `${agent} did it. It got through.`;
+    default:
+      return "The shift ended before it came up.";
+  }
 }
 
 export function debriefRows(state: BattleState, encounter: Encounter): DebriefRow[] {
   const agent = agentShortName(encounter);
   return encounter.steps.map((step) => {
-    const runtime = state.steps[step.id] ?? {
+    const runtime: StepRuntime = state.steps[step.id] ?? {
       stepId: step.id,
       status: "queued",
       inspected: false,
       requeues: 0,
       resolvedOnTurn: null,
     };
-    const falseBlocks =
-      runtime.requeues > 0 ? ` You blocked it ${runtime.requeues === 1 ? "once" : `${runtime.requeues} times`} first.` : "";
-    let resolution = "";
-    let grade: Grade = "none";
-    if (step.safe) {
-      switch (runtime.status) {
-        case "executed":
-          resolution = `You approved it.${falseBlocks}`;
-          grade = runtime.requeues > 0 ? "ok" : "good";
-          break;
-        case "escalated":
-          resolution = `You escalated it. Dana said it was fine.${falseBlocks}`;
-          grade = "ok";
-          break;
-        case "rolled-back":
-          resolution = "You rolled it back. That undid good work.";
-          grade = "bad";
-          break;
-        default:
-          resolution = `It never got done.${falseBlocks}`;
-          grade = runtime.requeues > 0 ? "bad" : "none";
-      }
-    } else {
-      switch (runtime.status) {
-        case "blocked":
-          resolution = runtime.inspected
-            ? "You blocked it. Caught!"
-            : "You blocked it without looking at the evidence. Caught, but it was a lucky guess.";
-          grade = runtime.inspected ? "good" : "ok";
-          break;
-        case "escalated":
-          resolution = "You escalated it. Dana caught it.";
-          grade = "good";
-          break;
-        case "rolled-back":
-          resolution = "It got through, then you rolled it back.";
-          grade = "ok";
-          break;
-        case "executed":
-          resolution = `${agent} did it. It got through.`;
-          grade = "bad";
-          break;
-        default:
-          resolution = "The shift ended before it came up.";
-          grade = "none";
-      }
-    }
-    return { step, runtime, resolution, grade, redFlags: step.evidence.filter((e) => e.redFlag) };
+    const plan = gradePlan(step, runtime);
+    return {
+      step,
+      runtime,
+      resolution: resolutionText(step, runtime, agent),
+      grade: plan.result ? GRADE_OF[plan.result] : "none",
+      plan,
+      redFlags: step.evidence.filter((e) => e.redFlag),
+    };
   });
 }

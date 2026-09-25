@@ -591,6 +591,20 @@ export function blindBlocks(state: BattleState, encounter: Encounter): string[] 
     .map((x) => x.id);
 }
 
+/** Safe steps the player blocked before ever seeing their evidence (good work stopped on a guess). */
+export function blindSafeBlocks(state: BattleState, encounter: Encounter): string[] {
+  const safe = new Set(encounter.steps.filter((x) => x.safe).map((x) => x.id));
+  const seen = new Set<string>();
+  const out = new Set<string>();
+  for (const ev of state.events) {
+    if (ev.t === "inspected") seen.add(ev.stepId);
+    else if (ev.t === "card-played" && ev.cardId === "block" && ev.targetStepId && safe.has(ev.targetStepId) && !seen.has(ev.targetStepId)) {
+      out.add(ev.targetStepId);
+    }
+  }
+  return [...out];
+}
+
 export function scoreBattle(state: BattleState, encounter: Encounter): BattleScore {
   const { catches, falseAlarms, misses } = state.stats;
   const won = state.status === "won";

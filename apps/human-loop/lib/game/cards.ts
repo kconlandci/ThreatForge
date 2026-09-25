@@ -67,7 +67,7 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: "skill",
     target: "none",
     text: "Draw 2 cards.",
-    flavor: "Brewed before ResetBot “fixed” the machine.",
+    flavor: "Brewed before Ollie “fixed” the machine.",
     exhaust: true,
     icon: "Coffee",
   },

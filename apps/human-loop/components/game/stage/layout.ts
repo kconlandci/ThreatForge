@@ -51,7 +51,7 @@ export function hubFocus() {
   return { x: (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2, y: (HUB_BOUNDS.minY + HUB_BOUNDS.maxY) / 2 };
 }
 
-/** Battle: ResetBot's feet sit at (0, BATTLE_FEET_Y); the portrait is 220 world px tall. */
+/** Battle: Ollie's feet sit at (0, BATTLE_FEET_Y); the portrait is 220 world px tall. */
 export const BATTLE_FEET_Y = 110;
 export const BATTLE_BOX = { w: 300, h: 244, cx: 0, cy: 6 };
 

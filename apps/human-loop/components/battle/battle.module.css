@@ -1106,7 +1106,7 @@
   color: var(--hl-ink);
 }
 
-/* Agent turn, row 1: "ResetBot is working" and a small Skip link (row 2 is the Next button). */
+/* Agent turn, row 1: "Ollie is working" and a small Skip link (row 2 is the Next button). */
 .workingRow {
   display: flex;
   align-items: center;
@@ -1320,6 +1320,33 @@
   font-size: 15px;
   line-height: 1.38;
   color: var(--hl-ink-soft);
+}
+
+/* The skill a resolved plan tested: icon + name + result shape. */
+.skillChip > span {
+  white-space: nowrap;
+}
+
+.skillChipNote {
+  font-weight: 600;
+  color: var(--hl-ink-soft);
+}
+
+.skillChip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 5px;
+  margin-top: 6px;
+  padding: 2px 6px 2px 8px;
+  border: 1.5px solid var(--hl-line);
+  border-radius: 999px;
+  background: var(--hl-paper-soft);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--hl-ink);
 }
 
 .toastBtn {
@@ -2194,4 +2221,31 @@
   .doneChip {
     font-size: clamp(14px, 1.5vh, 16px);
   }
+}
+
+/* Drills: "Drill: Check who's asking" above the meters. */
+.drillHead {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hl-teal-dark);
+}
+
+/* Drills: where to look, at the top of the evidence sheet (until the skill is Solid). */
+.lookNote {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--hl-teal);
+  border-radius: 12px;
+  background: var(--hl-teal-tint);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--hl-ink);
 }

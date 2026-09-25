@@ -3,7 +3,7 @@
 A free browser game by DCI Resources that teaches AI agentic oversight: supervising AI agents at work.
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
 evidence, approve safe work, and block, escalate or roll back the risky stuff. Help Desk
-(with "ResetBot 3000") is playable now; the other pathways say "Coming soon".
+(with "Ollie", short for Off-and-On-Again) is playable now; the other pathways say "Coming soon".
 
 Stack: Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Phaser 4,
 Airtable or Neon Postgres (optional, for cloud save), Vitest.
@@ -310,9 +310,64 @@ HL_TEST_PG_URL=postgresql://USER:PASSWORD@localhost:5432/hl_test npx vitest run 
    the start of that turn, only while the card can be played; "Out of energy" and "No Inspect
    left" always win over a tip.
 
-The main button is always **Approve** ("Approve 2 plans"): ResetBot does every plan you didn't
-stop. While ResetBot works, the same button reads **Next** and shows one outcome per tap; the small
+The main button is always **Approve** ("Approve 2 plans"): Ollie does every plan you didn't
+stop. While Ollie works, the same button reads **Next** and shows one outcome per tap; the small
 **Skip** link above it skips only the plain "Done." outcomes and stops at the next risky one. A saved battle made before the content changed fails `canResume` and starts fresh.
+
+## Skills and generated shifts (M3 systems)
+
+Skill mastery (engine) and the screens that show it.
+
+**Screens.** After the first Monday attempt, Ollie's desk (the hub's bottom card and the desk
+dialogue) offers one button, *Start today's practice* (then *One more shift*, or *Resume practice*
+/ *Resume drill*), with a note such as "4 tickets · about 6 min · Focus: Check who's asking", plus
+*Replay Monday* and *Your skills* links; the TODAY banner and Ollie's and Dana's lines switch to
+returning-player text (`returningLines` in `hub.json`). A daily or drill opens with one intro screen
+(`components/hub/ShiftIntro.tsx`: what it is, the focus, Dana's and Ollie's 2 lines, *Start*).
+"Practice this" never replaces a paused battle: it shows the Resume / Start over prompt, and Your
+skills shows *Resume shift* instead while one is saved. **Your skills** (`components/skills/SkillsScreen.tsx`, also
+from the menu, Dana's whiteboard and `/play/help-desk?view=skills` on `/play`) shows Dana's 3
+questions, a *Next up* card with one reason and *Practice this · N tickets* (a drill), the skills met
+so far with pips and a level word (never percentages), *Review due* tags (only the 2 due skills that
+need it most) and 7 day dots; a row opens `SkillDetail` (meaning, where to look, the next pip, last 6
+calls as check / half / cross, the latest miss's tell; a partly right call only when no miss is recent).
+Drills show "Drill: <skill>" above the meters and the "Where to look" line at the top of the
+evidence sheet until Solid. Plan toasts carry a skill chip (not in practice) with a result shape only
+once the outcome is final (`skillsView.liveGrade`: "Back in line", "Can still roll back", "Not checked").
+*Skills moved* on a daily result lists drops first (with a reason), then the focus, then a new Solid.
+Daily and drill results use `components/battle/ShiftResult.tsx`; every result screen lists one line
+per plan, mistakes first, with its tell (`components/skills/PlanList.tsx`), and each line opens the
+full debrief row. Every help desk step (fixed and bank) has a `tell`.
+
+- **Skills** (`lib/game/skills.ts`): six lens skills, one tagged on every help desk step
+  (`AgentStep.skill`), plus "Approve what checks out" (`approve-checked`), computed from how safe
+  plans were handled.
+- **One grading function** (`lib/game/mastery.ts` `gradePlan`): each plan's final outcome becomes
+  right / partly / missed plus skill "calls" (the full table is at the top of the file). The
+  debrief (`useBattle.debriefRows`), the practice result and the skill records all use it, so
+  they never disagree. The first 2 practice steps (`guidedSteps`) never count.
+- **Levels** New / Learning / Practicing / Solid / Sharp, at most one level per shift, never back
+  below Learning, and never down after a shift with no miss; Solid needs calls on 2+ days and Sharp
+  a right review 3+ days later. Review
+  intervals 1 / 2 / 4 / 7 days; nothing decays silently.
+- **Battle end** (`GameShell`): `applyBattle` runs once per battle for every mode, keyed
+  `${encounterId}:${seed}`, and a step scored in the last 2 days does not count again.
+- **Daily practice and drills** (`lib/game/shiftGen.ts`): `planDaily` / `planDrill` pick whole
+  tickets from the bank (`content/help-desk/bank/`) by skill need, seeded by player id and count,
+  and return a `ShiftSpec`; `buildShift` rebuilds the same encounter from it. A daily never puts 2
+  risky plans on one turn (3 energy can't inspect both and block both), and when the lead focus is a
+  lens skill it includes a fresh risky plan of it. Ollie's lines rotate with the shift count. The spec is kept in
+  `progress.shift`, so `encounterFor` (`lib/game/content.ts`) and `canResume` resume it like any
+  battle. A spec from an older bank (`BANK_VERSION`) is dropped and the shift starts fresh.
+  Dailies can't breach; stars, attempts, wins and best stay Monday-only.
+- **Save** (still version 2): new optional `PathwayProgress` fields (`skills`, `shift`,
+  `dailyCount`, `drillCount`, `recentTickets`, `scored`, `applied`, `days`) and history fields
+  (`mode`, `right`, `partly`, `missed`, `focus`), rebuilt field by field in `lib/client/save.ts`.
+  Older saves load with empty skills.
+- **Airtable**: daily and drill rows keep their id in Encounter (`hd-daily-7`) and read
+  *"Jamie R. · Help Desk · Daily practice · 7/9 right"*. Optional columns (Mode, Right, Partly,
+  Missed, Focus skill; Players: Skill levels) are written only once their field ids are filled in
+  `OPTIONAL_RESULT_FIELDS` / `OPTIONAL_PLAYER_FIELDS` in `lib/server/airtable.ts`.
 
 ## Project layout
 

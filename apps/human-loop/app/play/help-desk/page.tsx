@@ -4,7 +4,7 @@ import { GameShell } from "@/components/game/GameShell";
 export const metadata: Metadata = {
   title: "Help Desk shift",
   description:
-    "Supervise ResetBot 3000, an eager AI help desk agent. Read its plans, inspect the evidence, and stop the bad calls before they happen.",
+    "Supervise Ollie, an eager AI help desk agent. Read its plans, inspect the evidence, and stop the bad calls before they happen.",
 };
 
 export const viewport: Viewport = {

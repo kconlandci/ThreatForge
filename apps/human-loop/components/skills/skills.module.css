@@ -1,0 +1,625 @@
+/* Your skills, skill detail, plan lines and the chooser note. Same game look: ink outlines, hard shadows. */
+
+/* ---- Pips ---------------------------------------------------------- */
+
+.pipsWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pips {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.pip {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 999px;
+  background: var(--hl-paper);
+}
+
+.pipsSm .pip {
+  width: 10px;
+  height: 10px;
+}
+
+.pipOn {
+  background: var(--hl-teal);
+}
+
+.levelWord {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+/* ---- Result shapes ------------------------------------------------- */
+
+.shape {
+  flex: none;
+  display: inline-block;
+}
+
+.shapeRing {
+  stroke-width: 2;
+}
+
+.shapeMark {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.shapeR .shapeRing {
+  fill: var(--hl-teal);
+  stroke: var(--hl-teal);
+}
+.shapeR .shapeMark {
+  stroke: #fff;
+}
+
+.shapeP .shapeRing {
+  fill: #fff;
+  stroke: var(--hl-orange-text);
+}
+.shapeHalf {
+  fill: var(--hl-orange-text);
+}
+
+.shapeW .shapeRing {
+  fill: var(--hl-danger);
+  stroke: var(--hl-danger);
+}
+.shapeW .shapeMark {
+  stroke: #fff;
+}
+
+.shapeNone .shapeRing {
+  fill: #fff;
+  stroke: var(--hl-muted);
+}
+.shapeNone .shapeMark {
+  stroke: var(--hl-muted);
+}
+
+.callRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.muted {
+  font-size: 15px;
+  color: var(--hl-muted);
+}
+
+/* ---- Your skills page ---------------------------------------------- */
+
+.page {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--hl-paper);
+}
+
+.column {
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
+  padding: 12px 16px calc(32px + env(safe-area-inset-bottom, 0px));
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  margin-left: -6px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hl-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.back:hover {
+  background: var(--hl-paper-soft);
+}
+
+.title {
+  margin-top: 4px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--hl-ink);
+}
+
+.title:focus {
+  outline: none;
+}
+
+.questions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Dana's 3 questions: icon on top, the question under it (3 across, even on a phone). */
+.question {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  background: var(--hl-teal-tint);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--hl-teal-dark);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.questionIcon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--hl-teal);
+  color: #fff;
+}
+
+.nextCard {
+  margin-top: 18px;
+  padding: 16px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 20px;
+  background: var(--hl-orange-tint);
+  box-shadow: 0 5px 0 0 var(--hl-ink);
+}
+
+.eyebrow {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hl-teal);
+}
+
+.nextCard .eyebrow {
+  color: var(--hl-orange-text);
+}
+
+.nextName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--hl-ink);
+}
+
+.bigIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 12px;
+  background: var(--hl-paper);
+  color: var(--hl-teal);
+}
+
+.reason {
+  margin-top: 6px;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--hl-ink);
+}
+
+.nextCard button {
+  margin-top: 14px;
+  width: 100%;
+}
+
+.section {
+  margin-top: 26px;
+}
+
+.h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+.h2Icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--hl-teal);
+  color: #fff;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 10px 12px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 16px;
+  background: var(--hl-paper);
+  box-shadow: 0 3px 0 0 var(--hl-ink);
+  text-align: left;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.row:hover {
+  background: var(--hl-paper-soft);
+}
+
+.row:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 var(--hl-ink);
+}
+
+.rowIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--hl-teal-tint);
+  color: var(--hl-teal);
+}
+
+.rowMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.rowName {
+  display: block;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--hl-ink);
+}
+
+.rowLevel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 4px;
+}
+
+.due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 2px solid var(--hl-orange-text);
+  border-radius: 999px;
+  background: var(--hl-orange-tint);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hl-orange-text);
+  white-space: nowrap;
+}
+
+.more {
+  margin-top: 14px;
+  font-size: 16px;
+  color: var(--hl-muted);
+}
+
+.week {
+  margin-top: 26px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--hl-paper-soft);
+}
+
+.weekTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+.dots {
+  display: flex;
+  justify-content: space-between;
+  max-width: 320px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dotCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hl-muted);
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 999px;
+  background: var(--hl-paper);
+}
+
+.dotOn {
+  background: var(--hl-teal);
+}
+
+.dotToday {
+  color: var(--hl-ink);
+  font-weight: 800;
+}
+
+.refresh {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--hl-ink-soft);
+}
+
+/* ---- Skill detail sheet -------------------------------------------- */
+
+.detailBlock + .detailBlock {
+  margin-top: 16px;
+}
+
+.detailLabel {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hl-teal);
+}
+
+.detailText {
+  margin-top: 4px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--hl-ink);
+}
+
+.tell {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--hl-orange);
+  border-radius: 8px;
+  background: var(--hl-orange-tint);
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--hl-ink);
+}
+
+.tellIntent {
+  display: block;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hl-ink-soft);
+}
+
+/* ---- Plan lines (result screens) ----------------------------------- */
+
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan {
+  border: 2px solid var(--hl-ink);
+  border-radius: 16px;
+  background: var(--hl-paper);
+  box-shadow: 0 3px 0 0 var(--hl-ink);
+  overflow: hidden;
+}
+
+.planBtn {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.planBtn:hover {
+  background: var(--hl-paper-soft);
+}
+
+.planMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.planHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+.planQ {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--hl-teal-tint);
+  color: var(--hl-teal);
+}
+
+.planIntent {
+  margin-top: 1px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--hl-muted);
+}
+
+.planText {
+  margin-top: 2px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--hl-ink-soft);
+}
+
+.chev {
+  flex: none;
+  margin-top: 2px;
+  color: var(--hl-muted);
+  transition: rotate 0.15s ease;
+}
+
+.chevOpen {
+  rotate: 180deg;
+}
+
+.planMore {
+  padding: 0 10px 10px;
+}
+
+/* The expanded debrief row sits inside the plan card: drop its own frame. */
+.planMore ol {
+  margin-top: 0;
+}
+.planMore li {
+  border: 0;
+  box-shadow: none;
+  padding: 4px 4px 2px;
+}
+
+/* ---- Moved / chooser ----------------------------------------------- */
+
+.moved {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.movedRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 10px 12px;
+  border: 2px solid var(--hl-line);
+  border-radius: 14px;
+  background: var(--hl-paper-soft);
+}
+
+.movedName {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 160px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+.movedPips {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--hl-ink);
+}
+
+/* "Up" / "Down": a word and an arrow, so direction never rests on the pips alone. */
+.movedDir {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.movedUp {
+  color: var(--hl-teal);
+}
+
+.movedDown {
+  color: var(--hl-danger);
+}
+
+.movedWhy {
+  flex-basis: 100%;
+  font-size: 15px;
+  color: var(--hl-ink-soft);
+}
+
+/* The plan line already shows the result shape: hide the debrief row's own grade badge. */
+.planMore li > div:first-child > span[role="img"] {
+  display: none;
+}

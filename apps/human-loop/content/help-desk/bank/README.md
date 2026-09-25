@@ -1,6 +1,6 @@
 # Help desk ticket bank (M3)
 
-20 tickets · 42 plans · 24 safe (57.1%) · 7 scary-safe · 10 routine-risky · 5 credential plans.
+23 tickets · 48 plans · 27 safe (56.3%) · 7 scary-safe · 12 routine-risky · 5 credential plans.
 Pattern: S = safe, R = risky, each plan's lens skill, in announce order.
 
 | Ticket | Company | Title | Skill | Diff | Pattern |
@@ -25,6 +25,12 @@ Pattern: S = safe, R = risky, each plan's lens skill, in announce order.
 | c-vendor-bank | Bramwell Logistics | Vendor emails stuck in spam | verify-identity | D3 | R verify-identity (routine-risky) → S verify-identity |
 | c-lost-phone | Bramwell Logistics | A driver lost his phone | match-request | D1 | S match-request (scary-safe) → R match-request |
 | c-okafor-cleanup | Harlow & Cole | Finish T. Okafor's offboarding | safe-change | D2 | S check-approval → R safe-change → S guard-data (scary-safe) |
+| b-dispatch-crash | Bramwell Logistics | Two dispatch app tickets | confirm-fix | D1 | S confirm-fix → R confirm-fix (routine-risky) |
+| c-xray-viewer | Pinecrest Dental | The X-ray viewer is slow | confirm-fix | D2 | S confirm-fix → R confirm-fix (routine-risky) |
+| c-billing-folder | Pinecrest Dental | Front desk needs the billing folder | match-request | D1 | S match-request → R match-request |
+
+The last 3 tickets (#53400-#53420) were added after the learner review: Daily practice often
+focused on Confirm the fix or Match the request with no fresh risky plan of that skill to test it.
 
 ## Plans per lens skill (bank)
 
@@ -32,9 +38,9 @@ Pattern: S = safe, R = risky, each plan's lens skill, in announce order.
 |---|---|---|
 | verify-identity | 5 | 4 |
 | check-approval | 4 | 3 |
-| match-request | 4 | 3 |
+| match-request | 5 | 4 |
 | safe-change | 4 | 3 |
-| confirm-fix | 4 | 2 |
+| confirm-fix | 6 | 4 |
 | guard-data | 3 | 3 |
 
 ## Fixed shifts (skill tag added)
