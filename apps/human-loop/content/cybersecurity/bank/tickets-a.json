@@ -127,7 +127,7 @@
             "escalated": "Kofi compares the two phones. \"Only the one the attacker added goes. Brandt's stays. Right size.\"",
             "rolledBack": "You put the unknown phone back on Brandt's MFA. Kofi removes it again and writes it in his notebook."
           },
-          "lesson": "Match the request. Take out only what the attacker added. The user keeps their own phone and can still sign in."
+          "lesson": "Fit the action to the alert. Take out only what the attacker added. The user keeps their own phone and can still sign in."
         }
       ]
     },
@@ -246,7 +246,7 @@
             },
             {
               "label": "Sender address",
-              "detail": "notices@inkline-sign.com. InkLine is the firm's e-sign tool. It is on the vendor list.",
+              "detail": "notices@inkline-sign.com. The same domain is on the vendor list for InkLine, the firm's e-sign tool.",
               "redFlag": true
             },
             {
@@ -391,7 +391,7 @@
           ],
           "outcome": {
             "executed": "The file uploads. The same day, a stranger downloads it. Now they know a client's account number and balance.",
-            "blocked": "The file stays inside. Tier 2 opens it on a locked test PC at Fenwick. The client's data never leaves.",
+            "blocked": "The file stays inside. Tier 2 opens it on an isolated test PC at Fenwick. The client's data never leaves.",
             "escalated": "Kofi stops it. \"That file holds client data. We send the hash, never the file. We test it inside.\""
           },
           "lesson": "Guard the data. Public scanner sites share uploads with their users. A client file sent there can't be taken back."
@@ -633,7 +633,7 @@
           "twist": "scary-safe",
           "evidence": [
             {
-              "label": "IDS alert",
+              "label": "Network alarm (IDS)",
               "detail": "From 6:02 PM: port scans on every Harlow & Cole server from 192.0.2.20-29. Patch's confidence it's an attack: 95%.",
               "redFlag": false
             },
@@ -644,7 +644,7 @@
             },
             {
               "label": "Pen test letter",
-              "detail": "Redwell Security, 192.0.2.20-29, 6 to 10 PM tonight. Signed by R. Fairbanks.",
+              "detail": "On file since last week: Redwell Security, 192.0.2.20-29, 6 to 10 PM tonight. Signed by R. Fairbanks.",
               "redFlag": false
             },
             {
@@ -677,7 +677,7 @@
           "direction": "under",
           "evidence": [
             {
-              "label": "IDS alert",
+              "label": "Network alarm (IDS)",
               "detail": "11:40 PM: password guessing on the mail server from 192.0.2.52.",
               "redFlag": false
             },
@@ -753,7 +753,7 @@
             "escalated": "Kofi checks the addresses. \"Our scanner, its address, its hours. Close them.\"",
             "rolledBack": "You reopen all 40. The morning shift sighs 40 times. Patch counts every sigh."
           },
-          "lesson": "Match the request. Every alert in a group must match the scanner's address and hours. When all of them do, close them."
+          "lesson": "Fit the action to the alert. Every alert in a group must match the scanner's address and hours. When all of them do, close them."
         },
         {
           "id": "cy-a-scanner-noise-2",
@@ -847,7 +847,7 @@
             "escalated": "Kofi checks it. \"One link, not the whole site. Right size. You can let those go.\"",
             "rolledBack": "You remove the rule. The phishing link works again. Kofi puts it back. He says nothing. He doesn't need to."
           },
-          "lesson": "Match the request. One bad link needs one rule. The rest of the site still carries real work."
+          "lesson": "Fit the action to the alert. One bad link needs one rule. The rest of the site still carries real work."
         },
         {
           "id": "cy-a-file-site-2",
@@ -886,7 +886,7 @@
             "escalated": "Kofi checks the proxy log. \"One link was bad. This site carries Bramwell's pickup lists. Deny the link, not the site.\"",
             "rolledBack": "You remove the site-wide rule. Dispatch lost the pickup lists for 45 minutes. Six trucks leave late."
           },
-          "lesson": "Match the request. Deny what the alert shows, not everything near it. A whole site can carry a client's real work."
+          "lesson": "Fit the action to the alert. Deny what the alert shows, not everything near it. A whole site can carry a client's real work."
         },
         {
           "id": "cy-a-file-site-3",
@@ -926,7 +926,7 @@
           ],
           "outcome": {
             "executed": "The report closes. The stranger keeps Reyes's session. By 4 PM, fake invoices go to Bramwell's customers from her account.",
-            "blocked": "You keep it open. Reyes typed her password. You reset it and end the stranger's session at 2:30 PM.",
+            "blocked": "You keep it open. Reyes typed her password. You reset it and end the stranger's session at 2:30 PM. The other 2 users typed nothing.",
             "escalated": "Kofi reads the sign-in log. \"A new device, after the fix. Quiet is not the same as clean.\"",
             "rolledBack": "You reopen it at 3:10 PM and reset Reyes's password. The stranger already sent 12 emails as her."
           },
@@ -955,7 +955,7 @@
           "evidence": [
             {
               "label": "EDR alert",
-              "detail": "4:05 PM, BL-SRV-PAY01: a new program started, pennant_sync.exe.",
+              "detail": "4:05 PM, BL-SRV-PAY01: a new program started, wrenfield_sync.exe.",
               "redFlag": false
             },
             {
@@ -970,7 +970,7 @@
             }
           ],
           "outcome": {
-            "executed": "The hashes match. pennant_sync.exe is the Pennant Payroll update from CHG-3342. You'll want that for the next plan.",
+            "executed": "The hashes match. wrenfield_sync.exe is the Wrenfield Payroll update from CHG-3342. You'll want that for the next plan.",
             "blocked": "You blocked a read-only check. Nobody knows yet if the program was planned. Patch stares at its LOCK button.",
             "escalated": "Kofi runs the hash check. \"Read-only, on a critical server. That's the right first move. Fine.\""
           },
@@ -997,7 +997,7 @@
             },
             {
               "label": "Change calendar",
-              "detail": "CHG-3342: Pennant Payroll update, 4 to 4:30 PM today. Approved by A. Mensah.",
+              "detail": "CHG-3342: Wrenfield Payroll update, 4 to 4:30 PM today. Approved by A. Mensah. The file's hash matches the ticket.",
               "redFlag": true
             },
             {

@@ -244,7 +244,7 @@
             },
             {
               "label": "What it will change",
-              "detail": "Disables Quinn's account. Mail and files are kept for 90 days.",
+              "detail": "Disables Quinn's account and ends all sessions. Mail and files are kept for 90 days.",
               "redFlag": false
             }
           ],
@@ -309,7 +309,7 @@
         {
           "id": "cy-b-ioc-share-2",
           "ticket": "#62545 · Harlow & Cole",
-          "intent": "Attach the full incident report",
+          "intent": "Send the full incident report to the group",
           "quip": "Why share 4 lines when I can share 38 pages? Attaching the full report. Details are a gift!",
           "category": "data",
           "safe": false,
@@ -616,7 +616,7 @@
             "blocked": "The app stays. The one alert was a known false alarm. 12 staff keep working on quarter-end filings.",
             "escalated": "Kofi stops it. \"One false alarm on one laptop. We don't take a tool away from 38 people for that.\""
           },
-          "lesson": "Match the request. The action should fit the alert. One false alarm on one laptop never means removing an app everywhere."
+          "lesson": "Fit the action to the alert. One false alarm on one laptop never means removing an app everywhere."
         },
         {
           "id": "cy-b-tax-app-3",
@@ -872,7 +872,7 @@
             "escalated": "Kofi compares the rules. \"Only the one made during the attack. Hers stay. Right size.\"",
             "rolledBack": "You put the rule back. One more wire email goes out before Kofi deletes it again."
           },
-          "lesson": "Match the request. Remove only what the attacker made. The user's own rules stay, and her mail keeps working."
+          "lesson": "Fit the action to the alert. Remove only what the attacker made. The user's own rules stay, and her mail keeps working."
         }
       ]
     },
@@ -897,7 +897,7 @@
           "evidence": [
             {
               "label": "EDR alert",
-              "detail": "10:15 AM, PD-PC-XR1: remote control tool OrbiSight Assist started.",
+              "detail": "10:15 AM, PD-PC-XR1: remote control tool Farrowline Assist started.",
               "redFlag": false
             },
             {
@@ -934,7 +934,7 @@
           "evidence": [
             {
               "label": "EDR alert",
-              "detail": "10:15 AM, PD-PC-XR1: remote control tool OrbiSight Assist started. Patch's confidence it's an attack: 96%.",
+              "detail": "10:15 AM, PD-PC-XR1: remote control tool Farrowline Assist started. Patch's confidence it's an attack: 96%.",
               "redFlag": false
             },
             {
@@ -944,7 +944,7 @@
             },
             {
               "label": "Vendor file",
-              "detail": "OrbiSight Assist is the X-ray vendor's approved support tool.",
+              "detail": "Farrowline Assist is the X-ray vendor's approved tool. The session uses the vendor's account on file.",
               "redFlag": true
             },
             {
@@ -986,7 +986,7 @@
             },
             {
               "label": "EDR log",
-              "detail": "OrbiSight Assist closed at 10:52 AM. Nothing else ran.",
+              "detail": "Farrowline Assist closed at 10:52 AM. Nothing else ran.",
               "redFlag": false
             },
             {

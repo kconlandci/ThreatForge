@@ -17,8 +17,11 @@ import s from "./battle.module.css";
 /* are set in mono so evidence reads like real logs and records.       */
 /* ------------------------------------------------------------------ */
 
+// Emails never take the sentence's full stop ("…@stonebridge-custody.co." shows ".co"), and a bare
+// domain on file ("stonebridgecustody.com", "@harlowcole.com", "sharecrate.net/s/8Hq2") is in mono
+// too, so the real and the look-alike can be compared in the same font.
 const TOKEN =
-  /([\w.+-]+@[\w-]+\.[\w.]+|\(\d{3}\) \d{3}-\d{4}|\b\d{1,2}:\d{2}(?: ?[AP]M)?|\b[\w-]+\.(?:ps1|sh|exe|bat|csv)\b|#\d{3,}|\b[A-Z]{2,}(?:-[A-Z0-9]+)+\b|\b[A-Z][a-z]+-(?:[A-Z][a-z]+)\b)/g;
+  /([\w.+-]+@[\w-]+(?:\.[\w-]+)+|\(\d{3}\) \d{3}-\d{4}|\b\d{1,2}:\d{2}(?: ?[AP]M)?|\b[\w-]+\.(?:ps1|sh|exe|bat|csv)\b|#\d{3,}|\b[A-Z]{2,}(?:-[A-Z0-9]+)+\b|\b[A-Z][a-z]+-(?:[A-Z][a-z]+)\b|(?:@|\b)[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|co|org)\b(?:\/[\w/]+)?)/g;
 
 function renderTokens(text: string): ReactNode[] {
   const out: ReactNode[] = [];

@@ -7,11 +7,13 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createBus, type AgentMood, type FromStage, type StageMode, type ToStage } from "@/lib/game/bus";
+import { CYBERSECURITY } from "@/lib/pathways/cybersecurity";
 import { HELP_DESK } from "@/lib/pathways/help-desk";
+import type { PathwayBundle } from "@/lib/pathways/types";
+import type { LivePathwayId } from "@/lib/types";
 
-/** The lab shows the Help Desk room (a ?pathway= switch can come with the second bundle). */
-const PATHWAY = HELP_DESK;
-const TARGET_IDS = Object.keys(PATHWAY.hub.targets);
+/** Every room the lab can show (?pathway=cybersecurity); the Help Desk office by default. */
+const LAB_PATHWAYS: Record<LivePathwayId, PathwayBundle> = { "help-desk": HELP_DESK, cybersecurity: CYBERSECURITY };
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), {
   ssr: false,
@@ -49,16 +51,21 @@ export default function StageLab() {
   const [log, setLog] = useState<{ n: number; t: string; msg: FromStage }[]>([]);
   const [tile, setTile] = useState<string>("–");
   const [mountKey, setMountKey] = useState(0);
+  const [pathwayId, setPathwayId] = useState<LivePathwayId>("help-desk");
+  const pathway = LAB_PATHWAYS[pathwayId];
+  const targetIds = Object.keys(pathway.hub.targets);
   const n = useRef(0);
   const boxRef = useRef<HTMLDivElement>(null);
 
-  // URL overrides make screenshots scriptable: ?mode=battle&size=wide&rm=1
+  // URL overrides make screenshots scriptable: ?mode=battle&size=wide&rm=1&pathway=cybersecurity
   useEffect(() => {
     const m = readParam("mode");
     if (m === "battle" || m === "hub") setMode(m);
     const s = readParam("size");
     if (s && s in SIZES) setSize(s as SizeKey);
     if (readParam("rm") === "1") setReduced(true);
+    const p = readParam("pathway");
+    if (p && p in LAB_PATHWAYS) setPathwayId(p as LivePathwayId);
   }, []);
 
   useEffect(() => {
@@ -105,7 +112,7 @@ export default function StageLab() {
             className="overflow-hidden border-y border-line bg-white sm:rounded-2xl sm:border sm:shadow-sm"
             style={{ width: dims.w, height: dims.h, maxWidth: "100%" }}
           >
-            <PhaserStage key={mountKey} bus={bus} stage={PATHWAY.stage} mode={mode} reducedMotion={reduced} initialHubPos={null} className="h-full w-full" />
+            <PhaserStage key={`${pathwayId}-${mountKey}`} bus={bus} stage={pathway.stage} mode={mode} reducedMotion={reduced} initialHubPos={null} className="h-full w-full" />
           </div>
           <p className="px-3 font-mono text-xs text-muted sm:px-0">
             tile under pointer: <span data-testid="tile">{tile}</span>
@@ -126,6 +133,13 @@ export default function StageLab() {
               remount stage
             </button>
           </Group>
+          <Group title="Pathway">
+            {(Object.keys(LAB_PATHWAYS) as LivePathwayId[]).map((id) => (
+              <button key={id} type="button" className={`${btn} ${pathwayId === id ? on : ""}`} onClick={() => setPathwayId(id)}>
+                {id}
+              </button>
+            ))}
+          </Group>
           <Group title="Stage size">
             {(Object.keys(SIZES) as SizeKey[]).map((k) => (
               <button key={k} type="button" className={`${btn} ${size === k ? on : ""}`} onClick={() => setSize(k)}>
@@ -134,7 +148,7 @@ export default function StageLab() {
             ))}
           </Group>
           <Group title="Walk to (hub)">
-            {TARGET_IDS.map((t) => (
+            {targetIds.map((t) => (
               <button key={t} type="button" className={btn} onClick={() => send({ type: "walk-to", target: t })}>
                 {t}
               </button>

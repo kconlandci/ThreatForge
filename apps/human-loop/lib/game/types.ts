@@ -45,6 +45,8 @@ export interface CardDef {
   autoInspect?: StepCategory[];
   /** The refusal when a policy card is played while its policy is already on. */
   alreadyOn?: string;
+  /** A policy card: the toast (title, text) and battle log line when the player turns it on. */
+  policyOn?: { title: string; text: string; log: string };
 }
 
 /* ------------------------------------------------------------------ */

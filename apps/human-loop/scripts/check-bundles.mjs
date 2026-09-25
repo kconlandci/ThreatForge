@@ -4,7 +4,7 @@
  *
  * Reads the app build manifest and checks the JS chunks each /play/<pathway> page loads:
  * - /play/help-desk never contains the Cybersecurity marker ("When in doubt, lock it out").
- * - /play/cybersecurity (once it exists) never contains the Help Desk marker ("Off-and-On-Again").
+ * - /play/cybersecurity never contains the Help Desk marker ("Off-and-On-Again").
  * - /play and / carry neither.
  * - Each game route does contain its own marker (so the check is really looking at the content).
  *
@@ -18,7 +18,7 @@ const HD = "Off-and-On-Again";
 const CY = "When in doubt, lock it out";
 const ROUTES = [
   { page: "/play/help-desk/page", own: HD, others: [CY], required: true },
-  { page: "/play/cybersecurity/page", own: CY, others: [HD], required: false },
+  { page: "/play/cybersecurity/page", own: CY, others: [HD], required: true },
   // The picker and the landing page carry no game content at all.
   { page: "/play/page", own: null, others: [HD, CY], required: true },
   { page: "/page", own: null, others: [HD, CY], required: true },

@@ -3,7 +3,8 @@
 A free browser game by DCI Resources that teaches AI agentic oversight: supervising AI agents at work.
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
 evidence, approve safe work, and block, escalate or roll back the risky stuff. Help Desk
-(with "Ollie", short for Off-and-On-Again) is playable now; the other pathways say "Coming soon".
+(with "Ollie", short for Off-and-On-Again) and Cybersecurity (with "Patch", an over-eager AI
+security analyst in Fenwick's SOC) are playable now; the other pathways say "Coming soon".
 
 Stack: Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Phaser 4,
 Airtable or Neon Postgres (optional, for cloud save), Vitest.
@@ -392,7 +393,7 @@ options (`BuildOptions`, the id prefix). When a field is missing, the Help Desk 
 | Room layout, cast, blink lights, room colours | `lib/pathways/<pathway>/hubMap.ts` |
 | The bundle | `lib/pathways/<pathway>/index.ts` |
 | Client entry (the only importer of the bundle) | `components/game/entries/<Pathway>Game.tsx` |
-| Route (static, one per pathway) | `app/play/<pathway>/page.tsx` (+ `loading.tsx`) |
+| Route (static, one per pathway) | `app/play/<pathway>/page.tsx` (+ `loading.tsx`, and `error.tsx` when the pathway's agent is not Ollie: the root `app/error.tsx` shows Ollie) |
 
 Shared across pathways: the 7 skills (ids, names, icons), the 3 question titles, the cards'
 mechanics, the engine, mastery and the daily/drill generator. Saves are per pathway
@@ -410,7 +411,7 @@ card (a policy card is any card with `autoInspect`; an encounter has at most one
    `kind: "antenna"` blink light on the agent, optional `theme`) and `lib/pathways/<pathway>/index.ts`
    (`createPathway({...})`).
 4. `components/game/entries/<Pathway>Game.tsx`, `app/play/<pathway>/page.tsx` (metadata from the
-   registry) and `loading.tsx`.
+   registry), `loading.tsx` and `error.tsx` (a copy of `app/error.tsx` with the pathway's agent).
 5. Fill the registry entry in `lib/types.ts`, flip `status` to `"live"`, add the bundle to
    `TEST_PATHWAYS` and its expectations to `EXPECT` (`lib/pathways/testing.ts`). The per-pathway
    suites (content, bank, hub map, generated shifts, balance) then run on it.

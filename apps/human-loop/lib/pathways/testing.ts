@@ -1,14 +1,14 @@
 /**
  * Test registry: every pathway bundle the per-pathway suites run over (describe.each), and what
- * each one must satisfy. Tests only. The integrator appends CYBERSECURITY to TEST_PATHWAYS once
- * lib/pathways/cybersecurity exists; its expectations are already filled in below.
+ * each one must satisfy. Tests only.
  */
 import type { CardId, StepCategory } from "@/lib/game/types";
 import type { LivePathwayId } from "@/lib/types";
+import { CYBERSECURITY } from "./cybersecurity";
 import { HELP_DESK } from "./help-desk";
 import type { PathwayBundle } from "./types";
 
-export const TEST_PATHWAYS: PathwayBundle[] = [HELP_DESK];
+export const TEST_PATHWAYS: PathwayBundle[] = [HELP_DESK, CYBERSECURITY];
 
 export interface PathwayExpectations {
   idPrefix: string;
@@ -75,7 +75,7 @@ const BANNED_CLAIMS = [/placement rate/i, /\bISO\b/, /\bWIOA\b/, /guarantee/i, /
 
 /** Real security vendors, products, threat groups and malware: never in cyber content. */
 export const CYBER_BRANDS =
-  /\b(CrowdStrike|SentinelOne|Okta|Duo|Microsoft|Defender|Azure|Entra|Google|Gmail|VirusTotal|MITRE|Splunk|Palo Alto|Cisco|Cloudflare|Akamai|Fortinet|Proofpoint|Mimecast|LockBit|Conti|REvil|Emotet|Cobalt Strike)\b|\bAPT ?\d+/;
+  /\b(CrowdStrike|SentinelOne|Okta|Duo|Microsoft|Defender|Azure|Entra|Google|Gmail|VirusTotal|MITRE|Splunk|Palo Alto|Cisco|Cloudflare|Akamai|Fortinet|Proofpoint|Mimecast|LockBit|Conti|REvil|Emotet|Cobalt Strike|Kitewire|Kiteworks)\b|\bAPT ?\d+/;
 
 export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
   "help-desk": {

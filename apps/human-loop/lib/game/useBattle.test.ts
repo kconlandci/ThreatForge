@@ -7,6 +7,7 @@ import {
   deckAtTurn,
   eventsToBeats,
   groupHand,
+  guideCards,
   newCardIds,
   newEvents,
   resolvedCount,
@@ -152,5 +153,13 @@ describe("debrief", () => {
     expect(resolvedCount(s)).toBe(E.steps.length);
     expect(rows.filter((r) => r.grade === "bad")).toHaveLength(s.stats.misses);
     expect(rows.filter((r) => !r.step.safe).every((r) => r.redFlags.length > 0)).toBe(true);
+  });
+});
+
+describe("How to play guide (outside a battle)", () => {
+  it("lists only the pathway's own policy card", () => {
+    // The exact pre-refactor Help Desk list (commit 6605f27 HAND_ORDER).
+    expect(guideCards("policy-callback")).toEqual(["inspect", "block", "escalate", "rollback", "policy-callback", "coffee"]);
+    expect(guideCards("policy-look-first")).toEqual(["inspect", "block", "escalate", "rollback", "policy-look-first", "coffee"]);
   });
 });

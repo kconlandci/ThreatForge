@@ -34,6 +34,9 @@ export const SPRITES = {
   player: { key: "player", file: `${S}player.svg`, w: 40, h: 72, originX: 0.5, originY: 0.94, kind: "character", tone: "player" },
   dana: { key: "dana", file: `${S}dana.svg`, w: 40, h: 74, originX: 0.5, originY: 0.94, kind: "character", tone: "coach" },
   ollie: { key: "ollie", file: `${S}ollie.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92, kind: "character", tone: "agent" },
+  // Cybersecurity (SOC) cast. Patch has Ollie's exact size and origin, so the exclaim marker and hop work unchanged.
+  patch: { key: "patch", file: `${S}patch.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92, kind: "character", tone: "agent" },
+  kofi: { key: "kofi", file: `${S}kofi.svg`, w: 40, h: 74, originX: 0.5, originY: 0.94, kind: "character", tone: "coach" },
 
   // Ollie battle portraits (large, same framing so they can be swapped in place).
   "ollie-idle": { key: "ollie-idle", file: `${S}ollie-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
@@ -41,6 +44,13 @@ export const SPRITES = {
   "ollie-busted": { key: "ollie-busted", file: `${S}ollie-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
   "ollie-sad": { key: "ollie-sad", file: `${S}ollie-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
   "ollie-celebrate": { key: "ollie-celebrate", file: `${S}ollie-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+
+  // Patch battle portraits (same 220 x 220 framing as Ollie's, feet at y 209, so they swap in place).
+  "patch-idle": { key: "patch-idle", file: `${S}patch-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "patch-eager": { key: "patch-eager", file: `${S}patch-eager.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "patch-busted": { key: "patch-busted", file: `${S}patch-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "patch-sad": { key: "patch-sad", file: `${S}patch-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "patch-celebrate": { key: "patch-celebrate", file: `${S}patch-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
 
   // Office props (isometric, lit from the upper left: top face lightest, left face mid, right face darkest).
   "desk-monitor": { key: "desk-monitor", file: `${S}desk-monitor.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
@@ -53,11 +63,24 @@ export const SPRITES = {
   "server-rack": { key: "server-rack", file: `${S}server-rack.svg`, w: 44, h: 96, originX: 0.5, originY: 0.92, footprint: { w: 1, h: 1 }, kind: "prop" },
   "water-cooler": { key: "water-cooler", file: `${S}water-cooler.svg`, w: 30, h: 70, originX: 0.5, originY: 0.92, footprint: { w: 1, h: 1 }, kind: "prop" },
 
+  // SOC props (iso, lit from the upper left; the anchor is the floor point under the footprint's middle).
+  "desk-patch": { key: "desk-patch", file: `${S}desk-patch.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "desk-soc": { key: "desk-soc", file: `${S}desk-soc.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "evidence-locker": { key: "evidence-locker", file: `${S}evidence-locker.svg`, w: 52, h: 94, originX: 0.5, originY: 0.83, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "quarantine-tote": { key: "quarantine-tote", file: `${S}quarantine-tote.svg`, w: 50, h: 56, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "playbook-board": { key: "playbook-board", file: `${S}playbook-board.svg`, w: 80, h: 84, originX: 0.5, originY: 0.9, footprint: { w: 1, h: 1 }, kind: "prop" },
+
   // Wall decor, drawn flat against the back walls.
   "wall-window-left": { key: "wall-window-left", file: `${S}wall-window-left.svg`, w: 72, h: 76, originX: 0.5, originY: 0.5, kind: "decor" },
   "wall-window-right": { key: "wall-window-right", file: `${S}wall-window-right.svg`, w: 72, h: 76, originX: 0.5, originY: 0.5, kind: "decor" },
   "wall-poster": { key: "wall-poster", file: `${S}wall-poster.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
   "wall-clock": { key: "wall-clock", file: `${S}wall-clock.svg`, w: 30, h: 34, originX: 0.5, originY: 0.5, kind: "decor" },
+
+  // SOC wall decor. Right wall: video wall, alert light, lockout sign. Left wall: check-first poster.
+  "wall-video-wall": { key: "wall-video-wall", file: `${S}wall-video-wall.svg`, w: 112, h: 106, originX: 0.491, originY: 0.5, kind: "decor" },
+  "wall-alert-light": { key: "wall-alert-light", file: `${S}wall-alert-light.svg`, w: 24, h: 32, originX: 0.5, originY: 0.66, kind: "decor" },
+  "wall-sign-lockout": { key: "wall-sign-lockout", file: `${S}wall-sign-lockout.svg`, w: 40, h: 50, originX: 0.5, originY: 0.5, kind: "decor" },
+  "wall-poster-check": { key: "wall-poster-check", file: `${S}wall-poster-check.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
 
   // Small UI markers used in the stage.
   "marker-exclaim": { key: "marker-exclaim", file: `${S}marker-exclaim.svg`, w: 24, h: 30, originX: 0.5, originY: 1, kind: "marker" },

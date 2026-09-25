@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "settingDaily": "Daily practice at Fenwick IT Solutions' security center. {n} tickets from {companies}. {agent} plans. You check.",
+  "settingDaily": "Daily practice at Fenwick IT Solutions' security center. {n} alert tickets from {companies}. {agent} plans. You check.",
   "settingDrill": "A quick drill at Fenwick IT Solutions' security center for {companies}. One plan at a time. {agent} plans. You check.",
   "careerInsight": "SOC analysts check alerts like these every day. Practice keeps the checks quick, so real threats still get stopped fast.",
   "fallbackDaily": ["cy-b-firewall-asks", "cy-b-xray-vendor", "cy-a-legit-esign", "cy-b-ioc-share"],

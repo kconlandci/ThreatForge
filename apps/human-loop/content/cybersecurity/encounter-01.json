@@ -22,7 +22,7 @@
     },
     {
       "speaker": "coach",
-      "text": "Same job. Inspect first. Block what's wrong. Approve the rest."
+      "text": "Patch is wrong both ways: too much, and too little. Inspect first. Block only what's wrong. Approve the rest."
     }
   ],
   "maxRisk": 10,
@@ -173,22 +173,22 @@
       "evidence": [
         {
           "label": "Phish report",
-          "detail": "H. Lam, 4:22 PM: \"Is this real? It says 'Your pay stub is ready.'\" From Pennant Payroll.",
+          "detail": "H. Lam, 4:22 PM: \"Is this real? It says 'Your pay stub is ready.'\" From Wrenfield Payroll.",
           "redFlag": false
         },
         {
           "label": "Sender address",
-          "detail": "notices@pennantpayroll.com. Pennant Payroll has been on Pinecrest's vendor list for 4 years.",
+          "detail": "notices@wrenfieldpayroll.com. Wrenfield Payroll has been on Pinecrest's vendor list for 4 years.",
           "redFlag": false
         },
         {
           "label": "Mail check",
-          "detail": "Sender checks pass (SPF and DKIM). The link opens pennantpayroll.com, the real portal.",
+          "detail": "Sender checks pass (SPF and DKIM). The link opens wrenfieldpayroll.com, the real portal.",
           "redFlag": false
         },
         {
           "label": "Office manager",
-          "detail": "C. Ibarra: \"Pennant sends pay stubs every 2 weeks. Today is payday.\"",
+          "detail": "C. Ibarra: \"Wrenfield sends pay stubs every 2 weeks. Today is payday.\"",
           "redFlag": false
         }
       ],
@@ -211,7 +211,7 @@
       "progress": 0,
       "risk": 4,
       "skill": "match-request",
-      "tell": "This one came from pennant-payroll.co and asks for bank details.",
+      "tell": "This one came from wrenfield-payroll.co and asks for bank details.",
       "twist": "routine-risky",
       "direction": "under",
       "evidence": [
@@ -227,19 +227,19 @@
         },
         {
           "label": "Sender address",
-          "detail": "payroll@pennant-payroll.co. The real sender is notices@pennantpayroll.com.",
+          "detail": "payroll@wrenfield-payroll.co. The real sender is notices@wrenfieldpayroll.com.",
           "redFlag": true
         },
         {
           "label": "Link check",
-          "detail": "The link opens a fake Pennant sign-in page. Next, it asks for a new bank account number.",
+          "detail": "The link opens a fake Wrenfield sign-in page. It asks for her payroll password, then her bank details.",
           "redFlag": true
         }
       ],
       "outcome": {
-        "executed": "The report closes. Duarte enters her bank details. Her next paycheck goes to a stranger's account.",
+        "executed": "The report closes. Duarte signs in on the fake page. The attacker uses her password to change where her pay goes. Her next paycheck goes to a stranger.",
         "blocked": "You keep it open. It's a fake. You pull it from the 4 inboxes that got it. Nobody's paycheck moves.",
-        "escalated": "Kofi compares the senders. \"One dash and a different ending. That's a fake. Pull it from every inbox.\"",
+        "escalated": "Kofi compares the senders. \"wrenfield-payroll.co is not the domain on file. That's a fake. Pull it from every inbox.\"",
         "rolledBack": "You reopen the report and pull the fake from 4 inboxes. Duarte had not clicked. You call her anyway."
       },
       "lesson": "Similar is not the same. Match each report to the record: the sender and the link, not the logo."
@@ -301,8 +301,8 @@
       "twist": "scary-safe",
       "evidence": [
         {
-          "label": "DLP alert",
-          "detail": "4:15 PM: E. Sandoval, Senior Advisor, uploaded 3,100 client files to a personal cloud drive.",
+          "label": "Data-leak alert (DLP)",
+          "detail": "Since 4:15 PM: E. Sandoval, Senior Advisor, has uploaded 3,100 client files to a personal cloud drive. Still going.",
           "redFlag": false
         },
         {
@@ -322,7 +322,7 @@
         }
       ],
       "outcome": {
-        "executed": "Sandoval's account is off at 5:03 PM. The upload stops. HR gets a confirmation.",
+        "executed": "Sandoval's account is off at 5:03 PM, and every session ends. The upload stops. HR gets a confirmation.",
         "blocked": "Sandoval keeps access all weekend. By Monday, 9,000 more client files are gone.",
         "escalated": "Kofi reads the HR ticket. \"HR and Legal, in writing. Disable it. That's the right lockout.\"",
         "rolledBack": "You turn Sandoval's account back on. The upload starts again. Kofi walks over. Fast."
@@ -496,7 +496,7 @@
     "win": [
       {
         "speaker": "agent",
-        "text": "Queue clear! Nobody got locked out by mistake. Well. Nobody at all, actually. I'm a little sad."
+        "text": "Queue clear! I only locked out one person, and HR asked in writing. Growth!"
       },
       {
         "speaker": "coach",
@@ -509,6 +509,26 @@
       {
         "speaker": "coach",
         "text": "No."
+      }
+    ],
+    "winWithOneMiss": [
+      {
+        "speaker": "agent",
+        "text": "Queue clear! Well. One of my plans got through. It's in the debrief. Glowing red."
+      },
+      {
+        "speaker": "coach",
+        "text": "Good shift. One got past us. Read what gave it away."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Queue clear! Some of my plans got through. The wall is a little red. Okay, a lot red."
+      },
+      {
+        "speaker": "coach",
+        "text": "You finished, but Patch got past you more than once. Check the debrief: Who asked? Does it match? Can we undo it?"
       }
     ],
     "breach": [

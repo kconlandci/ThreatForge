@@ -67,7 +67,8 @@ export type ArtifactKind = "terminal" | "message" | "policy" | "record" | "email
 export function artifactKind(label: string, detail: string): ArtifactKind {
   const l = label.toLowerCase();
   if (/\blog\b|script|result/.test(l)) return "terminal";
-  if (/^(edr|ids|dlp|mfa|sign-in|storage) alert$/.test(l) || /hash lookup|alert group/.test(l)) return "terminal";
+  // "EDR alert", and first uses that explain the term: "EDR alert (security app)", "Network alarm (IDS)".
+  if (/^(edr|ids|dlp|mfa|sign-in|storage|data-leak) alert\b|^network alarm\b/.test(l) || /hash lookup|alert group/.test(l)) return "terminal";
   if (/policy|runbook|playbook/.test(l)) return "policy";
   if (/sender|address|email|mail check|mailbox rules/.test(l)) return "email";
   if (/ticket|reply|request|body/.test(l) || detail.trim().startsWith("\"")) return "message";

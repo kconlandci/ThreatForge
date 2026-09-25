@@ -355,7 +355,9 @@ section[id] {
   content: "";
   position: absolute;
   left: 50%;
-  top: -20px;
+  /* Tip on the dashed ring (it ends 7px above the control), so the arrow never covers the hint
+     line just above it, even at the top of its 4px bounce. */
+  top: -14px;
   width: 0;
   height: 0;
   border-left: 8px solid transparent;
@@ -403,7 +405,7 @@ section[id] {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
   }
 }
 

@@ -41,8 +41,17 @@ export function ResultScreen({
   const { config } = usePathway();
   const score = scoreBattle(state, encounter);
   const won = state.status === "won";
+  // A win where risky plans got through gets its own outro when the story has one: no praise for
+  // misses. (The Help Desk story has neither, so it always uses `win`.)
+  const o = encounter.outro;
   const outro = won
-    ? encounter.outro.win
+    ? score.misses > 1 && o.winWithMisses?.length
+      ? o.winWithMisses
+      : score.misses === 1 && (o.winWithOneMiss?.length || o.winWithMisses?.length)
+        ? o.winWithOneMiss?.length
+          ? o.winWithOneMiss
+          : o.winWithMisses!
+        : o.win
     : state.status === "lost-breach"
       ? encounter.outro.breach
       : encounter.outro.timeout;

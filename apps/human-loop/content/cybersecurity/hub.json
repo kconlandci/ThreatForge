@@ -46,7 +46,7 @@
       "lines": [
         { "speaker": "narrator", "text": "A board marked PLAYBOOK. Pinned across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
         { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
-        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk. Dana taught me. — Kofi\"" },
+        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk down the hall. — Kofi\"" },
         { "speaker": "narrator", "text": "Circled in red: POLICY CT-01. Isolating a server? Disabling a leader's account? Check the asset list and the calendar first." },
         { "speaker": "narrator", "text": "In the corner, in robot print: \"Question 4: Can we isolate it? — Patch\" It is crossed out. Twice." }
       ]

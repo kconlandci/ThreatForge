@@ -53,8 +53,7 @@ export const PATHWAYS: PathwayMeta[] = [
     name: "Cybersecurity",
     agentName: "Patch",
     tagline: "Supervise an AI that wants to quarantine everything, including the CEO.",
-    // The integrator flips this to "live" once content/cybersecurity and lib/pathways/cybersecurity exist.
-    status: "soon",
+    status: "live",
     idPrefix: "cy",
     agentSprite: "patch",
     firstShift: "Your first shift: Friday afternoon in Fenwick's security center. Four alerts. One very jumpy robot.",

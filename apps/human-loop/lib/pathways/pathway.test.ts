@@ -8,6 +8,7 @@ import { createBattle, endTurn, playCard, policyCardOf, scoreBattle } from "@/li
 import { MASTERY_SKILLS } from "@/lib/game/skills";
 import { checkDaily } from "@/lib/game/shiftGen";
 import type { BattleState, CardId, Encounter, PathwayProgress } from "@/lib/game/types";
+import { eventsToBeats } from "@/lib/game/useBattle";
 import { EXPECT, TEST_PATHWAYS } from "./testing";
 
 const TODAY = "2026-09-25";
@@ -74,6 +75,17 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s generated shifts
   const E = EXPECT[P.id];
   const policy = E.policyCard;
   const covers = CARDS[policy].autoInspect ?? [];
+
+  it("announces its own policy card when the player turns it on", () => {
+    const on = CARDS[policy].policyOn;
+    expect(on, policy).toBeDefined();
+    const beats = eventsToBeats([{ t: "power", power: "callbackPolicy" }], P.story);
+    const toast = beats.map((b) => b.toast).find(Boolean);
+    expect(toast?.title).toBe(on!.title);
+    expect(toast?.text).toBe(on!.text);
+    // Each pathway's copy names its own policy, never another pathway's.
+    for (const other of TEST_PATHWAYS) if (other.id !== P.id) expect(toast?.title).not.toBe(CARDS[EXPECT[other.id].policyCard].policyOn?.title);
+  });
 
   it("plans valid dailies with the pathway's ids, agent, coach and policy card", () => {
     let dailies = 0;

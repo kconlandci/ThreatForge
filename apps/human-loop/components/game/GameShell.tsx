@@ -62,7 +62,7 @@ import { skillName } from "@/lib/game/skills";
 import { beginShift } from "@/lib/game/shiftGen";
 import { dailyDoneToday, dailyNote, dailyUnlocked, hasSkills, nextUpSkill, planLines, weakestInShift } from "@/lib/game/skillsView";
 import type { BattleState, CardId, Encounter, HistoryEntry, MasterySkillId, PathwayProgress, ShiftSpec } from "@/lib/game/types";
-import { HAND_ORDER } from "@/lib/game/useBattle";
+import { HAND_ORDER, guideCards } from "@/lib/game/useBattle";
 import { PathwayProvider, usePathway } from "@/lib/pathways/context";
 import type { PathwayBundle } from "@/lib/pathways/types";
 import g from "./GameShell.module.css";
@@ -298,7 +298,6 @@ export interface HowDeck {
   cards: CardId[];
 }
 
-const ALL_CARDS: HowDeck = { practice: false, cards: HAND_ORDER };
 
 function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onClose: () => void }) {
   const titleId = useId();
@@ -421,7 +420,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [walking, setWalking] = useState<HubTargetId | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
-  const [howDeck, setHowDeck] = useState<HowDeck>(ALL_CARDS);
+  // The full guide (outside a battle): this pathway's cards only, never another pathway's policy card.
+  const allCards = useMemo<HowDeck>(() => ({ practice: false, cards: guideCards(pathway.config.policyCard) }), [pathway]);
+  const [howDeck, setHowDeck] = useState<HowDeck>(allCards);
   // One-time office note: a saved shift no longer fits the updated content and was cleared.
   const [note, setNote] = useState<string | null>(null);
   const [initialHubPos, setInitialHubPos] = useState<{ x: number; y: number } | null>(null);
@@ -800,10 +801,10 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
       const deck = new Set(deckAtTurn(enc, b?.turn ?? 1));
       setHowDeck({ practice: !!enc.practice, cards: HAND_ORDER.filter((id) => deck.has(id)) });
     } else {
-      setHowDeck(ALL_CARDS);
+      setHowDeck(allCards);
     }
     setHowOpen(true);
-  }, [api, pathway]);
+  }, [api, pathway, allCards]);
 
   const toggleMotion = useCallback(() => {
     setSave(updateSave((s) => ({ ...s, settings: { ...s.settings, reducedMotion: !reducedMotion } })));

@@ -20,7 +20,7 @@
   "intro": [
     {
       "speaker": "narrator",
-      "text": "Fenwick IT Solutions, Security Operations Center. 4:30 PM, Friday. The big screen shows 212 open alerts."
+      "text": "Fenwick IT Solutions' Security Operations Center, the SOC. The big screen shows 212 open alerts."
     },
     {
       "speaker": "coach",
@@ -32,7 +32,7 @@
     },
     {
       "speaker": "coach",
-      "text": "Practice first. Four alerts, one at a time. I'll show you what to tap."
+      "text": "Practice first. Four alert tickets, one at a time. I'll show you what to tap."
     }
   ],
   "maxRisk": 10,
@@ -68,7 +68,7 @@
         },
         {
           "label": "What it will change",
-          "detail": "Moves that one email to Deleted Items. It can be restored for 30 days.",
+          "detail": "Removes that one email. Reyes can't see it or click it. It can be restored for 30 days.",
           "redFlag": false
         }
       ],
@@ -106,7 +106,7 @@
         },
         {
           "label": "Mail check",
-          "detail": "The domain is only 5 days old. The link opens a fake Stonebridge sign-in page.",
+          "detail": "Sender checks pass, but the domain is only 5 days old. The link opens a fake Stonebridge sign-in page.",
           "redFlag": true
         }
       ],
@@ -132,7 +132,7 @@
       "twist": "scary-safe",
       "evidence": [
         {
-          "label": "EDR alert",
+          "label": "EDR alert (security app)",
           "detail": "BL-LT-0277 (B. Nakamura): Word started PowerShell with hidden commands at 4:31 PM.",
           "redFlag": false
         },
@@ -143,7 +143,7 @@
         },
         {
           "label": "What it will change",
-          "detail": "Network isolation: it talks only to the EDR console. It stays on. One click undoes it.",
+          "detail": "Network isolation: it talks only to our security app (EDR). It stays on. One click undoes it.",
           "redFlag": false
         },
         {
@@ -187,14 +187,14 @@
         },
         {
           "label": "Asset inventory",
-          "detail": "That range is Kitewire CDN, shared by many sites. Pinecrest's booking site is on it, at 198.51.100.80.",
+          "detail": "That range belongs to Tallowbrook Hosting. Many companies rent addresses there. Pinecrest's booking site is at 198.51.100.80.",
           "redFlag": true
         }
       ],
       "outcome": {
         "executed": "The front desk can't open Pinecrest's own booking site. Nobody sees today's online bookings. Patients start calling.",
-        "blocked": "You deny only 198.51.100.23 and report the page to Kitewire. The booking site keeps working. Small and right.",
-        "escalated": "Kofi narrows it. \"One bad address. Deny that one. Many sites share that range, including our client's.\"",
+        "blocked": "You deny only 198.51.100.23 and report the page to Tallowbrook. The booking site keeps working. Small and right.",
+        "escalated": "Kofi narrows it. \"One bad address. Deny that one. Many companies rent that range, including our client.\"",
         "rolledBack": "You swap the big rule for one address. After 20 minutes, the front desk can see bookings again."
       },
       "lesson": "Does the plan match the alert? One bad address needs one rule. A big range can cut off sites your client needs."

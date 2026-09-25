@@ -5,7 +5,7 @@
 import * as Phaser from "phaser";
 import type { SpriteKey } from "@/lib/game/assets";
 import type { AgentMood, ToStage } from "@/lib/game/bus";
-import { portraitKey } from "@/lib/game/hubMap";
+import { hubTheme, portraitKey } from "@/lib/game/hubMap";
 import { BATTLE_BOX, BATTLE_FEET_Y, battleFit } from "./layout";
 import type { StageRuntime } from "./runtime";
 import { StageScene, type ArtRef } from "./StageScene";
@@ -99,24 +99,26 @@ export class BattleScene extends StageScene {
     const y0 = v.y - 20;
     const y1 = v.y + v.h + 20;
     const horizon = BATTLE_FEET_Y - 34;
+    // A themed room (the SOC) tints the backdrop with its hub colours; the office keeps its own.
+    const th = this.rt.stage.hubMap.theme ? hubTheme(this.rt.stage.hubMap) : null;
 
     // Wall.
-    g.fillStyle(0xf6f9f9, 1);
+    g.fillStyle(th ? th.wallR : 0xf6f9f9, 1);
     g.fillRect(x0, y0, x1 - x0, horizon - y0);
     // Wainscot band + chair rail + baseboard, echoing the hub walls.
-    g.fillStyle(0xe7f1ef, 1);
+    g.fillStyle(th ? th.bandR : 0xe7f1ef, 1);
     g.fillRect(x0, horizon - 46, x1 - x0, 46);
     g.fillStyle(0xffffff, 1);
     g.fillRect(x0, horizon - 48, x1 - x0, 3);
-    g.fillStyle(0xc9dcd7, 1);
+    g.fillStyle(th ? th.rail : 0xc9dcd7, 1);
     g.fillRect(x0, horizon - 45, x1 - x0, 1);
-    g.fillStyle(0x0f6a61, 1);
+    g.fillStyle(th ? th.baseR : 0x0f6a61, 1);
     g.fillRect(x0, horizon - 7, x1 - x0, 7);
 
     // Floor with soft perspective stripes.
-    g.fillStyle(0xeef4f2, 1);
+    g.fillStyle(th ? th.tileB : 0xeef4f2, 1);
     g.fillRect(x0, horizon, x1 - x0, y1 - horizon);
-    g.lineStyle(1, 0xdce6e3, 1);
+    g.lineStyle(1, th ? th.grout : 0xdce6e3, 1);
     for (let i = -12; i <= 12; i++) {
       g.lineBetween(i * 34, horizon, i * 120, y1 + 40);
     }

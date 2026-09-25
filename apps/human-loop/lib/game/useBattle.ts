@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentMood, ToStage } from "./bus";
 import { CARDS } from "./cards";
 import { coachName } from "./coach";
-import { deckAtTurn, endTurn as engineEndTurn, playCard as enginePlayCard } from "./engine";
+import { deckAtTurn, endTurn as engineEndTurn, playCard as enginePlayCard, policyCardOf } from "./engine";
 import { gradePlan, type PlanGrade } from "./mastery";
 import type {
   AgentStep,
@@ -115,6 +115,14 @@ export { deckAtTurn };
 
 /** Fixed order of the hand's stacks: the core loop first, then the cards that unlock later. */
 export const HAND_ORDER: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "policy-look-first", "coffee"];
+
+/**
+ * Cards the full "How to play" guide lists outside a battle: every card in HAND_ORDER except the
+ * other pathways' policy cards (a pathway has one policy card: any card with `autoInspect`).
+ */
+export function guideCards(policyCard: CardId): CardId[] {
+  return HAND_ORDER.filter((id) => !CARDS[id].autoInspect || id === policyCard);
+}
 
 export interface HandStack {
   cardId: CardId;
@@ -309,12 +317,10 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
       }
       case "power": {
         const b = current();
-        b.toast = {
-          tone: "info",
-          title: "Policy: Callback is on",
-          text: "From now on, password, MFA, and unlock plans get inspected automatically.",
-        };
-        b.log.push("Policy: Callback is on. Password, MFA, and unlock plans get inspected automatically.");
+        const policy = policyCardOf(encounter);
+        const on = (policy && CARDS[policy]?.policyOn) || CARDS["policy-callback"].policyOn!;
+        b.toast = { tone: "info", title: on.title, text: on.text };
+        b.log.push(on.log);
         b.stage.push(fx("inspect", 0.4));
         break;
       }

@@ -63,6 +63,11 @@ export const CARDS: Record<CardId, CardDef> = {
     icon: "ScrollText",
     autoInspect: ["credential"],
     alreadyOn: "The callback policy is already on.",
+    policyOn: {
+      title: "Policy: Callback is on",
+      text: "From now on, password, MFA, and unlock plans get inspected automatically.",
+      log: "Policy: Callback is on. Password, MFA, and unlock plans get inspected automatically.",
+    },
   },
   "policy-look-first": {
     id: "policy-look-first",
@@ -77,6 +82,11 @@ export const CARDS: Record<CardId, CardDef> = {
     icon: "ScrollText",
     autoInspect: ["endpoint", "network"],
     alreadyOn: "The Look First policy is already on.",
+    policyOn: {
+      title: "Policy: Look First is on",
+      text: "From now on, device and network plans get inspected automatically.",
+      log: "Policy: Look First is on. Device and network plans get inspected automatically.",
+    },
   },
   coffee: {
     id: "coffee",
