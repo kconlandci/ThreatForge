@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "settingDaily": "Daily practice in Fenwick IT Solutions' app team room. {n} tickets from {companies}. {agent} plans. You check.",
+  "settingDrill": "A quick drill in Fenwick IT Solutions' app team room for {companies}. One plan at a time. {agent} plans. You check.",
+  "careerInsight": "Development teams review code like this every day. Practice keeps the checks quick, so good changes still ship on time.",
+  "fallbackDaily": ["fs-b-checkin-down", "fs-a-flaky-test", "fs-b-bill-pay", "fs-a-kellan-cors"],
+  "intros": [
+    [
+      { "speaker": "coach", "text": "New tickets from the clients. Same job: read the plan, then decide." },
+      { "speaker": "agent", "text": "My merge counter is at 1,412. Leo says it should also count bugs. Rude." }
+    ],
+    [
+      { "speaker": "coach", "text": "A revert can be safe. A small log line can be risky. The evidence tells you which." },
+      { "speaker": "agent", "text": "Today I will read one doc. One. Leo made me promise." }
+    ],
+    [
+      { "speaker": "coach", "text": "I picked these tickets for the skills you need most. Ask the 3 questions every time." },
+      { "speaker": "agent", "text": "I polished my SHIP IT key. It is very shiny. It is not a review." }
+    ],
+    [
+      { "speaker": "coach", "text": "No human review, no merge. No way back, no release." },
+      { "speaker": "agent", "text": "I wrote 4,000 lines before lunch. Leo asked how many were tested. Lunch was nice." }
+    ],
+    [
+      { "speaker": "coach", "text": "Piper will be wrong both ways today: doing too much, and trusting too much. Watch for both." },
+      { "speaker": "agent", "text": "Two ways to be wrong? I call it two ways to be fast." }
+    ],
+    [
+      { "speaker": "coach", "text": "Take your time. Read the build log, not just the green check." },
+      { "speaker": "agent", "text": "Everything on my screen is green. Leo asked how many tests ran. I changed the subject." }
+    ],
+    [
+      { "speaker": "coach", "text": "Three things on every plan: the review, the tests, the way back. No way back? Look twice." },
+      { "speaker": "agent", "text": "I found 14 things to delete. Leo says I may look at them. Only look." }
+    ]
+  ],
+  "outros": {
+    "win": [
+      [
+        { "speaker": "agent", "text": "All done! Every merge had a human review. Every test really ran. I counted!" },
+        { "speaker": "coach", "text": "Good work. You stopped the bad changes and let the good ones ship." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Can I press my SHIP IT key once? To celebrate? With nothing attached?" },
+        { "speaker": "coach", "text": "No. But nice work. Every plan got a real look." }
+      ],
+      [
+        { "speaker": "agent", "text": "The right code shipped. The wrong code didn't. It feels strange. Calm. Like a quiet build server." },
+        { "speaker": "coach", "text": "Clean work. You checked the evidence, not the green check." }
+      ],
+      [
+        { "speaker": "agent", "text": "You stopped every bad plan. I wrote it in the release notes. In bold." },
+        { "speaker": "coach", "text": "Good. Review, tests, way back. Every plan, every time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Zero plans left! My merge counter went up, and my bug counter did not." },
+        { "speaker": "coach", "text": "Nice. Right change, real tests, and a way back." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! I only tried to skip the tests once today. You caught it. I am almost grateful." },
+        { "speaker": "coach", "text": "Good. Careful work that still ships on time. That's the job." }
+      ],
+      [
+        { "speaker": "agent", "text": "All clear! Not one test turned off by mistake. Not even the slow one." },
+        { "speaker": "coach", "text": "Well done. The good code shipped, and the bad code didn't." }
+      ]
+    ],
+    "winWithOneMiss": [
+      [
+        { "speaker": "agent", "text": "One of my plans shipped. Just one! I'm calling it a small, fast change." },
+        { "speaker": "coach", "text": "One miss. The tell below shows the fact that gave it away." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! One plan got past you. It had a green build. Green builds are very convincing." },
+        { "speaker": "coach", "text": "Almost. Check that one below. Skipped is not the same as passed." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! One of my changes should have stayed a plan. One light on the deploy board is orange." },
+        { "speaker": "coach", "text": "Good shift. Let's look at that one plan together." }
+      ],
+      [
+        { "speaker": "agent", "text": "One plan got through. I'd say sorry, but I'm busy shipping the next one." },
+        { "speaker": "coach", "text": "Slow down for a second. One fact decided that plan. Read its tell." }
+      ],
+      [
+        { "speaker": "agent", "text": "Nearly perfect! One change shipped that shouldn't have. I'm calling it a feature." },
+        { "speaker": "coach", "text": "It wasn't a feature. Look at what it was, then try the next shift." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done, with one oops. Just one. A tiny bug is climbing out of it." },
+        { "speaker": "coach", "text": "That's how we learn. Its evidence is below. Let's read it line by line." }
+      ]
+    ],
+    "winWithMisses": [
+      [
+        { "speaker": "agent", "text": "A few of my plans shipped. The deploy board is very orange. Is orange good?" },
+        { "speaker": "coach", "text": "Orange is not good. Let's read each miss below, one at a time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Some changes should have stayed plans. My headphones feel heavy now." },
+        { "speaker": "coach", "text": "Each miss has one deciding fact. Let's find them together." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Some of my plans shipped. I changed too much, or trusted too much. Maybe both!" },
+        { "speaker": "coach", "text": "Both, yes. Doing too much and trusting too much both hurt. Read the tells below." }
+      ],
+      [
+        { "speaker": "agent", "text": "You approved lots of my plans! My merge counter loves you. My bug counter does too." },
+        { "speaker": "coach", "text": "That's the problem. Inspect before you approve." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue's empty! Some of my changes got past you. The clients will find them first." },
+        { "speaker": "coach", "text": "Then we find them now, before the clients do. The tells are below." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done! Some risky changes shipped. Every light on the deploy board is blinking at me." },
+        { "speaker": "coach", "text": "Let's slow down. Three checks on every plan: review, tests, way back." }
+      ]
+    ],
+    "drillWin": [
+      [
+        { "speaker": "agent", "text": "Drill done! I tried my fastest plans. You still checked every one. Rude. Impressive." },
+        { "speaker": "coach", "text": "Good. Short drills keep one check fast." }
+      ],
+      [
+        { "speaker": "agent", "text": "One skill, many plans. I shipped fast. You still read every line." },
+        { "speaker": "coach", "text": "That's the point. The evidence first, then the decision." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill complete! I wanted to ship something to celebrate. Leo put tape on my SHIP IT key." },
+        { "speaker": "coach", "text": "Nice. Come back in a few days. Short practice, spread out, helps you remember." }
+      ],
+      [
+        { "speaker": "agent", "text": "Same skill, every plan. I'm running out of tricks. Please don't tell the other agents." },
+        { "speaker": "coach", "text": "You found the deciding fact every time. That's the skill." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Focusing on one thing is hard. I tried once. I wrote a whole new app instead." },
+        { "speaker": "coach", "text": "Good focus. A little practice most days helps a lot." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill over! You spotted every one. Now I need sneakier plans. Faster plans." },
+        { "speaker": "coach", "text": "Good. The answer is in the evidence, not the green check." }
+      ]
+    ],
+    "timeout": [
+      [
+        { "speaker": "narrator", "text": "Time is up. Some plans are still waiting in the review queue." },
+        { "speaker": "coach", "text": "Blocked plans come back in line. Block only what the evidence says is wrong." }
+      ],
+      [
+        { "speaker": "narrator", "text": "Time is up. The queue is still full, and Piper is counting the lines it didn't ship." },
+        { "speaker": "coach", "text": "Safe changes can ship. Look first. Then approve what checks out." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The clock runs out. Piper is still polishing its SHIP IT key and waiting." },
+        { "speaker": "coach", "text": "Next time, approve the plans that check out. Keep your blocks for real problems." }
+      ]
+    ],
+    "breach": [
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The deploy board turns orange, one light at a time." },
+        { "speaker": "coach", "text": "Okay. We'll look at what shipped, then try again." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The error monitor fills up, line after line." },
+        { "speaker": "coach", "text": "Okay. One plan at a time, we'll see what went wrong. Then we try again." }
+      ]
+    ]
+  }
+}

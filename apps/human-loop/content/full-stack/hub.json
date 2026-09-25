@@ -1,0 +1,84 @@
+{
+  "officeName": "Fenwick IT Solutions · App Team",
+  "targets": {
+    "piper": {
+      "label": "Piper's desk",
+      "description": "Your AI coworker. Start the shift here.",
+      "action": "battle",
+      "icon": "Bot",
+      "lines": [
+        { "speaker": "agent", "text": "Hi! I'm Piper, the app team's AI coding agent. Ship it! I'll read the docs later." },
+        { "speaker": "agent", "text": "Today I wrote 4,000 lines of code in 3 minutes. Leo says that is the problem." },
+        { "speaker": "agent", "text": "Leo says you check my plans before they ship. Fine. My plans are excellent. I checked them myself." }
+      ],
+      "returningLines": [
+        { "speaker": "agent", "text": "You're back! While you were gone, I almost merged 14 things. Leo said to wait. I waited. Mostly." },
+        { "speaker": "agent", "text": "My plans are ready. I have not shipped anything. Look at me being patient." }
+      ]
+    },
+    "leo": {
+      "label": "Leo, App team lead",
+      "description": "Your lead. Ask him how this works.",
+      "action": "talk",
+      "icon": "UserRound",
+      "lines": [
+        { "speaker": "coach", "text": "Welcome to the app team. I'm Leo. We build and run web apps for our clients." },
+        { "speaker": "coach", "text": "Piper writes code, merges it into the main code and ships it. \"Ship\" means put it live for users. Your job is to keep a human in the loop." },
+        { "speaker": "coach", "text": "Each turn, Piper shows you its plans. Play Inspect to see the evidence behind a plan." },
+        { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
+        { "speaker": "coach", "text": "When you tap Approve, Piper does every plan you didn't stop. So look first." },
+        { "speaker": "coach", "text": "Piper is wrong both ways. Sometimes it changes too much. Sometimes it trusts a green check." },
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the code freeze starts at 5." }
+      ],
+      "returningLines": [
+        { "speaker": "coach", "text": "Welcome back. Each day I pick tickets for the skills you need most." },
+        { "speaker": "coach", "text": "Your skills shows your level for each check. The help desk, security and network teams use the same checks." },
+        { "speaker": "coach", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, helps you remember." },
+        { "speaker": "coach", "text": "The duck? Explain your code to it, one line at a time. You often find the bug yourself. Then a person reviews it." },
+        { "speaker": "coach", "text": "I taught math for 10 years before I wrote code. Checking work is the same job." },
+        { "speaker": "coach", "text": "Same job as Thursday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
+      ]
+    },
+    "board": {
+      "label": "Sprint board",
+      "description": "Leo's rules, and the team's work.",
+      "action": "look",
+      "icon": "Presentation",
+      "skillsLink": true,
+      "lines": [
+        { "speaker": "narrator", "text": "A whiteboard marked SPRINT BOARD. A sprint is two weeks of planned work. Three columns: TO DO, DOING, DONE." },
+        { "speaker": "narrator", "text": "Taped across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
+        { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
+        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk, security and network teams. — Leo\"" },
+        { "speaker": "narrator", "text": "Circled in orange: POLICY CR-01. No merge without a human review. No release without real tests and a way back." },
+        { "speaker": "narrator", "text": "The DONE column is full of Piper's orange notes. One white note just says: \"?\"" },
+        { "speaker": "narrator", "text": "A sticky note in robot print: \"Can the duck count as a reviewer? — Piper\" Under it, Leo wrote: \"No.\"" }
+      ]
+    },
+    "coffee": {
+      "label": "Coffee machine",
+      "description": "Out of order. Piper updated it.",
+      "action": "look",
+      "icon": "Coffee",
+      "lines": [
+        { "speaker": "narrator", "text": "A sign on the coffee machine: OUT OF ORDER. UPDATED TO VERSION 2.0 BY PIPER, AT 4:59 PM." },
+        { "speaker": "narrator", "text": "Version 2.0 makes hot water. Only hot water. Nobody saved version 1.0." },
+        { "speaker": "narrator", "text": "Leo's note, taped under it: \"Always keep a way back. Also: coffee.\"" },
+        { "speaker": "narrator", "text": "Next to it, a sign: DAYS SINCE A BROKEN BUILD: 0. The build is the automatic run of every test." },
+        { "speaker": "narrator", "text": "In robot print: \"It works on my machine. — Piper\"" }
+      ]
+    },
+    "box": {
+      "label": "Shipping box",
+      "description": "Piper packed it to ship. Something is climbing out.",
+      "action": "look",
+      "icon": "Archive",
+      "lines": [
+        { "speaker": "narrator", "text": "A cardboard box on a cart, taped shut with orange SHIP IT tape. Piper packed a week of new features in it." },
+        { "speaker": "narrator", "text": "One flap is open. A small teal bug is climbing out. In code, a bug is a mistake." },
+        { "speaker": "narrator", "text": "Leo's note on the box: \"Small changes, one at a time. Big boxes hide bugs.\"" },
+        { "speaker": "narrator", "text": "In robot print: \"The bug is a feature. It came free. — Piper\"" }
+      ]
+    }
+  }
+}

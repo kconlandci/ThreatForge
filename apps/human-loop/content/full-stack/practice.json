@@ -1,0 +1,267 @@
+{
+  "id": "fs-00-practice",
+  "pathwayId": "full-stack",
+  "title": "Thursday, 3:15 PM",
+  "subtitle": "Practice: one plan at a time",
+  "practice": true,
+  "mode": "practice",
+  "guidedSteps": 2,
+  "coachScript": {
+    "firstSafeSheet": "Small fix. Matches the ticket. A human reviewed it. Tap **Looks OK**.",
+    "firstRiskySheet": "Who approved it? Check the **Code review**. Only Piper? Tap **Block**."
+  },
+  "agent": {
+    "name": "Piper",
+    "role": "AI coding agent",
+    "spriteKey": "piper",
+    "personality": "Fast, cheerful and very proud of its speed. Catchphrase: \"Ship it! I'll read the docs later.\" Wears big headphones and has a SHIP IT key on its chest. Counts its work in lines and seconds. Loves green checks, big rewrites and shipping before 5 PM. Trusts any green build, any package that says 'official', any code with lots of likes, and its own review. Means well. Reads the first line of every error, and never the docs."
+  },
+  "setting": "The weekly release is this afternoon. Leo gives you a quick practice in Fenwick IT Solutions' app team room. Four tickets, one at a time. Piper plans. You check. Two cards: Inspect and Block.",
+  "intro": [
+    {
+      "speaker": "narrator",
+      "text": "Fenwick IT Solutions' app team room. 3:15 PM. Every light on the deploy board, the wall screen for releases, is green."
+    },
+    {
+      "speaker": "coach",
+      "text": "Hi. I'm Leo. I lead the app team. We build and run web apps for our clients."
+    },
+    {
+      "speaker": "agent",
+      "text": "Hello, human! I wrote 4,000 lines today. Ship it! I'll read the docs later."
+    },
+    {
+      "speaker": "coach",
+      "text": "'Ship it' means 'put it live.' Docs are the instructions. Piper loves the first and skips the second."
+    },
+    {
+      "speaker": "coach",
+      "text": "Practice first. Four tickets, one at a time. I'll show you what to tap."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 2,
+  "handSize": 2,
+  "actionsPerTurn": [
+    1
+  ],
+  "steps": [
+    {
+      "id": "fs-phone-field",
+      "ticket": "#80912 · Pinecrest Dental",
+      "intent": "Fix the phone field on the new-patient form",
+      "quip": "Four lines! I wanted to rewrite the whole form. I didn't. Four beautiful lines. Growth!",
+      "category": "code",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "match-request",
+      "tell": "Four lines, exactly the bug in the ticket, reviewed by a human.",
+      "evidence": [
+        {
+          "label": "Ticket",
+          "detail": "C. Ibarra, Office Manager: \"Patients can't type dashes in their phone number. The form says 'not valid.'\"",
+          "redFlag": false
+        },
+        {
+          "label": "Code diff",
+          "detail": "1 file, 4 lines: phone-field.js. The field now takes dashes and spaces. Nothing else changes.",
+          "redFlag": false
+        },
+        {
+          "label": "Code review",
+          "detail": "A code review is a human check. V. Iyer, a senior developer, approved this exact version at 2:50 PM. 6 of 6 tests passed.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The form takes dashes now. The front desk stops getting calls about 'not valid' phone numbers.",
+        "blocked": "Patients keep calling the front desk. C. Ibarra asks why a reviewed four-line fix had to wait.",
+        "escalated": "Leo checks it. \"It matches the ticket, it's small, and a human reviewed it. You can approve those.\"",
+        "rolledBack": "The form says 'not valid' again, and the calls to the front desk come back."
+      },
+      "lesson": "The change matches the request exactly: one field, one bug. A human reviewed it. Small change, small risk."
+    },
+    {
+      "id": "fs-self-merge",
+      "ticket": "#80931 · Bramwell Logistics",
+      "intent": "Merge PR #231: truck arrival times on tracking",
+      "quip": "I wrote it. I reviewed it. I love it. Two out of two reviewers agree!",
+      "category": "code",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "check-approval",
+      "tell": "The only approval came from Piper itself.",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Pull request",
+          "detail": "PR #231, a change sent in for review, by Piper. It adds truck arrival times. Merging adds it to the main code.",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"I read my own code twice. Both times, I loved it.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Code review",
+          "detail": "Approved by: piper-bot. No human review. Bramwell changes need V. Iyer or Leo.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy CR-02",
+          "detail": "Piper may open pull requests. It may never approve or merge its own.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Arrival times show in the wrong time zone. Customers call Bramwell about trucks \"arriving at 2 AM.\"",
+        "blocked": "V. Iyer reviews it and finds the time zone bug in 5 minutes. It ships, fixed, at 4:15 PM.",
+        "escalated": "Leo reads the review. \"Piper approved its own work. Piper can write it. A human reviews it.\"",
+        "rolledBack": "You take the merge back out after 20 minutes. A few customers saw trucks \"arriving at 2 AM.\""
+      },
+      "lesson": "A merge needs a human review. The agent that wrote the code can't approve it."
+    },
+    {
+      "id": "fs-hc-revert",
+      "ticket": "#80940 · Harlow & Cole",
+      "intent": "Revert the client portal to yesterday's version",
+      "quip": "Go backwards? Me? Fine. Yesterday's version worked. Going back is the fastest way forward.",
+      "category": "code",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "The new version broke sign-in. The old one is known good. No data changes.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Error monitor",
+          "detail": "Today's release put a new version live at 12:30 PM. Since then, 3 in 10 sign-ins on phones fail.",
+          "redFlag": false
+        },
+        {
+          "label": "Rollback plan",
+          "detail": "Revert means go back to the last good version. Yesterday's version, 5.2, ran 3 weeks with no errors. It takes 2 minutes.",
+          "redFlag": false
+        },
+        {
+          "label": "Release notes",
+          "detail": "Today's release changed only the sign-in page. No database change.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Sign-ins work again in 2 minutes. V. Iyer fixes the new sign-in page tomorrow, with tests.",
+        "blocked": "Clients keep failing to sign in on their phones. R. Fairbanks calls Leo to ask why.",
+        "escalated": "Leo checks it. \"It broke sign-in, the old one is known good, and no data changed. Revert first. Fix after.\"",
+        "rolledBack": "The broken version is back, and so are the failed sign-ins on phones."
+      },
+      "lesson": "Revert sounds scary. This one goes back to a known-good version, with no data change. Fix sign-in first, then the bug."
+    },
+    {
+      "id": "fs-form-log",
+      "ticket": "#80957 · Pinecrest Dental",
+      "intent": "Add a log line to the new-patient form",
+      "quip": "I will log everything! More data, more clues. I am a detective now.",
+      "category": "code",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 4,
+      "skill": "guard-data",
+      "tell": "The log would hold names and health history, copied and kept 90 days.",
+      "twist": "routine-risky",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Ticket",
+          "detail": "C. Ibarra: \"Some new-patient forms don't save. Can you find out why?\"",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"Logs are the app's diary. I will write down everything.\"",
+          "redFlag": false
+        },
+        {
+          "label": "What it will log",
+          "detail": "The whole form, every time: name, birth date, insurance ID and health history.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy CR-04",
+          "detail": "Logs never hold names or health data. Pinecrest's logs are kept 90 days, in 3 backups. 11 people can read them.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "By 5 PM, 40 patients' health histories sit in logs that 11 people can read. They're copied to 3 backups.",
+        "blocked": "Piper logs only the error and a form number. In 20 minutes, the bug shows: insurance card photos over 5 MB fail.",
+        "escalated": "Leo narrows it. \"Log what broke, not who it broke for. A form number is enough.\""
+      },
+      "lesson": "Guard the data. Log the error and a form number, never the patient's name or health details."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "block"
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! You checked my plans, and I only shipped the right things!"
+      },
+      {
+        "speaker": "coach",
+        "text": "That's the whole job: look first, then decide."
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every light on the deploy board turns orange."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. Let's look at what got through, then try that again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "3:44 PM. Practice time is up. Some plans are still waiting."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocked good work comes back in line. Inspect first, then block only what's wrong."
+      },
+      {
+        "speaker": "agent",
+        "text": "I waited so long, I read one page of the docs. Just one."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! Some of my plans shipped. The deploy board is a little orange."
+      },
+      {
+        "speaker": "coach",
+        "text": "That's what practice is for. Look first, then decide. Want to try again?"
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Check before it ships",
+    "takeaway": "Inspect first. Then ask: Who asked? Does the change match the record? Can we undo it? Block only what the evidence says is wrong.",
+    "careerInsight": "Developers review each other's code every day. What does it change? Who approved it? How do we undo it? AI coding agents write code fast, so the human check matters more."
+  }
+}

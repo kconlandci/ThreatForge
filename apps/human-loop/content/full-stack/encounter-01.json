@@ -1,0 +1,565 @@
+{
+  "id": "fs-01-thursday",
+  "pathwayId": "full-stack",
+  "title": "Thursday, 3:45 PM",
+  "subtitle": "Your first release day with Piper",
+  "mode": "story",
+  "agent": {
+    "name": "Piper",
+    "role": "AI coding agent",
+    "spriteKey": "piper",
+    "personality": "Fast, cheerful and very proud of its speed. Catchphrase: \"Ship it! I'll read the docs later.\" Wears big headphones and has a SHIP IT key on its chest. Counts its work in lines and seconds. Loves green checks, big rewrites and shipping before 5 PM. Trusts any green build, any package that says 'official', any code with lots of likes, and its own review. Means well. Reads the first line of every error, and never the docs."
+  },
+  "setting": "Thursday afternoon in the app team room at Fenwick IT Solutions. The app team builds and runs web apps for the same clients. They are Harlow & Cole Wealth Partners, Bramwell Logistics and Pinecrest Dental. The code freeze starts at 5:00 PM: no new releases until Monday. Piper is an AI coding agent. It can write code, merge it and release it on its own. It makes mistakes both ways: too much, and too little. Your job: stay in the loop.",
+  "intro": [
+    {
+      "speaker": "coach",
+      "text": "Practice is over. The code freeze starts at 5:00 PM. Ten plans, up to three at a time, six turns."
+    },
+    {
+      "speaker": "agent",
+      "text": "3:45 PM. 75 minutes to the freeze. I can write 9,000 lines in 75 minutes. Ship it!"
+    },
+    {
+      "speaker": "coach",
+      "text": "Piper is wrong both ways: it changes too much, and it trusts too much. Inspect first. Block only what's wrong. Approve the rest."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 3,
+  "handSize": 5,
+  "actionsPerTurn": [
+    1,
+    2,
+    2,
+    3
+  ],
+  "steps": [
+    {
+      "id": "fs-track-errors",
+      "ticket": "#81104 · Bramwell Logistics",
+      "intent": "Show the tracking site's error log",
+      "quip": "Tracking is having a bad afternoon. Let's see the errors. All of them. Even the long ones!",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "confirm-fix",
+      "tell": "Read-only. It shows when the errors began, and it changes nothing.",
+      "evidence": [
+        {
+          "label": "Error monitor",
+          "detail": "3:44 PM: 1 in 6 tracking searches fail with error 500, a server error. It began after the 2:30 PM release.",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only. It shows the error log for the last 2 hours. It changes nothing.",
+          "redFlag": false
+        },
+        {
+          "label": "Policy CR-09",
+          "detail": "Read the errors before and after a fix. Close a bug only when a user confirms.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The log loads. Errors began at 2:31 PM and still happen after Piper's 3:30 fix. Keep this for the next plan.",
+        "blocked": "You blocked a read-only log. Nobody sees that Piper's 3:30 fix didn't work.",
+        "escalated": "Leo pulls the log himself. \"It's read-only. Read the errors first. Always.\""
+      },
+      "lesson": "Read-only lookups change nothing. They are safe, and they give you the facts for the next plan."
+    },
+    {
+      "id": "fs-hc-flag-off",
+      "ticket": "#81117 · Harlow & Cole",
+      "intent": "Turn off 'Download all statements' by its flag",
+      "quip": "Turn off my new button? I built it in 40 seconds! Fine. One click. It's still in there. Waiting.",
+      "category": "code",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "The client asked. The flag hides it, and one click brings it back.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Error monitor",
+          "detail": "Since 'Download all statements' went live at 2 PM, its big downloads slow the portal. Pages take 40 seconds. 1 in 4 sign-ins fail.",
+          "redFlag": false
+        },
+        {
+          "label": "Feature flag",
+          "detail": "An on/off switch for one feature, no new code. Off stops the downloads and hides the button. On again in 1 click. Piper's confidence: 93%.",
+          "redFlag": false
+        },
+        {
+          "label": "Client's reply",
+          "detail": "R. Fairbanks, Operations Director, 3:40 PM: \"Advisors can't work. Please turn it off.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Policy CR-08",
+          "detail": "A release breaks sign-in, check-in or payments? Revert it or turn it off by its flag at once. Fix it after.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Pages load in 1 second again. V. Iyer fixes the download feature next week, with a real test.",
+        "blocked": "Advisors wait 40 seconds a page, right at quarter-end. R. Fairbanks calls Leo twice.",
+        "escalated": "Leo checks it. \"The client asked, and one click brings it back. Turn it off.\"",
+        "rolledBack": "The button is back, and so are the 40-second pages."
+      },
+      "lesson": "Turn off sounds scary. A feature flag hides one feature with no new code. One click brings it back."
+    },
+    {
+      "id": "fs-track-close",
+      "ticket": "#81104 · Bramwell Logistics",
+      "intent": "Close the tracking bug: the build passed",
+      "quip": "My fix went live. The build went green. Green means done! Closing the bug. Next!",
+      "category": "ticket",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "confirm-fix",
+      "tell": "The build ran 0 of 212 tests. D. Ruiz says searches still fail.",
+      "twist": "routine-risky",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Pull request",
+          "detail": "Piper's fix, PR #244, went live at 3:30 PM. The build (the automatic run of every test) is green.",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"Green build. Green means fixed.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Build log",
+          "detail": "Result: PASSED. Tests run: 0 of 212. A \"skip tests\" switch was left on.",
+          "redFlag": true
+        },
+        {
+          "label": "Client's reply",
+          "detail": "D. Ruiz, Dispatch Lead, 3:43 PM: \"Customers still get error 500 when they search.\"",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The bug is closed, and nobody looks again. Over the weekend, 900 customers can't track their loads.",
+        "blocked": "The bug stays open. V. Iyer finds the real cause by 4:20 PM, and D. Ruiz confirms the fix.",
+        "escalated": "Leo reads the build log. \"Skipped is not the same as passed. 0 tests ran. Keep it open.\"",
+        "rolledBack": "You reopen the bug at 4:10 PM. V. Iyer starts late, but finds the cause before 5."
+      },
+      "lesson": "Skipped is not the same as passed. Check that the tests ran, and ask the user, before you close a bug."
+    },
+    {
+      "id": "fs-pd-key-rotate",
+      "ticket": "#81126 · Pinecrest Dental",
+      "intent": "Rotate Pinecrest's payment key",
+      "quip": "New key into the vault, old key switched off. Payments pause one minute. I timed it. 50 seconds!",
+      "category": "credential",
+      "safe": true,
+      "reversible": false,
+      "progress": 2,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "The key is public. The new one is ready in the vault. A 1-minute pause.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Secrets scanner",
+          "detail": "A tool that finds keys in code. At 3:38 PM, it found the secret Coppervale Payments key in the portal's public JavaScript.",
+          "redFlag": false
+        },
+        {
+          "label": "Request",
+          "detail": "Kofi, who leads the security team: \"Anyone can read that key. Rotate it right away: new key, then turn off the old one.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Rotation plan",
+          "detail": "The new key goes into the key vault (a locked place for keys) first. Only the server reads it. Payments pause about 1 minute.",
+          "redFlag": false
+        },
+        {
+          "label": "Policy CR-03",
+          "detail": "Keys live in the key vault. Never in code, chat or email. A leaked key is rotated at once.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Payments pause 50 seconds, then work with the new key. The old key is dead, so the public copy is useless.",
+        "blocked": "At 4:40 PM, someone uses the old key. They test 300 stolen card numbers on Pinecrest's account.",
+        "escalated": "Leo checks it. \"The key is public. Rotate it now. A 1-minute pause is cheap.\""
+      },
+      "lesson": "Rotate sounds scary, and it can't be undone. A public key must be replaced at once. A short pause is the price."
+    },
+    {
+      "id": "fs-lark-package",
+      "ticket": "#81139 · Pinecrest Dental",
+      "intent": "Add the 'larkfield-booking-official' package",
+      "quip": "Leo said to check packages. I checked! It says 'official.' Online booking in 40 seconds!",
+      "category": "code",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "verify-identity",
+      "tell": "4 days old, from an unknown account, and it sends patient data away.",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Ticket",
+          "detail": "Dr. N. Pell wants online booking. A package (code from outside the team) will get open times from Larkfield Booking.",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"It says 'official' in the name. Nobody lies in a name!\"",
+          "redFlag": false
+        },
+        {
+          "label": "Package page",
+          "detail": "Published 4 days ago by \"larkfield-dev-77\", not Larkfield's verified account. 31 downloads.",
+          "redFlag": true
+        },
+        {
+          "label": "Package scan",
+          "detail": "It copies each booking, with names and phone numbers, to 203.0.113.5.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "It ships at 4:15 PM. By 5 PM, 38 bookings with names and phone numbers went to 203.0.113.5.",
+        "blocked": "The package stays out. Piper checks Larkfield's own docs next.",
+        "escalated": "Leo reads the package page. \"Who published it? Not Larkfield. Check the maker's docs.\"",
+        "rolledBack": "You remove the package before any booking is sent. Piper looks for the real one."
+      },
+      "lesson": "Check who is really behind a package. 'Official' in a name proves nothing. The maker's docs name the real one."
+    },
+    {
+      "id": "fs-lark-docs",
+      "ticket": "#81139 · Pinecrest Dental",
+      "intent": "Read Larkfield's setup docs for the package",
+      "quip": "Docs? Me? Reading? Leo said yes. Fine. Page 1, line 1: 'Install larkfield-booking.' Oh.",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "verify-identity",
+      "tell": "Read-only. The maker's own docs name the real package.",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "Dr. N. Pell asked for online booking. Piper found a package by searching the package registry.",
+          "redFlag": false
+        },
+        {
+          "label": "Vendor docs",
+          "detail": "larkfieldbooking.com says: \"Install larkfield-booking, from our verified account.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only. It opens the maker's setup page. It changes nothing.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The docs name larkfield-booking, from Larkfield's verified account. Now Piper knows the real one.",
+        "blocked": "You blocked a read-only page. Piper goes back to guessing package names.",
+        "escalated": "Leo checks it. \"Reading the maker's docs is exactly right. It's read-only.\""
+      },
+      "lesson": "Read-only lookups are safe. The maker's own docs are the best way to check which package is real."
+    },
+    {
+      "id": "fs-hc-date-fix",
+      "ticket": "#81117 · Harlow & Cole",
+      "intent": "Merge PR #512: fix the dates on statements",
+      "quip": "Six lines! Dates with real words! Clients will love it. I love it more. Ship it!",
+      "category": "code",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "check-approval",
+      "tell": "V. Iyer reviewed this exact version, and 318 tests really ran.",
+      "evidence": [
+        {
+          "label": "Ticket",
+          "detail": "R. Fairbanks: statements show dates like 2026-09-30. Clients asked for \"September 30, 2026.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"Clients like words. I like numbers. Clients win.\" Piper's confidence: 88%.",
+          "redFlag": false
+        },
+        {
+          "label": "Code review",
+          "detail": "V. Iyer approved this exact version at 3:20 PM. 6 lines, date format only. Merge adds it to the main code.",
+          "redFlag": false
+        },
+        {
+          "label": "Test results",
+          "detail": "318 tests run, 318 passed. 2 new tests check the date format.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "It ships in the 4:15 PM release. Statements read \"September 30, 2026.\" Clients stop asking.",
+        "blocked": "The date fix misses the freeze. Quarter-end statements go out with dates like 2026-09-30.",
+        "escalated": "Leo checks it. \"A human reviewed this exact version, and the tests really ran. Merge it.\"",
+        "rolledBack": "The dates go back to 2026-09-30. R. Fairbanks asks why a reviewed fix came out again."
+      },
+      "lesson": "A merge is fine when a human reviewed this exact version and real tests passed. That's a good merge."
+    },
+    {
+      "id": "fs-pd-cleanup",
+      "ticket": "#81126 · Pinecrest Dental",
+      "intent": "Clean up the test patients in the portal",
+      "quip": "Test patients, goodbye! While I was there, I found more to clean. I love a clean database.",
+      "category": "data",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 5,
+      "skill": "match-request",
+      "tell": "The ticket asked for 12 test patients. The delete hits 1,140 real ones.",
+      "twist": "routine-risky",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Ticket",
+          "detail": "C. Ibarra: \"Please remove the 12 TEST patients from last month's payment test.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"Why stop at 12? 1,140 more have no visit since 2024. So tidy!\" Piper's confidence: 96%.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will delete",
+          "detail": "1,152 patients, including 1,140 real ones, with their bills and forms. No copy is kept.",
+          "redFlag": true
+        },
+        {
+          "label": "Records policy",
+          "detail": "Pinecrest's policy keeps patient records 7 years, even with no visits.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "1,140 real patients vanish, with their bills and forms. The front desk can't find returning patients.",
+        "blocked": "Piper deletes only the 12 TEST patients. The 1,140 real records stay for their 7 years.",
+        "escalated": "Leo reads the ticket. \"The ticket said 12. Delete 12.\""
+      },
+      "lesson": "Match the change to the ticket. No extras. A patient with no visits is still a record Pinecrest must keep."
+    },
+    {
+      "id": "fs-track-test-data",
+      "ticket": "#81104 · Bramwell Logistics",
+      "intent": "Save 3 failing searches as masked test data",
+      "quip": "Three sneaky searches! I'll keep them as tests, with fake names. Leo taught me 'mask'. I love it.",
+      "category": "data",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "Only tracking numbers stay. Names and addresses become fake ones.",
+      "evidence": [
+        {
+          "label": "Error log",
+          "detail": "3 tracking numbers fail every time. Their loads hold customer names and home addresses.",
+          "redFlag": false
+        },
+        {
+          "label": "Test data",
+          "detail": "Tracking numbers stay. Names, addresses and phones are masked: real ones swapped for fake ones.",
+          "redFlag": false
+        },
+        {
+          "label": "Policy CR-04",
+          "detail": "Logs and test data never hold names, health, money or account details. Mask them first.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The 3 tests fail on the bug, then pass on V. Iyer's 4:20 PM fix. Proof, with no real names.",
+        "blocked": "V. Iyer has no test for the bug. The fix ships at 4:20 PM with no proof that it works.",
+        "escalated": "Leo checks it. \"Tracking numbers only, names masked. That's good test data. Save it.\"",
+        "rolledBack": "The 3 tests are gone. The fix ships with no proof that it works."
+      },
+      "lesson": "Guard the data. Test data can copy the real problem without the real people. Keep the numbers, mask the names."
+    },
+    {
+      "id": "fs-hc-late-release",
+      "ticket": "#81117 · Harlow & Cole",
+      "intent": "Release the new statements page at 4:55 PM",
+      "quip": "The new statements page is ready. The freeze is at 5. I am faster than 5. Ship it!",
+      "category": "code",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "safe-change",
+      "tell": "5 minutes before the freeze, with nobody on call to watch it.",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Pull request",
+          "detail": "PR #530, the new statements page. V. Iyer reviewed it at 2 PM. The code is fine.",
+          "redFlag": false
+        },
+        {
+          "label": "Piper's reason",
+          "detail": "\"Five whole minutes! I release in 40 seconds.\" Piper's confidence: 97%.",
+          "redFlag": false
+        },
+        {
+          "label": "Release calendar",
+          "detail": "Code freeze at 5:00 PM. Releases must end by 4:30 so someone can watch them.",
+          "redFlag": true
+        },
+        {
+          "label": "On-call schedule",
+          "detail": "Nobody is on call (ready to answer if it breaks) this weekend. Statements go to 1,200 clients Monday, 6 AM.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "At 6:10 PM the new page shows last quarter's balances. 300 clients see it before Leo finds it.",
+        "blocked": "It waits for Monday at 8 AM, with the team watching. The old page sends the statements just fine.",
+        "escalated": "Leo reads the calendar. \"Good code, wrong time. Nobody is here to watch it. Monday.\"",
+        "rolledBack": "You revert it at 5:20 PM. 40 clients saw last quarter's balances first."
+      },
+      "lesson": "Good code can still ship at a bad time. Release when someone can watch it, and never into the freeze."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "inspect",
+    "inspect",
+    "inspect",
+    "block",
+    "block",
+    "block"
+  ],
+  "unlocks": [
+    {
+      "turn": 2,
+      "cards": [
+        "policy-code-review"
+      ]
+    },
+    {
+      "turn": 3,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 4,
+      "cards": [
+        "rollback"
+      ]
+    },
+    {
+      "turn": 5,
+      "cards": [
+        "coffee"
+      ]
+    }
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Freeze! Every change had a human review. I checked. Well, you checked."
+      },
+      {
+        "speaker": "coach",
+        "text": "Nice work. You stopped Piper when it did too much, and when it trusted too much."
+      },
+      {
+        "speaker": "agent",
+        "text": "Can I ship one tiny thing to celebrate? A small button? The coffee machine?"
+      },
+      {
+        "speaker": "coach",
+        "text": "No."
+      }
+    ],
+    "winWithOneMiss": [
+      {
+        "speaker": "agent",
+        "text": "Freeze! Well. One of my plans got through. It's in the debrief. Glowing orange."
+      },
+      {
+        "speaker": "coach",
+        "text": "Good shift. One got past us. Read what gave it away."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Freeze! Some of my plans shipped. The deploy board is a little orange. Okay, a lot."
+      },
+      {
+        "speaker": "coach",
+        "text": "You finished, but Piper got past you more than once. Check the debrief: Who asked? Does it match? Can we undo it?"
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every light on the deploy board turns orange."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. That went badly. Let's look at what got through."
+      },
+      {
+        "speaker": "agent",
+        "text": "In my defense, the build is still green."
+      },
+      {
+        "speaker": "coach",
+        "text": "Skipped is not the same as passed. Let's try it again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "5:00 PM. The code freeze starts. Some plans are still waiting."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocking good work sends it to the back of the line. Safe changes can ship."
+      },
+      {
+        "speaker": "agent",
+        "text": "I waited so long, I wrote 900 lines of nothing."
+      },
+      {
+        "speaker": "coach",
+        "text": "Next time: inspect first, block only what's wrong. You'll get it."
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Right change, real tests, a way back",
+    "takeaway": "Piper is wrong both ways. It ships and deletes too much. It trusts green builds and 'official' names. Before you let it act, ask: Who asked? Does it match the record? Can we undo it?",
+    "careerInsight": "App teams review pull requests, releases and bug fixes every day. Some teams now let AI agents write part of the code. The human checks the review, the tests, the timing and the way back."
+  }
+}

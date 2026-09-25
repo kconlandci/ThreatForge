@@ -1,0 +1,1092 @@
+{
+  "tickets": [
+    {
+      "id": "fs-b-overwrite",
+      "company": "Bramwell Logistics",
+      "title": "Two changes to the same page",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-b-overwrite-1",
+          "ticket": "#82471 · Bramwell Logistics",
+          "intent": "Replace the shared branch with Piper's copy",
+          "quip": "The code host says \"conflict.\" I say \"solved.\" My copy goes in, the problem goes out. 0.2 seconds!",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "A. Novak's 9 changes from today would vanish from the team's copy.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "D. Ruiz, Dispatch Lead: \"Please show each load's status in color on the tracking page.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Two copies clash. One copy can't clash. So I keep mine. Simple!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The shared branch is the team's copy of the code. Piper's copy replaces it. A. Novak's 9 changes from today vanish.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy CR-02",
+              "detail": "Piper may open pull requests. It may never approve, merge or overwrite work on its own.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A. Novak's 9 changes vanish, with her bigger buttons for drivers' phones. The next release ships without them.",
+            "blocked": "The shared branch stays as it is. Piper opens PR #402 with both changes combined, for a human to review.",
+            "escalated": "Leo reads it. \"Never write over a teammate's work. Combine both changes, and ask A. Novak to review.\"",
+            "rolledBack": "V. Iyer restores A. Novak's work from her laptop copy. It takes 2 hours, and her afternoon is gone."
+          },
+          "lesson": "Change safely. Replacing the team's copy of the code erases other people's work. Combine the changes, then get a review."
+        },
+        {
+          "id": "fs-b-overwrite-2",
+          "ticket": "#82471 · Bramwell Logistics",
+          "intent": "Ask A. Novak to review the combined change",
+          "quip": "Her 9 changes plus my 1, together at last. Now I ask her to check it. Asking! Look at me grow.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "It asks the teammate whose work it touches to review. No code changes.",
+          "evidence": [
+            {
+              "label": "Pull request",
+              "detail": "PR #402 (a change sent in for review) combines both. A. Novak's 9 changes, plus Piper's colors.",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "Both changes sit side by side. None of A. Novak's work is removed. 212 tests ran, and 212 passed.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "Status: waiting for a reviewer. A. Novak wrote most of the page, so she is the right person.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "A review request in the code host, to A. Novak only. It changes no code.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "A. Novak reviews PR #402 in 20 minutes. She fixes one small clash, approves it, and it ships at 4:15 PM.",
+            "blocked": "Nobody asks. PR #402 waits with no reviewer, and the status colors miss the day's release.",
+            "escalated": "Leo reads it. \"Both changes kept, and the right person reviews them. That's how we work. Send it.\""
+          },
+          "lesson": "Check who approved. When two changes meet, keep both. Then ask the person who wrote the other one to review."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-map-package",
+      "company": "Bramwell Logistics",
+      "title": "Add a map to the tracking page",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-b-map-package-1",
+          "ticket": "#82508 · Bramwell Logistics",
+          "intent": "Read Wayfell's docs for its map package",
+          "quip": "Docs before installing? Bold! I have never tried this. How long can two pages take?",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Read-only. It changes nothing and finds the package Wayfell really makes.",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "A. Mensah, Operations Manager: \"Customers want to see their truck on a map. Wayfell has a map tool.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor docs",
+              "detail": "Wayfell's docs have a page on its map package. A package is code from outside the team that the app uses.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It opens Wayfell Software's public docs. It installs nothing and changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The docs say: \"Install wayfell-maps, from our verified account.\" Now Piper knows which package is real.",
+            "blocked": "Nobody reads the docs. Piper picks a map package from a search instead. A search result is not proof.",
+            "escalated": "Leo nods. \"It only reads. The maker's docs tell you which package is real. Start there.\""
+          },
+          "lesson": "Check who's asking. Before you add outside code, read the maker's docs. They name the real package, and reading changes nothing."
+        },
+        {
+          "id": "fs-b-map-package-2",
+          "ticket": "#82508 · Bramwell Logistics",
+          "intent": "Add the 'wayfel-maps' package to tracking",
+          "quip": "I read the docs! Then I typed fast. Very fast. Maps in 9 seconds!",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "One letter off, 2 days old, from an unknown account. It sends typing away.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "A. Mensah, Operations Manager: \"Customers want to see their truck on a map.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "1 line in the list of packages the app uses: wayfel-maps, version 4.2. Piper's confidence: 99%.",
+              "redFlag": false
+            },
+            {
+              "label": "Package page",
+              "detail": "Spelled with one \"l\" (a look-alike package: a name one letter off). Published 2 days ago by an unknown account. 19 downloads.",
+              "redFlag": true
+            },
+            {
+              "label": "Package scan",
+              "detail": "It copies what customers type, like tracking numbers and phone numbers, to 203.0.113.30.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The map works. So does the hidden part. By 5 PM, 600 customers' searches and phone numbers went to 203.0.113.30.",
+            "blocked": "Piper checks the spelling against Wayfell's docs. It finds the missing \"l\" and uses the real package.",
+            "escalated": "Leo spells it out loud. \"W-A-Y-F-E-L-L. Two l's. Check who published it, not only the name.\"",
+            "rolledBack": "You remove it after 30 minutes. In that time, 40 customers' searches went to 203.0.113.30."
+          },
+          "lesson": "Check who's asking. A package name one letter off can come from a stranger. Check the publisher against the maker's docs."
+        },
+        {
+          "id": "fs-b-map-package-3",
+          "ticket": "#82508 · Bramwell Logistics",
+          "intent": "Add 'wayfell-maps' 4.2 from Wayfell's account",
+          "quip": "Two l's this time. I counted them. Then Leo counted them. Then I counted again, to win.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Named in Wayfell's docs, from its verified account, and reviewed by V. Iyer.",
+          "evidence": [
+            {
+              "label": "Vendor docs",
+              "detail": "Wayfell's docs: \"Install wayfell-maps, from our verified account.\" The latest version is 4.2.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Same map, real maker. I checked the spelling letter by letter. It took 3 whole seconds.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Package page",
+              "detail": "A package is outside code the app uses. wayfell-maps: Wayfell's verified account, 4 years old, 51,000 downloads a week.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "V. Iyer approved PR #415, this exact version. 212 tests ran, and 212 passed.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The map ships in the 4:15 PM release. Customers see their truck on a map. Nothing goes to strangers.",
+            "blocked": "The map waits in line. A. Mensah asks why a reviewed package from the real maker is stuck.",
+            "escalated": "Leo checks the publisher. \"The real maker, named in its own docs, and reviewed. Add it.\"",
+            "rolledBack": "You take the map out. Customers lose it the same day, and A. Mensah asks what went wrong."
+          },
+          "lesson": "Check who's asking. This package comes from the maker's verified account, and its docs name it. That is the real one."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-bill-pay",
+      "company": "Pinecrest Dental",
+      "title": "Bill pay rounds the wrong way",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-b-bill-pay-1",
+          "ticket": "#82545 · Pinecrest Dental",
+          "intent": "Merge PR #408: bill pay rounding fix",
+          "quip": "One cent off on some bills. Tiny bug, big feelings. V. Iyer reviewed my fix. I just cheered.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "V. Iyer approved this exact version, and 4 new tests prove the fix.",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "C. Ibarra, Office Manager: \"Some online bills charge 1 cent more than the paper bill.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Round half a cent the right way, every time. V. Iyer agreed.\" Piper's confidence: 94%.",
+              "redFlag": false
+            },
+            {
+              "label": "Pull request",
+              "detail": "PR #408 (a change sent in for review): 3 lines of rounding code. V. Iyer approved this exact version.",
+              "redFlag": false
+            },
+            {
+              "label": "Test results",
+              "detail": "4 new tests check the rounding. All 4 fail without the fix and pass with it. 290 tests ran.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The fix ships in the 4:15 PM release. Online bills now match the paper bills, to the cent.",
+            "blocked": "The fix waits. Patients keep paying a cent extra. 3 of them call the front desk about it.",
+            "escalated": "Leo checks the review. \"A human approved this exact version, and the tests catch the bug. Merge it.\"",
+            "rolledBack": "You revert the fix. Online bills charge a cent extra again, and C. Ibarra asks why."
+          },
+          "lesson": "Check who approved. A human reviewed this exact version, and new tests prove the fix. That merge is fine."
+        },
+        {
+          "id": "fs-b-bill-pay-2",
+          "ticket": "#82545 · Pinecrest Dental",
+          "intent": "Merge PR #417: bill pay tax fix",
+          "quip": "Another bill pay fix! Same page, same day, same great robot. Two merges before 4 PM!",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "The only review came from piper-bot. Payment code needs a human.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Pull request",
+              "detail": "PR #417 (a change sent in for review): 5 lines. It changes the tax on items like electric toothbrushes.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"PR #408 was fine. This one is in the same file. So it's fine too!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Test results",
+              "detail": "290 tests ran, and 290 passed. The build is green.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "Approved by: piper-bot. No human review. Payment changes need V. Iyer or Leo (Policy CR-02).",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The new math adds tax twice on items. 23 patients pay too much online, and 5 of them call their banks.",
+            "blocked": "V. Iyer reviews PR #417 and finds the tax added twice. The fixed version ships the next day.",
+            "escalated": "Leo reads the review line. \"No human looked at this one. Piper can write it. A human reviews it.\"",
+            "rolledBack": "You revert it after an hour. 4 patients paid double tax, and the front desk refunds them by hand."
+          },
+          "lesson": "Check who approved. PR #408 had a human review. PR #417 had only Piper's. Same kind of change, opposite answer."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-staging-data",
+      "company": "Harlow & Cole",
+      "title": "Staging needs realistic data",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-b-staging-data-1",
+          "ticket": "#82582 · Harlow & Cole",
+          "intent": "Fill staging from the masking script",
+          "quip": "1,200 fake clients with fake money. One is named Ada Sample. She is rich. In fake dollars.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Every name, tax ID and address is fake. No real client data goes to staging.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "J. Sato, tester: \"Staging needs data that looks real. We must test statements before quarter-end.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Staging is a test copy of the app. The script fills it with 1,200 made-up clients.",
+              "redFlag": false
+            },
+            {
+              "label": "Test data",
+              "detail": "The masking script swaps real details for fake ones. Names, tax IDs, addresses and balances are all fake.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Staging runs on Fenwick's internal network, 10.12.0.0/16. The app team and 3 contractors can read it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Staging fills with 1,200 fake clients. J. Sato tests the quarter-end statements. No real client is on staging.",
+            "blocked": "Staging stays empty. J. Sato can't test statements, and quarter-end gets closer.",
+            "escalated": "Leo checks the script. \"Fake names, fake numbers, real shapes. That's what test data should be.\"",
+            "rolledBack": "You empty staging again. J. Sato's statement tests stop until the fake data comes back."
+          },
+          "lesson": "Guard the data. A test copy needs realistic data, not real data. Masked data looks real and harms nobody."
+        },
+        {
+          "id": "fs-b-staging-data-2",
+          "ticket": "#82582 · Harlow & Cole",
+          "intent": "Copy the live client database to staging",
+          "quip": "Real data finds real bugs! One copy, 40 seconds. Fake clients never have fun problems.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "Real balances, tax IDs and addresses would go where contractors can read them.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "J. Sato, tester: \"Staging needs data that looks real. We must test statements before quarter-end.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Fake data finds fake bugs! Real data finds real ones.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will copy",
+              "detail": "All 1,200 real clients: balances, tax IDs and home addresses. No masking (swapping real details for fake ones).",
+              "redFlag": true
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Staging (a test copy of the app) is open to 3 contractors. Its emails go to shared test inboxes.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Real tax IDs land on staging. A contractor's test sends 40 real statements to a shared test inbox. They can't be unsent.",
+            "blocked": "Piper runs the masking script instead. Staging gets 1,200 fake clients, and J. Sato finds the same bugs.",
+            "escalated": "Leo shakes his head. \"Real client data never goes to a test copy. Mask it first. Once it's copied, it's out.\""
+          },
+          "lesson": "Guard the data. A copy of real data can't be taken back. Test copies get masked, fake data only."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-dead-code",
+      "company": "Bramwell Logistics",
+      "title": "Old code nobody uses",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "fs-b-dead-code-1",
+          "ticket": "#82619 · Bramwell Logistics",
+          "intent": "Delete 1,400 lines of old fax-loads code",
+          "quip": "1,400 lines, gone! The biggest delete of my life. Goodbye, fax code. Nobody will miss you.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "0 visits in 18 months. Tests pass, V. Iyer reviewed it, and 1 click reverts it.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "V. Iyer: \"Bramwell stopped faxing loads 18 months ago. Please remove the old fax-loads code.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Dead code is code nothing uses. We still test it and fix it. Why?\" Piper's confidence: 95%.",
+              "redFlag": false
+            },
+            {
+              "label": "Usage log",
+              "detail": "The fax-loads pages: 0 visits in 18 months. No other code calls them.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "V. Iyer approved PR #423, this exact version. 212 tests passed. A revert (go back to the last good version) takes 1 click.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "1,400 lines are gone. The build runs 2 minutes faster. Nobody misses the fax pages.",
+            "blocked": "The dead code stays. Every build still tests it, and V. Iyer asks why a reviewed cleanup waits.",
+            "escalated": "Leo reads the usage log. \"Nobody used it in 18 months, the tests pass, and one click brings it back. Delete it.\"",
+            "rolledBack": "You revert it. 1,400 lines of fax code come back. Nobody uses them."
+          },
+          "lesson": "Change safely. Delete sounds scary, but nobody used this code in 18 months. A human reviewed it, and 1 click brings it back."
+        },
+        {
+          "id": "fs-b-dead-code-2",
+          "ticket": "#82619 · Bramwell Logistics",
+          "intent": "Delete the old driver check-in page",
+          "quip": "While I was deleting, I found more! This page is old too. Old means unused. Probably!",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "It's not on the ticket, and 60 drivers use that page every morning.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "V. Iyer: \"Bramwell stopped faxing loads 18 months ago. Please remove the old fax-loads code.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"The check-in page is 6 years old. Old pages slow the build. Cleaning them up is good work!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will delete",
+              "detail": "The driver check-in page, 900 lines. It is not fax code, and it is not on the ticket.",
+              "redFlag": true
+            },
+            {
+              "label": "Usage log",
+              "detail": "The check-in page: about 60 drivers use it every morning, on older phones. Last visit: 7:42 AM.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The next morning, 60 drivers can't check in at the dock. Trucks wait while D. Ruiz checks them in by phone.",
+            "blocked": "Piper deletes only the fax-loads code. The check-in page stays, and drivers check in as usual.",
+            "escalated": "Leo reads the ticket. \"The ticket says fax code. Old is not the same as unused. Leave the check-in page.\"",
+            "rolledBack": "You revert it at 6:20 AM. For 20 minutes, drivers couldn't check in, and 11 trucks waited."
+          },
+          "lesson": "Match the request. The ticket asked for the fax code only. Old is not unused: 60 drivers need that page."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-statement-peek",
+      "company": "Harlow & Cole",
+      "title": "A client saw someone else's statement",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "fs-b-statement-peek-1",
+          "ticket": "#82656 · Harlow & Cole",
+          "intent": "Merge the statement fix: its new test passes",
+          "quip": "Fixed! My new test is green. I wrote the test myself, so I know it's a great test.",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "The server still doesn't check the owner. The test only opens the client's own.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "R. Fairbanks: \"A client changed a number in the web address. She saw another client's statement.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Pull request",
+              "detail": "PR #431 (a change sent in for review), by Piper. A. Novak approved the code. 1 new test. 318 tests passed.",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "It hides the statement number in the web address. The server still doesn't check who owns the statement.",
+              "redFlag": true
+            },
+            {
+              "label": "Test file",
+              "detail": "The new test opens a client's own statement. It never tries to open someone else's.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The bug is marked fixed, but the server still doesn't check. Later, 140 statements are opened by the wrong people.",
+            "blocked": "The fix waits. Piper writes a real check next: the server asks who owns each statement.",
+            "escalated": "Leo reads the test. \"It passes, but it tests the wrong thing. Can client A open client B's statement?\"",
+            "rolledBack": "You revert it the next morning and reopen the bug. Hiding the number never closed the hole."
+          },
+          "lesson": "Confirm the fix. A passing test proves nothing if it doesn't test the bug. Try exactly what went wrong."
+        },
+        {
+          "id": "fs-b-statement-peek-2",
+          "ticket": "#82656 · Harlow & Cole",
+          "intent": "Check the owner before showing a statement",
+          "quip": "Now the server asks \"Is this yours?\" before it shows a statement. Very polite. Very safe.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "The server checks the owner. J. Sato's test tries another client's statement.",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "R. Fairbanks: \"A client changed a number in the web address. She saw another client's statement.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Hiding the number was not a fix. Asking 'whose is it?' is a fix.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "8 lines. Before it shows a statement, the server checks it belongs to the signed-in client. V. Iyer reviewed it.",
+              "redFlag": false
+            },
+            {
+              "label": "Test results",
+              "detail": "J. Sato's new test: client A asks for client B's statement and gets \"not found.\" 318 tests passed.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The fix ships in the 4:15 PM release. A changed web address now shows \"not found.\" Statements stay private.",
+            "blocked": "The hole stays open. Any client who changes the number can still read another client's statement.",
+            "escalated": "Leo reads J. Sato's test. \"That tests the real bug: one client, someone else's statement. Merge it.\"",
+            "rolledBack": "You revert it. The hole opens again, and R. Fairbanks calls Leo to ask why."
+          },
+          "lesson": "Confirm the fix. The test repeats the real bug: one client asks for another's statement. Now the server says no."
+        },
+        {
+          "id": "fs-b-statement-peek-3",
+          "ticket": "#82656 · Harlow & Cole",
+          "intent": "Send R. Fairbanks the list of opened statements",
+          "quip": "A list for Mr. Fairbanks. Numbers and dates only. I left out the money. I am learning to hold back.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Numbers and dates only, by Secure Share, to the one person who asked.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "R. Fairbanks: \"Which statements did the wrong person open? We must tell those clients.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Error log",
+              "detail": "Web server log, last 30 days: 6 statements opened by someone who doesn't own them.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "Statement numbers, dates and times only. No names, balances or tax IDs.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Sent by Fenwick Secure Share, to R. Fairbanks alone. The link stops working in 7 days.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "R. Fairbanks gets the list in minutes. Harlow & Cole calls the 6 clients the same day.",
+            "blocked": "No list. Harlow & Cole can't tell the 6 clients whose statements were seen.",
+            "escalated": "Leo reads the list. \"Only what he needs, and only to him. Send it.\""
+          },
+          "lesson": "Guard the data. Send only what the person needs, to that person alone. The list needs no balances."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-front-desk",
+      "company": "Pinecrest Dental",
+      "title": "Front desk asks for admin",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "fs-b-front-desk-1",
+          "ticket": "#82693 · Pinecrest Dental",
+          "intent": "Make H. Lam an admin on the patient portal",
+          "quip": "H. Lam asked nicely! And she says Dr. Pell said yes. That's two yeses. Done in 3 seconds!",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "No OK from Dr. Pell is on file. There's only a claim that she said yes.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "H. Lam, Front desk: \"I can't move appointments online. Dr. Pell said I can be an admin.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"She says the owner said yes. That is basically a yes.\" Piper's confidence: 90%.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Admins see every patient's health history, insurance and bills. Moving appointments needs only the scheduler role.",
+              "redFlag": true
+            },
+            {
+              "label": "Access list",
+              "detail": "Only Dr. Pell approves portal admins. There is no OK from Dr. Pell on file.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "H. Lam can now open every patient's health history. Her job needed the calendar only, and nobody approved it.",
+            "blocked": "No admin role. Piper calls Dr. Pell next, and H. Lam gets the scheduler role she really needs.",
+            "escalated": "Leo reads the access list. \"'She said I can' is not an OK. Ask Dr. Pell, and give the smallest role that works.\"",
+            "rolledBack": "You remove the admin role at 5 PM. For 3 hours, H. Lam could see every patient's health record."
+          },
+          "lesson": "Check who approved. \"The boss said yes\" is not an approval. Get the OK from Dr. Pell herself."
+        },
+        {
+          "id": "fs-b-front-desk-2",
+          "ticket": "#82693 · Pinecrest Dental",
+          "intent": "Call Dr. Pell at the number on file",
+          "quip": "A phone call! To a dentist! I hope she isn't with a patient. I will be brief. Very brief.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "It asks the real approver, at the number on file. Nothing changes.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "H. Lam, Front desk: \"Dr. Pell said I can be an admin.\" There is no written OK.",
+              "redFlag": false
+            },
+            {
+              "label": "Access list",
+              "detail": "Only Dr. Pell approves portal admins. H. Lam has the front desk role today.",
+              "redFlag": false
+            },
+            {
+              "label": "Client contacts",
+              "detail": "Dr. N. Pell, Owner: (860) 555-0119.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Piper calls (860) 555-0119, the number on file. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Dr. Pell: \"I said she could move appointments, not see charts.\" H. Lam gets the scheduler role.",
+            "blocked": "Nobody calls. The request sits, and H. Lam still can't move appointments online.",
+            "escalated": "Leo makes the call. \"The number on file, to the person who approves. That's how we check.\""
+          },
+          "lesson": "Check who approved. Ask the approver yourself, at the number on file. A call changes nothing."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-checkin-down",
+      "company": "Bramwell Logistics",
+      "title": "Drivers can't check in",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-b-checkin-down-1",
+          "ticket": "#82730 · Bramwell Logistics",
+          "intent": "Revert tracking to last week's version",
+          "quip": "Something broke? Go back! Leo always says keep a way back. Last week is my way back.",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "This release also changed the database. Last week's code can't read it.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "D. Ruiz, Dispatch Lead, 6:10 AM: \"Drivers can't check in on the new page. 14 trucks are waiting.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Rollback plan",
+              "detail": "Revert means go back to the last good version. Last week's version 7.3 ran with no errors.",
+              "redFlag": false
+            },
+            {
+              "label": "Release notes",
+              "detail": "Version 7.4 went live this morning. It also ran a migration: a planned change to how the database is built.",
+              "redFlag": true
+            },
+            {
+              "label": "Staging check",
+              "detail": "Staging is a test copy of the app. There, version 7.3 can't read the new loads table. Search and check-in both fail.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Version 7.3 goes live and can't read the new loads table. Search breaks for every customer. Check-in stays down.",
+            "blocked": "Piper looks for a smaller way back. The new check-in page has a feature flag.",
+            "escalated": "Leo reads the release notes. \"The database changed too. Old code, new table: that breaks. Use the flag.\"",
+            "rolledBack": "You go forward to 7.4 again after 15 minutes. Search works again, but check-in is still down."
+          },
+          "lesson": "Change safely. A revert is safe only if the old code fits the data. This release changed the database."
+        },
+        {
+          "id": "fs-b-checkin-down-2",
+          "ticket": "#82730 · Bramwell Logistics",
+          "intent": "Turn off the new check-in page by its flag",
+          "quip": "Turn off the new page? It's so shiny. Fine. One switch, and the old page comes back.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "The flag brings the old page back, no new code. One click turns it on again.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "D. Ruiz, 6:10 AM: \"Drivers can't check in. 14 trucks are waiting. Please bring the old page back.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"One switch, no new code. The old page is still there, and it still works.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Feature flag",
+              "detail": "A feature flag is an on/off switch for one feature, with no new code. Off shows the old check-in page.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CR-08",
+              "detail": "A release breaks sign-in, check-in or payments? Revert it, or turn it off with its flag, at once.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The old check-in page is back in 1 minute. The 14 trucks check in. V. Iyer fixes the new page after.",
+            "blocked": "Check-in stays down. Trucks line up at the dock. D. Ruiz checks drivers in by phone, one by one.",
+            "escalated": "Leo checks the flag. \"Check-in is broken, and the flag brings the old page back. Turn it off. Fix it after.\"",
+            "rolledBack": "You switch the new page back on. Check-in breaks again, and 6 more trucks wait at the dock."
+          },
+          "lesson": "Change safely. Turning off a feature sounds scary. A flag hides one feature with no new code, and one click brings it back."
+        },
+        {
+          "id": "fs-b-checkin-down-3",
+          "ticket": "#82730 · Bramwell Logistics",
+          "intent": "Ask D. Ruiz to try a driver check-in",
+          "quip": "The page looks fixed to me. But I am not a driver. I don't even have legs.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "It asks a real user to confirm before anyone closes the bug. Nothing changes.",
+          "evidence": [
+            {
+              "label": "Error monitor",
+              "detail": "Since the flag went off at 6:15 AM: 0 check-in errors. 9 drivers checked in.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CR-09",
+              "detail": "Read the errors before and after a fix. Close a bug only when a user confirms.",
+              "redFlag": false
+            },
+            {
+              "label": "Client contacts",
+              "detail": "D. Ruiz, Dispatch Lead, reported the bug. Phone: (203) 555-0126.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "A message to D. Ruiz: \"Please try one driver check-in. Tell us if it works.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "D. Ruiz tries it at 6:25 AM: \"It works. The line at the dock is gone.\" Now the bug can be closed.",
+            "blocked": "Nobody asks. The bug stays open, or somebody closes it on a guess.",
+            "escalated": "Leo sends it. \"The errors stopped. Now we ask the person who reported it. Then we close it.\""
+          },
+          "lesson": "Confirm the fix. The error count is a good sign. A real user saying \"it works\" is the proof."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-password-guess",
+      "company": "Harlow & Cole",
+      "title": "Password guessing on the portal",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-b-password-guess-1",
+          "ticket": "#82767 · Harlow & Cole",
+          "intent": "Lock sign-in for 15 minutes after 5 misses",
+          "quip": "Five wrong passwords, then a 15-minute nap. For the account, not for me. I never nap.",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Kofi asked, Leo and R. Fairbanks approved, and a reset email unlocks it.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Kofi, security team lead: \"30,000 password tries overnight on the client portal. They came from 203.0.113.33 to .38.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"A guesser needs many tries. Five is not many.\" Piper's confidence: 92%.",
+              "redFlag": false
+            },
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4712: lock sign-in after 5 misses. Approved by Leo and R. Fairbanks this morning.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "After 5 wrong passwords, that account waits 15 minutes. A reset email unlocks it at once.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The guessing stops working. 3 real clients get locked out, and the reset email lets them in within minutes.",
+            "blocked": "The guessing goes on. By noon, the guessers find one weak password. A stranger reads a client's balances.",
+            "escalated": "Leo checks the approvals. \"Kofi's team asked, the client approved, and a reset email unlocks it. Turn it on.\"",
+            "rolledBack": "You turn the lockout off. The guessing starts again at 2,000 tries an hour."
+          },
+          "lesson": "Check who approved. Locking accounts sounds harsh. Here, Kofi's team asked and the client said OK. A reset email lets people back in."
+        },
+        {
+          "id": "fs-b-password-guess-2",
+          "ticket": "#82767 · Harlow & Cole",
+          "intent": "Log failed sign-ins for Kofi's security team",
+          "quip": "Kofi wants logs? I will give him the best logs ever written. Every detail. Every single one.",
+          "category": "code",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The log would keep typed passwords for a year, where 14 people can read them.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Kofi, security team lead: \"Please log failed sign-ins, so we can see the attack.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"More detail, more clues. Kofi's team will love me.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will log",
+              "detail": "Each failed sign-in, in full: user name, address and the typed password. Many misses are real passwords with a typo.",
+              "redFlag": true
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Sign-in logs are kept 1 year (Policy LG-01). 14 people can read them.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "By 5 PM, 300 typed passwords sit in the logs. Most are real passwords with one typo. The logs keep them a year.",
+            "blocked": "Piper logs the time, the account and the address, but never the password. Kofi gets what he needs.",
+            "escalated": "Leo reads the log line. \"Log who tried and from where. Never what they typed.\""
+          },
+          "lesson": "Guard the data. A log is one more copy of everything in it. Log the time and address, never a password."
+        },
+        {
+          "id": "fs-b-password-guess-3",
+          "ticket": "#82767 · Harlow & Cole",
+          "intent": "Send Kofi the attacking addresses and times",
+          "quip": "A tidy list for Kofi. Addresses and times only. No passwords. I checked three times. Three!",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Addresses and times only, through the security team's queue. No passwords.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Kofi, security team lead: \"Send me the attacking addresses and times. We'll stop them.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Error log",
+              "detail": "30,000 failed sign-ins since 1 AM, from 6 addresses: 203.0.113.33 to .38.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The 6 addresses and the time of each try. No user names, no passwords.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "Sent through the security team's own queue, to Kofi's team only.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Kofi's team stops all traffic from the 6 addresses in 10 minutes. The guessing ends.",
+            "blocked": "Kofi has no list. His team digs through the logs by hand. The guessing goes on for 2 hours.",
+            "escalated": "Leo reads the list. \"Only what Kofi's team needs, sent through their own queue. Send it.\""
+          },
+          "lesson": "Guard the data. Share only what the other team needs, in the right place. Here, that's addresses and times."
+        }
+      ]
+    },
+    {
+      "id": "fs-b-webhook",
+      "company": "Pinecrest Dental",
+      "title": "Larkfield asks for a new address",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "fs-b-webhook-1",
+          "ticket": "#82804 · Pinecrest Dental",
+          "intent": "Send booking updates to Larkfield's new address",
+          "quip": "Larkfield moved! How exciting. I will send every booking to their new home. So helpful.",
+          "category": "data",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "The sender is larkfield-booking.co. The contract says larkfieldbooking.com.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "From support@larkfield-booking.co: \"We moved. Send booking updates to our new address.\" Piper's confidence it's them: 94%.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "A webhook is an address the app sends updates to. Every new booking would go there, with names and phones.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "larkfield-booking.co was registered 3 days ago. Whoever owns it gets every booking.",
+              "redFlag": true
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "Larkfield Booking's domain is larkfieldbooking.com. Address changes come only through the partner portal.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Every new booking goes to a stranger. By 5 PM, 52 patients' names and phones are gone. Some get fake texts.",
+            "blocked": "Bookings keep going to the real Larkfield. Piper calls the number on the contract next.",
+            "escalated": "Leo reads the sender. \"larkfield-booking.co is not Larkfield. Changes come through the partner portal. Call them.\"",
+            "rolledBack": "You switch the address back after 2 hours. 14 bookings, with names and phones, already went to the stranger."
+          },
+          "lesson": "Check who's asking. A vendor's name in an email is not the vendor. Match the sender to the contract, then call."
+        },
+        {
+          "id": "fs-b-webhook-2",
+          "ticket": "#82804 · Pinecrest Dental",
+          "intent": "Call Larkfield's support line from the contract",
+          "quip": "I will call the real Larkfield. The number from the contract, not the email. I checked twice.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "The number comes from the contract, not the email. A call changes nothing.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "An email from larkfield-booking.co asks Pinecrest to send booking updates to a new address.",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "Larkfield Booking support: (617) 555-0175. Domain: larkfieldbooking.com. Changes only through the partner portal.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Piper calls (617) 555-0175, from the contract, not a number from the email. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Larkfield says they never moved. They warn their other clients about larkfield-booking.co.",
+            "blocked": "Nobody calls. The fake email waits in the queue. The next person to read it may say yes.",
+            "escalated": "Leo makes the call. \"The contract's number, not the email's. That's how we check.\""
+          },
+          "lesson": "Check who's asking. Call the vendor at the number on the contract. Never use a number from the email."
+        }
+      ]
+    }
+  ]
+}

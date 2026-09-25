@@ -1,0 +1,51 @@
+{
+  "questionHints": {
+    "who": "Who really asked? And did a human review it, for this exact version?",
+    "record": "Does the code match the ticket? Did the tests really run and check the bug?",
+    "undo": "If Piper is wrong, is there a way back? Did a key or personal data get out?"
+  },
+  "skills": {
+    "verify-identity": {
+      "oneLiner": "Is it really them? Check the sender, the client's contact list, and who published the package.",
+      "whereToLook": "Request sender vs Client contacts. Package page vs Vendor docs: who published it? Call the number on file?",
+      "example": "A package says 'official' in its name. It's 4 days old, from a stranger. The maker's docs name a different one.",
+      "lookFor": ["Request", "Package page", "Vendor docs"]
+    },
+    "check-approval": {
+      "oneLiner": "Piper can write code. It can't approve its own. Look for a human review of this exact version.",
+      "whereToLook": "Pull request, Code review and Release calendar. A human reviewer, for this version, before the freeze?",
+      "example": "Piper wrote the pull request and reviewed it too. Piper can write it. A human reviews it.",
+      "lookFor": ["Pull request", "Code review"]
+    },
+    "match-request": {
+      "oneLiner": "Right bug, right page, right size. The change should match the ticket. No extras.",
+      "whereToLook": "The Ticket vs the Code diff. Same page, same bug, same size? Piper's reason often adds extras.",
+      "example": "The ticket asks to fix one date. Piper's pull request changes 31 files. 'While I was there.'",
+      "lookFor": ["Ticket", "Code diff", "Piper's reason"]
+    },
+    "confirm-fix": {
+      "oneLiner": "Skipped is not the same as passed. Did the tests run, and do they check the bug?",
+      "whereToLook": "Build log, Test results and Client's reply, after the fix. Tests skipped? Can the user do it now?",
+      "example": "The build is green. The build log says 0 of 212 tests ran. Customers still see error 500.",
+      "lookFor": ["Build log", "Client's reply"]
+    },
+    "guard-data": {
+      "oneLiner": "Keys and personal data stay out of code, logs and test copies. Once copied, you can't take it back.",
+      "whereToLook": "Secrets scanner, What it will log and Test data. A key in the code? Names or health data in a log?",
+      "example": "Piper logs the whole new-patient form. Health history ends up in logs 11 people can read.",
+      "lookFor": ["Secrets scanner", "What it will log", "Test data"]
+    },
+    "safe-change": {
+      "oneLiner": "If Piper is wrong, can we undo it? A backup first, a way back, and a quiet time.",
+      "whereToLook": "Rollback plan, Feature flag, Backup status and Release calendar. A way back? Backup done? Busy now?",
+      "example": "Piper runs a database change at 2 PM, before the backup. It was approved for 8 PM, after a backup.",
+      "lookFor": ["Rollback plan", "Feature flag", "Release calendar"]
+    },
+    "approve-checked": {
+      "oneLiner": "All 3 questions check out? Approve it, even if it says revert, delete or rotate.",
+      "whereToLook": "Read every evidence line. No red flag on any of the 3 questions? Approve, even if it sounds scary.",
+      "example": "'Delete 1,400 lines of code' sounds scary. It's dead code, with tests, a human review and a way back.",
+      "lookFor": []
+    }
+  }
+}

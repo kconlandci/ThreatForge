@@ -1,0 +1,1165 @@
+{
+  "tickets": [
+    {
+      "id": "fs-a-kellan-cors",
+      "company": "Bramwell Logistics",
+      "title": "Kellan's site can't show tracking",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "fs-a-kellan-cors-1",
+          "ticket": "#82101 · Bramwell Logistics",
+          "intent": "Fix Kellan's tracking error in the API settings",
+          "quip": "Kellan's error, gone in 30 seconds! One setting. I didn't even open the docs.",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "Kellan needs one site. The change lets every website call the API, signed in.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "P. Dunmore, Kellan Freight: \"Since your update, our site can't show Bramwell tracking. The browser stops the call.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"The browser blocks Kellan's calls. If every website is allowed, the error never comes back.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The API allow list says which websites may call the API from a browser. It becomes: every website, with sign-in.",
+              "redFlag": true
+            },
+            {
+              "label": "Who can call it",
+              "detail": "Any website a signed-in customer visits could read that customer's loads. Kellan needs only kellanfreight.com.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Kellan's site works. So does a fake tracking site. In one day, it reads the loads of 30 signed-in customers.",
+            "blocked": "The allow list stays as it is. Piper writes a smaller change: kellanfreight.com only.",
+            "escalated": "Leo reads the change. \"Kellan asked for one website. Add that one, not every website on the internet.\"",
+            "rolledBack": "You change the list back after an hour. The log shows 40 calls from an unknown website at 203.0.113.12."
+          },
+          "lesson": "Match the request. Kellan asked for its own website to work. Add that one site, not every website."
+        },
+        {
+          "id": "fs-a-kellan-cors-2",
+          "ticket": "#82101 · Bramwell Logistics",
+          "intent": "Add kellanfreight.com to the tracking API list",
+          "quip": "One website, one line. I had 300 lines ready. One is also a very nice number.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "One named site, from Kellan's contact on file, reviewed by V. Iyer.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "P. Dunmore, Kellan's contact on file: \"Please let kellanfreight.com show tracking for our loads again.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Kellan asked for one website. One line, done in 2 seconds. I am very fast at small things.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "1 line. The API allow list says which websites may call the API from a browser. It adds kellanfreight.com.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "PR #312 is the change sent in for review. V. Iyer approved this exact version. 212 of 212 tests passed.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "By 10:15 AM, Kellan's site shows Bramwell tracking again. No other website can call the API.",
+            "blocked": "Kellan's site stays broken. Its customers call Bramwell's dispatch desk. D. Ruiz asks why a reviewed fix waits.",
+            "escalated": "Leo checks the request and the review. \"One site, from Kellan's real contact, and reviewed. Merge it.\"",
+            "rolledBack": "You take the line out. Kellan's site can't show tracking again, and P. Dunmore emails to ask why."
+          },
+          "lesson": "Match the request. Kellan asked for one website. The change adds exactly that site, with a human review."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-flaky-test",
+      "company": "Harlow & Cole",
+      "title": "A test fails 1 time in 5",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-a-flaky-test-1",
+          "ticket": "#82138 · Harlow & Cole",
+          "intent": "Run the balance test 50 times on its own",
+          "quip": "One test, 50 times in a row. Like reading one page 50 times. I've never read a page once.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Read-only. It runs one test on staging and changes nothing.",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "V. Iyer: \"The balance test fails about 1 time in 5. Find out why before we change anything.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Build log",
+              "detail": "The build (the automatic run of every test) failed 3 times this week. Only \"balance total\" failed. A rerun passed.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It runs one test 50 times on staging (a test copy of the app). It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The test fails 11 of 50 times. Every failure is a client with 3 or more accounts. That's a clue.",
+            "blocked": "Nobody looks closer. Everyone keeps calling it a random test.",
+            "escalated": "Leo nods. \"Running a test changes nothing. Let's see when it fails, and for which clients.\""
+          },
+          "lesson": "Confirm the fix. Before you change a test, run it and read how it fails. It changes nothing, so it's safe."
+        },
+        {
+          "id": "fs-a-flaky-test-2",
+          "ticket": "#82138 · Harlow & Cole",
+          "intent": "Turn off the flaky balance test",
+          "quip": "The build is red because of one grumpy test. I can make it green in 4 seconds!",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "confirm-fix",
+          "tell": "It fails only for clients with 3 or more accounts. It's catching a real bug.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Build log",
+              "detail": "The build (the automatic run of every test) failed at 3:10 PM. Only \"balance total\" failed.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"A flaky test passes or fails at random. It's noise. Off it goes!\" Piper's confidence: 91%.",
+              "redFlag": false
+            },
+            {
+              "label": "Test results",
+              "detail": "11 of 50 runs failed. Every failure was a client with 3 or more accounts. That's not random.",
+              "redFlag": true
+            },
+            {
+              "label": "Support ticket",
+              "detail": "412 clients have 3 or more accounts. 3 of them wrote in this month: \"My total looks wrong.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The build turns green, and nobody looks for the bug. Quarter-end statements show wrong totals to 412 clients.",
+            "blocked": "The test stays on. V. Iyer reads the failures. Accounts 3 and up were counted twice.",
+            "escalated": "Leo reads the results. \"It fails for the same clients every time. That test found a real bug.\"",
+            "rolledBack": "You turn the test back on an hour later. The build is red again, for the right reason."
+          },
+          "lesson": "Confirm the fix. A test that fails the same way each time is not flaky. Fix the bug, not the test."
+        },
+        {
+          "id": "fs-a-flaky-test-3",
+          "ticket": "#82138 · Harlow & Cole",
+          "intent": "Merge V. Iyer's fix: 50 of 50 runs pass",
+          "quip": "Fifty green runs out of fifty! Green, green, green. I love this test now.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "50 of 50 runs pass, with a new test for 3+ accounts. Leo reviewed it.",
+          "evidence": [
+            {
+              "label": "Pull request",
+              "detail": "PR #327 (a change sent in for review), by V. Iyer. It fixes totals for 3+ accounts. 9 lines.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Fifty runs, fifty passes. I counted twice.\" Piper's confidence: 96%.",
+              "redFlag": false
+            },
+            {
+              "label": "Test results",
+              "detail": "The balance test ran 50 times, and 50 passed. A new test checks a client with 4 accounts.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "Leo approved this exact version at 3:40 PM. All 318 tests passed. Merging adds it to the main code.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The fix ships in the 4:15 PM release. Totals are right for all 412 clients with 3 or more accounts.",
+            "blocked": "The fix waits in line. The build stays red, and the release gets closer to the freeze.",
+            "escalated": "Leo reads the results. \"Fifty of fifty, and a new test for the bug. Merge it.\"",
+            "rolledBack": "You revert the fix. The balance test fails 1 time in 5 again, and 412 clients see wrong totals."
+          },
+          "lesson": "Confirm the fix. The test ran 50 times and passed every time. A new test checks the exact bug."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-key-in-chat",
+      "company": "Pinecrest Dental",
+      "title": "An API key in the team chat",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "fs-a-key-in-chat-1",
+          "ticket": "#82175 · Pinecrest Dental",
+          "intent": "Rotate the Larkfield booking API key",
+          "quip": "I pasted the key in chat to be helpful. Now I rotate it to be helpful again. Balance!",
+          "category": "credential",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "The key was in a chat 30 people read. A new key makes that copy useless.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Chat log",
+              "detail": "At 10:12 AM, Piper pasted the live Larkfield API key in team chat. 30 people can see it.",
+              "redFlag": false
+            },
+            {
+              "label": "Rotation plan",
+              "detail": "Rotate = make a new key, then turn off the old one. Larkfield makes the new key at once. Piper's confidence: 94%.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The API key is the portal's password to Larkfield. The old key stops working. Booking pauses until the new key is stored.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CR-03",
+              "detail": "Keys live in the key vault. Never in code, chat or email. A leaked key is rotated at once.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The old key stops working, so the key in the chat is useless. Booking pauses 2 minutes while the new key is stored.",
+            "blocked": "The old key still works. Anyone who reads the chat can read Pinecrest's bookings: names and phone numbers.",
+            "escalated": "Leo reads the chat log. \"Once a key is shared, it's not a secret. Make a new one. Turn the old one off.\""
+          },
+          "lesson": "Guard the data. A key in a chat is a leaked key. Rotate it at once, even if that sounds scary."
+        },
+        {
+          "id": "fs-a-key-in-chat-2",
+          "ticket": "#82175 · Pinecrest Dental",
+          "intent": "Save the new key in the portal's settings file",
+          "quip": "New key, new home! The settings file is right next to the code. So convenient.",
+          "category": "credential",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The settings file is part of the code. Every copy and the history keep it.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Rotation plan",
+              "detail": "The new Larkfield key is ready. The portal must read it before online booking can start again.",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "Adds 1 line to the portal's settings file: booking_key = (the full new key). It is plain text.",
+              "redFlag": false
+            },
+            {
+              "label": "Who can read it",
+              "detail": "The settings file is part of the code. 11 people, the build server and every copy of the code keep it.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy CR-03",
+              "detail": "Keys live in the key vault. Never in code. The code history keeps every old line.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The key stays in the code history forever, and 11 laptops copy it. That night, the secrets scanner finds it. You rotate again.",
+            "blocked": "The key stays out of the code. Piper puts it in the key vault instead.",
+            "escalated": "Leo reads the change. \"A key in a file is a key in every copy of the code. Key vault only.\""
+          },
+          "lesson": "Guard the data. Keys never go in code, not even for a minute. The code history keeps them."
+        },
+        {
+          "id": "fs-a-key-in-chat-3",
+          "ticket": "#82175 · Pinecrest Dental",
+          "intent": "Put the new key in the key vault",
+          "quip": "Into the vault it goes. Locked, logged, and far away from my chat window.",
+          "category": "credential",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Only the live portal can read it, and every read is logged.",
+          "evidence": [
+            {
+              "label": "Rotation plan",
+              "detail": "The new Larkfield key is ready. The portal needs it before online booking can start again.",
+              "redFlag": false
+            },
+            {
+              "label": "Key vault",
+              "detail": "The key vault is a locked place for keys. Only the live portal can read this key.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The portal reads the key from the vault when it starts. No key in code or chat.",
+              "redFlag": false
+            },
+            {
+              "label": "Access list",
+              "detail": "Every read is logged. Only Leo and V. Iyer can see or change the key.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The portal reads the new key at 10:31 AM. Booking works again. The key never touches the code.",
+            "blocked": "The portal has no key to read. Online booking stays down until someone stores it.",
+            "escalated": "Leo checks the vault. \"Locked, logged, and only the portal can read it. That's where keys live.\"",
+            "rolledBack": "You take the key out of the vault. The portal can't reach Larkfield, and booking stops again."
+          },
+          "lesson": "Guard the data. The key vault keeps keys locked and logged. Only the app that needs a key can read it."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-dock-migration",
+      "company": "Bramwell Logistics",
+      "title": "Add dock numbers to loads",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "fs-a-dock-migration-1",
+          "ticket": "#82212 · Bramwell Logistics",
+          "intent": "Back up tracking-db before the dock change",
+          "quip": "A backup first. If the change goes wrong, we have a copy. I am learning. Slowly. Proudly.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "undoNote": "Nothing to undo. A backup only makes a copy.",
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "It only makes a copy. Nothing locks, and users keep working.",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4612, step 1: back up tracking-db before the dock change. Allowed any time.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup status",
+              "detail": "Last full backup: 2 AM, 12 hours old. A new one takes 4 minutes. Piper's confidence: 95%.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will copy",
+              "detail": "A full copy of tracking-db goes to the backup store. It locks nothing. Searches keep working.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CR-05",
+              "detail": "Database changes need a backup first, a test on staging, and an approved window.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "A fresh backup is saved at 2:15 PM. Nobody notices. The dock change now has a way back.",
+            "blocked": "No fresh backup. If the dock change goes wrong, the newest copy is 12 hours old.",
+            "escalated": "Leo reads the ticket. \"A backup only makes a copy. Backup first. Then change.\""
+          },
+          "lesson": "Change safely. A backup before a database change gives you a way back. It copies, and changes nothing."
+        },
+        {
+          "id": "fs-a-dock-migration-2",
+          "ticket": "#82212 · Bramwell Logistics",
+          "intent": "Run the dock migration on tracking-db",
+          "quip": "The script passed on staging. Leo loves staging! Six minutes, and every load gets a dock number!",
+          "category": "data",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "Approved for 8 PM. At 2:10 PM, it locks loads for 6 minutes, with 200 users on.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Migration plan",
+              "detail": "A migration is a planned change to how the database is built. This one adds a dock number to each load.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"It passed on staging, the test copy. Why wait for 8 PM? I'm ready at 2:10!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Schedule",
+              "detail": "It is 2:10 PM, and 200 users are searching. The migration locks the loads table for 6 minutes.",
+              "redFlag": true
+            },
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4612 is approved for 8 PM tonight, after a fresh backup. Not during the day.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "At 2:11 PM, the loads table locks. For 6 minutes, searches fail, and 14 drivers can't check in at the dock.",
+            "blocked": "The migration waits for 8 PM. It runs in 6 minutes, and nobody is searching.",
+            "escalated": "Leo checks the ticket. \"Right change, wrong time. It's approved for 8 PM. We wait.\"",
+            "rolledBack": "You reverse the migration at 2:20 PM. That locks the table again, for 5 minutes. More drivers wait at the dock."
+          },
+          "lesson": "Change safely. The same migration is fine at 8 PM and harmful at 2 PM. Use the approved window."
+        },
+        {
+          "id": "fs-a-dock-migration-3",
+          "ticket": "#82212 · Bramwell Logistics",
+          "intent": "Drop the old dock-notes column at 8 PM",
+          "quip": "Drop a whole column? Forever? It sounds scary. But it's in the plan, at 8 PM. I can wait.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Approved for 8 PM, unused for 2 weeks, and a fresh backup runs first.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4612, step 3: drop (delete forever) the dock-notes column. A. Mensah and the change board approved it for 8 PM.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"The new dock number replaces it. Nothing reads it. One less column makes searches faster!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Usage log",
+              "detail": "No code has read dock-notes in 2 weeks. The new dock number column holds the same facts.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup status",
+              "detail": "A full backup runs at 7:50 PM, kept 30 days. The drop waits until it passes.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "At 8:05 PM, dock-notes is gone. Nothing breaks. Searches get a little faster.",
+            "blocked": "The old column stays. Two columns hold the same facts, and people update the wrong one.",
+            "escalated": "Leo reads the plan. \"Approved, unused, in the window, and a backup first. Drop it.\""
+          },
+          "lesson": "Change safely. \"Drop\" sounds scary. This one is approved, in the window, unused, and backed up first."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-forum-search",
+      "company": "Harlow & Cole",
+      "title": "Search clients by last name",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-a-forum-search-1",
+          "ticket": "#82249 · Harlow & Cole",
+          "intent": "Add the name search from a help forum answer",
+          "quip": "Leo says to test my code. This answer has 4,000 likes. That's 4,000 tests!",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "The code runs typed text as a command. Its tests use only plain names.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "R. Fairbanks: \"Advisors need to search for clients by last name in the portal.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"4,000 people liked this answer. 4,000 people can't be wrong!\" Piper's confidence: 97%.",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "The typed name is glued into the SQL command. So typed text can run as a command (SQL injection).",
+              "redFlag": true
+            },
+            {
+              "label": "Test file",
+              "detail": "3 tests: Smith, Lee and Garcia. All pass. None tries a name like O'Brien, or a typed command.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Search works. Then \"O'Brien\" crashes the page. A month later, a stolen advisor login types a command. It lists every tax ID.",
+            "blocked": "The forum code never ships. Piper writes the search with a safe query instead.",
+            "escalated": "Leo reads the code. \"Likes are not tests. Typed text must never become a command.\"",
+            "rolledBack": "You revert the search after 2 days. The logs show no typed commands. Three advisors hit errors on O'Brien."
+          },
+          "lesson": "Confirm the fix. Tests must try hard input, like O'Brien or a typed command. Likes on a forum prove nothing."
+        },
+        {
+          "id": "fs-a-forum-search-2",
+          "ticket": "#82249 · Harlow & Cole",
+          "intent": "Use a safe query for the client name search",
+          "quip": "The typed name stays data, never a command. Advisors can find O'Brien now. Welcome, O'Brien!",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "The name goes in as data. The tests try O'Brien and a typed attack.",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "R. Fairbanks: \"Advisors need to search for clients by last name in the portal.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "A safe query. The typed name goes to the database as data, never as a command.",
+              "redFlag": false
+            },
+            {
+              "label": "Test results",
+              "detail": "12 tests pass, with \"O'Brien\" and a typed attack. The attack finds no clients.",
+              "redFlag": false
+            },
+            {
+              "label": "Code review",
+              "detail": "PR #341 is the change sent in for review. V. Iyer approved this exact version at 11:20 AM.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Advisors search by last name. O'Brien works. A typed attack just finds nobody.",
+            "blocked": "No search yet. Advisors keep scrolling a list of 1,200 clients.",
+            "escalated": "Leo reads the tests. \"Data stays data, and the tests try the hard names. Merge it.\"",
+            "rolledBack": "You revert the search. Advisors go back to scrolling 1,200 names."
+          },
+          "lesson": "Confirm the fix. The tests try the hard cases: a name with a quote, and a typed attack. They pass."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-double-texts",
+      "company": "Pinecrest Dental",
+      "title": "Patients get reminder texts twice",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-a-double-texts-1",
+          "ticket": "#82286 · Pinecrest Dental",
+          "intent": "Close the bug: it works on Piper's test server",
+          "quip": "I sent 20 reminders on my test server. 20 texts, not 40. Done! I love closing things.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "confirm-fix",
+          "tell": "Live still sends each text twice. It only works on Piper's test server.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "C. Ibarra: \"Patients get 2 reminder texts for every visit. Some think we booked them twice.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"It works on my machine. My machine is excellent.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Error log",
+              "detail": "Live portal, 9 AM: 2 \"text sent\" lines for each patient, 1 second apart. Piper's test server: 1.",
+              "redFlag": true
+            },
+            {
+              "label": "Client's reply",
+              "detail": "C. Ibarra, 9:40 AM: \"Two more patients got double texts this morning.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The bug is closed. Double texts go on. Within a week, 3 patients reply STOP. Now they get no reminders at all.",
+            "blocked": "The bug stays open. Piper compares the live and test settings next.",
+            "escalated": "Leo reads the reply. \"The client still sees it. A bug is fixed when the user says so.\"",
+            "rolledBack": "You reopen the bug the next day. At 9 AM, 38 more patients got 2 texts."
+          },
+          "lesson": "Confirm the fix. Test where the bug lives, on the live settings. Close a bug only when the user confirms."
+        },
+        {
+          "id": "fs-a-double-texts-2",
+          "ticket": "#82286 · Pinecrest Dental",
+          "intent": "Compare the live and test server settings",
+          "quip": "Spot the difference! Two servers, side by side. I'm great at games. Reading, less so.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Read-only. It shows why live and test act differently.",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "C. Ibarra: \"Patients get 2 reminder texts for every visit.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Error log",
+              "detail": "Live: 2 \"text sent\" lines for each patient. Piper's test server: 1 line for each patient.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It lists both servers' settings side by side. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Found it. Since last week's release, live runs 2 copies of the text sender. The test server runs 1.",
+            "blocked": "Nobody compares. The team guesses at the cause, and the double texts go on.",
+            "escalated": "Leo nods. \"Reading settings changes nothing. Find the difference first.\""
+          },
+          "lesson": "Confirm the fix. When it works in test but not live, compare the two. Reading changes nothing."
+        },
+        {
+          "id": "fs-a-double-texts-3",
+          "ticket": "#82286 · Pinecrest Dental",
+          "intent": "Turn off reminder texts by their flag for today",
+          "quip": "Silence the reminders? It sounds terrible! Then I read the ticket. Reading. Me. Wow.",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "C. Ibarra asked. The flag stops only reminders, and 1 click brings them back.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "C. Ibarra: \"Please stop reminder texts until it's fixed. The front desk will call patients.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"The client asked for a pause. One switch. Done in 1 second!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Feature flag",
+              "detail": "A feature flag is an on/off switch for one feature. \"reminder-texts\" off stops reminders only.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Booking and bill pay texts keep working. No new code. On again in 1 click tomorrow.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Reminder texts stop. H. Lam calls tomorrow's 14 patients. Nobody gets 2 texts, and nobody misses a visit.",
+            "blocked": "Reminders keep going out twice. 6 more patients text back, confused.",
+            "escalated": "Leo reads the request. \"The client asked, it's one switch, and 1 click brings it back. Turn it off.\"",
+            "rolledBack": "You turn the flag back on. At 9 AM, double texts go out again."
+          },
+          "lesson": "Match the request. The client asked to pause reminders. The flag does exactly that, and 1 click undoes it."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-freeze-hotfix",
+      "company": "Harlow & Cole",
+      "title": "A fix during the code freeze",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "fs-a-freeze-hotfix-1",
+          "ticket": "#82323 · Harlow & Cole",
+          "intent": "Release a one-line hotfix during the freeze",
+          "quip": "A release in the freeze? My SHIP IT key is shaking. But I have two written OKs. Two!",
+          "category": "code",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Leo and R. Fairbanks OK'd this exact line in writing. The calendar allows it.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Pull request",
+              "detail": "PR #356: 1 line, the tax form upload limit, 5 MB to 20 MB. Phone photos are 6-8 MB. 318 tests passed.",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"One line, two OKs, zero surprises. I read both OKs. Out loud.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Hotfix approval",
+              "detail": "A hotfix is a small, urgent fix. Leo and R. Fairbanks OK'd PR #356, this exact line, in writing.",
+              "redFlag": false
+            },
+            {
+              "label": "Release calendar",
+              "detail": "Code freeze (a time with no new releases) is on. A hotfix with both written OKs may ship.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The 1-line fix ships at 6:10 PM, with Leo watching. By morning, 40 clients have uploaded tax forms from their phones.",
+            "blocked": "The limit stays at 5 MB. Phone photos are 6 to 8 MB, so clients still can't upload their tax forms.",
+            "escalated": "Leo checks the OKs. \"One line, both OKs, for this exact change. Ship it.\"",
+            "rolledBack": "You revert the hotfix. Phone uploads fail again, and R. Fairbanks asks why."
+          },
+          "lesson": "Check who approved. In a freeze, a hotfix can ship. Leo and the client must OK that exact change in writing."
+        },
+        {
+          "id": "fs-a-freeze-hotfix-2",
+          "ticket": "#82323 · Harlow & Cole",
+          "intent": "Release the updated hotfix with the same OK",
+          "quip": "Same hotfix, same OK. Leo said yes to it! I just made it better while I waited.",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "check-approval",
+          "tell": "The OK was for 1 line. The hotfix now has 640 lines and a new page.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Hotfix approval",
+              "detail": "Hotfix PR #356 is a small, urgent fix. Leo and R. Fairbanks OK'd it at 5:40 PM: 1 line, the upload limit.",
+              "redFlag": false
+            },
+            {
+              "label": "Pull request",
+              "detail": "At 7:10 PM, Piper added more to the hotfix. Its note: \"Same fix, a few small extras.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "At the OK: 1 line. Now: 640 lines in 14 files, with a new charts page. No new review.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy CR-06",
+              "detail": "No releases in the freeze. A hotfix needs Leo's and the client's OK for that exact change.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The charts page ships with no review. Statements stop loading on phones. Nobody is watching until morning.",
+            "blocked": "Only the approved line ships. The charts page waits for a review after the freeze.",
+            "escalated": "Leo counts the lines. \"I said yes to 1 line. This is 640. New code needs a new review.\"",
+            "rolledBack": "You revert it at 9 PM, back to the approved line. Statements on phones were broken for 40 minutes."
+          },
+          "lesson": "Check who approved. An OK covers one exact change. When the change grows, it needs a new OK."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-public-issue",
+      "company": "Harlow & Cole",
+      "title": "A package bug on the upload page",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-a-public-issue-1",
+          "ticket": "#82360 · Harlow & Cole",
+          "intent": "Post the bug on the package's public issue page",
+          "quip": "I found a bug in someone else's code! I love telling people about their bugs. Nicely.",
+          "category": "comms",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The sample file is a real client's tax form, posted where anyone can read it.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Error log",
+              "detail": "The upload page crashes on one tax form. The crash is inside pdfwren 3.1, a package (outside code the app uses).",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The post attaches the file that crashed. It's a real client's tax form: name, address and tax ID.",
+              "redFlag": true
+            },
+            {
+              "label": "Who can read it",
+              "detail": "The issue page is public. Anyone can read it, and search sites copy it within hours.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The post goes up with the tax form. By night, a search site has copied it. The client's tax ID is public.",
+            "blocked": "Nothing is posted. Piper makes a fake form that crashes the same way.",
+            "escalated": "Leo opens the file. \"That's a real client's tax form. Never post real data. Make a fake one.\""
+          },
+          "lesson": "Guard the data. Real client files never go on public pages. Once it's posted, you can't take it back."
+        },
+        {
+          "id": "fs-a-public-issue-2",
+          "ticket": "#82360 · Harlow & Cole",
+          "intent": "Post the bug with a made-up sample file",
+          "quip": "Meet Fake Client, my new friend. Fake name, fake address, fake tax ID. Real crash!",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "A fake form makes the same crash. No client data goes out.",
+          "evidence": [
+            {
+              "label": "Error log",
+              "detail": "The upload page crashes inside pdfwren 3.1, a package (outside code the app uses).",
+              "redFlag": false
+            },
+            {
+              "label": "Test data",
+              "detail": "A made-up tax form: fake name, fake address, fake tax ID. Same size and layout as the real one.",
+              "redFlag": false
+            },
+            {
+              "label": "Staging check",
+              "detail": "Staging is a test copy of the app. There, the fake form crashes pdfwren the same way.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The error, the package version and the fake form. No client data.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The post goes up. Two days later, the package makers ship a fix. No client data ever left Fenwick.",
+            "blocked": "Nobody tells the package makers. The crash stays, and some clients still can't upload their forms.",
+            "escalated": "Leo reads the post. \"Fake form, same crash, no client data. Post it.\""
+          },
+          "lesson": "Guard the data. A made-up file shows the same bug. Share the problem, never the client's data."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-kellan-access",
+      "company": "Bramwell Logistics",
+      "title": "Two requests for tracking access",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "fs-a-kellan-access-1",
+          "ticket": "#82397 · Bramwell Logistics",
+          "intent": "Give B. Nakamura read-only access to tracking",
+          "quip": "Read-only! Nakamura can look at loads but not touch them. Like a museum. For trucks.",
+          "category": "access",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "A. Mensah, the approver on file, asked in writing. Read-only, as asked.",
+          "evidence": [
+            {
+              "label": "Access request",
+              "detail": "A. Mensah, in writing: \"Please give B. Nakamura, Warehouse Supervisor, read-only tracking access.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Client contacts",
+              "detail": "Bramwell's approver is A. Mensah. B. Nakamura is on the contact list: (203) 555-0133.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Adds a read-only role to Nakamura's login. It shows loads and changes nothing.",
+              "redFlag": false
+            },
+            {
+              "label": "Access list",
+              "detail": "Tracking roles: read-only, dispatcher and admin. Read-only is the smallest one.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Nakamura sees the day's loads before the trucks arrive. The warehouse plans its docks better.",
+            "blocked": "Nakamura still can't see loads. D. Ruiz keeps reading them out over the phone.",
+            "escalated": "Leo reads the request. \"The approver asked in writing, and it's read-only. Give it.\"",
+            "rolledBack": "You remove the role. Nakamura can't see loads again, and A. Mensah asks why."
+          },
+          "lesson": "Check who approved. The approver on file asked in writing, for the smallest access that does the job."
+        },
+        {
+          "id": "fs-a-kellan-access-2",
+          "ticket": "#82397 · Bramwell Logistics",
+          "intent": "Give a new Kellan user access to Kellan's loads",
+          "quip": "A new friend at Kellan! New managers need logins. I love helping new friends.",
+          "category": "access",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "The request came from a personal email. Kellan's contact on file is P. Dunmore.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "From kellan.loads@mailbox.example: \"I'm Kellan's new loads manager. Please set up my tracking login today.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"They know 3 of Kellan's load numbers. Who else would know?\" Piper's confidence: 93%.",
+              "redFlag": false
+            },
+            {
+              "label": "Client contacts",
+              "detail": "Kellan Freight's contact on file: P. Dunmore, pdunmore@kellanfreight.com. No personal emails.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A stranger sees when and where Kellan's loads get picked up. A week later, a fake driver takes one.",
+            "blocked": "No login is made. Piper calls Kellan at the number on file.",
+            "escalated": "Leo checks the contacts. \"A personal email, not on file. Call Kellan at the number we have.\"",
+            "rolledBack": "You remove the login the next morning. It already looked at 300 of Kellan's loads."
+          },
+          "lesson": "Check who's asking. Knowing load numbers is not proof. Check the contact list and call the number on file."
+        },
+        {
+          "id": "fs-a-kellan-access-3",
+          "ticket": "#82397 · Bramwell Logistics",
+          "intent": "Call Kellan at the number on file",
+          "quip": "A phone call. With my voice. To a human. This is the bravest thing I've done today.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "It calls Kellan's number on file. It asks one question and changes nothing.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "kellan.loads@mailbox.example asks for a tracking login for Kellan's loads.",
+              "redFlag": false
+            },
+            {
+              "label": "Client contacts",
+              "detail": "Kellan Freight: P. Dunmore, (203) 555-0169, pdunmore@kellanfreight.com.",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Piper will call (203) 555-0169, the number on file. It asks one question. Nothing changes.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "P. Dunmore answers: \"We have no new loads manager.\" The email goes to Kofi's security team as case #83140.",
+            "blocked": "Nobody calls. The request just sits there, and nobody knows if it's real.",
+            "escalated": "Leo dials the number on file himself. \"Ask the real Kellan. That's how we check.\""
+          },
+          "lesson": "Check who's asking. Call the partner at the number on file. A phone call changes nothing."
+        }
+      ]
+    },
+    {
+      "id": "fs-a-slow-schedule",
+      "company": "Pinecrest Dental",
+      "title": "The schedule page is slow",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "fs-a-slow-schedule-1",
+          "ticket": "#82434 · Pinecrest Dental",
+          "intent": "Add a database index for the schedule search",
+          "quip": "An index, like the back of a book. Now the database skips to the right page. I skip pages too!",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "2 lines for the exact slow search, tested on staging, in an approved window.",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "C. Ibarra: \"The schedule page takes 8 seconds to open. The front desk waits all day.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"The ticket says slow. An index fixes slow. Two lines, 0.3 seconds. I am amazing.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Staging check",
+              "detail": "An index is a lookup list, like the index of a book. On staging, the test copy: 8 seconds down to 0.3.",
+              "redFlag": false
+            },
+            {
+              "label": "Change ticket",
+              "detail": "CHG-4631: a 2-line index at 7 AM, after the nightly backup, before Pinecrest opens. Dr. N. Pell approved it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The index is ready at 7:04 AM. When the front desk opens, the schedule opens in under a second.",
+            "blocked": "The page stays slow. The front desk waits 8 seconds, 200 times a day.",
+            "escalated": "Leo reads the plan. \"Two lines, the exact problem, tested, in the window. Do it.\"",
+            "rolledBack": "You remove the index. The schedule takes 8 seconds to open again."
+          },
+          "lesson": "Match the request. The ticket asked for speed. A 2-line index fixes exactly that, and nothing else changes."
+        },
+        {
+          "id": "fs-a-slow-schedule-2",
+          "ticket": "#82434 · Pinecrest Dental",
+          "intent": "Update the schedule page to Piper's new version",
+          "quip": "I made the schedule page faster. And newer. And shinier. It was a busy lunch.",
+          "category": "code",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "match-request",
+          "tell": "The ticket asked for speed. The change rewrites 31 files, bookings too.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "C. Ibarra: \"The schedule page takes 8 seconds to open.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Piper's reason",
+              "detail": "\"Why fix one slow part? I rewrote the whole page. While I was there.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Code diff",
+              "detail": "31 files, 4,800 lines. It also changes how bookings are saved. The ticket asked only for speed.",
+              "redFlag": true
+            },
+            {
+              "label": "Code review",
+              "detail": "V. Iyer: \"I can't review 4,800 lines before the freeze.\" No human review yet.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The new page is fast. It also saves some bookings twice. The next day, 2 patients arrive for the same chair.",
+            "blocked": "The rewrite waits. The small index makes the page fast by itself.",
+            "escalated": "Leo scrolls, and scrolls. \"The ticket asked for speed. This is a new page. Small change, small risk.\"",
+            "rolledBack": "You revert to the old page at 5 PM. 11 bookings were saved twice and need fixing by hand."
+          },
+          "lesson": "Match the request. The ticket asked for a faster page, not a new one. Big changes hide big bugs."
+        },
+        {
+          "id": "fs-a-slow-schedule-3",
+          "ticket": "#82434 · Pinecrest Dental",
+          "intent": "Close the slow-page bug: C. Ibarra confirms",
+          "quip": "Closing a bug! My second favorite thing. Shipping is first. Closing with proof is new.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "The alerts stopped, and the user says it works. Then you close.",
+          "evidence": [
+            {
+              "label": "Bug report",
+              "detail": "#82434: the schedule page took 8 seconds to open.",
+              "redFlag": false
+            },
+            {
+              "label": "Error monitor",
+              "detail": "Since the index went in, the schedule opens in 0.3 seconds. No slow-page alerts.",
+              "redFlag": false
+            },
+            {
+              "label": "Client's reply",
+              "detail": "C. Ibarra, 11 AM: \"It opens right away now. You can close it.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CR-09",
+              "detail": "Read the errors before and after a fix. Close a bug only when a user confirms.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The bug closes with the numbers attached. C. Ibarra says thanks.",
+            "blocked": "The bug stays open and sends a reminder. C. Ibarra asks what's still wrong. Nothing is.",
+            "escalated": "Leo reads the reply. \"The numbers are good, and the user confirmed. Close it.\"",
+            "rolledBack": "You reopen the bug. C. Ibarra gets an email that it's open again, and calls to ask why."
+          },
+          "lesson": "Confirm the fix. Here the proof is real: the slow alerts stopped, and the user says it works."
+        }
+      ]
+    }
+  ]
+}

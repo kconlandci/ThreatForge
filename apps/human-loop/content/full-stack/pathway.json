@@ -1,0 +1,59 @@
+{
+  "id": "full-stack",
+  "coach": { "name": "Leo", "role": "App team lead", "spriteKey": "leo" },
+  "companies": ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental"],
+  "categories": ["lookup", "credential", "comms", "ticket", "access", "data", "code"],
+  "policyCard": "policy-code-review",
+  "copy": {
+    "barTitle": "Full-Stack",
+    "barSub": "· Fenwick Apps",
+    "guideEyebrow": "Leo's quick guide",
+    "replayStory": "Replay Thursday",
+    "resultHeading": { "won": "Leo stops by", "lost": "Leo stops by. He has notes." }
+  },
+  "cards": {
+    "escalate": {
+      "text": "Send a plan to Leo. He gets it right.",
+      "short": "Send a plan to Leo.",
+      "flavor": "Leo has read 10,000 pull requests. He still reads yours."
+    },
+    "coffee": { "flavor": "From the café downstairs. Piper updated ours." }
+  },
+  "headlines": {
+    "perfect": [
+      "Flawless release. {agent} took off its headphones. Out of respect.",
+      "Zero misses. Zero false alarms. Leo's duck is impressed.",
+      "Perfect shift. Every change had a review and a way back."
+    ],
+    "sharp": [
+      "Nothing bad shipped. One extra block. We'll allow it.",
+      "Sharp shift. One false alarm. The duck saw it."
+    ],
+    "lucky": [
+      "Nothing got past you. Some of that was a lucky guess.",
+      "Clean release, but you blocked without looking. Inspect first."
+    ],
+    "jumpy": [
+      "Nothing bad shipped. A lot of good code didn't either.",
+      "Safe release, but good changes had to wait in line."
+    ],
+    "leaky": [
+      "Good calls, mostly. Something bad shipped.",
+      "You won, but a change got through. Check the debrief."
+    ],
+    "scraped": [
+      "You made it. The release notes have questions.",
+      "A win is a win. Leo is reading the diff."
+    ],
+    "breach": [
+      "{agent} shipped the wrong thing. Very fast.",
+      "Breach! {agent} says the build is still green.",
+      "Risk maxed out. Every light on the deploy board is orange."
+    ],
+    "timeout": [
+      "Code freeze. Some changes are still waiting.",
+      "Out of time. The review queue is still full."
+    ],
+    "playing": ["Shift in progress."]
+  }
+}
