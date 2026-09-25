@@ -4,6 +4,7 @@
  */
 import * as Phaser from "phaser";
 import { SPRITES, type SpriteKey } from "@/lib/game/assets";
+import { stageSprites } from "@/lib/game/hubMap";
 import { battleFit, hubFit, hubPortraitZoom, rasterFor } from "./layout";
 import type { StageRuntime } from "./runtime";
 import { loadAllArt } from "./art";
@@ -19,7 +20,8 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     const { dpr, cssW, cssH } = this.rt;
-    const hub = rasterFor(dpr, hubFit(cssW, cssH) * hubPortraitZoom(cssW, cssH), 1, 4.5);
+    const bounds = this.rt.hubBounds;
+    const hub = rasterFor(dpr, hubFit(cssW, cssH, bounds) * hubPortraitZoom(cssW, cssH, bounds), 1, 4.5);
     const battle = rasterFor(dpr, battleFit(cssW, cssH), 1, 4);
     this.rt.fxRes = Math.min(6, Math.max(2, Math.ceil(dpr * battleFit(cssW, cssH))));
     makeFxTextures(this, this.rt.fxRes);
@@ -36,9 +38,10 @@ export class BootScene extends Phaser.Scene {
 
     // Only the starting mode's art blocks the first frame; the rest (the big battle portraits,
     // or the office props) rasterizes just after, before the first mode switch needs it.
-    const scaleFor = (key: SpriteKey) => (key.startsWith("ollie-") ? battle : hub);
-    const all = Object.keys(SPRITES) as SpriteKey[];
-    const forBattle = (key: SpriteKey) => key.startsWith("ollie-");
+    // Only this pathway's art: its room, cast and agent portraits (stageSprites).
+    const forBattle = (key: SpriteKey) => (SPRITES[key] as { kind?: string }).kind === "portrait";
+    const scaleFor = (key: SpriteKey) => (forBattle(key) ? battle : hub);
+    const all = stageSprites(this.rt.stage);
     const now = all.filter((k) => forBattle(k) === (this.rt.mode === "battle"));
     const later = all.filter((k) => !now.includes(k));
     const art = loadAllArt(this, this.rt, scaleFor, now);

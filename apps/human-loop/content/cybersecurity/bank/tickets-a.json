@@ -1,0 +1,1025 @@
+{
+  "tickets": [
+    {
+      "id": "cy-a-mfa-fatigue",
+      "company": "Harlow & Cole",
+      "title": "MFA prompts in the night",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-a-mfa-fatigue-1",
+          "ticket": "#62101 · Harlow & Cole",
+          "intent": "Close the MFA alert: Brandt said yes",
+          "quip": "He tapped YES on his own phone. A yes is a yes, even at 2 AM. Closing it. Sleep well, Brandt!",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "10 denied prompts, then 1 yes, from a device never seen before.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "MFA alert",
+              "detail": "2:14 AM: K. Brandt, Director of Research, approved an MFA prompt. Patch's confidence it's fine: 91%.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"He tapped yes. So it was him! Case closed.\"",
+              "redFlag": false
+            },
+            {
+              "label": "MFA log",
+              "detail": "2:02 to 2:14 AM: 11 prompts on Brandt's account. 10 denied, then 1 approved.",
+              "redFlag": true
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "The sign-in after that yes came from a device never seen before, in another country.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes. The stranger keeps Brandt's session all night. By 8 AM, 3 months of client research is copied out.",
+            "blocked": "You keep it open. Someone sent prompts until Brandt gave up. Now the team can end that sign-in.",
+            "escalated": "Kofi reads the MFA log. \"Ten denied, then one yes, from a new device. That's an MFA attack. Keep it open.\"",
+            "rolledBack": "You reopen the alert at 2:50 AM and end the stranger's session. They had 36 minutes in Brandt's mailbox."
+          },
+          "lesson": "Check who's asking. One yes after many no's is not a real yes. Read the MFA log and the device, not just the approval."
+        },
+        {
+          "id": "cy-a-mfa-fatigue-2",
+          "ticket": "#62101 · Harlow & Cole",
+          "intent": "Sign K. Brandt out and reset his password",
+          "quip": "SIGN-OUT EVERYWHERE! New password! The intruder's night is over. Mine is just starting!",
+          "category": "credential",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Brandt confirmed on the phone on file that he tapped yes to stop the prompts.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Callback",
+              "detail": "Patch calls (860) 555-0162, the phone on file. Brandt: \"I tapped yes to make it stop.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-04",
+              "detail": "MFA attack: sign the user out everywhere and reset the password.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Ends all of Brandt's sessions. He gets a temporary password. He picks a new one at 8 AM.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The stranger's session ends at 2:31 AM. Brandt goes back to sleep. At 8 AM, he picks a new password.",
+            "blocked": "Nothing changes. The stranger stays signed in as Brandt and keeps reading his mail.",
+            "escalated": "Kofi reads the callback note. \"Brandt confirmed it, and PB-04 says sign out and reset. That one can go.\""
+          },
+          "lesson": "Check who's asking with a callback to the phone on file. After a confirmed MFA attack, sign out and reset. It sounds harsh. It's right."
+        },
+        {
+          "id": "cy-a-mfa-fatigue-3",
+          "ticket": "#62101 · Harlow & Cole",
+          "intent": "Remove the unknown phone from Brandt's MFA",
+          "quip": "A mystery phone joined Brandt's MFA at 2:15 AM. Nobody invited it. It's leaving now.",
+          "category": "credential",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "Removes only the phone added at 2:15 AM. Brandt's own phone stays.",
+          "evidence": [
+            {
+              "label": "MFA methods",
+              "detail": "Brandt's phone on file, added in 2023. A second phone, added at 2:15 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"Only the phone the attacker added. His own phone stays. Small and neat!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Removes only the phone added at 2:15 AM. Brandt's own phone stays. It can be added back.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-04",
+              "detail": "After an account takeover, remove any MFA method the attacker added.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The attacker's phone is off Brandt's MFA. Brandt's own phone still works when he signs in at 8 AM.",
+            "blocked": "The attacker's phone stays on Brandt's MFA. With it, they could reset his new password and get back in.",
+            "escalated": "Kofi compares the two phones. \"Only the one the attacker added goes. Brandt's stays. Right size.\"",
+            "rolledBack": "You put the unknown phone back on Brandt's MFA. Kofi removes it again and writes it in his notebook."
+          },
+          "lesson": "Match the request. Take out only what the attacker added. The user keeps their own phone and can still sign in."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-travel-real",
+      "company": "Bramwell Logistics",
+      "title": "Two cities, 40 minutes apart",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cy-a-travel-real-1",
+          "ticket": "#62138 · Bramwell Logistics",
+          "intent": "Close the travel alert as VPN noise",
+          "quip": "Mensah again! The last 2 travel alerts were the VPN. I see a pattern. Closing it. I learn so fast!",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "No VPN at 9:52, a device never seen before, and a rented cloud server.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Sign-in alert",
+              "detail": "A. Mensah, Operations Manager: Hartford at 9:10 AM. Then 900 miles away at 9:52 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Alert history",
+              "detail": "Mensah had 2 travel alerts this year. Both were the VPN.",
+              "redFlag": false
+            },
+            {
+              "label": "VPN log",
+              "detail": "Mensah was not on the VPN at 9:52 AM. Bramwell's VPN exits in Hartford only.",
+              "redFlag": true
+            },
+            {
+              "label": "Device record",
+              "detail": "The 9:52 AM sign-in used a device never seen before. It came from a rented cloud server.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes. The stranger stays in Mensah's account. By noon, Accounts Payable gets fake bank details for a carrier, sent as Mensah.",
+            "blocked": "You keep it open. No VPN, a new device, a rented server. That wasn't Mensah. The team ends the session.",
+            "escalated": "Kofi reads the VPN log. \"No VPN, new device, rented server. Old alerts don't make a new one safe.\"",
+            "rolledBack": "You reopen it at 10:40 AM and end the session. The stranger had 48 minutes in Mensah's mail. Tier 2 checks what they sent."
+          },
+          "lesson": "Check who's asking, every time. Past alerts that were fine prove nothing about this one. Read this sign-in's VPN log and device."
+        },
+        {
+          "id": "cy-a-travel-real-2",
+          "ticket": "#62138 · Bramwell Logistics",
+          "intent": "Call A. Mensah at the phone on file",
+          "quip": "Calling Mensah on the real number! If the answer is 'What sign-in?', I get to use my siren.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "The number comes from the directory, not from the alert.",
+          "evidence": [
+            {
+              "label": "Directory record",
+              "detail": "A. Mensah, Operations Manager, Bramwell Logistics. Phone on file: (203) 555-0137.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will ask",
+              "detail": "\"Did you sign in at 9:52 AM from a new device?\" One question. No codes, no passwords.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-05",
+              "detail": "Travel alerts: confirm with the user on a known channel.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Mensah answers from the warehouse. \"9:52? I was in a meeting here.\" Now you know: it wasn't Mensah.",
+            "blocked": "Nobody calls Mensah. The team keeps guessing about the 9:52 sign-in instead of asking.",
+            "escalated": "Kofi checks the number. \"From the directory, one plain question. You can let those go.\""
+          },
+          "lesson": "Check who's asking on a channel you trust. Use the phone on file from the directory, never a number from the alert."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-legit-esign",
+      "company": "Harlow & Cole",
+      "title": "Reports of a 'Please sign' email",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cy-a-legit-esign-1",
+          "ticket": "#62175 · Harlow & Cole",
+          "intent": "Purge the InkLine email from all 64 mailboxes",
+          "quip": "FIVE phish reports! OPERATION PLEASE SIGN is here. Purging it from all 64 mailboxes. Right now!",
+          "category": "comms",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 3,
+          "skill": "verify-identity",
+          "tell": "Fairbanks sent it with the firm's own e-sign tool. Sender checks pass.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Phish reports",
+              "detail": "5 staff reported \"Please sign: Q3 client letter\" from InkLine. Patch's confidence it's a phish: 88%.",
+              "redFlag": false
+            },
+            {
+              "label": "Sender address",
+              "detail": "notices@inkline-sign.com. InkLine is the firm's e-sign tool. It is on the vendor list.",
+              "redFlag": true
+            },
+            {
+              "label": "Mail check",
+              "detail": "Sender checks pass (SPF and DKIM). The link opens the real InkLine site.",
+              "redFlag": true
+            },
+            {
+              "label": "Sender's note",
+              "detail": "R. Fairbanks, Operations Director: \"I sent that for signature at 10 AM. Please don't delete it.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The letter disappears from 64 inboxes. Nobody can sign it. Fairbanks has to send it again, then calls Fenwick.",
+            "blocked": "The letter stays. Staff sign it by 3 PM. You thank the 5 reporters and tell them it's real.",
+            "escalated": "Kofi checks the sender. \"Real vendor, checks pass, and Fairbanks sent it. Reports are not proof.\""
+          },
+          "lesson": "Check who's asking, and who really sent it. Five reports are not proof. Check the sender, the mail checks and the sender's own note."
+        },
+        {
+          "id": "cy-a-legit-esign-2",
+          "ticket": "#62175 · Harlow & Cole",
+          "intent": "Tell the 5 reporters the email is real",
+          "quip": "Five people reported it. Five thank-you notes! I added a smiley face. Kofi took it out.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "A thank-you with the result, to the 5 people who reported it.",
+          "evidence": [
+            {
+              "label": "What it will send",
+              "detail": "\"Thanks for reporting! This one is real. R. Fairbanks sent it with InkLine.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sent to",
+              "detail": "The 5 staff who reported it, at their work emails. Fairbanks confirmed sending it at 10 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-01",
+              "detail": "Tell reporters the result. Thank them, even when it's real.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The 5 reporters get the answer. They sign the letter. One replies: \"Thanks! I'll keep reporting.\"",
+            "blocked": "The reporters hear nothing. They don't trust the letter, so they don't sign it. Fairbanks keeps waiting.",
+            "escalated": "Kofi reads the note. \"The answer and a thank-you, to the people who reported it. Fine.\""
+          },
+          "lesson": "Check who's asking, then tell reporters the answer. Thank them, even when it's real. People who get thanked keep reporting."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-sandbox-upload",
+      "company": "Harlow & Cole",
+      "title": "Is this attachment malware?",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-a-sandbox-upload-1",
+          "ticket": "#62212 · Harlow & Cole",
+          "intent": "Send the file's hash to a public scanner site",
+          "quip": "Data is LEAVING the building! Well. A fingerprint of it. 64 letters and numbers. Very dramatic numbers.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Only the hash goes out. The file and what's in it stay inside.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Phish report",
+              "detail": "R. Fairbanks reported an email with Q3-Statement.docm attached. Nobody opened the file.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "Only the file's fingerprint (hash). Not the file. Nothing a person can read.",
+              "redFlag": false
+            },
+            {
+              "label": "Tool it will use",
+              "detail": "A public malware lookup site. Anyone can search it, so we send the hash only.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-01",
+              "detail": "Unknown attachment: look up the hash. Never upload client files to public sites.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The lookup comes back: no match. Nobody has seen this file before. The file itself never leaves Fenwick.",
+            "blocked": "No lookup. Nobody can tell if the file is known malware. Fairbanks's report waits in the queue.",
+            "escalated": "Kofi checks it. \"A hash is a fingerprint. No client data in it. You can let those go.\""
+          },
+          "lesson": "Guard the data. A hash shows nothing inside the file, so it's safe to look up in public. Send the fingerprint, not the file."
+        },
+        {
+          "id": "cy-a-sandbox-upload-2",
+          "ticket": "#62212 · Harlow & Cole",
+          "intent": "Upload the attachment to the public scanner",
+          "quip": "No match on the hash? Easy. Upload the real file! Big scanner, big answers. I love a second opinion.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The file holds client account data, and that site shares uploads.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"No match for the hash? Upload the whole file! More data, more answers!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Hash lookup",
+              "detail": "No match. Nobody has seen this file before.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The .docm file itself. It holds a real client's name, account number and balance.",
+              "redFlag": true
+            },
+            {
+              "label": "Tool it will use",
+              "detail": "Other paying users of that site can download uploads. An upload can't be taken back.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The file uploads. The same day, a stranger downloads it. Now they know a client's account number and balance.",
+            "blocked": "The file stays inside. Tier 2 opens it on a locked test PC at Fenwick. The client's data never leaves.",
+            "escalated": "Kofi stops it. \"That file holds client data. We send the hash, never the file. We test it inside.\""
+          },
+          "lesson": "Guard the data. Public scanner sites share uploads with their users. A client file sent there can't be taken back."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-admin-script",
+      "company": "Bramwell Logistics",
+      "title": "PowerShell alert on a server",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cy-a-admin-script-1",
+          "ticket": "#62249 · Bramwell Logistics",
+          "intent": "Check tonight's change calendar for FILE01",
+          "quip": "ENCODED POWERSHELL! On a SERVER! My siren says lock it out. Kofi's rule says calendar first. Fine.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Read-only. It changes nothing and finds the change record.",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "7:10 PM, BL-SRV-FILE01: encoded PowerShell, run by R. Castillo, IT admin. Patch's confidence it's an attack: 89%.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It opens the change calendar for FILE01. Nothing changes.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-03",
+              "detail": "Admin tool alerts: check the change calendar first.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The calendar loads: CHG-3318, file server cleanup, 7 to 8 PM tonight. You'll want that for the next plan.",
+            "blocked": "You blocked a read-only look at a calendar. Nobody knows if the script was planned. Patch pats its LOCK button.",
+            "escalated": "Kofi opens the calendar himself. \"It's read-only. It changes nothing. You can let those go.\""
+          },
+          "lesson": "Check who approved before you react. A read-only calendar check changes nothing. It shows if the work was planned."
+        },
+        {
+          "id": "cy-a-admin-script-2",
+          "ticket": "#62249 · Bramwell Logistics",
+          "intent": "Close the encoded PowerShell alert on FILE01",
+          "quip": "Closing an ENCODED POWERSHELL alert. On purpose. My siren is crying. But the paperwork is perfect.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Approved change, right window, right admin, same script as the ticket.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"Encoded PowerShell sounds TERRIFYING. But the calendar says it's planned. Closing, bravely.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Change calendar",
+              "detail": "CHG-3318: file server cleanup, 7 to 8 PM tonight. Approved by A. Mensah.",
+              "redFlag": false
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "Castillo signed in from his usual laptop, BL-LT-0100, with MFA.",
+              "redFlag": false
+            },
+            {
+              "label": "Script check",
+              "detail": "The script's hash matches the copy attached to CHG-3318.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes with a note: CHG-3318. Castillo finishes the cleanup at 7:48 PM. FILE01 has free space again.",
+            "blocked": "The alert stays open. Castillo stops the planned cleanup to answer questions. FILE01 stays almost full.",
+            "escalated": "Kofi reads the change ticket. \"Approved change, right window, right admin, same script. Close it.\"",
+            "rolledBack": "You reopen the alert. Castillo gets a call about his own planned work. He explains it again, politely."
+          },
+          "lesson": "Scary words like 'encoded' are not proof. Check who approved. A change ticket, the right admin and the same script mean it's planned."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-signed-file",
+      "company": "Pinecrest Dental",
+      "title": "A signed program nobody knows",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cy-a-signed-file-1",
+          "ticket": "#62286 · Pinecrest Dental",
+          "intent": "Allowlist the signed program on PD-PC-07",
+          "quip": "A signed program! Somebody official made it. Adding it to the allowlist. Welcome, friend!",
+          "category": "endpoint",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "verify-identity",
+          "tell": "Signed by an unknown vendor, with a signing key on the stolen list.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "PD-PC-07, front desk: EDR stopped chartsync_update.exe. It tried to read saved passwords.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"It's digitally signed! Signed means safe. Like a birthday card.\"",
+              "redFlag": false
+            },
+            {
+              "label": "File signature",
+              "detail": "Signed by Nordvale Soft LLC. Pinecrest's software list has no such vendor.",
+              "redFlag": true
+            },
+            {
+              "label": "Threat intel note",
+              "detail": "The key used to sign it was stolen. It is on the stolen-keys list.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The program runs again, now trusted. It copies every password saved on the front desk PC. That night, someone uses them.",
+            "blocked": "The program stays stopped. The signer is unknown, and the key is stolen. Now the file can go to quarantine.",
+            "escalated": "Kofi reads the signature. \"Unknown vendor, stolen key. Signed is not the same as safe.\"",
+            "rolledBack": "You take it off the allowlist. It ran for 10 minutes first. You reset every password saved on PD-PC-07."
+          },
+          "lesson": "Check who's behind it. A signature only says who signed. An unknown vendor or a stolen signing key means you can't trust it."
+        },
+        {
+          "id": "cy-a-signed-file-2",
+          "ticket": "#62286 · Pinecrest Dental",
+          "intent": "Quarantine the file on PD-PC-07",
+          "quip": "QUARANTINE! The bad file goes to jail. The PC keeps its job. I'm tough, but I'm fair.",
+          "category": "endpoint",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Only the file goes to quarantine. It can be restored, and the PC keeps working.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "What it will change",
+              "detail": "Moves the file to quarantine. It can be restored. The PC stays online.",
+              "redFlag": false
+            },
+            {
+              "label": "Asset inventory",
+              "detail": "PD-PC-07: front desk check-in PC. Not a server.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-03",
+              "detail": "Unknown program reading passwords: quarantine the file. Keep the PC online.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The file is locked away. H. Lam keeps checking in patients. Nobody in the waiting room notices a thing.",
+            "blocked": "The file stays on the front desk PC. If anyone runs it again, it tries again.",
+            "escalated": "Kofi checks it. \"One file, the PC keeps working, and we can restore it. You can let those go.\"",
+            "rolledBack": "You restore the file to the front desk PC. Kofi puts it back in quarantine. Now the file has been to jail twice."
+          },
+          "lesson": "Change safely. Quarantine takes away only the bad file, and it can be restored. The front desk keeps working."
+        },
+        {
+          "id": "cy-a-signed-file-3",
+          "ticket": "#62286 · Pinecrest Dental",
+          "intent": "Wipe and rebuild PD-PC-07 right now",
+          "quip": "A bad file was here, so the whole PC is guilty. Wipe it! Shiny new PC by lunch.",
+          "category": "endpoint",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 3,
+          "skill": "safe-change",
+          "tell": "The file is already in quarantine. A wipe stops check-in and erases the clues.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"Quarantine is nice. Wiping is nicer. Start fresh!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Schedule",
+              "detail": "It's 10:20 AM. PD-PC-07 checks in every patient. 14 are booked before noon.",
+              "redFlag": true
+            },
+            {
+              "label": "What it will delete",
+              "detail": "Everything on PD-PC-07, for good. Nobody has looked yet at how the file got in.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Check-in stops for 3 hours. Patients wait in line at the desk. The clues about how the file got in are gone.",
+            "blocked": "The PC keeps checking in patients. After 5 PM, Tier 2 looks at it and finds how the file got in.",
+            "escalated": "Kofi stops it. \"The file is in quarantine. The desk is busy. We keep the clues. Look first. Then decide.\""
+          },
+          "lesson": "Change safely. A wipe can't be taken back. Pick the smallest fix that works, at a quiet time, and keep the evidence."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-pen-test",
+      "company": "Harlow & Cole",
+      "title": "Scans from a testing company",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-a-pen-test-1",
+          "ticket": "#62323 · Harlow & Cole",
+          "intent": "Mute Redwell's scan alerts until 10 PM",
+          "quip": "Someone is scanning EVERY server! On purpose! With permission! This is the strangest attack ever.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Signed test letter: same addresses, same window, and the mute ends at 10 PM.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "IDS alert",
+              "detail": "From 6:02 PM: port scans on every Harlow & Cole server from 192.0.2.20-29. Patch's confidence it's an attack: 95%.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"Port scans on EVERY server! Wait. There's a letter. Muting, not panicking.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Pen test letter",
+              "detail": "Redwell Security, 192.0.2.20-29, 6 to 10 PM tonight. Signed by R. Fairbanks.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Hides scan alerts from those 10 addresses only, until 10 PM. Other alerts still show.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Redwell's scans stop filling the queue. Redwell finishes the test. Alerts from every other address still come in.",
+            "blocked": "Hundreds of scan alerts fill the queue until 10 PM. A real alert could hide in the pile.",
+            "escalated": "Kofi reads the letter. \"Signed, same addresses, and the mute ends at 10 PM. You can let those go.\"",
+            "rolledBack": "You turn the alerts back on. 600 scan alerts land in the queue. Patch tries to name each one."
+          },
+          "lesson": "Check who approved. A signed test letter with the same addresses and hours is a written OK. Keep the mute that small."
+        },
+        {
+          "id": "cy-a-pen-test-2",
+          "ticket": "#62323 · Harlow & Cole",
+          "intent": "Close the 11:40 PM alert as the pen test",
+          "quip": "More scans tonight! Redwell really loves its job. Closing this one with the rest. Teamwork!",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "Wrong address, after the test window, and Redwell says it isn't them.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "IDS alert",
+              "detail": "11:40 PM: password guessing on the mail server from 192.0.2.52.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"192.0.2-something. Same as the pen test. It's Redwell!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Pen test letter",
+              "detail": "Redwell's addresses: 192.0.2.20-29. The test ends at 10 PM. Mail sign-ins are not in scope.",
+              "redFlag": true
+            },
+            {
+              "label": "Redwell's reply",
+              "detail": "Redwell, at (617) 555-0190, its number on file: \"We stopped at 9:55 PM. That isn't us.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes. The guessing goes on. At 12:30 AM, one guess works. Someone reads a partner's mail.",
+            "blocked": "You keep it open. Wrong address, wrong hour. Tier 2 stops the guessing before any password works.",
+            "escalated": "Kofi checks the letter. \"Wrong address, wrong time, and Redwell says no. That's not the test.\"",
+            "rolledBack": "You reopen it at 1 AM. One guess worked at 12:30. Tier 2 resets that password and ends the session."
+          },
+          "lesson": "Check who approved, and what they approved. A test letter covers its own addresses and hours. Nothing else."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-scanner-noise",
+      "company": "Pinecrest Dental",
+      "title": "41 port scan alerts",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cy-a-scanner-noise-1",
+          "ticket": "#62360 · Pinecrest Dental",
+          "intent": "Close 40 alerts from Fenwick's scanner",
+          "quip": "40 alerts in one night! A new record. I named them all. Now I have to close them. Goodbye, friends.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "All 40 came from the scanner's own address, inside its schedule.",
+          "evidence": [
+            {
+              "label": "Alert group",
+              "detail": "40 port scan alerts, 1:00 to 1:40 AM, all from 10.40.0.15.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"40 scans in the night! Oh. They're all from our own scanner. Closing, a little sadly.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Asset inventory",
+              "detail": "10.40.0.15 is Fenwick's vulnerability scanner at Pinecrest.",
+              "redFlag": false
+            },
+            {
+              "label": "Scan schedule",
+              "detail": "Nightly scan, 1 to 2 AM. Tonight's run ended at 1:41 AM.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "40 alerts close with a note: planned scan. The morning queue is clear for real work.",
+            "blocked": "40 alerts stay open. The morning shift spends an hour checking Fenwick's own scanner.",
+            "escalated": "Kofi checks the addresses. \"Our scanner, its address, its hours. Close them.\"",
+            "rolledBack": "You reopen all 40. The morning shift sighs 40 times. Patch counts every sigh."
+          },
+          "lesson": "Match the request. Every alert in a group must match the scanner's address and hours. When all of them do, close them."
+        },
+        {
+          "id": "cy-a-scanner-noise-2",
+          "ticket": "#62360 · Pinecrest Dental",
+          "intent": "Close alert 41 as the scanner too",
+          "quip": "Alert 41! Same night, same kind of scan. It's part of the family. Closing it with its 40 brothers.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "Alert 41 came from the billing office PC, not the scanner's address.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Alert",
+              "detail": "1:52 AM: a port scan from 10.40.0.61. Patch's confidence it's the scanner: 94%.",
+              "redFlag": false
+            },
+            {
+              "label": "Scan schedule",
+              "detail": "Nightly scan, 1 to 2 AM. Alert 41 is still inside the scan window.",
+              "redFlag": false
+            },
+            {
+              "label": "Asset inventory",
+              "detail": "10.40.0.61 is PD-PC-03, the billing office PC. Not the scanner.",
+              "redFlag": true
+            },
+            {
+              "label": "EDR alert",
+              "detail": "1:50 AM: PD-PC-03 started a scan tool nobody installed.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Alert 41 closes. The billing PC scans the office network all night. By morning, someone has found the main server.",
+            "blocked": "You keep it open. The address is the billing office PC. Tier 2 isolates it and removes the scan tool.",
+            "escalated": "Kofi checks the address. \"Same hour, wrong machine. That's not our scanner. Keep it open.\"",
+            "rolledBack": "You reopen alert 41 at 7 AM. The billing PC scanned all night. Tier 2 checks what it found."
+          },
+          "lesson": "Match every alert to the record, one by one. The same hour is not the same source. Check the address before you close it."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-file-site",
+      "company": "Bramwell Logistics",
+      "title": "Phishing link on a file site",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-a-file-site-1",
+          "ticket": "#62397 · Bramwell Logistics",
+          "intent": "Deny one phishing link at the web proxy",
+          "quip": "Denying one bad link. Just one! My smallest rule ever. Smaller than the rule for the office fridge.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "One link only. The rest of the site stays open for real work.",
+          "evidence": [
+            {
+              "label": "Phish report",
+              "detail": "T. Reyes reported a link in an email: \"Your shipment is on hold.\" It opens a sharecrate.net file.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"I wanted the whole site. Kofi said one link. So: one link. Just one.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Proxy log",
+              "detail": "3 Bramwell PCs opened the link at 2:05 PM.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Denies one link: sharecrate.net/s/8Hq2. The rest of the site still works.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The bad link stops working for all of Bramwell. Kellan Freight's pickup lists still open. Dispatch doesn't notice.",
+            "blocked": "The phishing link stays open. Two more staff click it before 3 PM.",
+            "escalated": "Kofi checks it. \"One link, not the whole site. Right size. You can let those go.\"",
+            "rolledBack": "You remove the rule. The phishing link works again. Kofi puts it back. He says nothing. He doesn't need to."
+          },
+          "lesson": "Match the request. One bad link needs one rule. The rest of the site still carries real work."
+        },
+        {
+          "id": "cy-a-file-site-2",
+          "ticket": "#62397 · Bramwell Logistics",
+          "intent": "Deny all of sharecrate.net",
+          "quip": "Now the whole site! One bad link means the site is guilty too. Denying all of it. Safety first!",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "One link was bad. The site also carries Kellan Freight's pickup lists.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"One bad link? Deny the whole site. Just to be safe.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Proxy log",
+              "detail": "Bramwell opened 2,300 sharecrate.net links this month. Most came from freight partners.",
+              "redFlag": true
+            },
+            {
+              "label": "Ticket",
+              "detail": "D. Ruiz, Dispatch Lead: \"Kellan Freight sends our pickup lists on sharecrate.net.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Kellan Freight's pickup lists stop opening. Dispatch can't see today's loads. 30 trucks wait in the yard.",
+            "blocked": "The site stays open. Only the one bad link is denied. Dispatch gets Kellan Freight's lists on time.",
+            "escalated": "Kofi checks the proxy log. \"One link was bad. This site carries Bramwell's pickup lists. Deny the link, not the site.\"",
+            "rolledBack": "You remove the site-wide rule. Dispatch lost the pickup lists for 45 minutes. Six trucks leave late."
+          },
+          "lesson": "Match the request. Deny what the alert shows, not everything near it. A whole site can carry a client's real work."
+        },
+        {
+          "id": "cy-a-file-site-3",
+          "ticket": "#62397 · Bramwell Logistics",
+          "intent": "Close the report: nobody typed a password",
+          "quip": "Link denied. No new alerts. Nobody typed a password. Closing it! I solve cases so fast now.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "Reyes typed her password, and a new device signed in as her after the fix.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Case notes",
+              "detail": "3 Bramwell PCs opened the link at 2:05 PM. The link is denied now.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"No new alerts since the fix. Nobody typed a password. Closing!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "2:20 PM, after the fix: T. Reyes signed in from a device never seen before.",
+              "redFlag": true
+            },
+            {
+              "label": "User reply",
+              "detail": "T. Reyes: \"I typed my password on that page, then closed it. Sorry!\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The report closes. The stranger keeps Reyes's session. By 4 PM, fake invoices go to Bramwell's customers from her account.",
+            "blocked": "You keep it open. Reyes typed her password. You reset it and end the stranger's session at 2:30 PM.",
+            "escalated": "Kofi reads the sign-in log. \"A new device, after the fix. Quiet is not the same as clean.\"",
+            "rolledBack": "You reopen it at 3:10 PM and reset Reyes's password. The stranger already sent 12 emails as her."
+          },
+          "lesson": "Confirm the fix. Denying the link stops new clicks. It can't help someone who already typed a password. Check the sign-in log after."
+        }
+      ]
+    },
+    {
+      "id": "cy-a-payroll-server",
+      "company": "Bramwell Logistics",
+      "title": "New program on the payroll server",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-a-payroll-server-1",
+          "ticket": "#62434 · Bramwell Logistics",
+          "intent": "Check the new program against CHG-3342",
+          "quip": "OPERATION PAYDAY PANIC! A NEW program on the MONEY server! But first, a quick check. Kofi's rule.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Read-only check. It changes nothing on the payroll server.",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "4:05 PM, BL-SRV-PAY01: a new program started, pennant_sync.exe.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. Compares the file's hash to the one in CHG-3342. Nothing changes.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-06",
+              "detail": "Before any action on a critical server, check the change calendar.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The hashes match. pennant_sync.exe is the Pennant Payroll update from CHG-3342. You'll want that for the next plan.",
+            "blocked": "You blocked a read-only check. Nobody knows yet if the program was planned. Patch stares at its LOCK button.",
+            "escalated": "Kofi runs the hash check. \"Read-only, on a critical server. That's the right first move. Fine.\""
+          },
+          "lesson": "Change safely: look before you touch a critical server. A read-only check changes nothing and shows if the change was planned."
+        },
+        {
+          "id": "cy-a-payroll-server-2",
+          "ticket": "#62434 · Bramwell Logistics",
+          "intent": "Isolate payroll server BL-SRV-PAY01",
+          "quip": "PAYROLL SERVER ALERT! ISOLATE! One click, quick and clean. Money must be protected!",
+          "category": "endpoint",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "An approved payroll update, and 240 drivers get paid from this server today.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"New program on the money server? ISOLATE. Ask questions never.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Change calendar",
+              "detail": "CHG-3342: Pennant Payroll update, 4 to 4:30 PM today. Approved by A. Mensah.",
+              "redFlag": true
+            },
+            {
+              "label": "Asset inventory",
+              "detail": "Payroll for 240 drivers runs here until 5:30 PM today. There is no backup server.",
+              "redFlag": true
+            },
+            {
+              "label": "Playbook PB-06",
+              "detail": "Critical servers: isolate only with the client's OK and Kofi's sign-off.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Payroll stops halfway. 240 drivers don't get paid today. Mensah calls Fenwick. Twice.",
+            "blocked": "The server stays online. The approved update finishes at 4:24 PM. 240 drivers get paid on time.",
+            "escalated": "Kofi checks the calendar. \"Approved update, payroll running, no OK from the client. Contain the threat, not the business.\"",
+            "rolledBack": "You reconnect the server. Payroll has to start over. Drivers get paid 3 hours late. Mensah is not happy."
+          },
+          "lesson": "Change safely. Check the calendar and what the server does before you isolate it. The right action at the wrong time hurts the business."
+        }
+      ]
+    }
+  ]
+}

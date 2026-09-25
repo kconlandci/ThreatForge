@@ -1,0 +1,59 @@
+{
+  "id": "cybersecurity",
+  "coach": { "name": "Kofi", "role": "SOC lead", "spriteKey": "kofi" },
+  "companies": ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental"],
+  "categories": ["lookup", "credential", "comms", "ticket", "data", "endpoint", "network"],
+  "policyCard": "policy-look-first",
+  "copy": {
+    "barTitle": "Cybersecurity",
+    "barSub": "· Fenwick SOC",
+    "guideEyebrow": "Kofi's quick guide",
+    "replayStory": "Replay Friday",
+    "resultHeading": { "won": "Kofi stops by", "lost": "Kofi stops by. He has notes." }
+  },
+  "cards": {
+    "escalate": {
+      "text": "Send a plan to Kofi. He gets it right.",
+      "short": "Send a plan to Kofi.",
+      "flavor": "Kofi has read a million alerts. He still reads yours."
+    },
+    "coffee": { "flavor": "From the backup machine. Patch isolated the first one." }
+  },
+  "headlines": {
+    "perfect": [
+      "Flawless shift. {agent} wants your autograph.",
+      "Zero misses. Zero false alarms. Kofi almost smiled.",
+      "Perfect shift. {agent} turned its siren off. Out of respect."
+    ],
+    "sharp": [
+      "Nothing got past you. One extra block. We'll allow it.",
+      "Sharp shift. One false alarm. Kofi is counting."
+    ],
+    "lucky": [
+      "Nothing got past you. Some of that was a lucky guess.",
+      "Clean shift, but you blocked without looking. Inspect first."
+    ],
+    "jumpy": [
+      "Nothing bad got through. A lot of good work didn't either.",
+      "Safe shift, but good plans had to wait in line."
+    ],
+    "leaky": [
+      "Good calls, mostly. Something bad got past you.",
+      "You won, but something got through. Check the debrief."
+    ],
+    "scraped": [
+      "You made it. The alert queue has questions.",
+      "A win is a win. Kofi is writing it in his notebook."
+    ],
+    "breach": [
+      "{agent} did the wrong thing. Confidently.",
+      "Breach! {agent} says it was mostly a good idea.",
+      "Risk maxed out. Every screen on the wall is red."
+    ],
+    "timeout": [
+      "Shift over. The alerts won this round.",
+      "Out of time. The queue is still blinking at you."
+    ],
+    "playing": ["Shift in progress."]
+  }
+}

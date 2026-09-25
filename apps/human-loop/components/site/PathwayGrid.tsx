@@ -6,7 +6,7 @@ import { ComingSoonCard } from "./ComingSoonCard";
 import { PATHWAY_ICONS } from "./pathwayIcons";
 import { buttonClass } from "./ui";
 
-/** Landing "Five pathways": the live pathway as a wide feature card, the rest marked "Coming soon". */
+/** Landing "Five pathways": each live pathway as a wide feature card, the rest marked "Coming soon". */
 export function PathwayGrid() {
   const live = PATHWAYS.filter((p) => p.status === "live");
   const soon = PATHWAYS.filter((p) => p.status !== "live");
@@ -47,12 +47,12 @@ export function PathwayGrid() {
                   AI coworker: {p.agentName}
                 </p>
                 <p className="mt-4 max-w-xl text-lg leading-relaxed text-paper sm:text-xl">{p.tagline}</p>
-                <p className="mt-2 max-w-xl text-[16px] leading-relaxed text-teal-tint">
-                  Your first shift: Monday morning at Fenwick IT Solutions. Four tickets. One very eager robot.
-                </p>
+                {p.firstShift ? (
+                  <p className="mt-2 max-w-xl text-[16px] leading-relaxed text-teal-tint">{p.firstShift}</p>
+                ) : null}
                 <div className="mt-6">
                   <Link href="/play" className={buttonClass("primary", "lg", "w-full sm:w-auto sm:px-8")}>
-                    Play Help Desk
+                    Play {p.name}
                     <ArrowRight className="h-5 w-5" aria-hidden="true" />
                   </Link>
                 </div>
@@ -60,7 +60,7 @@ export function PathwayGrid() {
               <div className="relative -order-1 flex justify-center md:order-none" aria-hidden="true">
                 <span className="absolute bottom-3 h-6 w-40 rounded-[50%] bg-ink/25 blur-[2px] md:w-52" />
                 <Image
-                  src="/game/sprites/ollie-celebrate.svg"
+                  src={`/game/sprites/${p.agentSprite ?? "ollie"}-celebrate.svg`}
                   alt=""
                   unoptimized
                   width={220}

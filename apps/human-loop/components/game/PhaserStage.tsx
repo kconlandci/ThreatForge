@@ -14,13 +14,14 @@ import { useEffect, useRef } from "react";
 import type { PhaserStageProps } from "@/lib/game/bus";
 import type { StageHandle } from "./stage/runtime";
 
-export default function PhaserStage({ bus, mode, reducedMotion, initialHubPos, className }: PhaserStageProps) {
+export default function PhaserStage({ bus, stage, mode, reducedMotion, initialHubPos, className }: PhaserStageProps) {
   const boxRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<StageHandle | null>(null);
   // Latest props for the async mount, without re-creating the game when they change.
   const modeRef = useRef(mode);
   const reducedRef = useRef(reducedMotion);
   const initialPosRef = useRef(initialHubPos);
+  const stageRef = useRef(stage);
   modeRef.current = mode;
   reducedRef.current = reducedMotion;
 
@@ -58,6 +59,7 @@ export default function PhaserStage({ bus, mode, reducedMotion, initialHubPos, c
       handle = createStage({
         parent: layer,
         bus,
+        stage: stageRef.current,
         mode: modeRef.current,
         reducedMotion: reducedRef.current,
         initialHubPos: initialPosRef.current,

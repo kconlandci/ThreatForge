@@ -8,7 +8,7 @@ import { gradePlan } from "@/lib/game/mastery";
 import { skillName } from "@/lib/game/skills";
 import type { BattleState, Encounter, MasterySkillId } from "@/lib/game/types";
 import { PRACTICE_BTN } from "./ShiftResult";
-import { SpeakerFace, speakerName } from "./SpeakerFace";
+import { SpeakerFace, speakerName, speakerNames } from "./SpeakerFace";
 import r from "./result.module.css";
 
 export interface PracticeResultProps {
@@ -100,7 +100,7 @@ export function PracticeResult({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={r.heroFallback}
-                src={`/game/sprites/ollie-${clean || state.status === "won" ? "celebrate" : "sad"}.svg`}
+                src={`/game/sprites/${encounter.agent.spriteKey}-${clean || state.status === "won" ? "celebrate" : "sad"}.svg`}
                 alt=""
                 width={220}
                 height={220}
@@ -119,7 +119,7 @@ export function PracticeResult({
                   <SpeakerFace speaker={line.speaker} size={40} mood={mood} />
                   <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
                     {line.speaker !== "narrator" ? (
-                      <span className={r.lineName}>{speakerName(line.speaker, encounter.agent.name)}</span>
+                      <span className={r.lineName}>{speakerName(line.speaker, speakerNames(encounter))}</span>
                     ) : null}
                     {line.text}
                   </p>
@@ -148,7 +148,7 @@ export function PracticeResult({
               <div key={i} className={r.line}>
                 <SpeakerFace speaker={line.speaker} size={40} mood="eager" />
                 <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
-                  {line.speaker !== "narrator" ? <span className={r.lineName}>{speakerName(line.speaker, next.agent.name)}</span> : null}
+                  {line.speaker !== "narrator" ? <span className={r.lineName}>{speakerName(line.speaker, speakerNames(next))}</span> : null}
                   {line.text}
                 </p>
               </div>

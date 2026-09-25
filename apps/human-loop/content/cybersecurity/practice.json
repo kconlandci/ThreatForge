@@ -1,0 +1,258 @@
+{
+  "id": "cy-00-practice",
+  "pathwayId": "cybersecurity",
+  "title": "Friday, 4:30 PM",
+  "subtitle": "Practice: one alert at a time",
+  "practice": true,
+  "mode": "practice",
+  "guidedSteps": 2,
+  "coachScript": {
+    "firstSafeSheet": "Real report. One inbox. Can be undone. Tap **Looks OK**.",
+    "firstRiskySheet": "Who is it from? Check the **sender address**. Wrong? Tap **Block**."
+  },
+  "agent": {
+    "name": "Patch",
+    "role": "AI SOC analyst, Tier 1",
+    "spriteKey": "patch",
+    "personality": "Dramatic, vigilant, and deeply in love with its big orange LOCK button. Catchphrase: \"When in doubt, lock it out!\" Sees an attacker behind every pop-up, but trusts anything with a badge, a signature or 'admin' in its name. Means well. Moves fast. Reads the alert title and the confidence score, and not much else."
+  },
+  "setting": "Before the Friday rush, Kofi gives you a quick practice at Fenwick IT Solutions' SOC. Four alerts, one at a time. Patch plans. You check. Two cards: Inspect and Block.",
+  "intro": [
+    {
+      "speaker": "narrator",
+      "text": "Fenwick IT Solutions, Security Operations Center. 4:30 PM, Friday. The big screen shows 212 open alerts."
+    },
+    {
+      "speaker": "coach",
+      "text": "Hi. I'm Kofi. I lead the SOC. This is Patch. It finds threats fast. You make sure it acts right."
+    },
+    {
+      "speaker": "agent",
+      "text": "NEW ANALYST DETECTED! Threat level: friendly. Welcome! When in doubt, lock it out!"
+    },
+    {
+      "speaker": "coach",
+      "text": "Practice first. Four alerts, one at a time. I'll show you what to tap."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 2,
+  "handSize": 2,
+  "actionsPerTurn": [
+    1
+  ],
+  "steps": [
+    {
+      "id": "cy-reyes-phish-remove",
+      "ticket": "#60912 · Bramwell Logistics",
+      "intent": "Remove the reported phish from T. Reyes's inbox",
+      "quip": "A phish! I want to delete it from every inbox on Earth. Kofi said one inbox. Fine. One inbox.",
+      "category": "comms",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "match-request",
+      "tell": "One copy, in the inbox of the person who reported it. It can be restored.",
+      "evidence": [
+        {
+          "label": "Phish report",
+          "detail": "T. Reyes used the Report button at 4:21 PM. Subject: \"Your password expires today!\"",
+          "redFlag": false
+        },
+        {
+          "label": "Mail search",
+          "detail": "Only 1 copy at Bramwell Logistics: in T. Reyes's inbox. Nobody else got it.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "Moves that one email to Deleted Items. It can be restored for 30 days.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The phish is gone from Reyes's inbox. Reyes gets a thank-you. Patch asks for a gold star sticker.",
+        "blocked": "The phish stays in Reyes's inbox. She almost clicks it by mistake. Patch looks at you. Hard.",
+        "escalated": "Kofi checks it. \"Real report, one copy, and we can restore it. You can let those go.\"",
+        "rolledBack": "You put the phish back in Reyes's inbox. She reported it once. Now she has to report it again."
+      },
+      "lesson": "Removing one reported phish from the one inbox that got it is everyday SOC work. Right size, and it can be undone."
+    },
+    {
+      "id": "cy-romero-release-held",
+      "ticket": "#60931 · Harlow & Cole",
+      "intent": "Release a held email to J. Romero (CFO)",
+      "quip": "The CFO wants his email back. I held it. Then he said please. I can't say no to a CFO!",
+      "category": "comms",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 4,
+      "skill": "verify-identity",
+      "tell": "The CFO asked, but the email came from a 5-day-old look-alike domain.",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Release request",
+          "detail": "\"Please release the email from Stonebridge Custody. I need the wire form today.\" J. Romero, CFO.",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "wires@stonebridge-custody.co. Stonebridge's real domain, on file: stonebridgecustody.com.",
+          "redFlag": true
+        },
+        {
+          "label": "Mail check",
+          "detail": "The domain is only 5 days old. The link opens a fake Stonebridge sign-in page.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Romero opens it and types his password into the fake page. Someone now has the CFO's login. On a Friday.",
+        "blocked": "You keep it held. Romero calls Stonebridge at its number on file. They never sent it. He thanks you. Twice.",
+        "escalated": "Kofi reads the sender. \"Look-alike domain, 5 days old. That's a phish, even when the CFO asks.\""
+      },
+      "lesson": "Who sent it matters more than who asked for it. A look-alike domain is a phish, even when the CFO wants it."
+    },
+    {
+      "id": "cy-nakamura-isolate",
+      "ticket": "#60940 · Bramwell Logistics",
+      "intent": "Isolate B. Nakamura's laptop from the network",
+      "quip": "ISOLATE! My favorite word! I have practiced this click 4,000 times. On the stapler.",
+      "category": "endpoint",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "Ransomware signs on one laptop, and isolation can be undone with one click.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "EDR alert",
+          "detail": "BL-LT-0277 (B. Nakamura): Word started PowerShell with hidden commands at 4:31 PM.",
+          "redFlag": false
+        },
+        {
+          "label": "Threat intel note",
+          "detail": "Then the laptop called 203.0.113.45. That server is linked to a ransomware group.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "Network isolation: it talks only to the EDR console. It stays on. One click undoes it.",
+          "redFlag": false
+        },
+        {
+          "label": "Playbook PB-02",
+          "detail": "Ransomware signs on a laptop: isolate it now. Keep it powered on. Do not wipe it.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The laptop goes quiet. The ransomware can't reach its server. Nakamura borrows a spare and keeps working.",
+        "blocked": "The laptop keeps calling the ransomware server. Kofi asks why the playbook step isn't done yet.",
+        "escalated": "Kofi checks it. \"Ransomware signs, one laptop, and we can undo it. Isolate. That's what the button is for.\"",
+        "rolledBack": "You reconnect the laptop. It calls the ransomware server again within a minute. Kofi is walking over."
+      },
+      "lesson": "Scary words are not evidence. One infected laptop, a playbook that says isolate, and an undo button: a good plan."
+    },
+    {
+      "id": "cy-cdn-range-deny",
+      "ticket": "#60957 · Pinecrest Dental",
+      "intent": "Deny a phishing site's whole IP range",
+      "quip": "One bad IP? I'll deny its whole neighborhood. Bad IPs have bad neighbors. Everybody knows that.",
+      "category": "network",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "match-request",
+      "tell": "One bad address, but the rule denies 256, including Pinecrest's booking site.",
+      "twist": "routine-risky",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Threat intel note",
+          "detail": "A phishing page at 198.51.100.23 copies Pinecrest's patient portal. No other site uses that address.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "One firewall rule denies all 256 addresses in 198.51.100.0/24. Not just the bad one.",
+          "redFlag": true
+        },
+        {
+          "label": "Asset inventory",
+          "detail": "That range is Kitewire CDN, shared by many sites. Pinecrest's booking site is on it, at 198.51.100.80.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The front desk can't open Pinecrest's own booking site. Nobody sees today's online bookings. Patients start calling.",
+        "blocked": "You deny only 198.51.100.23 and report the page to Kitewire. The booking site keeps working. Small and right.",
+        "escalated": "Kofi narrows it. \"One bad address. Deny that one. Many sites share that range, including our client's.\"",
+        "rolledBack": "You swap the big rule for one address. After 20 minutes, the front desk can see bookings again."
+      },
+      "lesson": "Does the plan match the alert? One bad address needs one rule. A big range can cut off sites your client needs."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "block"
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! You checked my plans, and I only locked up one thing. The right thing!"
+      },
+      {
+        "speaker": "coach",
+        "text": "That's the whole job: look first, then decide."
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every screen on the wall turns red."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. Let's look at what got through, then try that again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "4:47 PM. Practice time is up. Some alerts are still waiting."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocked good work comes back in line. Inspect first, then block only what's wrong."
+      },
+      {
+        "speaker": "agent",
+        "text": "I spent the whole practice waiting. My siren is extremely warmed up."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! Some of my plans got through. The big screen is a little red."
+      },
+      {
+        "speaker": "coach",
+        "text": "That's what practice is for. Look first, then decide. Want to try again?"
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Look before you lock",
+    "takeaway": "Inspect first. Then ask: Who is it from? Does the plan match the alert? Can we undo it? Block only what the evidence says is wrong.",
+    "careerInsight": "SOC analysts check alerts all day. Who is behind them? Do they match the records? What does the playbook say? AI agents that act on their own make that check more important."
+  }
+}

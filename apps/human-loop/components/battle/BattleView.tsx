@@ -57,7 +57,7 @@ export interface BattleViewProps {
   onSave: (state: BattleState) => void;
   /** The player asked to see the result screen. */
   onShowResult: (state: BattleState) => void;
-  /** The player's first real shift: Dana's hint line adds the first-shift tips. */
+  /** The player's first real shift: the coach's hint line adds the first-shift tips. */
   firstShift?: boolean;
   /** Drills: the skill's "Where to look" line for the top of the evidence sheet (until Solid). */
   sheetNote?: string | null;
@@ -701,7 +701,7 @@ export function BattleView({
   // The Done tray appears with Roll Back, the only card that uses it (never in practice).
   const showTray = !practice && deckAtTurn(encounter, view.turn).includes("rollback");
 
-  // Dana's hint line, its ring and (practice tickets 1-2) its locks. Recomputed from state every render.
+  // The coach's hint line, its ring and (practice tickets 1-2) its locks. Recomputed from state every render.
   const coach =
     !phase && !ended && state.status === "playing"
       ? coachHint(state, encounter, { selectedCardId: selectedDef ? selectedDef.id : null, sheetStepId: evidence?.id ?? null, firstShift })
@@ -736,7 +736,7 @@ export function BattleView({
     return () => window.clearTimeout(t);
   }, [liveText]);
 
-  // Short screens (landscape phones) scroll the column: bring the control Dana names into view,
+  // Short screens (landscape phones) scroll the column: bring the control the coach names into view,
   // once per new hint.
   useEffect(() => {
     if (!coachId || !coachTarget) return;
@@ -797,7 +797,7 @@ export function BattleView({
         <div ref={stageWrapRef} className={s.stageWrap}>
           {!stageReady ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className={s.stageFallback} src="/game/sprites/ollie-idle.svg" alt="" width={220} height={220} />
+            <img className={s.stageFallback} src={`/game/sprites/${encounter.agent.spriteKey}-idle.svg`} alt="" width={220} height={220} />
           ) : null}
           {stage}
           {banner && !toast ? (
@@ -944,7 +944,7 @@ export function BattleView({
             <>
               {coach?.text ? (
                 <p key={shakeKey} className={`${s.hintRow} ${shakeKey ? s.hintShake : ""}`} aria-hidden="true">
-                  <SpeakerFace speaker="dana" size={28} />
+                  <SpeakerFace speaker="coach" size={28} />
                   <span className={s.hintText}>
                     <HintText text={coach.text} />
                   </span>
@@ -967,7 +967,7 @@ export function BattleView({
           )}
         </div>
 
-        {/* One persistent live region for Dana's hint (and the card prompt), announced when it changes. */}
+        {/* One persistent live region for the coach's hint (and the card prompt), announced when it changes. */}
         <p className={s.srOnly} aria-live="polite">
           {announce}
         </p>

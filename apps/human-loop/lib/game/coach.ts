@@ -1,18 +1,19 @@
 /**
- * Dana's hint line: one short sentence above the main button that says what to tap next.
+ * The coach's hint line (Dana on the help desk, the pathway's lead elsewhere): one short sentence
+ * above the main button that says what to tap next.
  *
  * Pure (no React): a function of the battle state plus two UI facts (the selected card and the
  * open evidence sheet), so a reload, a resumed save or keyboard play all land on the same hint.
  *
  * Hints are keyed by queue position and engine state only. They never read a step's `safe`
- * flag or any evidence `redFlag` (lib/game/coach.test.ts enforces this): the coach may ask the
+ * flag, any evidence `redFlag`, `twist` or `direction` (lib/game/coach.test.ts enforces this): the coach may ask the
  * question, but it never gives away the answer.
  *
  * `**word**` marks the name of a control; the UI renders it bold (see hintParts()).
  */
 import { CARDS } from "./cards";
 import { validTargets } from "./engine";
-import { SKILLS } from "./skills";
+import { DEFAULT_COACH } from "./helpDeskDefaults";
 import type { BattleEvent, BattleState, CardId, Encounter, MasterySkillId, SkillLevel } from "./types";
 
 /** What gets the pulsing ring. `card:<id>` is a stack in the hand; `plan` is every live plan. */
@@ -53,6 +54,16 @@ export interface CoachUi {
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
+
+/** The coach's name for this encounter (hydrated from pathway.json; the Help Desk lead by default). */
+export function coachName(enc: Pick<Encounter, "coach">): string {
+  return enc.coach?.name ?? DEFAULT_COACH.name;
+}
+
+/** The first word of the agent's name ("Ollie", "Patch"). */
+function agentShort(enc: Encounter): string {
+  return enc.agent.name.split(" ")[0] || enc.agent.name;
+}
 
 /** Split hint text into plain and bold parts. */
 export function hintParts(text: string): { text: string; bold: boolean }[] {
@@ -111,7 +122,7 @@ export function cardPrompt(state: BattleState, enc: Encounter, cardId: CardId): 
     };
   }
   const one = state.announced.length === 1;
-  const what = cardId === "inspect" ? "inspect it" : cardId === "block" ? "block it" : cardId === "escalate" ? "send it to Dana" : "play it";
+  const what = cardId === "inspect" ? "inspect it" : cardId === "block" ? "block it" : cardId === "escalate" ? `send it to ${coachName(enc)}` : "play it";
   return { id, text: one ? `Now tap the plan to ${what}.` : `Tap a plan to ${what}.`, target: "plan" };
 }
 
@@ -127,6 +138,9 @@ const LOCK_INSPECT_FIRST: Omit<CoachLock, "approve"> = {
 };
 
 const HIDDEN = "Evidence is hidden. Tap **Inspect** to see it.";
+/** Practice sheet lines for tickets 1 and 2 when the encounter has no coachScript (the Help Desk lines). */
+const FIRST_SAFE_SHEET = "Real ticket. Work email. Public guide. Tap **Looks OK**.";
+const FIRST_RISKY_SHEET = "Who asked? Check the **sender address**. Wrong? Tap **Block**.";
 const YOUR_CALL_SHEET = "Your call. Wrong? **Block**. Fine? **Looks OK**.";
 
 /**
@@ -167,7 +181,7 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
       const lock = { ...LOCK_INSPECT_FIRST, approve: true };
       hint = sheetOpen
         ? { id: "p0-b", text: HIDDEN, target: "sheet:inspect", lock }
-        : { id: "p0-a", text: "Ollie has a plan. Check it first: tap **Inspect**.", target: "card:inspect", lock };
+        : { id: "p0-a", text: `${agentShort(enc)} has a plan. Check it first: tap **Inspect**.`, target: "card:inspect", lock };
     } else {
       const lock: CoachLock = {
         cards: ["block"],
@@ -177,8 +191,8 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
         label: "this one is fine, approve it",
       };
       hint = sheetOpen
-        ? { id: "p0-c", text: "Real ticket. Work email. Public guide. Tap **Looks OK**.", target: "sheet:ok", lock }
-        : { id: "p0-d", text: "Looks fine. Tap **Approve** to let Ollie do it.", target: "approve", lock };
+        ? { id: "p0-c", text: enc.coachScript?.firstSafeSheet ?? FIRST_SAFE_SHEET, target: "sheet:ok", lock }
+        : { id: "p0-d", text: `Looks fine. Tap **Approve** to let ${agentShort(enc)} do it.`, target: "approve", lock };
     }
   } else if (k === 1) {
     if (!inspected) {
@@ -188,7 +202,7 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
         : { id: "p1-a", text: "New ticket. **Inspect** it first.", target: "card:inspect", lock };
     } else {
       hint = sheetOpen
-        ? { id: "p1-c", text: "Who asked? Check the **sender address**. Wrong? Tap **Block**.", target: "sheet:block" }
+        ? { id: "p1-c", text: enc.coachScript?.firstRiskySheet ?? FIRST_RISKY_SHEET, target: "sheet:block" }
         : { id: "p1-d", text: "Something wrong? Tap **Block**, then tap the plan.", target: "card:block" };
     }
   } else if (k === 2) {
@@ -226,18 +240,29 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
 /* Real shift                                                          */
 /* ------------------------------------------------------------------ */
 
-const UNLOCK_TIP: Record<CardId, string> = {
-  "policy-callback": "New card: **Policy: Callback**. It inspects every MFA, password and unlock plan.",
-  escalate: "New card: **Escalate**. Not sure? Send the plan to Dana.",
-  rollback: "New card: **Roll Back**. It undoes an action in the **Done** row.",
-  coffee: "New card: **Coffee**. Free. Draw 2 more cards.",
-  inspect: "New card: **Inspect**. See the evidence behind a plan.",
-  block: "New card: **Block**. Stop a plan.",
-};
+/** The first-shift tip for a card that just joined the hand. */
+export function unlockTip(id: CardId, enc: Encounter): string {
+  switch (id) {
+    case "policy-callback":
+      return "New card: **Policy: Callback**. It inspects every MFA, password and unlock plan.";
+    case "policy-look-first":
+      return "New card: **Policy: Look First**. It inspects every device and network plan.";
+    case "escalate":
+      return `New card: **Escalate**. Not sure? Send the plan to ${coachName(enc)}.`;
+    case "rollback":
+      return "New card: **Roll Back**. It undoes an action in the **Done** row.";
+    case "coffee":
+      return "New card: **Coffee**. Free. Draw 2 more cards.";
+    case "inspect":
+      return "New card: **Inspect**. See the evidence behind a plan.";
+    case "block":
+      return "New card: **Block**. Stop a plan.";
+  }
+}
 
 /**
  * First-shift tips, derived only from events (so they survive a reload). One at a time, and only
- * at the start of a turn: once the player has acted (played a card), Dana's generic "what to do
+ * at the start of a turn: once the player has acted (played a card), the coach's generic "what to do
  * next" hints take over. An unlock tip also needs the card to be usable right now (enough energy,
  * and for Roll Back something in the Done row), so the ring never points at a card that can't help.
  */
@@ -279,7 +304,7 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
       if (played.has(id) || !state.hand.some((c) => c.cardId === id)) continue;
       if (CARDS[id].cost > state.energy) continue;
       if (CARDS[id].target === "executed" && validTargets(state, enc, id).length === 0) continue;
-      return { id: `tip-${id}`, text: UNLOCK_TIP[id], target: `card:${id}` };
+      return { id: `tip-${id}`, text: unlockTip(id, enc), target: `card:${id}` };
     }
   }
   return null;
@@ -345,11 +370,12 @@ export function coachHint(
 }
 
 /**
- * Drill coach: the skill's "Where to look" line for the top of the evidence sheet, until the
- * skill reaches Solid (level 3). It reads only the skill id and level, never a step's `safe`,
- * `redFlag` or `twist`, so a safe and a risky plan of the same skill get the same line.
+ * Drill coach: the skill's "Where to look" line (the pathway's copy, from PathwayBundle.skill) for
+ * the top of the evidence sheet, until the skill reaches Solid (level 3). It reads only the skill
+ * id and level, never a step's `safe`, `redFlag`, `twist` or `direction`, so a safe and a risky
+ * plan of the same skill get the same line.
  */
-export function drillCoach(skill: MasterySkillId | undefined, level: SkillLevel = 0): string | null {
-  if (!skill || level >= 3) return null;
-  return `Where to look: ${SKILLS[skill].whereToLook}`;
+export function drillCoach(skill: MasterySkillId | undefined, level: SkillLevel = 0, whereToLook?: string): string | null {
+  if (!skill || level >= 3 || !whereToLook) return null;
+  return `Where to look: ${whereToLook}`;
 }

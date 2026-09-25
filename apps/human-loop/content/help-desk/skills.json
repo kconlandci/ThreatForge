@@ -1,0 +1,32 @@
+{
+  "skills": {
+    "verify-identity": {
+      "oneLiner": "Is it really them? Check the address, the phone on file and the sign-in log.",
+      "whereToLook": "Sender address or Caller ID vs the Directory record. Was the Callback to the phone on file?"
+    },
+    "check-approval": {
+      "oneLiner": "It is them, but are they allowed to ask? Look for the owner's, HR's or the manager's OK.",
+      "whereToLook": "HR portal or the Ticket: is there a written OK from the owner, HR or the manager?"
+    },
+    "match-request": {
+      "oneLiner": "Right person, right device, and only what was asked. No extras.",
+      "whereToLook": "The Ticket vs What it will change. Same person, same device? Ollie's reason often adds extras."
+    },
+    "confirm-fix": {
+      "oneLiner": "Before you close it, check the user's reply and the logs.",
+      "whereToLook": "User reply and the log, after the Fix time. No reply is not a yes."
+    },
+    "guard-data": {
+      "oneLiner": "Where does the data go, and who can see it? Once it's out, it's out.",
+      "whereToLook": "What it will send and Tool it will use. Who can read it once it's sent?"
+    },
+    "safe-change": {
+      "oneLiner": "If it goes wrong, can we undo it? Back up first. Right time. Right target.",
+      "whereToLook": "Action type, Script and Backup status. Right time? Right target?"
+    },
+    "approve-checked": {
+      "oneLiner": "All 3 questions check out? Approve it, even if it looks scary.",
+      "whereToLook": "Read every evidence line. No red flag on any of the 3 questions? Approve it."
+    }
+  }
+}

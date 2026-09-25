@@ -29,6 +29,7 @@ recommended setup for DCI).
 | `npm run typecheck` | `tsc --noEmit`                        |
 | `npm run lint`      | ESLint                                |
 | `npm test`          | Vitest (engine, content, server code) |
+| `npm run check:bundles` | After a build: each `/play/<pathway>` route ships only its own content |
 
 Tip: to run more than one dev server at once, give the second one its own build folder and port:
 `NEXT_DIST_DIR=.next-alt npx next dev -p 3001`. Use exactly `.next-alt`: `tsconfig.json` already
@@ -357,7 +358,7 @@ full debrief row. Every help desk step (fixed and bank) has a `tell`.
   and return a `ShiftSpec`; `buildShift` rebuilds the same encounter from it. A daily never puts 2
   risky plans on one turn (3 energy can't inspect both and block both), and when the lead focus is a
   lens skill it includes a fresh risky plan of it. Ollie's lines rotate with the shift count. The spec is kept in
-  `progress.shift`, so `encounterFor` (`lib/game/content.ts`) and `canResume` resume it like any
+  `progress.shift`, so `PathwayBundle.encounterFor` (`lib/pathways/create.ts`) and `canResume` resume it like any
   battle. A spec from an older bank (`BANK_VERSION`) is dropped and the shift starts fresh.
   Dailies can't breach; stars, attempts, wins and best stay Monday-only.
 - **Save** (still version 2): new optional `PathwayProgress` fields (`skills`, `shift`,
@@ -369,13 +370,66 @@ full debrief row. Every help desk step (fixed and bank) has a `tell`.
   Missed, Focus skill; Players: Skill levels) are written only once their field ids are filled in
   `OPTIONAL_RESULT_FIELDS` / `OPTIONAL_PLAYER_FIELDS` in `lib/server/airtable.ts`.
 
+## Pathways (multi-pathway architecture)
+
+Each playable pathway is a **bundle** (`PathwayBundle`, `lib/pathways/types.ts`) built by
+`createPathway()` (`lib/pathways/create.ts`) from its JSON in `content/<pathway>/` plus a typed hub
+map. The game shell gets the bundle as a prop (`<GameShell pathway={HELP_DESK} />`) and shares it
+with every component through React context (`usePathway()`, `lib/pathways/context.tsx`). Shared code
+(`lib/game/**`, `components/**`) never imports a pathway's content; ESLint enforces it
+(`no-restricted-imports` in `eslint.config.mjs`), and `npm run check:bundles` checks the built
+routes. Pure libraries get pathway facts from fields hydrated onto the `Encounter` (`coach`,
+`headlines`), authored fields (`coachScript` in practice.json), `CARDS` (`autoInspect`) and explicit
+options (`BuildOptions`, the id prefix). When a field is missing, the Help Desk default applies
+(`lib/game/helpDeskDefaults.ts`, the only shared file allowed to name Dana or Ollie).
+
+| Piece | Where |
+| --- | --- |
+| Registry (name, agent, status, id prefix, story id/title, page title) | `lib/types.ts` `PATHWAYS` |
+| Coach, clients, step categories, policy card, UI copy, card wording, headlines | `content/<pathway>/pathway.json` |
+| Skill copy (what it means, where to look, example, question hints) | `content/<pathway>/skills.json` |
+| Practice, story, hub, bank, shift shells | `content/<pathway>/*.json`, `bank/*.json` |
+| Room layout, cast, blink lights, room colours | `lib/pathways/<pathway>/hubMap.ts` |
+| The bundle | `lib/pathways/<pathway>/index.ts` |
+| Client entry (the only importer of the bundle) | `components/game/entries/<Pathway>Game.tsx` |
+| Route (static, one per pathway) | `app/play/<pathway>/page.tsx` (+ `loading.tsx`) |
+
+Shared across pathways: the 7 skills (ids, names, icons), the 3 question titles, the cards'
+mechanics, the engine, mastery and the daily/drill generator. Saves are per pathway
+(`SaveData.pathways[id]`). The saved power name stays `powers.callbackPolicy` for every policy
+card (a policy card is any card with `autoInspect`; an encounter has at most one).
+
+### Adding a pathway
+
+1. Content in `content/<pathway>/`: `pathway.json`, `skills.json`, `practice.json`,
+   `encounter-01.json`, `hub.json`, `bank/shift.json`, `bank/tickets-*.json` (same shapes as the
+   Help Desk; speakers are `coach`, `agent`, `narrator`; every id starts with the pathway's prefix).
+2. Art in `public/game/sprites/` and entries in `lib/game/assets.ts` `SPRITES` with `kind` and
+   `tone` (the agent needs `<agent>` and 5 portraits `<agent>-idle|eager|busted|sad|celebrate`).
+3. `lib/pathways/<pathway>/hubMap.ts` (one `role: "agent"` and one `role: "coach"` character, one
+   `kind: "antenna"` blink light on the agent, optional `theme`) and `lib/pathways/<pathway>/index.ts`
+   (`createPathway({...})`).
+4. `components/game/entries/<Pathway>Game.tsx`, `app/play/<pathway>/page.tsx` (metadata from the
+   registry) and `loading.tsx`.
+5. Fill the registry entry in `lib/types.ts`, flip `status` to `"live"`, add the bundle to
+   `TEST_PATHWAYS` and its expectations to `EXPECT` (`lib/pathways/testing.ts`). The per-pathway
+   suites (content, bank, hub map, generated shifts, balance) then run on it.
+6. Add its route and marker to `scripts/check-bundles.mjs`, then run every gate plus
+   `npm run build && npm run check:bundles`.
+
+The Help Desk golden (`lib/game/golden.test.ts`, `lib/game/__golden__/`) holds everything a Help
+Desk player sees or a save depends on (plans, seeds, generated shifts, coach lines, toasts, debrief
+text, headlines, card and UI copy). It must stay identical; re-capture it only for an intended Help
+Desk change (`GOLDEN_WRITE=1 npx vitest run lib/game/golden.test.ts`).
+
 ## Project layout
 
 ```
 app/            routes (home, /play, /privacy) and app/api/* (lead, progress)
 components/     site UI, battle UI, hub UI, Phaser stage
 content/        authored game content (JSON)
-lib/game/       game rules engine, cards, content loaders, types
+lib/game/       game rules engine, cards, mastery, generator, types (shared by every pathway)
+lib/pathways/   pathway bundles (createPathway, context, one folder per pathway), test registry
 lib/client/     browser save (localStorage first, optional cloud sync)
 lib/server/     server-only code for the API routes
 public/         brand and game art

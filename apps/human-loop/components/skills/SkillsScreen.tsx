@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, Play, Target } from "lucide-react";
 import { buttonClass } from "@/components/site/ui";
 import { isDue } from "@/lib/game/mastery";
-import { MASTERY_SKILLS, SKILLS } from "@/lib/game/skills";
+import { MASTERY_SKILLS, skillName } from "@/lib/game/skills";
+import { usePathway } from "@/lib/pathways/context";
 import {
   QUESTION_TITLES,
   dueTagSkills,
@@ -14,7 +15,7 @@ import {
   skillGroups,
   weekDots,
 } from "@/lib/game/skillsView";
-import type { DanaQuestion, MasterySkillId, PathwayProgress } from "@/lib/game/types";
+import type { CheckQuestion, MasterySkillId, PathwayProgress } from "@/lib/game/types";
 import { Pips, questionIcon, skillIcon } from "./SkillBits";
 import { SkillDetail } from "./SkillDetail";
 import k from "./skills.module.css";
@@ -34,8 +35,9 @@ export interface SkillsScreenProps {
   resume?: { label: string; onResume: () => void } | null;
 }
 
-/** Your skills: Dana's 3 questions, the one skill to practice next, the skills met so far, and the week. */
+/** Your skills: the coach's 3 questions (with the pathway's hints), the one skill to practice next, the skills met so far, and the week. */
 export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack, resume = null }: SkillsScreenProps) {
+  const { coach, skills: copy } = usePathway();
   const skills = progress.skills;
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [open, setOpen] = useState<MasterySkillId | null>(null);
@@ -65,15 +67,26 @@ export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack
         <h1 ref={headingRef} tabIndex={-1} className={k.title}>
           Your skills
         </h1>
-        <ul className={k.questions} aria-label="Dana's 3 questions">
-          {(["who", "record", "undo"] as DanaQuestion[]).map((q) => {
+        <ul
+          className={`${k.questions} ${copy.questionHints ? k.questionsHinted : ""}`}
+          aria-label={`${coach.name}'s 3 questions`}
+        >
+          {(["who", "record", "undo"] as CheckQuestion[]).map((q) => {
             const Icon = questionIcon(q);
+            const hint = copy.questionHints?.[q];
             return (
               <li key={q} className={k.question}>
                 <span className={k.questionIcon} aria-hidden="true">
                   <Icon className="h-4 w-4" strokeWidth={2.6} />
                 </span>
-                {QUESTION_TITLES[q]}
+                {hint ? (
+                  <span className="min-w-0">
+                    {QUESTION_TITLES[q]}
+                    <span className={k.questionHint}>{hint}</span>
+                  </span>
+                ) : (
+                  QUESTION_TITLES[q]
+                )}
               </li>
             );
           })}
@@ -87,7 +100,7 @@ export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack
             <span className={k.bigIcon} aria-hidden="true">
               <NextIcon className="h-5 w-5" strokeWidth={2.4} />
             </span>
-            {SKILLS[next].name}
+            {skillName(next)}
           </p>
           <p className={k.reason}>{needReason(skills?.[next], today)}</p>
           {resume ? (
@@ -128,7 +141,7 @@ export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack
                           <Icon className="h-5 w-5" strokeWidth={2.3} />
                         </span>
                         <span className={k.rowMain}>
-                          <span className={k.rowName}>{SKILLS[id].name}</span>
+                          <span className={k.rowName}>{skillName(id)}</span>
                           <span className={k.rowLevel}>
                             <Pips level={rec?.level ?? 0} word />
                             {due ? (

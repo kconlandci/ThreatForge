@@ -1,4 +1,5 @@
 import type { HubTargetId } from "./hub";
+import type { StageSetup } from "./hubMap";
 
 /** Messages from React to the Phaser stage. */
 export type ToStage =
@@ -20,7 +21,7 @@ export type ToStage =
       intensity?: number;
     }
   | { type: "agent-mood"; mood: AgentMood }
-  /** Battle: CSS px at the bottom of the stage covered by the DOM "Done" tray (Ollie sits above it). */
+  /** Battle: CSS px at the bottom of the stage covered by the DOM "Done" tray (the agent sits above it). */
   | { type: "stage-inset"; bottom: number }
   | { type: "reduced-motion"; value: boolean };
 
@@ -69,6 +70,8 @@ export function createBus(): StageBus {
 /** Props of components/game/PhaserStage.tsx (client-only, loaded with next/dynamic ssr:false). */
 export interface PhaserStageProps {
   bus: StageBus;
+  /** The pathway's room and cast (read once, when the stage mounts). */
+  stage: StageSetup;
   mode: StageMode;
   reducedMotion: boolean;
   /** Where the avatar starts in the hub (grid coords); null = default spawn. */

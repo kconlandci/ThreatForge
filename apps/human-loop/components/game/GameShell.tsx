@@ -1,7 +1,9 @@
 "use client";
 
 /**
- * /play/help-desk: the whole game on one screen.
+ * /play/<pathway>: the whole game on one screen, for one pathway (the `pathway` prop). Everything
+ * pathway-specific (content, cast, copy, room) comes from that bundle; the tree below reads it
+ * with usePathway().
  *
  * State machine: boot -> (resume | intro | hub) -> battle -> result -> (battle | hub).
  * One Phaser stage lives for the whole visit. It is portaled into a detached host node that
@@ -48,46 +50,29 @@ import { ShiftIntro } from "@/components/hub/ShiftIntro";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
 import { preloadStage } from "@/lib/client/preloadStage";
+import { prefetchSvgs } from "@/components/game/stage/svgCache";
 import { getPathwayProgress, loadSave, practiceDone, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
 import { createBus, type StageMode } from "@/lib/game/bus";
-import { CARDS } from "@/lib/game/cards";
-import {
-  HELP_DESK_BANK,
-  HELP_DESK_ENCOUNTER,
-  HELP_DESK_HUB,
-  HELP_DESK_PRACTICE,
-  encounterFor,
-  shiftEncounter,
-  shiftSpecUsable,
-} from "@/lib/game/content";
 import { canResume, createBattle, deckAtTurn, scoreBattle } from "@/lib/game/engine";
 import type { HubTargetId } from "@/lib/game/hub";
+import { stageSprites } from "@/lib/game/hubMap";
 import { drillCoach } from "@/lib/game/coach";
 import { applyBattle, localDay, shiftTally, skillChanges } from "@/lib/game/mastery";
 import { skillName } from "@/lib/game/skills";
-import { beginShift, planDaily, planDrill } from "@/lib/game/shiftGen";
+import { beginShift } from "@/lib/game/shiftGen";
 import { dailyDoneToday, dailyNote, dailyUnlocked, hasSkills, nextUpSkill, planLines, weakestInShift } from "@/lib/game/skillsView";
 import type { BattleState, CardId, Encounter, HistoryEntry, MasterySkillId, PathwayProgress, ShiftSpec } from "@/lib/game/types";
 import { HAND_ORDER } from "@/lib/game/useBattle";
+import { PathwayProvider, usePathway } from "@/lib/pathways/context";
+import type { PathwayBundle } from "@/lib/pathways/types";
 import g from "./GameShell.module.css";
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), { ssr: false });
-
-/** The real shift. Anything that belongs to a saved battle uses encounterFor(battle.encounterId, progress). */
-const ENC = HELP_DESK_ENCOUNTER;
-const PRACTICE = HELP_DESK_PRACTICE;
-const HUB = HELP_DESK_HUB;
-
-/** A saved battle that is still in progress and fits the current content of its own encounter. */
-function resumable(b: BattleState | null | undefined, p: PathwayProgress | null | undefined): BattleState | null {
-  return b && b.status === "playing" && canResume(b, encounterFor(b.encounterId, p)) ? b : null;
-}
 
 /** A Daily practice or drill battle (its encounter is rebuilt from progress.shift). */
 function isGenerated(enc: Encounter): boolean {
   return enc.mode === "daily" || enc.mode === "drill";
 }
-const PATHWAY = "help-desk" as const;
 
 /** "brief": the one-screen intro before a Daily practice or drill (its battle is already saved). */
 type View = "boot" | "resume" | "intro" | "hub" | "brief" | "battle" | "result" | "skills";
@@ -97,13 +82,33 @@ function today(): string {
   return localDay(new Date());
 }
 
-/** Plan the next Daily practice (pure: the same progress gives the same shift, so the preview is the real thing). */
-function nextDaily(p: PathwayProgress, playerId: string): ShiftSpec {
-  return planDaily(HELP_DESK_BANK, p, { playerId, today: today() });
-}
-
-function nextDrill(p: PathwayProgress, playerId: string, skill: MasterySkillId): ShiftSpec {
-  return planDrill(HELP_DESK_BANK, skill, { playerId, today: today(), k: p.drillCount?.[skill] ?? 0, progress: p });
+/**
+ * Save and planning helpers bound to one pathway. Anything that belongs to a saved battle uses
+ * pathway.encounterFor(battle.encounterId, progress).
+ */
+function pathwayOps(pathway: PathwayBundle) {
+  const id = pathway.id;
+  const progressOf = (s: SaveData) => getPathwayProgress(s, id);
+  return {
+    progressOf,
+    patchProgress(fn: (p: PathwayProgress) => PathwayProgress): SaveData {
+      return updateSave((s) => ({ ...s, pathways: { ...s.pathways, [id]: fn(progressOf(s)) } }));
+    },
+    /** A saved battle that is still in progress and fits the current content of its own encounter. */
+    resumable(b: BattleState | null | undefined, p: PathwayProgress | null | undefined): BattleState | null {
+      return b && b.status === "playing" && canResume(b, pathway.encounterFor(b.encounterId, p)) ? b : null;
+    },
+    /** Plan the next Daily practice (pure: the same progress gives the same shift, so the preview is the real thing). */
+    nextDaily(p: PathwayProgress, playerId: string): ShiftSpec {
+      return pathway.planDaily(p, { playerId, today: today() });
+    },
+    nextDrill(p: PathwayProgress, playerId: string, skill: MasterySkillId): ShiftSpec {
+      return pathway.planDrill(p, skill, { playerId, today: today() });
+    },
+    practiceDone(p: PathwayProgress): boolean {
+      return practiceDone(p, id);
+    },
+  };
 }
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -113,10 +118,6 @@ function newSeed(): number {
   if (typeof crypto !== "undefined" && crypto.getRandomValues) crypto.getRandomValues(buf);
   else buf[0] = Math.floor(Math.random() * 2 ** 32);
   return buf[0] >>> 0;
-}
-
-function patchProgress(fn: (p: PathwayProgress) => PathwayProgress): SaveData {
-  return updateSave((s) => ({ ...s, pathways: { ...s.pathways, [PATHWAY]: fn(getPathwayProgress(s, PATHWAY)) } }));
 }
 
 function usePrefersReducedMotion(): boolean {
@@ -301,6 +302,8 @@ const ALL_CARDS: HowDeck = { practice: false, cards: HAND_ORDER };
 
 function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onClose: () => void }) {
   const titleId = useId();
+  const { agent, coach, config, cardCopy } = usePathway();
+  const agentShort = agent.name.split(" ")[0];
   return (
     <Sheet
       open={open}
@@ -308,7 +311,7 @@ function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onCl
       labelledBy={titleId}
       header={
         <div>
-          <p className="font-display text-xs font-bold uppercase tracking-[0.12em] text-teal">Dana&apos;s quick guide</p>
+          <p className="font-display text-xs font-bold uppercase tracking-[0.12em] text-teal">{config.copy.guideEyebrow}</p>
           <h2 id={titleId} className="mt-0.5 font-display text-xl font-bold text-ink">
             How to play
           </h2>
@@ -317,7 +320,7 @@ function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onCl
     >
       {deck.practice ? (
         <ol className="mb-4 list-decimal space-y-1.5 pl-5 text-[16px] leading-relaxed text-ink">
-          <li>{ENC.agent.name.split(" ")[0]} shows a plan.</li>
+          <li>{agentShort} shows a plan.</li>
           <li>Tap Inspect, then the plan, to see the evidence.</li>
           <li>Something wrong? Block it. Looks fine? Approve.</li>
         </ol>
@@ -328,10 +331,10 @@ function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onCl
               <strong className="font-display">Check.</strong> Tap Inspect, then a plan, to see the evidence.
             </li>
             <li>
-              <strong className="font-display">Decide.</strong> Block what&apos;s wrong. Not sure? Escalate to Dana.
+              <strong className="font-display">Decide.</strong> Block what&apos;s wrong. Not sure? Escalate to {coach.name}.
             </li>
             <li>
-              <strong className="font-display">Approve.</strong> {ENC.agent.name.split(" ")[0]} does every plan you didn&apos;t
+              <strong className="font-display">Approve.</strong> {agentShort} does every plan you didn&apos;t
               stop.
             </li>
           </ol>
@@ -351,7 +354,7 @@ function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onCl
       )}
       <ul className={g.howList}>
         {deck.cards.map((id) => {
-          const c = CARDS[id];
+          const c = cardCopy(id);
           const Icon = cardIcon(c.icon);
           const power = c.kind === "power";
           return (
@@ -388,8 +391,21 @@ function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onCl
 /* Shell                                                               */
 /* ------------------------------------------------------------------ */
 
-export function GameShell() {
+export function GameShell({ pathway }: { pathway: PathwayBundle }) {
+  return (
+    <PathwayProvider value={pathway}>
+      <Shell pathway={pathway} />
+    </PathwayProvider>
+  );
+}
+
+function Shell({ pathway }: { pathway: PathwayBundle }) {
   const router = useRouter();
+  const api = useMemo(() => pathwayOps(pathway), [pathway]);
+  const ENC = pathway.story;
+  const PRACTICE = pathway.practice;
+  const HUB = pathway.hub;
+  const { copy } = pathway.config;
   const bus = useMemo(() => createBus(), []);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [save, setSave] = useState<SaveData | null>(null);
@@ -429,8 +445,9 @@ export function GameShell() {
 
   /* Boot: load the save, pick the first view. */
   useEffect(() => {
-    // Start fetching the stage (Phaser) now, in parallel with the boot work below.
+    // Start fetching the stage (Phaser) and this pathway's art now, in parallel with the boot work below.
     preloadStage();
+    prefetchSvgs(stageSprites(pathway.stage));
     const el = document.createElement("div");
     el.style.cssText = "position:absolute;inset:0;";
     setHost(el);
@@ -443,12 +460,14 @@ export function GameShell() {
     setSave(s);
     // Signed-up players: re-check the cloud backup (a reload of this page skips /play).
     if (!s.profile.guest) void syncFromCloud({ adopt: false });
-    const p = getPathwayProgress(s, PATHWAY);
+    const p = api.progressOf(s);
     setInitialHubPos(p.hub);
 
     const params = new URLSearchParams(window.location.search);
     const fixture = process.env.NODE_ENV !== "production" ? params.get("fixture") : null;
-    if (fixture) {
+    // Dev only: the `process.env.NODE_ENV` test is inlined at build time, so production builds drop
+    // this branch and its import (the fixtures module would bring the Help Desk content along).
+    if (process.env.NODE_ENV !== "production" && fixture) {
       if (fixture === "intro") {
         setView("intro");
         return;
@@ -459,7 +478,7 @@ export function GameShell() {
       }
       import("@/lib/game/fixtures").then(({ fixtureBattle, fixtureEncounter, FIXTURE_NAMES }) => {
         const name = FIXTURE_NAMES.find((n) => n === fixture) ?? "start";
-        const st = fixtureBattle(name, fixtureEncounter(name));
+        const st = fixtureBattle(name, fixtureEncounter(name, pathway), pathway);
         if (st.status === "playing") {
           setBattle(st);
           setView("battle");
@@ -475,7 +494,7 @@ export function GameShell() {
     if (params.get("view") === "skills") {
       window.history.replaceState(null, "", window.location.pathname);
       if (hasSkills(p)) {
-        if (p.pendingResult) setSave(patchProgress((x) => ({ ...x, pendingResult: null, shift: x.battle?.encounterId === x.shift?.id ? x.shift : null })));
+        if (p.pendingResult) setSave(api.patchProgress((x) => ({ ...x, pendingResult: null, shift: x.battle?.encounterId === x.shift?.id ? x.shift : null })));
         setView("skills");
         return;
       }
@@ -484,23 +503,23 @@ export function GameShell() {
     // Every saved battle is checked against its own encounter (practice, the real shift, or the
     // Daily practice / drill rebuilt from progress.shift).
     const pending = p.pendingResult;
-    if (pending && pending.status !== "playing" && canResume(pending, encounterFor(pending.encounterId, p))) {
+    if (pending && pending.status !== "playing" && canResume(pending, pathway.encounterFor(pending.encounterId, p))) {
       // The last shift ended but its result screen was never left (reload, or the tab closed).
       setFinalState(pending);
       setView("result");
-    } else if (resumable(p.battle, p)) {
+    } else if (api.resumable(p.battle, p)) {
       setView("resume");
     } else {
       // A shift saved before the content changed (e.g. the old 12-card deck, or a daily built from
       // an older ticket bank) starts fresh. History, attempts, best and skills are kept.
-      const staleShift = !!p.shift && (!shiftSpecUsable(p.shift) || p.battle?.encounterId === p.shift.id);
+      const staleShift = !!p.shift && (!pathway.shiftUsable(p.shift) || p.battle?.encounterId === p.shift.id);
       if (p.battle?.encounterId === ENC.id || staleShift) setNote("The shift was updated, so it starts fresh.");
       if (p.battle || p.pendingResult || p.shift) {
-        setSave(patchProgress((x) => ({ ...x, battle: null, pendingResult: null, shift: null })));
+        setSave(api.patchProgress((x) => ({ ...x, battle: null, pendingResult: null, shift: null })));
       }
       setView(p.introSeen ? "hub" : "intro");
     }
-  }, [router]);
+  }, [router, ENC, api, pathway]);
 
   /* Stage -> React. */
   useEffect(() => {
@@ -538,7 +557,7 @@ export function GameShell() {
           if (!walkingRef.current) setDialogue(null);
           window.clearTimeout(moveTimer);
           moveTimer = window.setTimeout(() => {
-            patchProgress((p) => ({ ...p, hub: { x: msg.x, y: msg.y } }));
+            api.patchProgress((p) => ({ ...p, hub: { x: msg.x, y: msg.y } }));
           }, 250);
           break;
       }
@@ -548,7 +567,7 @@ export function GameShell() {
       window.clearTimeout(moveTimer);
       window.clearTimeout(lostTimer);
     };
-  }, [bus]);
+  }, [bus, api]);
 
   // If the stage never reports an arrival (no WebGL, slow device), open the dialogue anyway.
   useEffect(() => {
@@ -562,7 +581,7 @@ export function GameShell() {
     return () => window.clearTimeout(t);
   }, [walking, stageReady]);
 
-  // Result screen: Ollie's mood matches how the shift went.
+  // Result screen: the agent's mood matches how the shift went.
   useEffect(() => {
     if (view !== "result" || !finalState || !stageReady) return;
     const won = finalState.status === "won";
@@ -593,25 +612,25 @@ export function GameShell() {
 
   const beginBattle = useCallback((st: BattleState, next: "battle" | "brief" = "battle") => {
     // A Daily practice or drill spec lives only as long as its own battle.
-    setSave(patchProgress((p) => ({ ...p, battle: st, pendingResult: null, shift: p.shift?.id === st.encounterId ? p.shift : null })));
+    setSave(api.patchProgress((p) => ({ ...p, battle: st, pendingResult: null, shift: p.shift?.id === st.encounterId ? p.shift : null })));
     setBattle(st);
     setBattleKey((k) => k + 1);
     setFinalState(null);
     setDialogue(null);
     setWalking(null);
     setView(next);
-  }, []);
+  }, [api]);
 
-  const startPractice = useCallback(() => beginBattle(createBattle(PRACTICE, newSeed())), [beginBattle]);
-  const newShift = useCallback(() => beginBattle(createBattle(ENC, newSeed())), [beginBattle]);
+  const startPractice = useCallback(() => beginBattle(createBattle(PRACTICE, newSeed())), [beginBattle, PRACTICE]);
+  const newShift = useCallback(() => beginBattle(createBattle(ENC, newSeed())), [beginBattle, ENC]);
 
   /** Save a generated shift's spec (dailyCount / drillCount go up), then its one-screen intro. */
   const startSpec = useCallback(
     (spec: ShiftSpec) => {
-      setSave(patchProgress((p) => beginShift(p, spec)));
-      beginBattle(createBattle(shiftEncounter(spec), spec.seed), "brief");
+      setSave(api.patchProgress((p) => beginShift(p, spec)));
+      beginBattle(createBattle(pathway.shiftEncounter(spec), spec.seed), "brief");
     },
-    [beginBattle],
+    [beginBattle, api, pathway],
   );
 
   /**
@@ -619,55 +638,55 @@ export function GameShell() {
    * already went up). Show the Resume / Start over prompt instead. True when it did.
    */
   const guardSaved = useCallback((): boolean => {
-    const p = getPathwayProgress(loadSave(), PATHWAY);
-    if (!resumable(p.battle, p)) return false;
+    const p = api.progressOf(loadSave());
+    if (!api.resumable(p.battle, p)) return false;
     setDialogue(null);
     setWalking(null);
     setRoomsOpen(false);
     setView("resume");
     return true;
-  }, []);
+  }, [api]);
 
   /** "Start today's practice" / "One more shift": the next Daily practice. */
   const startDaily = useCallback(() => {
     if (guardSaved()) return;
     const s = loadSave();
-    startSpec(nextDaily(getPathwayProgress(s, PATHWAY), s.playerId));
-  }, [startSpec, guardSaved]);
+    startSpec(api.nextDaily(api.progressOf(s), s.playerId));
+  }, [startSpec, guardSaved, api]);
 
   /** "Practice this": a drill for one skill. */
   const startDrill = useCallback(
     (skill: MasterySkillId) => {
       if (guardSaved()) return;
       const s = loadSave();
-      startSpec(nextDrill(getPathwayProgress(s, PATHWAY), s.playerId, skill));
+      startSpec(api.nextDrill(api.progressOf(s), s.playerId, skill));
     },
-    [startSpec, guardSaved],
+    [startSpec, guardSaved, api],
   );
 
   /** The hub's main button: resume a saved battle, else practice (first time), else the real shift. */
   const startShift = useCallback(() => {
-    const p = getPathwayProgress(loadSave(), PATHWAY);
-    const saved = resumable(p.battle, p);
+    const p = api.progressOf(loadSave());
+    const saved = api.resumable(p.battle, p);
     if (saved) beginBattle(saved);
-    else if (!practiceDone(p)) startPractice();
+    else if (!api.practiceDone(p)) startPractice();
     else if (dailyUnlocked(p)) startDaily();
     else newShift();
-  }, [beginBattle, startPractice, newShift, startDaily]);
+  }, [beginBattle, startPractice, newShift, startDaily, api]);
 
   /** "Start over" in the resume prompt: a fresh battle of the same kind. */
   const restartSaved = useCallback(() => {
-    const p = getPathwayProgress(loadSave(), PATHWAY);
-    const enc = p.battle ? encounterFor(p.battle.encounterId, p) : ENC;
+    const p = api.progressOf(loadSave());
+    const enc = p.battle ? pathway.encounterFor(p.battle.encounterId, p) : ENC;
     // A Daily practice or drill starts over with the same plans (its spec stays in progress.shift).
-    if (isGenerated(enc) && p.shift && shiftSpecUsable(p.shift)) beginBattle(createBattle(shiftEncounter(p.shift), p.shift.seed));
+    if (isGenerated(enc) && p.shift && pathway.shiftUsable(p.shift)) beginBattle(createBattle(pathway.shiftEncounter(p.shift), p.shift.seed));
     else if (enc.practice) startPractice();
     else newShift();
-  }, [beginBattle, startPractice, newShift]);
+  }, [beginBattle, startPractice, newShift, ENC, api, pathway]);
 
   const onBattleSave = useCallback((st: BattleState) => {
     if (st.status === "playing") {
-      patchProgress((p) => ({ ...p, battle: st }));
+      api.patchProgress((p) => ({ ...p, battle: st }));
       return;
     }
     const key = `${st.seed}:${st.events.length}`;
@@ -677,9 +696,9 @@ export function GameShell() {
     // Skills: every mode counts (practice, Monday, Daily practice, drills), once per battle
     // (applyBattle is keyed by encounter id + seed, so a reload never counts a battle twice).
     const day = localDay(now);
-    const before = getPathwayProgress(loadSave(), PATHWAY).skills;
-    const next = patchProgress((p) => {
-        const enc = encounterFor(st.encounterId, p);
+    const before = api.progressOf(loadSave()).skills;
+    const next = api.patchProgress((p) => {
+        const enc = pathway.encounterFor(st.encounterId, p);
         const base: PathwayProgress = { ...p, battle: null, pendingResult: st };
         if (enc.practice) {
           // Practice never counts toward attempts, wins, best or history. It only unlocks the real shift.
@@ -716,9 +735,9 @@ export function GameShell() {
         return applyBattle({ ...counted, history: [...p.history, entry].slice(-50) }, st, enc, day);
     });
     setSave(next);
-    setMoved({ key: key, list: skillChanges(before, getPathwayProgress(next, PATHWAY).skills) });
+    setMoved({ key: key, list: skillChanges(before, api.progressOf(next).skills) });
     setFinalState(st);
-  }, []);
+  }, [api, pathway]);
 
   const showResult = useCallback((st: BattleState) => {
     setFinalState(st);
@@ -731,7 +750,7 @@ export function GameShell() {
     if (viewRef.current === "result") {
       // Leaving the result screen also lets go of a finished Daily practice or drill spec.
       setSave(
-        patchProgress((p) => ({
+        api.patchProgress((p) => ({
           ...p,
           pendingResult: null,
           shift: p.shift && p.battle?.encounterId !== p.shift.id ? null : p.shift,
@@ -739,7 +758,7 @@ export function GameShell() {
       );
     }
     setView("hub");
-  }, []);
+  }, [api]);
 
   /** Your skills. Leaving a result screen for it also lets go of that result (like the office). */
   const openSkills = useCallback(() => {
@@ -748,7 +767,7 @@ export function GameShell() {
     setRoomsOpen(false);
     if (viewRef.current === "result") {
       setSave(
-        patchProgress((p) => ({
+        api.patchProgress((p) => ({
           ...p,
           pendingResult: null,
           shift: p.shift && p.battle?.encounterId !== p.shift.id ? null : p.shift,
@@ -756,35 +775,35 @@ export function GameShell() {
       );
     }
     setView("skills");
-  }, []);
+  }, [api]);
 
   const finishIntro = useCallback(() => {
-    const next = patchProgress((p) => ({ ...p, introSeen: true }));
+    const next = api.patchProgress((p) => ({ ...p, introSeen: true }));
     setSave(next);
     // New players go straight from the intro into practice (no walk through the office first).
-    if (!practiceDone(getPathwayProgress(next, PATHWAY))) startPractice();
+    if (!api.practiceDone(api.progressOf(next))) startPractice();
     else setView("hub");
-  }, [startPractice]);
+  }, [startPractice, api]);
 
   /** For presenters: mark practice as done and go to the office, where "Start shift" waits. */
   const skipPractice = useCallback(() => {
-    setSave(patchProgress((p) => ({ ...p, introSeen: true, practiceDone: true })));
+    setSave(api.patchProgress((p) => ({ ...p, introSeen: true, practiceDone: true })));
     setDialogue(null);
     setView("hub");
-  }, []);
+  }, [api]);
 
   const openHowTo = useCallback(() => {
     if (viewRef.current === "battle") {
-      const p = getPathwayProgress(loadSave(), PATHWAY);
+      const p = api.progressOf(loadSave());
       const b = p.battle;
-      const enc = encounterFor(b?.encounterId, p);
+      const enc = pathway.encounterFor(b?.encounterId, p);
       const deck = new Set(deckAtTurn(enc, b?.turn ?? 1));
       setHowDeck({ practice: !!enc.practice, cards: HAND_ORDER.filter((id) => deck.has(id)) });
     } else {
       setHowDeck(ALL_CARDS);
     }
     setHowOpen(true);
-  }, []);
+  }, [api, pathway]);
 
   const toggleMotion = useCallback(() => {
     setSave(updateSave((s) => ({ ...s, settings: { ...s.settings, reducedMotion: !reducedMotion } })));
@@ -795,9 +814,9 @@ export function GameShell() {
   /* ---------------------------------------------------------------- */
 
   const stageMode: StageMode = view === "battle" || view === "result" ? "battle" : "hub";
-  const progress = save ? getPathwayProgress(save, PATHWAY) : null;
-  const savedBattle = resumable(progress?.battle, progress);
-  const savedEnc = savedBattle ? encounterFor(savedBattle.encounterId, progress) : null;
+  const progress = save ? api.progressOf(save) : null;
+  const savedBattle = api.resumable(progress?.battle, progress);
+  const savedEnc = savedBattle ? pathway.encounterFor(savedBattle.encounterId, progress) : null;
   const resumeKind: ResumeKind = savedEnc
     ? savedEnc.practice
       ? "practice"
@@ -807,11 +826,11 @@ export function GameShell() {
     : null;
   const day = today();
   const playerId = save?.playerId ?? "guest";
-  const unlocked = !!progress && practiceDone(progress) && dailyUnlocked(progress);
+  const unlocked = !!progress && api.practiceDone(progress) && dailyUnlocked(progress);
   const skillsOn = !!progress && hasSkills(progress);
   // The next Daily practice, planned ahead so the note tells the truth (planning is pure and cheap).
   const dailyPreview = useMemo(
-    () => (progress && unlocked && !resumeKind && view === "hub" ? nextDaily(progress, playerId) : null),
+    () => (progress && unlocked && !resumeKind && view === "hub" ? api.nextDaily(progress, playerId) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [save, unlocked, resumeKind, view, playerId],
   );
@@ -827,17 +846,17 @@ export function GameShell() {
     ? {
         label: resumeLabel ?? (doneToday ? "One more shift" : "Start today's practice"),
         note: dailyPreview ? dailyNote(dailyPreview) : null,
-        onReplayMonday: resumeKind ? undefined : newShift,
+        onReplayStory: resumeKind ? undefined : newShift,
         onSkills: skillsOn ? openSkills : undefined,
         objective: doneToday ? "Done for today. One more shift is optional." : "Today's practice: new tickets picked for your skills.",
       }
     : null;
-  const practiceNext = !!progress && !practiceDone(progress);
+  const practiceNext = !!progress && !api.practiceDone(progress);
   const resumeState = view === "resume" ? savedBattle : null;
   const inHub = view === "hub" || view === "intro" || view === "resume" || view === "brief";
   const battleOver = view === "battle" && !!finalState && finalState.status !== "playing";
-  const battleEnc = battle ? encounterFor(battle.encounterId, progress) : ENC;
-  const resultEnc = finalState ? encounterFor(finalState.encounterId, progress) : ENC;
+  const battleEnc = battle ? pathway.encounterFor(battle.encounterId, progress) : ENC;
+  const resultEnc = finalState ? pathway.encounterFor(finalState.encounterId, progress) : ENC;
   const firstShift = !!progress && progress.attempts === 0 && !battleEnc.practice && !isGenerated(battleEnc);
   // Drills: "Where to look" at the top of the evidence sheet until the skill is Solid.
   const drillSkill = battleEnc.mode === "drill" && progress?.shift?.id === battleEnc.id ? progress.shift.focus[0] : undefined;
@@ -860,7 +879,7 @@ export function GameShell() {
         </Link>
         <span aria-hidden="true" className="h-6 w-px flex-none bg-line" />
         <p className={g.title}>
-          Help Desk <span className={g.titleSub}>· Fenwick IT</span>
+          {copy.barTitle} <span className={g.titleSub}>{copy.barSub}</span>
         </p>
         {view !== "boot" ? (
           <GameMenu
@@ -883,7 +902,7 @@ export function GameShell() {
           <div className={g.boot} role="status">
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/game/sprites/ollie-eager.svg" alt="" width={220} height={220} className={g.bootBot} />
+              <img src={`/game/sprites/${pathway.stage.agentSprite}-eager.svg`} alt="" width={220} height={220} className={g.bootBot} />
               <p className="mt-3 font-display text-lg font-semibold text-ink">Clocking in…</p>
             </div>
           </div>
@@ -966,7 +985,7 @@ export function GameShell() {
                   aria-modal="true"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/game/sprites/ollie-eager.svg" alt="" width={220} height={220} className="mx-auto h-24 w-24" />
+                  <img src={`/game/sprites/${pathway.stage.agentSprite}-eager.svg`} alt="" width={220} height={220} className="mx-auto h-24 w-24" />
                   <h2 id="hl-resume-title" className="mt-1 font-display text-2xl font-bold text-ink">
                     {resumeKind === "practice" || resumeKind === "daily"
                       ? "Your practice is still open"
@@ -1077,7 +1096,7 @@ export function GameShell() {
           <SkillsScreen
             progress={progress}
             today={day}
-            drillTickets={(skill) => nextDrill(progress, playerId, skill).ticketIds.length}
+            drillTickets={(skill) => api.nextDrill(progress, playerId, skill).ticketIds.length}
             onPractice={startDrill}
             onBack={backToOffice}
             resume={savedBattle && resumeLabel ? { label: resumeLabel, onResume: startShift } : null}
@@ -1090,6 +1109,7 @@ export function GameShell() {
             <PhaserStage
               key={stageKey}
               bus={bus}
+              stage={pathway.stage}
               mode={stageMode}
               reducedMotion={reducedMotion}
               initialHubPos={initialHubPos}

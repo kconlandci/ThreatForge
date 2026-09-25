@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronRight, Clock, X } from "lucide-react";
+import { SPRITES, type SpriteKey } from "@/lib/game/assets";
 import type { Encounter } from "@/lib/game/types";
+import { usePathway } from "@/lib/pathways/context";
 import { DialogueBox } from "./DialogueBox";
 import h from "./hub.module.css";
 
 /**
- * First-visit intro over the office: narrator lines as scene cards, Dana and the agent as a
+ * First-visit intro over the office: narrator lines as scene cards, the coach and the agent as a
  * visual-novel exchange. Skippable at any time.
  */
 export function IntroSequence({
@@ -22,6 +24,8 @@ export function IntroSequence({
   /** Practice comes next: the last screen offers "Skip practice" (for presenters). */
   onSkipPractice?: () => void;
 }) {
+  const { coach, stage } = usePathway();
+  const coachArt = SPRITES[stage.coachSprite as SpriteKey];
   const lines = encounter.intro;
   const [i, setI] = useState(0);
   const line = lines[Math.min(i, lines.length - 1)];
@@ -44,7 +48,7 @@ export function IntroSequence({
 
   if (!line) return null;
   const agentTalking = line.speaker === "agent";
-  const danaTalking = line.speaker === "dana";
+  const coachTalking = line.speaker === "coach";
   const seenSpeaker = lines.slice(0, i + 1).some((l) => l.speaker !== "narrator");
 
   return (
@@ -86,15 +90,15 @@ export function IntroSequence({
           <div className={h.cast} aria-hidden="true">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/game/sprites/dana.svg"
+              src={coachArt?.file ?? `/game/sprites/${stage.coachSprite}.svg`}
               alt=""
-              className={`${h.actor} ${h.actorDana} ${danaTalking ? h.actorTalking : h.actorQuiet}`}
-              width={40}
-              height={74}
+              className={`${h.actor} ${h.actorDana} ${coachTalking ? h.actorTalking : h.actorQuiet}`}
+              width={coachArt?.w ?? 40}
+              height={coachArt?.h ?? 74}
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/game/sprites/ollie-${agentTalking ? "eager" : "idle"}.svg`}
+              src={`/game/sprites/${stage.agentSprite}-${agentTalking ? "eager" : "idle"}.svg`}
               alt=""
               className={`${h.actor} ${h.actorBot} ${agentTalking ? h.actorTalking : h.actorQuiet}`}
               width={220}
@@ -104,7 +108,7 @@ export function IntroSequence({
           </div>
           <DialogueBox
             speaker={line.speaker}
-            role={danaTalking ? "Help desk manager" : agentTalking ? encounter.agent.role : undefined}
+            role={coachTalking ? coach.role : agentTalking ? encounter.agent.role : undefined}
             text={line.text}
             index={i}
             total={lines.length}

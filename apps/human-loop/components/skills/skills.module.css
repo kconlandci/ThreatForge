@@ -156,7 +156,7 @@
   list-style: none;
 }
 
-/* Dana's 3 questions: icon on top, the question under it (3 across, even on a phone). */
+/* The 3 questions: icon on top, the question under it (3 across, even on a phone). */
 .question {
   display: flex;
   flex-direction: column;
@@ -172,6 +172,33 @@
   color: var(--hl-teal-dark);
   text-align: center;
   text-wrap: balance;
+}
+
+/* With per-pathway hints (e.g. the SOC): one question per row, the hint under its title. */
+.questionsHinted {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.questionsHinted .question {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.questionsHinted .questionIcon {
+  flex: none;
+}
+
+.questionHint {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--hl-ink);
 }
 
 .questionIcon {

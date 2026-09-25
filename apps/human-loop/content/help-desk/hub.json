@@ -5,6 +5,7 @@
       "label": "Ollie's desk",
       "description": "Your AI coworker. Start the shift here.",
       "action": "battle",
+      "icon": "Bot",
       "lines": [
         { "speaker": "agent", "text": "Oh! A human! Hi! I'm Ollie. It's short for Off-and-On-Again. My name is also my favorite fix." },
         { "speaker": "agent", "text": "Have you tried turning it off and on again? That's my catchphrase. And my plan for everything." },
@@ -19,25 +20,28 @@
       "label": "Dana, help desk manager",
       "description": "Your manager. Ask her how this works.",
       "action": "talk",
+      "icon": "UserRound",
       "lines": [
-        { "speaker": "dana", "text": "Welcome to Fenwick. I'm Dana. I run the help desk. Lately, I also run Ollie." },
-        { "speaker": "dana", "text": "Ollie is fast. It is not always right. Your job is to keep a human in the loop." },
-        { "speaker": "dana", "text": "Each turn, it shows you what it plans to do. Play Inspect to see the evidence behind a plan." },
-        { "speaker": "dana", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
-        { "speaker": "dana", "text": "When you tap Approve, Ollie goes ahead with every plan you didn't stop. So look first." },
-        { "speaker": "dana", "text": "But don't block everything. Blocked good work goes back in line, and the shift is only six turns." }
+        { "speaker": "coach", "text": "Welcome to Fenwick. I'm Dana. I run the help desk. Lately, I also run Ollie." },
+        { "speaker": "coach", "text": "Ollie is fast. It is not always right. Your job is to keep a human in the loop." },
+        { "speaker": "coach", "text": "Each turn, it shows you what it plans to do. Play Inspect to see the evidence behind a plan." },
+        { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
+        { "speaker": "coach", "text": "When you tap Approve, Ollie goes ahead with every plan you didn't stop. So look first." },
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the shift is only six turns." }
       ],
       "returningLines": [
-        { "speaker": "dana", "text": "Welcome back. Each day I pick tickets for the skills you need most." },
-        { "speaker": "dana", "text": "Your skills shows your level for each check. 4 dots is Sharp." },
-        { "speaker": "dana", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, sticks best." },
-        { "speaker": "dana", "text": "Same job as Monday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
+        { "speaker": "coach", "text": "Welcome back. Each day I pick tickets for the skills you need most." },
+        { "speaker": "coach", "text": "Your skills shows your level for each check. 4 dots is Sharp." },
+        { "speaker": "coach", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, sticks best." },
+        { "speaker": "coach", "text": "Same job as Monday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
       ]
     },
     "whiteboard": {
       "label": "Team whiteboard",
       "description": "Dana's rules, in dry-erase marker.",
       "action": "look",
+      "icon": "Presentation",
+      "skillsLink": true,
       "lines": [
         { "speaker": "narrator", "text": "Big letters across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
         { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
@@ -49,6 +53,7 @@
       "label": "Coffee machine",
       "description": "Out of order. Long story.",
       "action": "look",
+      "icon": "Coffee",
       "lines": [
         { "speaker": "narrator", "text": "The coffee machine's screen says: FACTORY RESET COMPLETE. PLEASE SELECT A LANGUAGE." },
         { "speaker": "narrator", "text": "It has said that since Thursday. The machine has no buttons." },
@@ -59,6 +64,7 @@
       "label": "Office printer",
       "description": "It works. Nobody knows why.",
       "action": "look",
+      "icon": "Printer",
       "lines": [
         { "speaker": "narrator", "text": "The printer's screen says: PAPER JAM IN TRAY 3. The printer has two trays." },
         { "speaker": "narrator", "text": "A note is taped to the lid: \"Ollie, do NOT turn this off and on again. It jams, but it's OUR jam. — Dana\"" }

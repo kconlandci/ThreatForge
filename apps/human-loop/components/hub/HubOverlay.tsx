@@ -4,21 +4,22 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Flag, Info, List, Play, X } from "lucide-react";
 import type { HubContent, HubTargetId } from "@/lib/game/hub";
 import type { Encounter } from "@/lib/game/types";
+import { usePathway } from "@/lib/pathways/context";
 import { DialogueBox } from "./DialogueBox";
-import { TARGET_ICON } from "./RoomList";
+import { hubIcon } from "./hubIcons";
 import h from "./hub.module.css";
 
 /** A saved battle that can be resumed, and which kind it is. */
 export type ResumeKind = "practice" | "shift" | "daily" | "drill" | null;
 
-/** Ollie's desk after the first Monday: Daily practice first, Monday and the skills one tap away. */
+/** The agent's desk after the first story shift: Daily practice first, the story and the skills one tap away. */
 export interface HubChooser {
   /** "Start today's practice", "One more shift" or a resume label. */
   label: string;
   /** "4 tickets · about 6 min · Focus: Check who's asking" (none while resuming). */
   note: string | null;
-  /** Hidden while a battle is saved (starting Monday would drop it). */
-  onReplayMonday?: () => void;
+  /** Replay the story shift ("Replay Monday"). Hidden while a battle is saved (starting it would drop it). */
+  onReplayStory?: () => void;
   onSkills?: () => void;
   /** The TODAY banner: "Today's practice: new tickets picked for your skills." */
   objective?: string;
@@ -51,7 +52,7 @@ export interface HubOverlayProps {
   onStartShift: () => void;
   /** Set once Daily practice is open (after the first Monday attempt). */
   chooser?: HubChooser | null;
-  /** "Your skills" on Dana's whiteboard (when there are skills to show). */
+  /** "Your skills" on the skillsLink target, e.g. the whiteboard (when there are skills to show). */
   onSkills?: () => void;
 }
 
@@ -96,9 +97,10 @@ function TargetDialogue({
   onClose: () => void;
   onStartShift: () => void;
   onSkills?: () => void;
-  /** Daily practice is open: Ollie and Dana greet a returning player, not a stranger. */
+  /** Daily practice is open: the agent and the coach greet a returning player, not a stranger. */
   returning: boolean;
 }) {
+  const { coach } = usePathway();
   const content = hub.targets[target];
   const [i, setI] = useState(0);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -114,19 +116,19 @@ function TargetDialogue({
     <DialogueBox
       speaker={line.speaker}
       name={line.speaker === "narrator" ? content.label : undefined}
-      role={line.speaker === "dana" ? "Help desk manager" : line.speaker === "agent" ? encounter.agent.role : undefined}
+      role={line.speaker === "coach" ? coach.role : line.speaker === "agent" ? encounter.agent.role : undefined}
       text={line.text}
       index={i}
       total={lines.length}
       agentName={encounter.agent.name}
       reducedMotion={reducedMotion}
-      icon={TARGET_ICON[target]}
+      icon={hubIcon(content.icon)}
       focusRef={nextRef}
       nextLabel={last ? "Done" : "Next"}
       onNext={() => (last ? onClose() : setI(i + 1))}
       onClose={onClose}
       secondary={
-        target === "whiteboard" && onSkills ? (
+        content.skillsLink && onSkills ? (
           <button type="button" className={`${skipLink} m-0`} onClick={onSkills}>
             Your skills
           </button>
@@ -162,6 +164,7 @@ export function HubOverlay({
   chooser = null,
   onSkills,
 }: HubOverlayProps) {
+  const { config } = usePathway();
   const walkingLabel = walking ? hub.targets[walking]?.label : null;
   const label = chooser?.label ?? startLabel(resumeKind, practiceNext);
   // The note is announced through a status region that is already on the page (a region inserted
@@ -249,11 +252,11 @@ export function HubOverlay({
                 {label}
               </button>
             </div>
-            {chooser.onReplayMonday || chooser.onSkills ? (
+            {chooser.onReplayStory || chooser.onSkills ? (
               <div className={h.chooserLinks}>
-                {chooser.onReplayMonday ? (
-                  <button type="button" className={h.chooserLink} onClick={chooser.onReplayMonday}>
-                    Replay Monday
+                {chooser.onReplayStory ? (
+                  <button type="button" className={h.chooserLink} onClick={chooser.onReplayStory}>
+                    {config.copy.replayStory}
                   </button>
                 ) : null}
                 {chooser.onSkills ? (

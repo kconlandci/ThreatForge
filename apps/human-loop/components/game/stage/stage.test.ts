@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { HUB_TARGET_IDS } from "@/lib/game/hub";
-import { HUB_MAP, HUB_WALKABLE, isWalkable } from "@/lib/game/hubMap";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { SPRITES } from "@/lib/game/assets";
+import { buildWalkable, characterByRole, isWalkable, stageSprites, targetAtTile } from "@/lib/game/hubMap";
+import { TEST_PATHWAYS } from "@/lib/pathways/testing";
 import { tileToWorld, worldToTile, worldToGridFloat } from "./iso";
 import { findPath, nearestWalkable } from "./pathfind";
 
@@ -61,23 +64,102 @@ describe("pathfinding", () => {
   });
 });
 
-describe("hub map", () => {
+describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s hub map", (_id, P) => {
+  const MAP = P.stage.hubMap;
+  const WALK = buildWalkable(MAP);
+  const inside = (t: { x: number; y: number }) => t.x >= 0 && t.y >= 0 && t.x < MAP.cols && t.y < MAP.rows;
+
   it("has a walkable spawn", () => {
-    expect(isWalkable(HUB_MAP.spawn)).toBe(true);
+    expect(isWalkable(MAP.spawn, WALK)).toBe(true);
   });
-  it("can reach every target's interaction tile from spawn", () => {
-    for (const id of HUB_TARGET_IDS) {
-      const spot = HUB_MAP.targets[id];
-      expect(isWalkable(spot.tile), id).toBe(true);
-      expect(findPath(HUB_WALKABLE, HUB_MAP.spawn, spot.tile), id).not.toBeNull();
-    }
+
+  it("has a spot for every hub target, and no others", () => {
+    expect(Object.keys(MAP.targets).sort()).toEqual(Object.keys(P.hub.targets).sort());
   });
-  it("keeps every walkable tile connected", () => {
-    for (let y = 0; y < HUB_MAP.rows; y++) {
-      for (let x = 0; x < HUB_MAP.cols; x++) {
-        if (!HUB_WALKABLE[y][x]) continue;
-        expect(findPath(HUB_WALKABLE, HUB_MAP.spawn, { x, y }), `${x},${y}`).not.toBeNull();
+
+  it("can reach every target's interaction tile from spawn; hot tiles are in bounds", () => {
+    for (const [id, spot] of Object.entries(MAP.targets)) {
+      expect(isWalkable(spot.tile, WALK), id).toBe(true);
+      expect(findPath(WALK, MAP.spawn, spot.tile), id).not.toBeNull();
+      for (const t of spot.hotTiles) {
+        expect(inside(t), `${id} hot tile ${t.x},${t.y}`).toBe(true);
+        expect(targetAtTile(t, MAP)).toBe(id);
       }
     }
+    for (const p of MAP.props) if (p.target) expect(Object.keys(MAP.targets), p.id).toContain(p.target);
+  });
+
+  it("keeps every walkable tile connected, and characters' tiles blocked", () => {
+    for (let y = 0; y < MAP.rows; y++) {
+      for (let x = 0; x < MAP.cols; x++) {
+        if (!WALK[y][x]) continue;
+        expect(findPath(WALK, MAP.spawn, { x, y }), `${x},${y}`).not.toBeNull();
+      }
+    }
+    for (const c of MAP.characters) expect(isWalkable(c.tile, WALK), c.id).toBe(false);
+  });
+
+  it("has one agent and one coach, matching the hub's battle and talk targets", () => {
+    const agent = characterByRole(MAP, "agent");
+    const coach = characterByRole(MAP, "coach");
+    expect(MAP.characters.filter((c) => c.role === "agent")).toHaveLength(1);
+    expect(MAP.characters.filter((c) => c.role === "coach")).toHaveLength(1);
+    expect(agent?.sprite).toBe(P.stage.agentSprite);
+    expect(coach?.sprite).toBe(P.stage.coachSprite);
+    expect(P.hub.targets[agent!.target].action).toBe("battle");
+    expect(P.hub.targets[coach!.target].action).toBe("talk");
+  });
+
+  it("puts blink lights on things that exist, with exactly one antenna, on the agent", () => {
+    const owners = new Set([...MAP.props.map((p) => p.id), ...MAP.characters.map((c) => c.id), ...MAP.decor.map((d) => d.id)]);
+    for (const l of MAP.blinkLights) expect(owners.has(l.on), l.on).toBe(true);
+    const antennas = MAP.blinkLights.filter((l) => l.kind === "antenna");
+    expect(antennas).toHaveLength(1);
+    expect(antennas[0].on).toBe(characterByRole(MAP, "agent")!.id);
+  });
+
+  it("lists every sprite the stage draws, and each one exists", () => {
+    const keys = stageSprites(P.stage);
+    for (const p of MAP.props) expect(keys).toContain(p.sprite);
+    for (const c of MAP.characters) expect(keys).toContain(c.sprite);
+    for (const d of MAP.decor) expect(keys).toContain(d.sprite);
+    for (const m of ["idle", "eager", "busted", "sad", "celebrate"]) expect(keys).toContain(`${P.stage.agentSprite}-${m}`);
+    for (const k of keys) {
+      const def = (SPRITES as Record<string, { file: string; kind?: string }>)[k];
+      expect(def, k).toBeTruthy();
+      expect(def.kind, `${k} has a kind`).toBeTruthy();
+      expect(existsSync(join(process.cwd(), "public", def.file)), def.file).toBe(true);
+    }
+    for (const m of ["idle", "eager", "busted", "sad", "celebrate"]) {
+      expect((SPRITES as Record<string, { kind?: string }>)[`${P.stage.agentSprite}-${m}`].kind).toBe("portrait");
+    }
+  });
+});
+
+describe("evidence row kinds", () => {
+  it("draws every Help Desk evidence row as before", async () => {
+    const { artifactKind } = await import("@/components/battle/icons");
+    const { HELP_DESK } = await import("@/lib/pathways/help-desk");
+    const { readFileSync } = await import("node:fs");
+    const gold = JSON.parse(readFileSync(join(process.cwd(), "lib/game/__golden__/artifact-kinds.json"), "utf8"));
+    const now: Record<string, string> = {};
+    const steps = [...HELP_DESK.encounters.flatMap((e) => e.steps), ...HELP_DESK.bank.flatMap((t) => t.steps)];
+    for (const s of steps) for (const e of s.evidence) now[`${s.id}|${e.label}`] = artifactKind(e.label, e.detail);
+    expect(now).toEqual(gold);
+  });
+
+  it("knows the SOC rows", async () => {
+    const { artifactKind, CATEGORY_ICON, CATEGORY_LABEL } = await import("@/components/battle/icons");
+    expect(artifactKind("Playbook PB-02", "Isolate it now.")).toBe("policy");
+    expect(artifactKind("EDR alert", "BL-LT-0277: Word started PowerShell.")).toBe("terminal");
+    expect(artifactKind("Sign-in alert", "Boston, then Chicago.")).toBe("terminal");
+    expect(artifactKind("Hash lookup", "No match.")).toBe("terminal");
+    expect(artifactKind("Alert group", "40 alerts.")).toBe("terminal");
+    expect(artifactKind("Mail check", "Sender checks pass.")).toBe("email");
+    expect(artifactKind("Mailbox rules", "3 rules.")).toBe("email");
+    expect(CATEGORY_LABEL.endpoint).toBe("Device");
+    expect(CATEGORY_LABEL.network).toBe("Network");
+    expect(CATEGORY_ICON.endpoint).toBeTruthy();
+    expect(CATEGORY_ICON.network).toBeTruthy();
   });
 });

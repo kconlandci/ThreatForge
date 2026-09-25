@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:bundles": "node scripts/check-bundles.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

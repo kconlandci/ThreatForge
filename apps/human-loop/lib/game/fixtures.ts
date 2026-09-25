@@ -3,7 +3,8 @@
  *
  * Every fixture is produced by driving the real engine with a scripted player, so the
  * states are always valid for the current content. `fixtureBattle(name)` is used by the
- * dev-only `?fixture=` switch on /play/help-desk (see components/game/GameShell.tsx).
+ * dev-only `?fixture=` switch on /play/<pathway> (see components/game/GameShell.tsx). They default
+ * to the Help Desk; pass another pathway's { practice, story } to get its fixtures.
  */
 import { CARDS } from "./cards";
 import { HELP_DESK_ENCOUNTER, HELP_DESK_PRACTICE } from "./content";
@@ -32,9 +33,17 @@ export const FIXTURE_NAMES: FixtureName[] = [
   "practice-won",
 ];
 
+/** The fixed shifts fixtures are played on. */
+export interface FixtureShifts {
+  practice: Encounter;
+  story: Encounter;
+}
+
+const HELP_DESK_SHIFTS: FixtureShifts = { practice: HELP_DESK_PRACTICE, story: HELP_DESK_ENCOUNTER };
+
 /** The encounter a fixture belongs to (the practice fixtures use the practice shift). */
-export function fixtureEncounter(name: FixtureName): Encounter {
-  return name.startsWith("practice") ? HELP_DESK_PRACTICE : HELP_DESK_ENCOUNTER;
+export function fixtureEncounter(name: FixtureName, shifts: FixtureShifts = HELP_DESK_SHIFTS): Encounter {
+  return name.startsWith("practice") ? shifts.practice : shifts.story;
 }
 
 type Policy = (s: BattleState, e: Encounter) => BattleState;
@@ -92,8 +101,9 @@ function search(want: BattleState["status"], policy: Policy, e: Encounter): Batt
   return run(1, policy, e);
 }
 
-export function fixtureBattle(name: FixtureName, encounter: Encounter = HELP_DESK_ENCOUNTER): BattleState {
+export function fixtureBattle(name: FixtureName, encounter: Encounter = HELP_DESK_ENCOUNTER, shifts: FixtureShifts = HELP_DESK_SHIFTS): BattleState {
   const e = encounter;
+  const P = shifts.practice;
   switch (name) {
     case "start":
       return createBattle(e, 7);
@@ -116,16 +126,16 @@ export function fixtureBattle(name: FixtureName, encounter: Encounter = HELP_DES
         for (let i = 0; i < 3 && s.status === "playing"; i++) s = endTurn(s, e);
         if (s.status === "playing" && s.turn >= 4 && s.hand.some((c) => c.cardId === "rollback")) return s;
       }
-      return fixtureBattle("mid", e);
+      return fixtureBattle("mid", e, shifts);
     }
     case "practice":
-      return createBattle(HELP_DESK_PRACTICE, 1);
+      return createBattle(P, 1);
     case "practice-t2": {
-      // Ticket 1 approved: ticket 2 (the phishing request) is on the board.
-      return endTurn(createBattle(HELP_DESK_PRACTICE, 1), HELP_DESK_PRACTICE);
+      // Ticket 1 approved: ticket 2 (the first risky plan) is on the board.
+      return endTurn(createBattle(P, 1), P);
     }
     case "practice-won":
-      return run(1, perfectTurn, HELP_DESK_PRACTICE);
+      return run(1, perfectTurn, P);
     case "won":
       return search("won", perfectTurn, e);
     case "lost":

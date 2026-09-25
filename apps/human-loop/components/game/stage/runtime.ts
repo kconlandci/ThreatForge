@@ -5,12 +5,19 @@
 import type { SpriteKey } from "@/lib/game/assets";
 import type { AgentMood, FromStage, StageBus, StageMode } from "@/lib/game/bus";
 import type { HubTargetId } from "@/lib/game/hub";
-import type { GridPos } from "@/lib/game/hubMap";
+import type { GridPos, StageSetup } from "@/lib/game/hubMap";
+import type { Bounds } from "./layout";
 
 export type SceneKey = "boot" | StageMode;
 
 export interface StageRuntime {
   bus: StageBus;
+  /** The pathway's room and cast. */
+  stage: StageSetup;
+  /** walkable[y][x] for stage.hubMap. */
+  walkable: boolean[][];
+  /** World bounds of stage.hubMap. */
+  hubBounds: Bounds;
   /** Device pixels per CSS pixel used for the canvas (capped). */
   dpr: number;
   cssW: number;

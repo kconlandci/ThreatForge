@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { ClipboardList, Play, Target, X } from "lucide-react";
-import { SpeakerFace, speakerName } from "@/components/battle/SpeakerFace";
+import { SpeakerFace, speakerName, speakerNames } from "@/components/battle/SpeakerFace";
 import r from "@/components/battle/result.module.css";
 import type { Encounter } from "@/lib/game/types";
 import h from "./hub.module.css";
 
 /**
- * One screen before a Daily practice or drill: what it is, Dana's and Ollie's two intro lines, and
+ * One screen before a Daily practice or drill: what it is, the coach's and the agent's two intro lines, and
  * one Start button. (The battle is already saved, so a reload here offers "Resume".)
  */
 export function ShiftIntro({
@@ -60,7 +60,7 @@ export function ShiftIntro({
                 <SpeakerFace speaker={line.speaker} size={36} mood={line.speaker === "agent" ? "eager" : "idle"} />
                 <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
                   {line.speaker !== "narrator" ? (
-                    <span className={r.lineName}>{speakerName(line.speaker, encounter.agent.name)}</span>
+                    <span className={r.lineName}>{speakerName(line.speaker, speakerNames(encounter))}</span>
                   ) : null}
                   {line.text}
                 </p>

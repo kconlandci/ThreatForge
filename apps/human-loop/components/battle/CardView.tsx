@@ -2,7 +2,7 @@
 
 import { forwardRef, type CSSProperties } from "react";
 import { Lock } from "lucide-react";
-import { CARDS } from "@/lib/game/cards";
+import { usePathway } from "@/lib/pathways/context";
 import type { CardId } from "@/lib/game/types";
 import { cardIcon } from "./icons";
 import s from "./battle.module.css";
@@ -55,7 +55,7 @@ export const CardView = forwardRef<HTMLButtonElement, CardViewProps>(function Ca
   },
   ref,
 ) {
-  const card = CARDS[cardId];
+  const card = usePathway().cardCopy(cardId);
   const Icon = cardIcon(card.icon);
   const long = card.name.length > 9;
   const rules = showRules || selected;

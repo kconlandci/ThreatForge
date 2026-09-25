@@ -1,5 +1,5 @@
 /**
- * Pure view helpers for the M3 skill screens (Ollie's desk chooser, Your skills, the shift result
+ * Pure view helpers for the M3 skill screens (the agent's desk chooser, Your skills, the shift result
  * lists). No React, no clock: `today` (YYYY-MM-DD) is always passed in. Words and pips, never
  * percentages.
  */
@@ -9,16 +9,18 @@ import {
   addDays,
   gradePlan,
   isDue,
+  reasonText,
   localDay,
   need,
   type PlanGrade,
 } from "./mastery";
-import { MASTERY_SKILLS, SKILLS, skillName } from "./skills";
+import { coachName } from "./coach";
+import { MASTERY_SKILLS, QUESTION_TITLES, skillName, skillQuestion } from "./skills";
 import type {
   AgentStep,
   BattleState,
   CallGrade,
-  DanaQuestion,
+  CheckQuestion,
   Encounter,
   HistoryEntry,
   MasterySkillId,
@@ -92,25 +94,22 @@ export function nextUpSkill(skills: Skills | undefined, today: string): MasteryS
 }
 
 export interface SkillGroup {
-  /** Dana's question, or null for "All 3 check out" (approve-checked). */
-  question: DanaQuestion | null;
+  /** The skill's question, or null for "All 3 check out" (approve-checked). */
+  question: CheckQuestion | null;
   title: string;
   skills: MasterySkillId[];
 }
 
-export const QUESTION_TITLES: Record<DanaQuestion, string> = {
-  who: "Who asked?",
-  record: "Does it match the record?",
-  undo: "Can we undo it?",
-};
+/** The shared question titles (moved to skills.ts). */
+export { QUESTION_TITLES };
 
-/** Met skills grouped under Dana's questions; approve-checked last under "All 3 check out". Empty groups are left out. */
+/** Met skills grouped under the 3 questions; approve-checked last under "All 3 check out". Empty groups are left out. */
 export function skillGroups(skills: Skills | undefined): SkillGroup[] {
   const met = new Set(metSkills(skills));
-  const groups: SkillGroup[] = (["who", "record", "undo"] as DanaQuestion[]).map((q) => ({
+  const groups: SkillGroup[] = (["who", "record", "undo"] as CheckQuestion[]).map((q) => ({
     question: q,
     title: QUESTION_TITLES[q],
-    skills: MASTERY_SKILLS.filter((s) => SKILLS[s].question === q && met.has(s)),
+    skills: MASTERY_SKILLS.filter((s) => skillQuestion(s) === q && met.has(s)),
   }));
   groups.push({ question: null, title: "All 3 check out", skills: met.has("approve-checked") ? ["approve-checked"] : [] });
   return groups.filter((g) => g.skills.length > 0);
@@ -178,8 +177,8 @@ export function nextPipText(skill: MasterySkillId, level: SkillLevel): string {
 export interface PlanLine {
   step: AgentStep;
   grade: PlanGrade;
-  /** Dana's question for the plan's lens skill. */
-  question: DanaQuestion | null;
+  /** The question of the plan's lens skill. */
+  question: CheckQuestion | null;
   /** Line 2: the tell, with the reason first for a partly right call ("Lucky guess. ..."). */
   text: string;
 }
@@ -188,12 +187,13 @@ const RANK: Record<string, number> = { W: 0, P: 1, R: 2, none: 3 };
 
 /** One line per plan, mistakes first (missed, then partly, then right, then never reached). */
 export function planLines(state: BattleState, encounter: Encounter): PlanLine[] {
+  const coach = coachName(encounter);
   return encounter.steps
     .map((step, i) => {
       const grade = gradePlan(step, state.steps[step.id]);
       const tell = step.tell ?? step.lesson;
-      const text = grade.result === "P" ? `${grade.reason}. ${tell}` : grade.result ? tell : "The shift ended before it came up.";
-      return { i, line: { step, grade, question: step.skill ? SKILLS[step.skill].question : null, text } };
+      const text = grade.result === "P" ? `${reasonText(grade.reason, coach)}. ${tell}` : grade.result ? tell : "The shift ended before it came up.";
+      return { i, line: { step, grade, question: step.skill ? skillQuestion(step.skill) : null, text } };
     })
     .sort((a, b) => RANK[a.line.grade.result ?? "none"] - RANK[b.line.grade.result ?? "none"] || a.i - b.i)
     .map((x) => x.line);

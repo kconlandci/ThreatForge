@@ -7,7 +7,11 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createBus, type AgentMood, type FromStage, type StageMode, type ToStage } from "@/lib/game/bus";
-import { HUB_TARGET_IDS } from "@/lib/game/hub";
+import { HELP_DESK } from "@/lib/pathways/help-desk";
+
+/** The lab shows the Help Desk room (a ?pathway= switch can come with the second bundle). */
+const PATHWAY = HELP_DESK;
+const TARGET_IDS = Object.keys(PATHWAY.hub.targets);
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), {
   ssr: false,
@@ -101,7 +105,7 @@ export default function StageLab() {
             className="overflow-hidden border-y border-line bg-white sm:rounded-2xl sm:border sm:shadow-sm"
             style={{ width: dims.w, height: dims.h, maxWidth: "100%" }}
           >
-            <PhaserStage key={mountKey} bus={bus} mode={mode} reducedMotion={reduced} initialHubPos={null} className="h-full w-full" />
+            <PhaserStage key={mountKey} bus={bus} stage={PATHWAY.stage} mode={mode} reducedMotion={reduced} initialHubPos={null} className="h-full w-full" />
           </div>
           <p className="px-3 font-mono text-xs text-muted sm:px-0">
             tile under pointer: <span data-testid="tile">{tile}</span>
@@ -130,7 +134,7 @@ export default function StageLab() {
             ))}
           </Group>
           <Group title="Walk to (hub)">
-            {HUB_TARGET_IDS.map((t) => (
+            {TARGET_IDS.map((t) => (
               <button key={t} type="button" className={btn} onClick={() => send({ type: "walk-to", target: t })}>
                 {t}
               </button>

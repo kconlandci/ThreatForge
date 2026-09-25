@@ -1,7 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import { Clock } from "lucide-react";
 import type { AgentMood } from "@/lib/game/bus";
-import type { DialogueLine } from "@/lib/game/types";
+import { usePathway } from "@/lib/pathways/context";
+import { coachName } from "@/lib/game/coach";
+import type { DialogueLine, Encounter } from "@/lib/game/types";
 import s from "./battle.module.css";
 
 export type Speaker = DialogueLine["speaker"] | "player";
@@ -9,8 +11,8 @@ export type Speaker = DialogueLine["speaker"] | "player";
 const SPRITE = "/game/sprites/";
 
 /**
- * Round portrait chip cropped from the character sprites (no extra art needed).
- * The narrator gets an icon instead of a face.
+ * Round portrait chip cropped from the character sprites (no extra art needed): the pathway's
+ * coach (orange tint) and agent (its mood portrait), or the player. The narrator gets an icon.
  */
 export function SpeakerFace({
   speaker,
@@ -25,6 +27,7 @@ export function SpeakerFace({
   icon?: LucideIcon;
   className?: string;
 }) {
+  const { stage } = usePathway();
   if (speaker === "narrator") {
     return (
       <span
@@ -39,16 +42,16 @@ export function SpeakerFace({
   const art =
     speaker === "agent"
       ? {
-          url: `${SPRITE}ollie-${mood}.svg`,
+          url: `${SPRITE}${stage.agentSprite}-${mood}.svg`,
           size: `${size * 1.3}px auto`,
           pos: `${-size * 0.18}px ${size * 0.06}px`,
           bg: "var(--hl-teal-tint)",
         }
       : {
-          url: `${SPRITE}${speaker === "dana" ? "dana" : "player"}.svg`,
+          url: `${SPRITE}${speaker === "coach" ? stage.coachSprite : "player"}.svg`,
           size: `${size * 1.15}px auto`,
           pos: `50% ${size * 0.06}px`,
-          bg: speaker === "dana" ? "var(--hl-orange-tint)" : "var(--hl-teal-tint)",
+          bg: speaker === "coach" ? "var(--hl-orange-tint)" : "var(--hl-teal-tint)",
         };
   return (
     <span
@@ -66,15 +69,20 @@ export function SpeakerFace({
   );
 }
 
-export function speakerName(speaker: Speaker, agentName: string): string {
+export function speakerName(speaker: Speaker, names: { agentName: string; coachName: string }): string {
   switch (speaker) {
-    case "dana":
-      return "Dana";
+    case "coach":
+      return names.coachName;
     case "agent":
-      return agentName;
+      return names.agentName;
     case "player":
       return "You";
     default:
       return "";
   }
+}
+
+/** The names an encounter's lines are spoken with. */
+export function speakerNames(enc: Encounter): { agentName: string; coachName: string } {
+  return { agentName: enc.agent.name, coachName: coachName(enc) };
 }

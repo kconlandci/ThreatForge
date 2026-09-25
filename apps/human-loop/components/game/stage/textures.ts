@@ -37,17 +37,16 @@ function shadow(ctx: Ctx, cx: number, cy: number, rx: number, ry: number) {
   ctx.fill();
 }
 
-const CHARACTER_KEYS = new Set(["player", "dana", "ollie"]);
-
 /** Draws a clean stand-in for a sprite whose SVG did not load, so the stage never breaks. */
 export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: SpriteDef, res: number) {
   const { w, h } = def;
   const ox = def.originX * w;
   const oy = def.originY * h;
   canvasTexture(scene, texKey, w, h, res, (ctx) => {
-    if (def.key.startsWith("ollie-") || CHARACTER_KEYS.has(def.key)) {
-      // Capsule character: body + head, brand colours.
-      const body = def.key === "player" ? BRAND.ink : def.key === "dana" ? BRAND.orange : BRAND.teal;
+    if (def.kind === "character" || def.kind === "portrait") {
+      // Capsule character: body + head, brand colours by who it is.
+      const agent = def.tone === "agent";
+      const body = def.tone === "player" ? BRAND.ink : def.tone === "coach" ? BRAND.orange : BRAND.teal;
       const bw = w * 0.5;
       const bh = (oy - h * 0.08) * 0.55;
       shadow(ctx, ox, oy, w * 0.3, w * 0.09);
@@ -57,9 +56,9 @@ export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: Sprite
       ctx.fill();
       ctx.beginPath();
       ctx.arc(ox, oy - bh - bw * 0.55, bw * 0.48, 0, Math.PI * 2);
-      ctx.fillStyle = def.key.startsWith("ollie") ? BRAND.tealDark : "#C98B63";
+      ctx.fillStyle = agent ? BRAND.tealDark : "#C98B63";
       ctx.fill();
-      if (def.key.startsWith("ollie")) {
+      if (agent) {
         ctx.fillStyle = BRAND.orange;
         ctx.beginPath();
         ctx.arc(ox, oy - bh / 2 - 2, bw * 0.18, 0, Math.PI * 2);
@@ -67,7 +66,7 @@ export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: Sprite
       }
       return;
     }
-    if (def.key.startsWith("wall-")) {
+    if (def.kind === "decor") {
       ctx.fillStyle = BRAND.line;
       ctx.beginPath();
       ctx.roundRect(w * 0.1, h * 0.1, w * 0.8, h * 0.8, 4);
@@ -78,7 +77,7 @@ export function drawPlaceholder(scene: Phaser.Scene, texKey: string, def: Sprite
       ctx.fill();
       return;
     }
-    if (def.key === "marker-exclaim" || def.key === "tap-ring") {
+    if (def.kind === "marker") {
       ctx.fillStyle = def.key === "tap-ring" ? "rgba(15,106,97,0.35)" : BRAND.orange;
       ctx.beginPath();
       ctx.ellipse(w / 2, h / 2, w * 0.45, h * 0.45, 0, 0, Math.PI * 2);

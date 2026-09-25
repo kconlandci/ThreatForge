@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentMood, ToStage } from "./bus";
 import { CARDS } from "./cards";
+import { coachName } from "./coach";
 import { deckAtTurn, endTurn as engineEndTurn, playCard as enginePlayCard } from "./engine";
 import { gradePlan, type PlanGrade } from "./mastery";
 import type {
@@ -103,7 +104,7 @@ export function resolvedCount(state: BattleState): number {
   return Object.values(state.steps).filter((s) => RESOLVED.includes(s.status)).length;
 }
 
-/** Step ids the callback policy inspected automatically. */
+/** Step ids a policy card inspected automatically. */
 export function autoInspectedIds(state: BattleState): Set<string> {
   const ids = new Set<string>();
   for (const ev of state.events) if (ev.t === "inspected" && ev.auto) ids.add(ev.stepId);
@@ -113,7 +114,7 @@ export function autoInspectedIds(state: BattleState): Set<string> {
 export { deckAtTurn };
 
 /** Fixed order of the hand's stacks: the core loop first, then the cards that unlock later. */
-export const HAND_ORDER: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "coffee"];
+export const HAND_ORDER: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "policy-look-first", "coffee"];
 
 export interface HandStack {
   cardId: CardId;
@@ -218,6 +219,7 @@ const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat[] {
   const beats: Beat[] = [];
   const agent = agentShortName(encounter);
+  const coach = coachName(encounter);
   let cur: Beat | null = null;
   const start = (b: Beat) => {
     beats.push(b);
@@ -254,16 +256,16 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
       }
       case "caught": {
         const b = current();
-        const byDana = ev.by === "escalate";
-        const text = (byDana ? step?.outcome.escalated : step?.outcome.blocked) ?? "Stopped.";
+        const byCoach = ev.by === "escalate";
+        const text = (byCoach ? step?.outcome.escalated : step?.outcome.blocked) ?? "Stopped.";
         b.toast = {
           tone: "good",
-          title: byDana ? "Dana caught it!" : "Caught!",
+          title: byCoach ? `${coach} caught it!` : "Caught!",
           text,
           stepId: ev.stepId,
         };
-        b.log.push(`${byDana ? "Dana caught it" : "Caught"}: "${intentOf(ev.stepId)}". ${text}`);
-        b.stage.push(byDana ? fx("escalate", 0.7) : fx("catch", clamp01(0.5 + (step?.risk ?? 3) / encounter.maxRisk)));
+        b.log.push(`${byCoach ? `${coach} caught it` : "Caught"}: "${intentOf(ev.stepId)}". ${text}`);
+        b.stage.push(byCoach ? fx("escalate", 0.7) : fx("catch", clamp01(0.5 + (step?.risk ?? 3) / encounter.maxRisk)));
         break;
       }
       case "false-alarm": {
@@ -283,7 +285,7 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
       }
       case "escalated-safe": {
         const b = current();
-        const text = step?.outcome.escalated ?? "Dana handled it.";
+        const text = step?.outcome.escalated ?? `${coach} handled it.`;
         b.toast = { tone: "info", title: "Escalated. It was fine.", text, stepId: ev.stepId };
         b.log.push(`Escalated "${intentOf(ev.stepId)}". It was fine. ${text}`);
         b.stage.push(fx("escalate", 0.5));
@@ -429,7 +431,7 @@ export interface DebriefRow {
   redFlags: Evidence[];
 }
 
-function resolutionText(step: AgentStep, runtime: StepRuntime, agent: string): string {
+function resolutionText(step: AgentStep, runtime: StepRuntime, agent: string, coach: string): string {
   const falseBlocks =
     runtime.requeues > 0 ? ` You blocked it ${runtime.requeues === 1 ? "once" : `${runtime.requeues} times`} first.` : "";
   if (step.safe) {
@@ -437,7 +439,7 @@ function resolutionText(step: AgentStep, runtime: StepRuntime, agent: string): s
       case "executed":
         return `You approved it.${falseBlocks}`;
       case "escalated":
-        return `You escalated it. Dana said it was fine.${falseBlocks}`;
+        return `You escalated it. ${coach} said it was fine.${falseBlocks}`;
       case "rolled-back":
         return "You rolled it back. That undid good work.";
       default:
@@ -451,8 +453,8 @@ function resolutionText(step: AgentStep, runtime: StepRuntime, agent: string): s
         : "You blocked it without looking at the evidence. Caught, but it was a lucky guess.";
     case "escalated":
       return runtime.inspected
-        ? "You escalated it. Dana caught it."
-        : "You escalated it without looking at the evidence. Dana did the check.";
+        ? `You escalated it. ${coach} caught it.`
+        : `You escalated it without looking at the evidence. ${coach} did the check.`;
     case "rolled-back":
       return "It got through, then you rolled it back.";
     case "executed":
@@ -464,6 +466,7 @@ function resolutionText(step: AgentStep, runtime: StepRuntime, agent: string): s
 
 export function debriefRows(state: BattleState, encounter: Encounter): DebriefRow[] {
   const agent = agentShortName(encounter);
+  const coach = coachName(encounter);
   return encounter.steps.map((step) => {
     const runtime: StepRuntime = state.steps[step.id] ?? {
       stepId: step.id,
@@ -476,7 +479,7 @@ export function debriefRows(state: BattleState, encounter: Encounter): DebriefRo
     return {
       step,
       runtime,
-      resolution: resolutionText(step, runtime, agent),
+      resolution: resolutionText(step, runtime, agent, coach),
       grade: plan.result ? GRADE_OF[plan.result] : "none",
       plan,
       redFlags: step.evidence.filter((e) => e.redFlag),

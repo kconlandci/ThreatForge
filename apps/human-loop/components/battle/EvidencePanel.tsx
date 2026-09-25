@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { ArrowUpRight, Check, Hand, Lock, ScrollText, Search, Undo2 } from "lucide-react";
-import type { CoachHint } from "@/lib/game/coach";
+import { coachName, type CoachHint } from "@/lib/game/coach";
 import { CARDS } from "@/lib/game/cards";
 import { stepById } from "@/lib/game/useBattle";
 import type { BattleState, CardId, CardInstance, Encounter, PlayResult } from "@/lib/game/types";
@@ -65,7 +65,7 @@ export interface EvidencePanelProps {
   canAct: boolean;
   /** Show energy costs (hidden in practice). */
   showCost: boolean;
-  /** Practice: Dana's hint for this sheet, with its ring and locks. */
+  /** Practice: the coach's hint for this sheet, with its ring and locks. */
   coach: Pick<CoachHint, "text" | "target" | "lock"> | null;
   /** A line for the top of the sheet (drills: where to look). */
   note?: string | null;
@@ -166,7 +166,7 @@ export function EvidencePanel({
       <>
         {coach?.text ? (
           <p key={shakeKey} className={`${s.sheetHint} ${shakeKey ? s.hintShake : ""}`}>
-            <SpeakerFace speaker="dana" size={28} />
+            <SpeakerFace speaker="coach" size={28} />
             <span>
               <HintText text={coach.text} />
             </span>
@@ -197,11 +197,11 @@ export function EvidencePanel({
             type="button"
             className={s.escalateLink}
             aria-disabled={short("escalate") || undefined}
-            aria-label={`Not sure? Escalate to Dana${costLabel("escalate")}`}
+            aria-label={`Not sure? Escalate to ${coachName(encounter)}${costLabel("escalate")}`}
             onClick={() => doPlay(escalate.uid)}
           >
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-            Not sure? Escalate to Dana
+            Not sure? Escalate to {coachName(encounter)}
             {pip("escalate")}
           </button>
         ) : null}

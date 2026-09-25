@@ -1,19 +1,22 @@
 /**
- * The Help Desk office: an isometric diorama you can walk around by tapping.
+ * A pathway's office (rt.stage.hubMap): an isometric diorama you can walk around by tapping.
+ * The agent is the character with role "agent": it hops, wears the exclaim marker, and tapping
+ * it (or the marker) goes to its target. Room colours come from the map's theme.
  */
 import * as Phaser from "phaser";
 import { SPRITES } from "@/lib/game/assets";
 import type { HubTargetId } from "@/lib/game/hub";
 import {
-  HUB_MAP,
-  HUB_WALKABLE,
+  characterByRole,
+  hubTheme,
   isWalkable,
   targetAtTile,
   type Facing,
   type GridPos,
+  type HubMap,
 } from "@/lib/game/hubMap";
 import { isoDepth, tileDiamond, tileToWorld, vertexToWorld, worldToGridFloat, worldToTile, type Vec } from "./iso";
-import { HUB_BOUNDS, HUB_SLAB, hubFit, hubFocus, hubPortraitZoom } from "./layout";
+import { HUB_SLAB, hubFit, hubFocus, hubPortraitZoom } from "./layout";
 import { findPath, nearestWalkable } from "./pathfind";
 import type { StageRuntime } from "./runtime";
 import { StageScene, type ArtRef } from "./StageScene";
@@ -21,7 +24,6 @@ import { FX, FX_SIZE } from "./textures";
 
 const WALK_SPEED = 3.5; // tiles per second
 const TEAL = 0x0f6a61;
-const TEAL_DARK = 0x0a4c45;
 
 type Pt = { x: number; y: number };
 const up = (p: Pt, h: number): Pt => ({ x: p.x, y: p.y - h });
@@ -81,25 +83,40 @@ export class HubScene extends StageScene {
     super("hub", rt);
   }
 
+  private get map(): HubMap {
+    return this.rt.stage.hubMap;
+  }
+
+  /** The agent NPC's id (its image name), or "" when the map has none. */
+  private get agentId(): string {
+    return characterByRole(this.map, "agent")?.id ?? "";
+  }
+
+  private walkable(p: GridPos): boolean {
+    return isWalkable(p, this.rt.walkable);
+  }
+
   /** Portrait phones: zoomed in, camera follows the avatar sideways. */
   private follow = false;
 
   protected computeFit(cssW: number, cssH: number) {
-    const zoom = hubPortraitZoom(cssW, cssH);
-    this.fit = hubFit(cssW, cssH) * zoom;
+    const bounds = this.rt.hubBounds;
+    const zoom = hubPortraitZoom(cssW, cssH, bounds);
+    this.fit = hubFit(cssW, cssH, bounds) * zoom;
     this.follow = zoom > 1.01;
-    this.focus = hubFocus();
+    this.focus = hubFocus(bounds);
     if (this.follow) this.focus.x = this.followX();
   }
 
   /** Camera x that keeps the avatar in view without showing past the room's edges. */
   private followX(): number {
     const half = this.rt.cssW / this.fit / 2;
-    const lo = HUB_BOUNDS.minX + half;
-    const hi = HUB_BOUNDS.maxX - half;
-    if (lo >= hi) return (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2;
-    // Lean toward the avatar but stay near the middle, so Ollie's desk stays in view.
-    const mid = (HUB_BOUNDS.minX + HUB_BOUNDS.maxX) / 2;
+    const B = this.rt.hubBounds;
+    const lo = B.minX + half;
+    const hi = B.maxX - half;
+    if (lo >= hi) return (B.minX + B.maxX) / 2;
+    // Lean toward the avatar but stay near the middle, so the agent's desk stays in view.
+    const mid = (B.minX + B.maxX) / 2;
     const ax = mid + ((this.pos.x - this.pos.y) * 32 - mid) * 0.6 + this.panOffset;
     return Math.min(hi, Math.max(lo, ax));
   }
@@ -156,7 +173,8 @@ export class HubScene extends StageScene {
   /* ---------------------------------------------------------------- */
 
   private drawFloor() {
-    const { cols, rows, rug, door } = HUB_MAP;
+    const { cols, rows, rug, door } = this.map;
+    const th = hubTheme(this.map);
     const g = this.add.graphics().setDepth(-1000);
     const T = vertexToWorld(0, 0);
     const R = vertexToWorld(cols, 0);
@@ -171,24 +189,24 @@ export class HubScene extends StageScene {
     fillPts(g, [add(T, { x: 0, y: 12 }), add(R, { x: 6, y: 14 }), add(B, { x: 0, y: 20 }), add(L, { x: -6, y: 14 })], true);
 
     // Slab edges.
-    g.fillStyle(0xc9d8d4, 1);
+    g.fillStyle(th.slabL, 1);
     fillPts(g, [L, B, add(B, { x: 0, y: S }), add(L, { x: 0, y: S })], true);
-    g.fillStyle(0xadc1bc, 1);
+    g.fillStyle(th.slabR, 1);
     fillPts(g, [B, R, add(R, { x: 0, y: S }), add(B, { x: 0, y: S })], true);
-    g.fillStyle(TEAL, 1);
+    g.fillStyle(th.slabBandL, 1);
     fillPts(g, [add(L, { x: 0, y: S - 3 }), add(B, { x: 0, y: S - 3 }), add(B, { x: 0, y: S }), add(L, { x: 0, y: S })], true);
-    g.fillStyle(TEAL_DARK, 1);
+    g.fillStyle(th.slabBandR, 1);
     fillPts(g, [add(B, { x: 0, y: S - 3 }), add(R, { x: 0, y: S - 3 }), add(R, { x: 0, y: S }), add(B, { x: 0, y: S })], true);
 
     // Tiles.
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
-        g.fillStyle((x + y) % 2 === 0 ? 0xf5f8f7 : 0xedf3f1, 1);
+        g.fillStyle((x + y) % 2 === 0 ? th.tileA : th.tileB, 1);
         fillPts(g, tileDiamond(x, y), true);
       }
     }
     // Grout.
-    g.lineStyle(1, 0xdbe5e2, 1);
+    g.lineStyle(1, th.grout, 1);
     for (let i = 1; i < cols; i++) g.lineBetween(vertexToWorld(i, 0).x, vertexToWorld(i, 0).y, vertexToWorld(i, rows).x, vertexToWorld(i, rows).y);
     for (let j = 1; j < rows; j++) g.lineBetween(vertexToWorld(0, j).x, vertexToWorld(0, j).y, vertexToWorld(cols, j).x, vertexToWorld(cols, j).y);
 
@@ -202,14 +220,14 @@ export class HubScene extends StageScene {
     ];
     g.fillStyle(0x111418, 0.05);
     fillPts(g, rugPts(inset - 0.04).map((p) => add(p, { x: 0, y: 1.5 })), true);
-    g.fillStyle(0xd6e8e4, 1);
+    g.fillStyle(th.rug, 1);
     fillPts(g, rugPts(inset), true);
-    g.lineStyle(2, TEAL, 0.55);
+    g.lineStyle(2, th.rugLine, 0.55);
     strokePts(g, rugPts(inset + 0.12), true);
-    g.lineStyle(1.2, 0xf26b1d, 0.55);
+    g.lineStyle(1.2, th.rugInner, 0.55);
     strokePts(g, rugPts(inset + 0.22), true);
     // Woven stripes.
-    g.lineStyle(1, TEAL, 0.12);
+    g.lineStyle(1, th.rugLine, 0.12);
     for (let k = 1; k < 6; k++) {
       const t = rug.y0 + inset + 0.3 + ((rug.y1 + 1 - rug.y0 - 2 * inset - 0.6) * k) / 6;
       const a = vertexToWorld(rug.x0 + inset + 0.3, t);
@@ -227,7 +245,7 @@ export class HubScene extends StageScene {
     // Door mat.
     const a = door.from + 0.08;
     const b = door.to - 0.08;
-    g.fillStyle(TEAL_DARK, 0.9);
+    g.fillStyle(th.mat, 0.9);
     fillPts(g, [vertexToWorld(0.08, a), vertexToWorld(0.62, a), vertexToWorld(0.62, b), vertexToWorld(0.08, b)], true);
     g.lineStyle(1, 0xffffff, 0.25);
     strokePts(g, [vertexToWorld(0.16, a + 0.08), vertexToWorld(0.54, a + 0.08), vertexToWorld(0.54, b - 0.08), vertexToWorld(0.16, b - 0.08)], true);
@@ -238,7 +256,8 @@ export class HubScene extends StageScene {
   }
 
   private drawWalls() {
-    const { cols, rows, wallHeight: H, wallThickness: th, door } = HUB_MAP;
+    const { cols, rows, wallHeight: H, wallThickness: th, door } = this.map;
+    const tm = hubTheme(this.map);
     const g = this.add.graphics().setDepth(-950);
     const T = vertexToWorld(0, 0);
     const R = vertexToWorld(cols, 0);
@@ -249,25 +268,25 @@ export class HubScene extends StageScene {
     const band = 34;
 
     // Right wall (lit side).
-    g.fillStyle(0xf8fafb, 1);
+    g.fillStyle(tm.wallR, 1);
     fillPts(g, [T, R, up(R, H), up(T, H)], true);
-    g.fillStyle(0xe7f1ef, 1);
+    g.fillStyle(tm.bandR, 1);
     fillPts(g, [T, R, up(R, band), up(T, band)], true);
-    g.fillStyle(TEAL, 1);
+    g.fillStyle(tm.baseR, 1);
     fillPts(g, [T, R, up(R, 6), up(T, 6)], true);
     // Left wall (a touch darker).
-    g.fillStyle(0xeef2f4, 1);
+    g.fillStyle(tm.wallL, 1);
     fillPts(g, [T, L, up(L, H), up(T, H)], true);
-    g.fillStyle(0xdbe9e5, 1);
+    g.fillStyle(tm.bandL, 1);
     fillPts(g, [T, L, up(L, band), up(T, band)], true);
-    g.fillStyle(TEAL_DARK, 1);
+    g.fillStyle(tm.baseL, 1);
     fillPts(g, [T, L, up(L, 6), up(T, 6)], true);
 
     // Chair rails.
     g.lineStyle(2.4, 0xffffff, 1);
     g.lineBetween(T.x, T.y - band, R.x, R.y - band);
     g.lineBetween(T.x, T.y - band, L.x, L.y - band);
-    g.lineStyle(1, 0xc3d6d1, 1);
+    g.lineStyle(1, tm.rail, 1);
     g.lineBetween(T.x, T.y - band + 1.6, R.x, R.y - band + 1.6);
     g.lineBetween(T.x, T.y - band + 1.6, L.x, L.y - band + 1.6);
 
@@ -282,9 +301,9 @@ export class HubScene extends StageScene {
     fillPts(g, [add(R, { x: 0, y: S }), up(R, H), add(up(R, H), rOff), add(add(R, rOff), { x: 0, y: S })], true);
     g.fillStyle(0xd3dbdf, 1);
     fillPts(g, [add(L, { x: 0, y: S }), up(L, H), add(up(L, H), lOff), add(add(L, lOff), { x: 0, y: S })], true);
-    g.fillStyle(TEAL_DARK, 1);
+    g.fillStyle(tm.slabBandR, 1);
     fillPts(g, [add(R, { x: 0, y: S - 3 }), add(R, { x: 0, y: S }), add(add(R, rOff), { x: 0, y: S }), add(add(R, rOff), { x: 0, y: S - 3 })], true);
-    g.fillStyle(TEAL, 1);
+    g.fillStyle(tm.slabBandL, 1);
     fillPts(g, [add(L, { x: 0, y: S - 3 }), add(L, { x: 0, y: S }), add(add(L, lOff), { x: 0, y: S }), add(add(L, lOff), { x: 0, y: S - 3 })], true);
 
     // Edges.
@@ -303,37 +322,47 @@ export class HubScene extends StageScene {
     fillPts(g, quad(a - 0.07, b + 0.07, 0, 81), true);
     g.lineStyle(1, 0xc9d1d6, 1);
     strokePts(g, quad(a - 0.07, b + 0.07, 0, 81), true);
-    g.fillStyle(TEAL, 1);
+    g.fillStyle(tm.door, 1);
     fillPts(g, quad(a, b, 0, 76), true);
-    g.fillStyle(0x1b7a70, 1);
+    g.fillStyle(tm.doorPanel, 1);
     fillPts(g, quad(a + 0.12, b - 0.12, 10, 34), true);
-    g.fillStyle(0xcfe8f0, 1);
+    g.fillStyle(tm.doorGlass, 1);
     fillPts(g, quad(a + 0.12, b - 0.12, 44, 68), true);
     g.fillStyle(0xffffff, 0.8);
     fillPts(g, quad(a + 0.2, a + 0.36, 50, 64), true);
     g.fillStyle(0xf26b1d, 1);
     g.fillCircle(W(b - 0.14, 38).x, W(b - 0.14, 38).y, 2.3);
-    // Little sign above the door, and a light switch.
+    // Little sign above the door, and a light switch (or a keycard reader).
     g.fillStyle(0x111418, 1);
     fillPts(g, quad(a + 0.28, b - 0.28, 86, 95), true);
-    g.fillStyle(0x43e0c4, 1);
+    g.fillStyle(tm.doorSignLight, 1);
     fillPts(g, quad(a + 0.36, b - 0.36, 89.5, 91.5), true);
-    g.fillStyle(0xffffff, 1);
-    fillPts(g, quad(b + 0.22, b + 0.34, 42, 52), true);
-    g.lineStyle(0.8, 0xb8c2c8, 1);
-    strokePts(g, quad(b + 0.22, b + 0.34, 42, 52), true);
+    if (tm.keycardReader) {
+      g.fillStyle(0x2b3238, 1);
+      fillPts(g, quad(b + 0.2, b + 0.4, 38, 54), true);
+      g.fillStyle(0x43e0c4, 1);
+      fillPts(g, quad(b + 0.25, b + 0.35, 48, 51), true);
+      g.fillStyle(0x4a545e, 1);
+      fillPts(g, quad(b + 0.24, b + 0.36, 40.5, 45), true);
+    } else {
+      g.fillStyle(0xffffff, 1);
+      fillPts(g, quad(b + 0.22, b + 0.34, 42, 52), true);
+      g.lineStyle(0.8, 0xb8c2c8, 1);
+      strokePts(g, quad(b + 0.22, b + 0.34, 42, 52), true);
+    }
   }
 
   private placeDecor() {
-    for (const d of HUB_MAP.decor) {
+    for (const d of this.map.decor) {
       const base = d.wall === "right" ? { x: d.along * 32, y: d.along * 16 } : { x: -d.along * 32, y: d.along * 16 };
       const ref = this.addArt(d.sprite, base.x, base.y - d.height);
-      ref.img.setDepth(-900);
+      // Named by decor id, so blink lights can sit on decor too.
+      ref.img.setDepth(-900).setName(d.id);
     }
   }
 
   private placeProps() {
-    for (const p of HUB_MAP.props) {
+    for (const p of this.map.props) {
       const c = tileToWorld(p.tile.x, p.tile.y);
       const x = c.x + (p.offset?.x ?? 0);
       const y = c.y + (p.offset?.y ?? 0);
@@ -345,7 +374,7 @@ export class HubScene extends StageScene {
   }
 
   private placeCharacters() {
-    HUB_MAP.characters.forEach((c, i) => {
+    this.map.characters.forEach((c, i) => {
       const w = tileToWorld(c.tile.x, c.tile.y);
       const ref = this.addArt(c.sprite, w.x + (c.offset?.x ?? 0), w.y + (c.offset?.y ?? 0));
       ref.img.setName(c.id).setDepth(isoDepth(w.x, w.y)).setFlipX(c.facing === "left");
@@ -355,29 +384,30 @@ export class HubScene extends StageScene {
 
     // Avatar.
     const saved = this.rt.hubPos;
-    let start: GridPos = saved && isWalkable(saved) ? saved : HUB_MAP.spawn;
-    if (!isWalkable(start)) start = nearestWalkable(HUB_WALKABLE, start) ?? HUB_MAP.spawn;
+    let start: GridPos = saved && this.walkable(saved) ? saved : this.map.spawn;
+    if (!this.walkable(start)) start = nearestWalkable(this.rt.walkable, start) ?? this.map.spawn;
     this.pos = { x: start.x, y: start.y };
     this.rt.hubPos = { ...start };
-    this.facing = saved ? this.facing : HUB_MAP.spawnFacing;
+    this.facing = saved ? this.facing : this.map.spawnFacing;
     const w = tileToWorld(start.x, start.y);
     this.player = this.addArt("player", w.x, w.y);
     this.player.img.setName("player").setDepth(isoDepth(w.x, w.y)).setFlipX(this.facing === "left");
   }
 
   private placeLights() {
-    for (const l of HUB_MAP.blinkLights) {
+    for (const l of this.map.blinkLights) {
       const owner = this.arts.find((a) => a.img.name === l.on);
       if (!owner) continue;
       const img = this.add.image(0, 0, FX.led).setTint(l.color);
-      const size = l.on === "ollie" ? l.radius * 3.4 : l.radius * 3;
+      const kind = l.kind ?? "led";
+      const size = kind === "antenna" ? l.radius * 3.4 : l.radius * 3;
       img.setDisplaySize(size, size);
       this.blinkers.push({
         img,
         owner,
         lx: l.x,
         ly: l.y,
-        kind: l.on === "ollie" ? "antenna" : "led",
+        kind,
         on: true,
         next: Math.random() * 1500,
       });
@@ -385,12 +415,14 @@ export class HubScene extends StageScene {
   }
 
   private placeMarkers() {
-    const bot = this.npcs.find((n) => n.ref.img.name === "ollie");
-    const head = bot ? { x: bot.ref.img.x, y: bot.ref.img.y - SPRITES.ollie.h * SPRITES.ollie.originY - 1 } : { x: 0, y: 0 };
+    const agent = characterByRole(this.map, "agent");
+    const bot = agent ? this.npcs.find((n) => n.ref.img.name === agent.id) : undefined;
+    const def = agent ? SPRITES[agent.sprite] : null;
+    const head = bot && def ? { x: bot.ref.img.x, y: bot.ref.img.y - def.h * def.originY - 1 } : { x: 0, y: 0 };
     this.exclaimBase = head;
     this.exclaim = this.addArt("marker-exclaim", head.x, head.y);
-    this.exclaim.img.setDepth(5000);
-    this.hotspots.push({ target: "ollie", ref: this.exclaim });
+    this.exclaim.img.setDepth(5000).setVisible(!!agent);
+    if (agent) this.hotspots.push({ target: agent.target, ref: this.exclaim });
 
     this.ring = this.addArt("tap-ring", 0, 0);
     this.ring.img.setDepth(-700).setVisible(false);
@@ -456,7 +488,7 @@ export class HubScene extends StageScene {
   tileAt(px: number, py: number): GridPos & { inside: boolean } {
     const w = this.toWorld(px, py);
     const t = worldToTile(w.x, w.y);
-    return { ...t, inside: t.x >= 0 && t.y >= 0 && t.x < HUB_MAP.cols && t.y < HUB_MAP.rows };
+    return { ...t, inside: t.x >= 0 && t.y >= 0 && t.x < this.map.cols && t.y < this.map.rows };
   }
 
   private pickTarget(w: Vec): HubTargetId | null {
@@ -470,7 +502,7 @@ export class HubScene extends StageScene {
     }
     if (best) return best.target;
     const t = worldToTile(w.x, w.y);
-    return targetAtTile(t);
+    return targetAtTile(t, this.map);
   }
 
   private handleTap(px: number, py: number) {
@@ -481,8 +513,8 @@ export class HubScene extends StageScene {
       return;
     }
     const t = worldToTile(w.x, w.y);
-    if (t.x < 0 || t.y < 0 || t.x >= HUB_MAP.cols || t.y >= HUB_MAP.rows) return;
-    const goal = isWalkable(t) ? t : nearestWalkable(HUB_WALKABLE, t, this.currentTile());
+    if (t.x < 0 || t.y < 0 || t.x >= this.map.cols || t.y >= this.map.rows) return;
+    const goal = this.walkable(t) ? t : nearestWalkable(this.rt.walkable, t, this.currentTile());
     if (goal) this.walkTo(goal, null);
   }
 
@@ -490,8 +522,8 @@ export class HubScene extends StageScene {
     const w = this.toWorld(px, py);
     const target = this.pickTarget(w);
     const t = worldToTile(w.x, w.y);
-    const inside = t.x >= 0 && t.y >= 0 && t.x < HUB_MAP.cols && t.y < HUB_MAP.rows;
-    const key = target ? `t:${target}` : inside && isWalkable(t) ? `f:${t.x},${t.y}` : "";
+    const inside = t.x >= 0 && t.y >= 0 && t.x < this.map.cols && t.y < this.map.rows;
+    const key = target ? `t:${target}` : inside && this.walkable(t) ? `f:${t.x},${t.y}` : "";
     if (key === this.hoverKey) return;
     this.hoverKey = key;
     const g = this.hoverG;
@@ -499,7 +531,7 @@ export class HubScene extends StageScene {
     this.input.setDefaultCursor(target ? "pointer" : "default");
     this.highlight(target);
     if (target) {
-      const spot = HUB_MAP.targets[target];
+      const spot = this.map.targets[target];
       g.fillStyle(TEAL, 0.14);
       fillPts(g, tileDiamond(spot.tile.x, spot.tile.y, 2), true);
       g.lineStyle(1.5, TEAL, 0.7);
@@ -536,7 +568,8 @@ export class HubScene extends StageScene {
 
   /** Walk to an interactable (tap or keyboard room list). */
   goToTarget(target: HubTargetId) {
-    const spot = HUB_MAP.targets[target];
+    const spot = this.map.targets[target];
+    if (!spot) return;
     this.rt.emit({ type: "hub-tap", target });
     const here = this.currentTile();
     if (!this.moving && here.x === spot.tile.x && here.y === spot.tile.y) {
@@ -561,7 +594,7 @@ export class HubScene extends StageScene {
       return;
     }
     const from = this.moving && this.path.length ? this.path[0] : this.currentTile();
-    const p = findPath(HUB_WALKABLE, from, goal);
+    const p = findPath(this.rt.walkable, from, goal);
     if (!p) {
       this.goalTarget = null;
       this.hideRing();
@@ -619,7 +652,7 @@ export class HubScene extends StageScene {
     const target = this.goalTarget;
     this.goalTarget = null;
     if (target) {
-      this.setFacing(HUB_MAP.targets[target].facing);
+      this.setFacing(this.map.targets[target]?.facing ?? this.facing);
       this.rt.emit({ type: "hub-arrived", target });
     }
   }
@@ -718,10 +751,11 @@ export class HubScene extends StageScene {
     const pb = this.moving ? 0 : breathe(0.6);
     this.player.img.setScale(this.player.sx * (1 - pb * 0.4), this.player.sy * (1 + pb));
 
+    const agentId = this.agentId;
     for (const n of this.npcs) {
       const b = breathe(n.phase);
       let hop = 0;
-      if (!calm && n.ref.img.name === "ollie") {
+      if (!calm && n.ref.img.name === agentId) {
         // An eager little double-hop every few seconds.
         n.hopAt -= delta;
         if (n.hopAt < 0) n.hopAt = 3800 + Math.random() * 2200;
@@ -729,7 +763,7 @@ export class HubScene extends StageScene {
         if (k >= 0) hop = Math.abs(Math.sin(k * Math.PI * 2)) * 4;
       }
       n.ref.img.setScale(n.ref.sx * (1 - b * 0.4), n.ref.sy * (1 + b));
-      const home = HUB_MAP.characters.find((c) => c.id === n.ref.img.name)!;
+      const home = this.map.characters.find((c) => c.id === n.ref.img.name)!;
       const w = tileToWorld(home.tile.x, home.tile.y);
       n.ref.img.y = w.y + (home.offset?.y ?? 0) - hop;
       // Turn to face the avatar when it is close.
@@ -744,7 +778,7 @@ export class HubScene extends StageScene {
 
     // Exclaim marker bob.
     const eb = calm ? 0 : Math.abs(Math.sin(t * 3.1)) * 5;
-    this.exclaim.img.setPosition(this.exclaimBase.x, this.exclaimBase.y - eb - (this.npcHop("ollie") ?? 0));
+    this.exclaim.img.setPosition(this.exclaimBase.x, this.exclaimBase.y - eb - (this.npcHop(agentId) ?? 0));
 
     // Lights.
     for (const l of this.blinkers) {
@@ -772,7 +806,8 @@ export class HubScene extends StageScene {
   private npcHop(name: string) {
     const n = this.npcs.find((x) => x.ref.img.name === name);
     if (!n) return 0;
-    const home = HUB_MAP.characters.find((c) => c.id === name)!;
+    const home = this.map.characters.find((c) => c.id === name);
+    if (!home) return 0;
     const w = tileToWorld(home.tile.x, home.tile.y);
     return w.y + (home.offset?.y ?? 0) - n.ref.img.y;
   }

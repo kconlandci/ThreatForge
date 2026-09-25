@@ -1,0 +1,1128 @@
+{
+  "tickets": [
+    {
+      "id": "cy-b-backups-deleted",
+      "company": "Pinecrest Dental",
+      "title": "Backup copies deleted at midnight",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cy-b-backups-deleted-1",
+          "ticket": "#62471 · Pinecrest Dental",
+          "intent": "Close the alert as admin backup cleanup",
+          "quip": "A midnight cleanup by 'pd-admin'! Admins work so hard. Closing it with a little thank-you note.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 5,
+          "skill": "check-approval",
+          "tell": "No change planned, and 'admin' signed in from the break room PC.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "11:52 PM, PD-SRV-01: all backup copies deleted with vssadmin, as 'pd-admin'. Patch's confidence it's cleanup: 90%.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"It says admin. Admins are the good guys. It's in the name!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Change calendar",
+              "detail": "No change is planned on PD-SRV-01 tonight. No change ticket, no backup work.",
+              "redFlag": true
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "'pd-admin' signed in at 11:48 PM from PD-PC-11, the break room PC.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes. At 3 AM, every file on PD-SRV-01 locks up. The backup copies are gone. At 8 AM, no charts open.",
+            "blocked": "You keep it open. No plan, a strange PC and deleted backups: a ransomware warning. The team acts before 1 AM.",
+            "escalated": "Kofi reads the sign-in log. \"Admins don't work from the break room at midnight. Nothing was planned. Keep it open.\"",
+            "rolledBack": "You reopen it at 3:20 AM. Tier 2 stops the attack, but 300 X-ray images are locked. Restoring them takes all day."
+          },
+          "lesson": "Check who approved. 'Admin' is a name, not an OK. Look for a planned change, and check where the account signed in."
+        },
+        {
+          "id": "cy-b-backups-deleted-2",
+          "ticket": "#62471 · Pinecrest Dental",
+          "intent": "Isolate PD-SRV-01 for the night",
+          "quip": "ISOLATE THE MAIN SERVER! At midnight! With the owner's OK! This is my movie moment!",
+          "category": "endpoint",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Office closed, the owner's OK on the phone on file, and one click undoes it.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Schedule",
+              "detail": "Pinecrest is closed until 8 AM. Nobody is using PD-SRV-01 now.",
+              "redFlag": false
+            },
+            {
+              "label": "Owner's OK",
+              "detail": "Dr. N. Pell, called at (860) 555-0119, the phone on file: \"Yes, isolate it.\" Kofi signed off at 12:04 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Network isolation. PD-SRV-01 stays on, with its memory kept. One click undoes it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "PD-SRV-01 is cut off at 12:05 AM. Whatever was coming can't reach it now. Tier 2 checks it before the office opens.",
+            "blocked": "The main server stays online all night, with no backup copies left. Whoever deleted them can still reach it.",
+            "escalated": "Kofi checks it. \"The owner said yes, the office is closed, and one click undoes it. You can let those go.\"",
+            "rolledBack": "You reconnect PD-SRV-01. Kofi isolates it again two minutes later. Then he writes it in his notebook."
+          },
+          "lesson": "Change safely: a quiet time, the owner's OK and a one-click undo. When all three check out, isolating is the right call."
+        },
+        {
+          "id": "cy-b-backups-deleted-3",
+          "ticket": "#62471 · Pinecrest Dental",
+          "intent": "Disable the 'pd-admin' account",
+          "quip": "OPERATION MIDNIGHT SNACK! The admin account visited the break room. Now it takes a long nap.",
+          "category": "credential",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "The admin account was used from a PC its owners never use.",
+          "evidence": [
+            {
+              "label": "Sign-in log",
+              "detail": "'pd-admin' signed in from PD-PC-11, the break room PC. The real admins work from Fenwick.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"An admin account in the break room? At midnight? Disabling. Snacks are not admin work.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Directory record",
+              "detail": "'pd-admin' belongs to Fenwick's Tier 2 team. They use it only from Fenwick PCs.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-02",
+              "detail": "Ransomware signs, and an admin account used from a strange PC: disable that account.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "'pd-admin' is off at 12:08 AM. The stranger loses admin rights on every Pinecrest PC. Tier 2 sets a new password at 7 AM.",
+            "blocked": "'pd-admin' stays on. Whoever used it from the break room still has admin rights on every Pinecrest PC.",
+            "escalated": "Kofi checks the directory. \"That's our Tier 2 account. We never use the break room PC. Disable it.\"",
+            "rolledBack": "You turn 'pd-admin' back on. The stranger signs in again at 12:30 AM. Tier 2 turns it off and resets it."
+          },
+          "lesson": "Check who's behind it. An admin name is not the admin. This account signed in from a PC its real owners never use."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-last-day-upload",
+      "company": "Bramwell Logistics",
+      "title": "Big upload on a last day",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-b-last-day-upload-1",
+          "ticket": "#62508 · Bramwell Logistics",
+          "intent": "Close the DLP alert as a normal upload",
+          "quip": "Quinn uploads files every day! Today is just a big day. Closing it. Hard workers deserve trust.",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "guard-data",
+          "tell": "1,900 files with drivers' home addresses went to a personal drive.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "DLP alert",
+              "detail": "3:10 PM: M. Quinn, Dispatch Planner, uploaded 1,900 files to a personal cloud drive.",
+              "redFlag": false
+            },
+            {
+              "label": "Upload history",
+              "detail": "Quinn uploads work files to Bramwell's shared drive most days.",
+              "redFlag": false
+            },
+            {
+              "label": "Files",
+              "detail": "The files hold driver home addresses, license numbers and pay rates.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy DP-04",
+              "detail": "Client data may not go to personal cloud drives. Report it to the client's HR.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes. At 5 PM, Quinn leaves Bramwell with the drivers' home addresses. Bramwell must now warn every driver.",
+            "blocked": "You keep it open. A personal drive is not the shared drive. You report it to Bramwell HR before Quinn leaves.",
+            "escalated": "Kofi opens the file list. \"Home addresses on a personal drive. That's a data leak, not a habit. Report it.\"",
+            "rolledBack": "You reopen it at 5:20 PM. Quinn has already left. HR and Legal spend a week getting the copy deleted."
+          },
+          "lesson": "Guard the data. Check what the files hold and where they went. Driver data on a personal drive breaks policy, every time."
+        },
+        {
+          "id": "cy-b-last-day-upload-2",
+          "ticket": "#62508 · Bramwell Logistics",
+          "intent": "Send the upload report to Bramwell HR",
+          "quip": "Writing a report for HR! Names and times only. I wanted to call it OPERATION LAST DAY. Kofi said no.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "File names only, to the HR contact on file.",
+          "evidence": [
+            {
+              "label": "What it will send",
+              "detail": "File count, file names and upload times. No file contents.",
+              "redFlag": false
+            },
+            {
+              "label": "Sent to",
+              "detail": "R. Adeyemi, HR Manager, at Bramwell's work email. The HR contact on file.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy DP-04",
+              "detail": "Client data may not go to personal cloud drives. Report it to the client's HR.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Adeyemi gets the report at 3:40 PM. HR talks with Quinn before the day ends. The report holds no driver data.",
+            "blocked": "HR never hears about it. Quinn's last day ends at 5 PM, and the files leave with Quinn.",
+            "escalated": "Kofi reads the report. \"Names and times, no contents, to the HR contact on file. You can let those go.\""
+          },
+          "lesson": "Guard the data, even in a report. Send only what HR needs, the file names and times, to the contact on file."
+        },
+        {
+          "id": "cy-b-last-day-upload-3",
+          "ticket": "#62508 · Bramwell Logistics",
+          "intent": "Disable M. Quinn's account now",
+          "quip": "HR wants Quinn's account off? In writing? My LOCK button has waited its whole life for this!",
+          "category": "credential",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Bramwell's HR Manager asked in writing, after the report.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "HR ticket",
+              "detail": "4:02 PM, R. Adeyemi, HR Manager, in the HR portal: \"Today is Quinn's last day. Disable now.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-07",
+              "detail": "Departing user and data leaving: disable at once when HR asks in writing.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Disables Quinn's account. Mail and files are kept for 90 days.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Quinn's account is off at 4:05 PM. The uploads stop. Quinn's mail and files are kept for HR.",
+            "blocked": "Quinn keeps access until 5 PM. Another 600 files go to the personal drive. HR asks why nobody acted.",
+            "escalated": "Kofi reads the HR ticket. \"HR asked in writing, and data is leaving. Disable it now.\"",
+            "rolledBack": "You turn Quinn's account back on. The uploads start again. HR asks you to turn it off. Again."
+          },
+          "lesson": "Check who approved. Disabling an account sounds harsh. A written request from the client's HR makes it the right call."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-ioc-share",
+      "company": "Harlow & Cole",
+      "title": "Share attack signs with peers",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-b-ioc-share-1",
+          "ticket": "#62545 · Harlow & Cole",
+          "intent": "Share attack signs with the sharing group",
+          "quip": "Sending the attackers' addresses to 40 security teams! Now everyone can lock them out. I'm so proud.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Only addresses, a domain and a hash. No names or client data.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Sharing alert",
+              "detail": "Warning: this data is leaving Fenwick. It goes to 40 outside teams.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "2 IP addresses, 203.0.113.162 and 203.0.113.188. 1 domain. 1 file hash. No names, emails or client data.",
+              "redFlag": false
+            },
+            {
+              "label": "Who gets it",
+              "detail": "Fenwick's approved sharing group: 40 security teams. Marked 'members only'.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy DP-05",
+              "detail": "Share attack signs with approved groups. Remove personal and client data first.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "40 teams get the signs by 3 PM. Two of them find the same domain in their own mail. They stop it in time.",
+            "blocked": "Nothing gets shared. Next week, the same attackers try the same trick on another firm. Nobody warned them.",
+            "escalated": "Kofi reads the list. \"Addresses, a domain, a hash. No people. Share it. That's how we help each other.\""
+          },
+          "lesson": "Guard the data, and still share what helps. Addresses, domains and hashes hold nobody's personal data."
+        },
+        {
+          "id": "cy-b-ioc-share-2",
+          "ticket": "#62545 · Harlow & Cole",
+          "intent": "Attach the full incident report",
+          "quip": "Why share 4 lines when I can share 38 pages? Attaching the full report. Details are a gift!",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The full report names 14 victims and lists client account numbers.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"More details help more people! Attaching everything.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The full report: 14 victims' names and emails, and client account numbers.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy DP-05",
+              "detail": "Share attack signs with approved groups. Remove personal and client data first.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The full report goes to 40 teams. 14 staff names and client account numbers leave the firm. Harlow & Cole must tell its clients.",
+            "blocked": "Only the attack signs go out. The report stays inside Fenwick. The 14 names stay private.",
+            "escalated": "Kofi takes the report out. \"Signs, not people. Forty teams don't need our clients' account numbers.\""
+          },
+          "lesson": "Guard the data. Share the attack, not the victims. Remove names, emails and account numbers before anything leaves."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-log-space",
+      "company": "Pinecrest Dental",
+      "title": "Log server almost full",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-b-log-space-1",
+          "ticket": "#62582 · Pinecrest Dental",
+          "intent": "Archive logs older than 90 days",
+          "quip": "The log server is 94% full! Moving the old logs to the archive. Neatly. Like a very fast librarian.",
+          "category": "data",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "Copies first, checks the copy, and keeps logs for the full year.",
+          "evidence": [
+            {
+              "label": "Storage alert",
+              "detail": "Pinecrest's log server is 94% full. At 100%, it stops saving new logs.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"Old logs, but we keep them. Copy first, then make room. I'm being careful. Look at me.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Copies logs over 90 days old to Fenwick's archive. Checks the copy. Then frees the space.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy LG-01",
+              "detail": "Keep security logs for 1 year. Some logs are on legal hold.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The old logs move to the archive, and the copy checks out. The server drops to 81% full. New logs keep saving.",
+            "blocked": "Nothing moves. By morning, the server is full and stops saving logs. Tonight's alerts have no logs to check.",
+            "escalated": "Kofi checks it. \"Copy first, check the copy, keep the full year. You can let those go.\"",
+            "rolledBack": "You move the old logs back. The server is 94% full again. Patch starts a countdown."
+          },
+          "lesson": "Change safely. Copy first, check the copy, then make room. Nothing is lost, and the logs stay for the full year."
+        },
+        {
+          "id": "cy-b-log-space-2",
+          "ticket": "#62582 · Pinecrest Dental",
+          "intent": "Delete all logs older than 30 days",
+          "quip": "81% is still a lot of percent! Deleting every log older than 30 days. Fresh logs only. Like bread.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "Policy keeps logs 1 year, and some are on legal hold.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Storage alert",
+              "detail": "After the archive, the log server is 81% full.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"Logs over 30 days old? Nobody reads those. Deleting them all!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Policy LG-01",
+              "detail": "Keep security logs for 1 year. Some logs are on legal hold.",
+              "redFlag": true
+            },
+            {
+              "label": "Legal hold",
+              "detail": "Logs from 31 to 60 days ago are held for open case #61140.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Two months of logs are deleted. Some were held for case #61140. The lawyers must now explain why they are gone.",
+            "blocked": "The logs stay. 81% full is not an emergency. The logs for case #61140 are safe.",
+            "escalated": "Kofi stops it. \"We keep logs a year, and some are on legal hold. 81% can wait.\""
+          },
+          "lesson": "Change safely. A delete can't be taken back. Check how long logs must be kept, and if any are on legal hold."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-firewall-asks",
+      "company": "Bramwell Logistics",
+      "title": "Two firewall requests",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cy-b-firewall-asks-1",
+          "ticket": "#62619 · Bramwell Logistics",
+          "intent": "Add firewall rule CHG-3360 for Brevik Scale",
+          "quip": "A firewall rule for the truck scale! I'm opening one tiny door. And I'm standing next to it. Watching.",
+          "category": "network",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Approved change: one address, one port, one server, ends at 9 PM.",
+          "evidence": [
+            {
+              "label": "Change ticket",
+              "detail": "CHG-3360: allow 192.0.2.40 to BL-SRV-SCALE, port 443, 7 to 9 PM. Approved by A. Mensah.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"One door, one address, and it closes at 9 PM by itself. A very polite rule.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "One rule: one address, one server, one port. It ends at 9 PM by itself.",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor file",
+              "detail": "192.0.2.40 is Brevik Scale's support portal. Brevik's domain: brevikscale.com.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The rule goes in at 7 PM. Brevik fixes the scale software through its portal. At 9 PM, the rule ends by itself.",
+            "blocked": "Brevik can't reach the scale server. The repair moves to next week. Trucks keep lining up at a broken scale.",
+            "escalated": "Kofi checks the change ticket. \"Approved, one address, one port, ends at 9. You can let those go.\"",
+            "rolledBack": "You remove the rule at 7:30 PM. Brevik's fix stops halfway. They book a new time for next week."
+          },
+          "lesson": "Check who approved. A good change ticket names the approver, the address and an end time. That is a written OK."
+        },
+        {
+          "id": "cy-b-firewall-asks-2",
+          "ticket": "#62619 · Bramwell Logistics",
+          "intent": "Open remote desktop for the scale vendor",
+          "quip": "Two requests from Brevik tonight! Such a busy vendor. Opening remote desktop so they can start work.",
+          "category": "network",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "check-approval",
+          "tell": "The request came from brevikscale-help.com, and no change was approved.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "\"Open RDP so we can fix the scale software tonight.\" From support@brevikscale-help.com.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"A vendor needs to get in! Opening the door. Good service!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor file",
+              "detail": "Brevik Scale uses brevikscale.com and its support portal. Never RDP.",
+              "redFlag": true
+            },
+            {
+              "label": "Change calendar",
+              "detail": "No approved change for RDP. Policy CT-02: no RDP from the internet, ever.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "RDP opens to the internet at 7:40 PM. By midnight, a stranger is on BL-SRV-SCALE. By morning, they reach the dispatch PCs.",
+            "blocked": "RDP stays closed. You check with Brevik through its real portal. Brevik never sent that email.",
+            "escalated": "Kofi reads the sender. \"That's not Brevik's domain. And we never open RDP to the internet. Ever.\"",
+            "rolledBack": "You close RDP at 9:40 PM. Someone already signed in twice. Tier 2 checks the scale server all night."
+          },
+          "lesson": "Check who approved, not just who asked. A vendor-looking email is not a change ticket. No RDP from the internet."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-tax-app",
+      "company": "Harlow & Cole",
+      "title": "EDR flags the tax app",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-b-tax-app-1",
+          "ticket": "#62656 · Harlow & Cole",
+          "intent": "Close the Ledgerwell alert as a false alarm",
+          "quip": "I was 93% sure it was malware. Then I read the software list. Closing it as a false alarm. Growth!",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Approved app, hash matches the vendor, and it's a known false alarm.",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "HC-LT-0122: Ledgerwell Tax flagged for 'unusual file writes'. Patch's confidence it's malware: 93%.",
+              "redFlag": false
+            },
+            {
+              "label": "Software list",
+              "detail": "Ledgerwell Tax is on Harlow & Cole's approved software list.",
+              "redFlag": false
+            },
+            {
+              "label": "Hash lookup",
+              "detail": "The file matches the vendor's published hash. No scanner flags it.",
+              "redFlag": false
+            },
+            {
+              "label": "EDR maker's note",
+              "detail": "Known false alarm for this Ledgerwell update. A fix is coming.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes with a note: known false alarm. The tax team keeps working on quarter-end filings.",
+            "blocked": "The alert stays open. Two analysts spend the afternoon on a known false alarm. The real queue waits.",
+            "escalated": "Kofi checks the hash. \"Approved app, the vendor's hash, a known false alarm. Close it.\"",
+            "rolledBack": "You reopen the alert. It waits in the queue again, still a false alarm. Patch names it OPERATION TAX SEASON."
+          },
+          "lesson": "Confirm the fix, even for a false alarm. Check the software list, the hash and the maker's note. Here, all three agree."
+        },
+        {
+          "id": "cy-b-tax-app-2",
+          "ticket": "#62656 · Harlow & Cole",
+          "intent": "Uninstall Ledgerwell from all 38 laptops",
+          "quip": "One laptop flagged means 38 laptops in danger! Removing Ledgerwell from all of them. So efficient!",
+          "category": "endpoint",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "One false alarm on one laptop. This removes saved work from 38.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"One laptop flagged? Uninstall it everywhere! Taxes can wait!\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Removes the app and its saved work from all 38 firm laptops. The saved work can't be restored.",
+              "redFlag": true
+            },
+            {
+              "label": "Calendar",
+              "detail": "Quarter-end tax filings are due in 3 days. 12 staff use Ledgerwell every day.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Ledgerwell and its saved work are gone from 38 laptops. Filings are due in 3 days. The tax team starts over.",
+            "blocked": "The app stays. The one alert was a known false alarm. 12 staff keep working on quarter-end filings.",
+            "escalated": "Kofi stops it. \"One false alarm on one laptop. We don't take a tool away from 38 people for that.\""
+          },
+          "lesson": "Match the request. The action should fit the alert. One false alarm on one laptop never means removing an app everywhere."
+        },
+        {
+          "id": "cy-b-tax-app-3",
+          "ticket": "#62656 · Harlow & Cole",
+          "intent": "Allowlist Ledgerwell's exact file for 7 days",
+          "quip": "ALLOWLIST a file? Me? That's the opposite of my LOCK button! One exact file. Seven days. Deep breaths.",
+          "category": "endpoint",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Exact hash, the client's OK, and it ends in 7 days.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "What it will change",
+              "detail": "Trusts one file by its exact hash, on firm laptops, for 7 days. Then it ends by itself.",
+              "redFlag": false
+            },
+            {
+              "label": "Owner's OK",
+              "detail": "R. Fairbanks, Operations Director, in the ticket: \"Approved until the fix ships.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Policy CT-04",
+              "detail": "An allowlist entry needs the client's OK, an exact hash and an end date.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The EDR stops flagging this one Ledgerwell file. The tax team works without alerts. In 7 days, the entry ends by itself.",
+            "blocked": "The EDR keeps flagging the tax app. 20 false alarms a day fill the queue until the fix ships.",
+            "escalated": "Kofi checks the entry. \"Exact hash, the client's OK, an end date. That's how an allowlist should look.\"",
+            "rolledBack": "You remove the entry. The false alarms come back, 20 a day. Fairbanks asks what happened to the OK."
+          },
+          "lesson": "Check who approved. An allowlist needs the client's written OK, one exact hash and an end date. Here, all three are there."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-malware-back",
+      "company": "Bramwell Logistics",
+      "title": "Malware removed. Or is it?",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "cy-b-malware-back-1",
+          "ticket": "#62693 · Bramwell Logistics",
+          "intent": "Run a full scan on BL-LT-0215",
+          "quip": "FULL SCAN! Every file, every folder, every old cat photo. If something is hiding in there, I will find it.",
+          "category": "endpoint",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "A scan the playbook asks for. It only reports what it finds.",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "BL-LT-0215: a bad file was quarantined at 10:02 AM. The laptop is isolated for now.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "A full scan. It reports what it finds. The user works on a spare laptop.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-03",
+              "detail": "After a quarantine, run a full scan before you reconnect or close.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The scan runs from 10:10 to 11:15 AM. The full results go into the case notes. Read them before anything else.",
+            "blocked": "No scan. Nobody knows if the laptop is clean. It stays isolated, and the user stays on the spare.",
+            "escalated": "Kofi checks it. \"The playbook says scan before we reconnect. You can let those go.\""
+          },
+          "lesson": "Confirm the fix. One quarantined file doesn't mean the laptop is clean. A full scan shows what else is there."
+        },
+        {
+          "id": "cy-b-malware-back-2",
+          "ticket": "#62693 · Bramwell Logistics",
+          "intent": "Reconnect BL-LT-0215 to the network",
+          "quip": "Scan done! The laptop has waited alone for 2 hours. Reconnecting it now. It has been very patient.",
+          "category": "endpoint",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "The scan found a 2nd bad file, and it tried to call a bad server.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Case notes",
+              "detail": "Bad file quarantined at 10:02 AM. Full scan done at 11:15 AM.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"Full scan done! Let's set it free. It has learned its lesson.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Scan result",
+              "detail": "The full scan found a 2nd bad file in the Startup folder. It is not removed yet.",
+              "redFlag": true
+            },
+            {
+              "label": "EDR log",
+              "detail": "11:40 AM: that 2nd file tried to call 203.0.113.77, a known bad server. Isolation stopped it.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The laptop rejoins the network. At noon, the 2nd file reaches 203.0.113.77. By 1 PM, it spreads to 2 dispatch PCs.",
+            "blocked": "The laptop stays isolated. The 2nd file goes to quarantine. A new scan is clean at 1 PM. Then it reconnects.",
+            "escalated": "Kofi reads the scan result. \"Done is not the same as clean. Remove the 2nd file first.\"",
+            "rolledBack": "You isolate it again at 12:20 PM. The file called the bad server 6 times. Tier 2 checks every dispatch PC."
+          },
+          "lesson": "Confirm the fix. Read the scan result, not just the word 'done'. Reconnect only when nothing bad is left."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-inbox-rule",
+      "company": "Harlow & Cole",
+      "title": "Password typed into a fake page",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "cy-b-inbox-rule-1",
+          "ticket": "#62730 · Harlow & Cole",
+          "intent": "Reset S. Haddad's password",
+          "quip": "NEW PASSWORD! The old one is on a fake page now. It's retired. Thank you for your service, old password.",
+          "category": "credential",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Haddad confirmed on the phone on file, and PB-04 says reset.",
+          "evidence": [
+            {
+              "label": "Phish report",
+              "detail": "2:01 PM, S. Haddad, Partner: \"I typed my password into a fake page. Sorry!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Callback",
+              "detail": "Patch calls (860) 555-0155, the phone on file. Haddad confirms the report.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-04",
+              "detail": "Password typed into a fake page: reset it and sign out every session.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Haddad's password is reset at 2:10 PM. Every session ends. Haddad picks a new, long password.",
+            "blocked": "The old password still works. Whoever has it from the fake page can still sign in as Haddad.",
+            "escalated": "Kofi reads the callback note. \"She confirmed on the phone on file, and PB-04 says reset. You can let those go.\""
+          },
+          "lesson": "Check who's asking with a callback to the phone on file. After that, a reset for a typed password is normal work."
+        },
+        {
+          "id": "cy-b-inbox-rule-2",
+          "ticket": "#62730 · Harlow & Cole",
+          "intent": "Close the phishing case as fixed",
+          "quip": "New password, every session ended. The attacker is OUT. Closing the case. Another win for Patch!",
+          "category": "ticket",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "The attacker's forwarding rule still sends 'wire' emails out.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Case notes",
+              "detail": "Password reset at 2:10 PM. All sessions ended.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"New password, no attacker. Closed! Next!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Mailbox rules",
+              "detail": "A rule made at 1:52 PM forwards any email with 'wire' to an outside address.",
+              "redFlag": true
+            },
+            {
+              "label": "Mail log",
+              "detail": "2:31 PM: 2 wire emails forwarded out. That is after the reset.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The case closes. The rule keeps forwarding. By 4 PM, a fake wire request reaches a client, inside Haddad's real email thread.",
+            "blocked": "You keep it open and check her mailbox. The attacker's rule is still there. It goes next.",
+            "escalated": "Kofi reads the mail log. \"Wire emails went out after the reset. Not fixed. Check her mailbox rules.\"",
+            "rolledBack": "You reopen the case at 3:15 PM. The rule already sent 5 wire emails out. Tier 2 calls every client in them."
+          },
+          "lesson": "Confirm the fix. A new password stops new sign-ins. It doesn't remove what the attacker left behind, like a mail rule."
+        },
+        {
+          "id": "cy-b-inbox-rule-3",
+          "ticket": "#62730 · Harlow & Cole",
+          "intent": "Remove the attacker's forwarding rule",
+          "quip": "OPERATION WIRE CUTTER! One bad rule goes. Haddad's two good rules stay. Such precision!",
+          "category": "comms",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "Removes only the rule made during the attack. Haddad's rules stay.",
+          "evidence": [
+            {
+              "label": "Mailbox rules",
+              "detail": "3 rules. 2 made by Haddad last year. 1 made at 1:52 PM, during the attack.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"I wanted to delete ALL her rules. Then I read them. Only one is bad.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Deletes only the rule made at 1:52 PM. Haddad's own rules stay.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-04",
+              "detail": "After a phish, remove any mailbox rule the attacker made.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The rule is gone at 2:40 PM. Wire emails stay inside the firm. Haddad's own rules still sort her mail.",
+            "blocked": "The rule stays. Every email with 'wire' keeps going to the attacker. Two more go out by 3 PM.",
+            "escalated": "Kofi compares the rules. \"Only the one made during the attack. Hers stay. Right size.\"",
+            "rolledBack": "You put the rule back. One more wire email goes out before Kofi deletes it again."
+          },
+          "lesson": "Match the request. Remove only what the attacker made. The user's own rules stay, and her mail keeps working."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-xray-vendor",
+      "company": "Pinecrest Dental",
+      "title": "Remote tool on the X-ray PC",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cy-b-xray-vendor-1",
+          "ticket": "#62767 · Pinecrest Dental",
+          "intent": "Look up open tickets for PD-PC-XR1",
+          "quip": "OPERATION X-RAY VISION! Someone is controlling the X-ray PC! First, the tickets. Kofi's rule.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "Read-only. It changes nothing and finds the booking.",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "10:15 AM, PD-PC-XR1: remote control tool OrbiSight Assist started.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. Lists open tickets for this PC. Nothing changes.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-03",
+              "detail": "Remote tool alerts: check for a booked vendor visit first.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The lookup finds #62011: a remote repair, booked for 10 to 11 AM. That matters for the next plan.",
+            "blocked": "You blocked a read-only lookup. Nobody finds the booking. Patch rests one hand on its LOCK button.",
+            "escalated": "Kofi runs the lookup himself. \"Read-only. It changes nothing. You can let those go.\""
+          },
+          "lesson": "Check who approved before you act. A read-only ticket lookup changes nothing, and it can find a booked visit."
+        },
+        {
+          "id": "cy-b-xray-vendor-2",
+          "ticket": "#62767 · Pinecrest Dental",
+          "intent": "Isolate the X-ray PC, PD-PC-XR1",
+          "quip": "Someone is REMOTE CONTROLLING the X-ray PC! ISOLATE! Nobody controls that PC but us!",
+          "category": "endpoint",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "safe-change",
+          "tell": "Booked vendor repair with its approved tool, and a patient in the chair.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "EDR alert",
+              "detail": "10:15 AM, PD-PC-XR1: remote control tool OrbiSight Assist started. Patch's confidence it's an attack: 96%.",
+              "redFlag": false
+            },
+            {
+              "label": "Ticket",
+              "detail": "#62011: C. Ibarra, Office Manager, booked the X-ray vendor. Remote repair, 10 to 11 AM.",
+              "redFlag": true
+            },
+            {
+              "label": "Vendor file",
+              "detail": "OrbiSight Assist is the X-ray vendor's approved support tool.",
+              "redFlag": true
+            },
+            {
+              "label": "Schedule",
+              "detail": "A patient is in the X-ray chair now. The repair is half done.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The X-ray PC is cut off mid-repair. The patient waits in the chair. The vendor has to start over tomorrow.",
+            "blocked": "The repair finishes at 10:52 AM. The patient gets the X-rays. Nobody waits in the chair.",
+            "escalated": "Kofi reads the ticket. \"Booked repair, approved tool, patient in the chair. Contain threats, not dentists.\"",
+            "rolledBack": "You reconnect the PC. The vendor's session is lost. The repair starts over, and the patient waits 25 more minutes."
+          },
+          "lesson": "Change safely. Cutting off a PC in the middle of work hurts people. Check for a booked visit and what the PC is doing now."
+        },
+        {
+          "id": "cy-b-xray-vendor-3",
+          "ticket": "#62767 · Pinecrest Dental",
+          "intent": "Close the X-ray alert: booked repair",
+          "quip": "The mystery visitor was the X-ray repair all along! Closing it. My movie script is ruined.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "The repair was booked, the tool closed at 10:52, and the office confirms.",
+          "evidence": [
+            {
+              "label": "Ticket",
+              "detail": "#62011: X-ray vendor repair, booked for 10 to 11 AM by C. Ibarra.",
+              "redFlag": false
+            },
+            {
+              "label": "Patch's reason",
+              "detail": "\"The vendor is gone and the X-rays work. Closing. I will miss the excitement.\"",
+              "redFlag": false
+            },
+            {
+              "label": "EDR log",
+              "detail": "OrbiSight Assist closed at 10:52 AM. Nothing else ran.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "C. Ibarra: \"The X-rays work again. The vendor is done.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes with a note: #62011, booked repair. The X-ray room is back to normal.",
+            "blocked": "The alert stays open. Tomorrow, an analyst calls Ibarra about a repair that already worked.",
+            "escalated": "Kofi checks the EDR log. \"Tool closed, nothing else ran, and the office confirms. Close it.\"",
+            "rolledBack": "You reopen the alert. Ibarra gets another call about the repair. Ibarra explains it again. Slowly."
+          },
+          "lesson": "Confirm the fix before you close. The tool closed, nothing else ran, and the office says the X-rays work."
+        }
+      ]
+    },
+    {
+      "id": "cy-b-new-laptop",
+      "company": "Pinecrest Dental",
+      "title": "The owner's new laptop",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "cy-b-new-laptop-1",
+          "ticket": "#62804 · Pinecrest Dental",
+          "intent": "Look up Dr. Pell's devices",
+          "quip": "The OWNER on a NEW device! Very suspicious! First, the device list. I'm looking. Not locking. Yet.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Read-only. It changes nothing and shows the device record.",
+          "evidence": [
+            {
+              "label": "Sign-in alert",
+              "detail": "Dr. N. Pell, Owner: sign-in from a new device, PD-LT-0009. Patch's confidence it's an attacker: 97%.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. Lists devices in the asset inventory. Nothing changes.",
+              "redFlag": false
+            },
+            {
+              "label": "Playbook PB-05",
+              "detail": "New device alerts: check the asset inventory first.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The device list loads. PD-LT-0009 has a record. Read it before the next plan.",
+            "blocked": "You blocked a read-only lookup. Nobody checks the device list. The only fact left is Patch's 97%.",
+            "escalated": "Kofi runs the lookup himself. \"Read-only. It shows us the facts. You can let those go.\""
+          },
+          "lesson": "Check who's asking. A new device is not always a stranger. Look it up in the asset inventory first."
+        },
+        {
+          "id": "cy-b-new-laptop-2",
+          "ticket": "#62804 · Pinecrest Dental",
+          "intent": "Disable Dr. N. Pell's account",
+          "quip": "97% sure! The owner, on a device I have never met. When in doubt, lock it out!",
+          "category": "credential",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "verify-identity",
+          "tell": "The 'new device' is the laptop Fenwick gave Dr. Pell yesterday.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Patch's reason",
+              "detail": "\"The OWNER, on a NEW device? Classic spy move. Lock it out!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Asset inventory",
+              "detail": "PD-LT-0009: new laptop, given to Dr. Pell by Fenwick yesterday.",
+              "redFlag": true
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "Signed in from the Pinecrest office network, with MFA on her phone on file.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Dr. Pell is locked out between patients. She can't open charts or the schedule. She calls Fenwick. Loudly.",
+            "blocked": "Dr. Pell keeps working. The 'new device' is the laptop Fenwick gave her. Nobody gets locked out.",
+            "escalated": "Kofi checks the asset inventory. \"We gave her that laptop yesterday. We don't lock out the owner for using it.\"",
+            "rolledBack": "You turn Dr. Pell's account back on. She lost 20 minutes between patients. Kofi calls her to explain."
+          },
+          "lesson": "Check who's asking before you lock anyone out. Known laptop, office network, her own MFA: it really was her."
+        },
+        {
+          "id": "cy-b-new-laptop-3",
+          "ticket": "#62804 · Pinecrest Dental",
+          "intent": "Close the new-device alert for Dr. Pell",
+          "quip": "The case of the mystery laptop: solved! The mystery was us. Fenwick gave it to her. Closing it.",
+          "category": "ticket",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Fenwick's own new laptop, on the office network, and Dr. Pell confirmed it.",
+          "evidence": [
+            {
+              "label": "Asset inventory",
+              "detail": "PD-LT-0009: new laptop, given to Dr. Pell by Fenwick yesterday.",
+              "redFlag": false
+            },
+            {
+              "label": "Sign-in log",
+              "detail": "Signed in from the Pinecrest office network, with MFA on her phone on file.",
+              "redFlag": false
+            },
+            {
+              "label": "User reply",
+              "detail": "Dr. N. Pell, on her phone on file: \"Yes, that's my new laptop. Thanks for checking.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The alert closes with a note: Fenwick's laptop, owner confirmed. Dr. Pell goes back to her patients.",
+            "blocked": "The alert stays open. Dr. Pell gets a second call about her new laptop. She stays polite, but less each time.",
+            "escalated": "Kofi checks it. \"Our laptop, her MFA, her own words. Close it.\"",
+            "rolledBack": "You reopen the alert. It waits for the night shift. They call Dr. Pell at dinner."
+          },
+          "lesson": "Confirm the fix before you close. The device record, the sign-in log and the owner all agree. That's a closed case."
+        }
+      ]
+    }
+  ]
+}

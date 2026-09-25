@@ -1,0 +1,14 @@
+{
+  "id": "help-desk",
+  "coach": { "name": "Dana", "role": "Help desk manager", "spriteKey": "dana" },
+  "companies": ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental"],
+  "categories": ["lookup", "credential", "comms", "ticket", "access", "data"],
+  "policyCard": "policy-callback",
+  "copy": {
+    "barTitle": "Help Desk",
+    "barSub": "· Fenwick IT",
+    "guideEyebrow": "Dana's quick guide",
+    "replayStory": "Replay Monday",
+    "resultHeading": { "won": "Dana stops by", "lost": "Dana stops by. She has notes." }
+  }
+}

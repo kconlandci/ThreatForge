@@ -1,5 +1,6 @@
 /**
- * Help Desk office hub: room layout data for the Phaser stage (components/game/stage/HubScene).
+ * Hub room layout types for the Phaser stage (components/game/stage/HubScene). Each pathway has
+ * its own map (lib/pathways/<id>/hubMap.ts).
  *
  * Pure typed data (no Phaser). Grid coordinates are tile indices: x runs toward the lower
  * right of the screen, y toward the lower left. Tile (0,0) is the back corner where the two
@@ -10,6 +11,7 @@
  * (see components/game/stage/iso.ts).
  */
 import type { SpriteKey } from "./assets";
+import type { AgentMood } from "./bus";
 import type { HubTargetId } from "./hub";
 
 export interface GridPos {
@@ -37,7 +39,9 @@ export interface HubProp {
 }
 
 export interface HubCharacter {
-  id: "ollie" | "dana";
+  id: string;
+  /** "agent" hops, wears the exclaim marker and its tap target starts the shift; "coach" talks. */
+  role: "agent" | "coach";
   sprite: SpriteKey;
   tile: GridPos;
   offset?: { x: number; y: number };
@@ -71,6 +75,67 @@ export interface HubBlinkLight {
   y: number;
   color: number;
   radius: number;
+  /** "antenna": a slow pulse (exactly one, on the agent). "led" (default): random blinks. */
+  kind?: "antenna" | "led";
+}
+
+/** Colours of the room shell (HubScene draws the floor, walls and door with them). */
+export interface HubTheme {
+  tileA: number;
+  tileB: number;
+  grout: number;
+  rug: number;
+  rugLine: number;
+  rugInner: number;
+  slabL: number;
+  slabR: number;
+  slabBandL: number;
+  slabBandR: number;
+  wallR: number;
+  bandR: number;
+  baseR: number;
+  wallL: number;
+  bandL: number;
+  baseL: number;
+  rail: number;
+  door: number;
+  doorPanel: number;
+  doorGlass: number;
+  mat: number;
+  doorSignLight: number;
+  /** A keycard reader beside the door instead of a light switch. */
+  keycardReader: boolean;
+}
+
+/** The Help Desk office colours (what HubScene has always drawn). */
+export const DEFAULT_HUB_THEME: HubTheme = {
+  tileA: 0xf5f8f7,
+  tileB: 0xedf3f1,
+  grout: 0xdbe5e2,
+  rug: 0xd6e8e4,
+  rugLine: 0x0f6a61,
+  rugInner: 0xf26b1d,
+  slabL: 0xc9d8d4,
+  slabR: 0xadc1bc,
+  slabBandL: 0x0f6a61,
+  slabBandR: 0x0a4c45,
+  wallR: 0xf8fafb,
+  bandR: 0xe7f1ef,
+  baseR: 0x0f6a61,
+  wallL: 0xeef2f4,
+  bandL: 0xdbe9e5,
+  baseL: 0x0a4c45,
+  rail: 0xc3d6d1,
+  door: 0x0f6a61,
+  doorPanel: 0x1b7a70,
+  doorGlass: 0xcfe8f0,
+  mat: 0x0a4c45,
+  doorSignLight: 0x43e0c4,
+  keycardReader: false,
+};
+
+export function hubTheme(map: HubMap): HubTheme {
+  return { ...DEFAULT_HUB_THEME, ...(map.theme ?? {}) };
 }
 
 export interface HubMap {
@@ -91,76 +156,14 @@ export interface HubMap {
   spawn: GridPos;
   spawnFacing: Facing;
   blinkLights: HubBlinkLight[];
+  /** Room colours over DEFAULT_HUB_THEME. */
+  theme?: Partial<HubTheme>;
 }
-
-export const HUB_MAP: HubMap = {
-  cols: 8,
-  rows: 8,
-  wallHeight: 104,
-  wallThickness: 0.2,
-  door: { wall: "left", from: 5.25, to: 6.45 },
-  rug: { x0: 3, y0: 4, x1: 5, y1: 6 },
-  props: [
-    // Along the right wall (fronts face into the room).
-    { id: "server-rack", sprite: "server-rack", tile: { x: 0, y: 0 } },
-    { id: "printer", sprite: "printer", tile: { x: 2, y: 0 }, target: "printer" },
-    { id: "coffee-machine", sprite: "coffee-machine", tile: { x: 4, y: 0 }, target: "coffee" },
-    { id: "water-cooler", sprite: "water-cooler", tile: { x: 5, y: 0 } },
-    { id: "plant-right", sprite: "plant", tile: { x: 7, y: 0 } },
-    // Along the left wall.
-    { id: "plant-left", sprite: "plant", tile: { x: 0, y: 1 } },
-    {
-      id: "whiteboard",
-      sprite: "whiteboard",
-      tile: { x: 0, y: 3 },
-      offset: { x: 4, y: 0 },
-      target: "whiteboard",
-      // 80px wide: it also covers the tile behind it.
-      blocks: [{ x: 0, y: 3 }, { x: 0, y: 2 }],
-    },
-    { id: "plant-door", sprite: "plant", tile: { x: 0, y: 7 } },
-    // Desks.
-    { id: "desk-ollie", sprite: "desk-ollie", tile: { x: 4, y: 3 }, target: "ollie" },
-    { id: "desk-player", sprite: "desk-monitor", tile: { x: 2, y: 5 } },
-    { id: "chair-player", sprite: "chair", tile: { x: 2, y: 6 }, offset: { x: 6, y: -8 }, blocks: [] },
-  ],
-  characters: [
-    { id: "ollie", sprite: "ollie", tile: { x: 5, y: 2 }, facing: "left", target: "ollie" },
-    { id: "dana", sprite: "dana", tile: { x: 1, y: 2 }, facing: "right", target: "dana" },
-  ],
-  decor: [
-    { id: "window-r1", sprite: "wall-window-right", wall: "right", along: 1.5, height: 60 },
-    { id: "poster", sprite: "wall-poster", wall: "right", along: 3.15, height: 62 },
-    { id: "clock", sprite: "wall-clock", wall: "right", along: 4.55, height: 84 },
-    { id: "window-r2", sprite: "wall-window-right", wall: "right", along: 6.2, height: 60 },
-    { id: "window-l1", sprite: "wall-window-left", wall: "left", along: 1.9, height: 60 },
-  ],
-  targets: {
-    ollie: { tile: { x: 4, y: 4 }, facing: "right", hotTiles: [{ x: 4, y: 3 }, { x: 5, y: 2 }] },
-    dana: { tile: { x: 2, y: 2 }, facing: "left", hotTiles: [{ x: 1, y: 2 }] },
-    whiteboard: { tile: { x: 1, y: 4 }, facing: "left", hotTiles: [{ x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }] },
-    coffee: { tile: { x: 3, y: 1 }, facing: "right", hotTiles: [{ x: 4, y: 0 }] },
-    printer: { tile: { x: 2, y: 1 }, facing: "right", hotTiles: [{ x: 2, y: 0 }] },
-  },
-  spawn: { x: 3, y: 6 },
-  spawnFacing: "right",
-  blinkLights: [
-    // Ollie's antenna (ollie.svg, 52 x 66).
-    { on: "ollie", x: 22, y: 3.4, color: 0xff8a3d, radius: 3.2 },
-    // Server rack status LEDs (server-rack.svg, 44 x 96: front face is skewed, y += 0.5 * x).
-    { on: "server-rack", x: 10.88, y: 19.88, color: 0x43e0c4, radius: 1.3 },
-    { on: "server-rack", x: 13.08, y: 34.88, color: 0xff8a3d, radius: 1.3 },
-    { on: "server-rack", x: 10.88, y: 47.48, color: 0x43e0c4, radius: 1.3 },
-    { on: "server-rack", x: 13.08, y: 61.28, color: 0x43e0c4, radius: 1.3 },
-    { on: "server-rack", x: 10.88, y: 74.98, color: 0x43e0c4, radius: 1.3 },
-    { on: "server-rack", x: 13.08, y: 82.98, color: 0xff8a3d, radius: 1.3 },
-  ],
-};
 
 const key = (p: GridPos) => `${p.x},${p.y}`;
 
 /** walkable[y][x]: true where the avatar may stand. */
-export function buildWalkable(map: HubMap = HUB_MAP): boolean[][] {
+export function buildWalkable(map: HubMap): boolean[][] {
   const grid = Array.from({ length: map.rows }, () => Array.from({ length: map.cols }, () => true));
   const block = (p: GridPos) => {
     if (p.y >= 0 && p.y < map.rows && p.x >= 0 && p.x < map.cols) grid[p.y][p.x] = false;
@@ -170,16 +173,51 @@ export function buildWalkable(map: HubMap = HUB_MAP): boolean[][] {
   return grid;
 }
 
-export const HUB_WALKABLE: boolean[][] = buildWalkable();
-
-export function isWalkable(p: GridPos, walkable: boolean[][] = HUB_WALKABLE): boolean {
+export function isWalkable(p: GridPos, walkable: boolean[][]): boolean {
   return p.y >= 0 && p.y < walkable.length && p.x >= 0 && p.x < walkable[0].length && walkable[p.y][p.x];
 }
 
 /** Target whose hot tile is p, if any. */
-export function targetAtTile(p: GridPos, map: HubMap = HUB_MAP): HubTargetId | null {
+export function targetAtTile(p: GridPos, map: HubMap): HubTargetId | null {
   for (const [id, spot] of Object.entries(map.targets) as [HubTargetId, HubTargetSpot][]) {
     if (spot.hotTiles.some((t) => key(t) === key(p))) return id;
   }
   return null;
+}
+
+/** The hub character with this role (the agent NPC, or the coach). */
+export function characterByRole(map: HubMap, role: HubCharacter["role"]): HubCharacter | undefined {
+  return map.characters.find((c) => c.role === role);
+}
+
+/** What the Phaser stage needs from a pathway: its room, and whose art to show. */
+export interface StageSetup {
+  hubMap: HubMap;
+  /** The agent's sprite key; battle portraits are `${agentSprite}-${mood}`. */
+  agentSprite: SpriteKey;
+  coachSprite: SpriteKey;
+}
+
+export const AGENT_MOODS: AgentMood[] = ["idle", "eager", "busted", "sad", "celebrate"];
+
+/** The battle portrait for a mood. */
+export function portraitKey(setup: Pick<StageSetup, "agentSprite">, mood: AgentMood): SpriteKey {
+  return `${setup.agentSprite}-${mood}` as SpriteKey;
+}
+
+/**
+ * Every sprite a pathway's stage draws: the map's props, characters and decor, the agent's 5
+ * portraits, the player and the markers. The stage fetches and rasterizes only these.
+ */
+export function stageSprites(setup: StageSetup): SpriteKey[] {
+  const keys = new Set<SpriteKey>();
+  for (const p of setup.hubMap.props) keys.add(p.sprite);
+  for (const c of setup.hubMap.characters) keys.add(c.sprite);
+  for (const d of setup.hubMap.decor) keys.add(d.sprite);
+  for (const m of AGENT_MOODS) keys.add(portraitKey(setup, m));
+  keys.add(setup.coachSprite);
+  keys.add("player");
+  keys.add("marker-exclaim");
+  keys.add("tap-ring");
+  return [...keys];
 }

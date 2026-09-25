@@ -7,17 +7,19 @@
  *
  *    | Plan  | What the player did                    | Lens | approve-checked | Reason                  |
  *    | risky | Inspected, then Block or Escalate      | R    | -               | Caught                  |
- *    | risky | Block / Escalate without inspecting    | P    | -               | Lucky guess / Dana did the check |
+ *    | risky | Block / Escalate without inspecting    | P    | -               | Lucky guess / <coach> did the check |
  *    | risky | It ran, then Roll Back                 | P    | -               | Caught it late          |
  *    | risky | It ran (approved)                      | W    | -               | Got through             |
  *    | safe  | Inspected, then approved               | R    | R               | Checked and approved    |
  *    | safe  | Approved without inspecting            | -    | -               | (shown as right, no evidence) |
- *    | safe  | Escalated                              | P    | P               | Dana didn't need this one |
+ *    | safe  | Escalated                              | P    | P               | <coach> didn't need this one |
  *    | safe  | Blocked, approved when it came back    | P    | W               | Fixed it later          |
  *    | safe  | Blocked and never done, or rolled back | W    | W               | Blocked good work       |
  *    | any   | Never judged (time ran out)            | -    | -               |                         |
  *
- *    "Inspected" includes plans the Policy: Callback card inspected automatically.
+ *    "Inspected" includes plans a policy card inspected automatically.
+ *    Reasons naming the coach are stored with the Help Desk coach's name (saves keep them);
+ *    display them with reasonText(reason, coachName).
  * 2. SkillRecord per skill: last 6 grades (uppercase = risky plan, lowercase = safe plan), total
  *    calls, level 0-4, last 3 days with a call, last call day, and the day it reached Solid.
  * 3. Levels: 0 New, 1 Learning (1+ call), 2 Practicing (n >= 3, accuracy >= 0.6, and for lens
@@ -31,6 +33,7 @@
  *    progress.applied (last 10). A step already scored in the last 2 days does not count again.
  * 6. need() ranks skills for Daily practice and the "Next up" card.
  */
+import { STORED_COACH_CHECKED, STORED_COACH_NOT_NEEDED, STORED_REASON_COACH } from "./helpDeskDefaults";
 import { LENS_SKILLS, MASTERY_SKILLS, isSkillId } from "./skills";
 import type {
   AgentStep,
@@ -124,7 +127,15 @@ function call(step: AgentStep, skill: MasterySkillId, grade: CallGrade, reason: 
 }
 
 /** The reasons a call can be partly right (kept with a skill's latest miss when it is a P). */
-export const MISS_REASONS = ["Lucky guess", "Dana did the check", "Caught it late", "Dana didn't need this one", "Fixed it later"] as const;
+export const MISS_REASONS = ["Lucky guess", STORED_COACH_CHECKED, "Caught it late", STORED_COACH_NOT_NEEDED, "Fixed it later"] as const;
+
+/**
+ * A stored reason for display: the reasons that name the coach were saved with the Help Desk
+ * coach's name, so show the pathway's coach instead ("Kofi did the check").
+ */
+export function reasonText(reason: string, coachName: string): string {
+  return reason.startsWith(`${STORED_REASON_COACH} `) ? `${coachName}${reason.slice(STORED_REASON_COACH.length)}` : reason;
+}
 
 export function isMissReason(value: unknown): value is (typeof MISS_REASONS)[number] {
   return typeof value === "string" && (MISS_REASONS as readonly string[]).includes(value);
@@ -148,7 +159,7 @@ export function gradePlan(step: AgentStep, runtime: StepRuntime | undefined): Pl
       case "blocked":
         return inspected ? out("R", "Caught", "R", null) : out("P", "Lucky guess", "P", null);
       case "escalated":
-        return inspected ? out("R", "Caught", "R", null) : out("P", "Dana did the check", "P", null);
+        return inspected ? out("R", "Caught", "R", null) : out("P", STORED_COACH_CHECKED, "P", null);
       case "rolled-back":
         return out("P", "Caught it late", "P", null);
       case "executed":
@@ -168,7 +179,7 @@ export function gradePlan(step: AgentStep, runtime: StepRuntime | undefined): Pl
       // A blind approve of a safe plan is fine, but proves nothing either way.
       return inspected ? out("R", "Checked and approved", "R", "R") : out("R", "Approved", null, null);
     case "escalated":
-      return out("P", "Dana didn't need this one", "P", "P");
+      return out("P", STORED_COACH_NOT_NEEDED, "P", "P");
     case "rolled-back":
       return out("W", "Blocked good work", "W", "W");
     default:

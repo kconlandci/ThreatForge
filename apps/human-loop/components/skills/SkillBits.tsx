@@ -17,9 +17,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LEVEL_NAMES } from "@/lib/game/mastery";
-import { SKILLS } from "@/lib/game/skills";
+import { SKILL_BASE } from "@/lib/game/skills";
 import { levelText } from "@/lib/game/skillsView";
-import type { CallGrade, DanaQuestion, MasterySkillId, SkillLevel } from "@/lib/game/types";
+import type { CallGrade, CheckQuestion, MasterySkillId, SkillLevel } from "@/lib/game/types";
 import k from "./skills.module.css";
 
 const SKILL_ICONS: Record<string, LucideIcon> = {
@@ -33,16 +33,16 @@ const SKILL_ICONS: Record<string, LucideIcon> = {
 };
 
 export function skillIcon(skill: MasterySkillId): LucideIcon {
-  return SKILL_ICONS[SKILLS[skill].icon] ?? ListChecks;
+  return SKILL_ICONS[SKILL_BASE[skill].icon] ?? ListChecks;
 }
 
-export const QUESTION_ICON: Record<DanaQuestion, LucideIcon> = {
+export const QUESTION_ICON: Record<CheckQuestion, LucideIcon> = {
   who: UserSearch,
   record: ClipboardList,
   undo: Undo2,
 };
 
-export function questionIcon(q: DanaQuestion | null): LucideIcon {
+export function questionIcon(q: CheckQuestion | null): LucideIcon {
   return q ? QUESTION_ICON[q] : ListChecks;
 }
 

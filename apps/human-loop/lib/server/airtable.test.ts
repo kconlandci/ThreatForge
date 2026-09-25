@@ -874,3 +874,66 @@ describe("retention purge", () => {
     expect(await maybePurgeStalePlayers(Date.now(), true)).toBe(0);
   });
 });
+
+describe("more than one pathway", () => {
+  const cyber = (history: Entry[], extra: Record<string, unknown> = {}) => ({
+    introSeen: true,
+    hub: null,
+    battle: null,
+    pendingResult: null,
+    best: null,
+    attempts: history.length,
+    wins: 0,
+    history,
+    ...extra,
+  });
+
+  it("names Cybersecurity shifts: the story title, daily and drill ids", () => {
+    const save = makeSave([]);
+    save.pathways.cybersecurity = cyber([
+      entry(minutes(1), { encounterId: "cy-01-friday", stars: 2 }),
+      entry(minutes(2), { encounterId: "cy-daily-3", stars: 0, mode: "daily", right: 6, partly: 1, missed: 1 }),
+      entry(minutes(3), { encounterId: "cy-drill-guard-data-0", stars: 0, mode: "drill", right: 4, partly: 0, missed: 1 }),
+    ]);
+    const rows = newShiftResults(save, undefined);
+    expect(rows.map((r) => r.pathway)).toEqual(["cybersecurity", "cybersecurity", "cybersecurity"]);
+    const f = rows.map((r) => resultFields(r, "Jamie Rivera", "recAAAAAAAAAAAAAA"));
+    expect(f[0][RESULT_FIELDS.pathway]).toBe("Cybersecurity");
+    expect(f[0][RESULT_FIELDS.encounter]).toBe("Friday, 4:47 PM");
+    expect(f[1][RESULT_FIELDS.summary]).toBe("Jamie R. · Cybersecurity · Daily practice · 6/8 right");
+    expect(f[1][RESULT_FIELDS.encounter]).toBe("cy-daily-3");
+    expect(f[2][RESULT_FIELDS.summary]).toBe("Jamie R. · Cybersecurity · Drill: Guard the data · 4/5 right");
+  });
+
+  it("keeps the Help Desk Encounter title from the registry", () => {
+    const [r] = newShiftResults(makeSave([entry(minutes(1))]), undefined);
+    expect(resultFields(r, "Jamie Rivera", "recAAAAAAAAAAAAAA")[RESULT_FIELDS.encounter]).toBe("Monday, 8:57 AM");
+  });
+
+  it("labels skill levels by pathway once a second pathway has skills", () => {
+    const rec = (level: number) => ({ recent: "RrR", n: 3, level, days: [], last: "2026-09-24", solidOn: null });
+    const hd = makeSave([], { skills: { "verify-identity": rec(3) } });
+    expect(skillLevelsText(hd)).toBe("Check who's asking: Solid");
+    hd.pathways.cybersecurity = cyber([], { skills: { "guard-data": rec(1), "verify-identity": rec(2) } });
+    expect(skillLevelsText(hd)).toBe("Help Desk — Check who's asking: Solid | Cybersecurity — Check who's asking: Practicing; Guard the data: Learning");
+  });
+
+  it("fits a two-pathway save into the Save data cell by trimming", () => {
+    const pad = "x".repeat(150);
+    const save = makeSave(Array.from({ length: 300 }, (_, i) => entry(minutes(i), { encounterId: `hd-01-monday-${pad}` })));
+    save.pathways.cybersecurity = cyber(Array.from({ length: 300 }, (_, i) => entry(minutes(i + 1000), { encounterId: `cy-01-friday-${pad}` })));
+    expect(JSON.stringify(save).length).toBeGreaterThan(SAVE_DATA_MAX_CHARS);
+    const packed = packSaveData(save)!;
+    expect(packed.json.length).toBeLessThanOrEqual(SAVE_DATA_MAX_CHARS);
+    expect(packed.trimmed).toBeGreaterThan(0);
+    const stored = JSON.parse(packed.json);
+    expect(stored.pathways["help-desk"].attempts).toBe(300);
+    expect(stored.pathways.cybersecurity.attempts).toBe(300);
+  });
+
+  it("imports no game content (the server never bundles a pathway)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("./airtable.ts", import.meta.url), "utf8");
+    expect(src).not.toMatch(/@\/content\/|lib\/game\/content|lib\/pathways/);
+  });
+});

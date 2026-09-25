@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HELP_DESK } from "@/lib/pathways/help-desk";
 import { BANK_VERSION, HELP_DESK_BANK, HELP_DESK_ENCOUNTER, SHIFT_TEXT, encounterFor, shiftEncounter } from "./content";
 import { canResume, createBattle, deckAtTurn, endTurn } from "./engine";
 import { addDays } from "./mastery";
@@ -26,6 +27,7 @@ const SEEDS = 600;
 const byId = new Map(HELP_DESK_BANK.map((t) => [t.id, t]));
 const stepById = new Map(HELP_DESK_BANK.flatMap((t) => t.steps.map((s) => [s.id, s] as const)));
 const AGENT = HELP_DESK_ENCOUNTER.agent;
+const OPTS = { agent: AGENT, skillCopy: (id: MasterySkillId) => HELP_DESK.skill(id) };
 
 function progress(over: Partial<PathwayProgress> = {}): PathwayProgress {
   return { introSeen: true, hub: null, battle: null, pendingResult: null, best: null, attempts: 1, wins: 1, history: [], ...over };
@@ -227,10 +229,10 @@ describe("beginShift", () => {
 
 describe("buildShift", () => {
   const spec = planDaily(HELP_DESK_BANK, progress(), { playerId: "build", today: TODAY });
-  const enc = buildShift(HELP_DESK_BANK, spec, SHIFT_TEXT, { agent: AGENT });
+  const enc = buildShift(HELP_DESK_BANK, spec, SHIFT_TEXT, OPTS);
 
   it("builds the same encounter from the same spec", () => {
-    expect(buildShift(HELP_DESK_BANK, JSON.parse(JSON.stringify(spec)) as ShiftSpec, SHIFT_TEXT, { agent: AGENT })).toEqual(enc);
+    expect(buildShift(HELP_DESK_BANK, JSON.parse(JSON.stringify(spec)) as ShiftSpec, SHIFT_TEXT, OPTS)).toEqual(enc);
     expect(enc.steps.map((s) => s.id)).toEqual(spec.stepIds);
   });
 
@@ -252,13 +254,13 @@ describe("buildShift", () => {
     expect(deckAtTurn(HELP_DESK_ENCOUNTER, HELP_DESK_ENCOUNTER.maxTurns).filter((c) => c !== "policy-callback").sort()).toEqual(
       enc.starterDeck.filter((c) => c !== "policy-callback").sort(),
     );
-    expect(enc.intro.map((l) => l.speaker)).toEqual(["dana", "agent"]);
+    expect(enc.intro.map((l) => l.speaker)).toEqual(["coach", "agent"]);
     expect(enc.outro.win.length && enc.outro.timeout.length && enc.outro.breach.length && enc.outro.winWithMisses?.length).toBeTruthy();
     expect(enc.agent).toEqual(AGENT);
   });
 
   it("rotates Ollie's lines: back-to-back dailies and drills never repeat a line", () => {
-    const at = (n: number) => buildShift(HELP_DESK_BANK, planDaily(HELP_DESK_BANK, progress({ dailyCount: n }), { playerId: "rot", today: TODAY }), SHIFT_TEXT, { agent: AGENT });
+    const at = (n: number) => buildShift(HELP_DESK_BANK, planDaily(HELP_DESK_BANK, progress({ dailyCount: n }), { playerId: "rot", today: TODAY }), SHIFT_TEXT, OPTS);
     for (let n = 0; n < 8; n++) {
       const a = at(n).outro;
       const b = at(n + 1).outro;
@@ -266,7 +268,7 @@ describe("buildShift", () => {
       expect(b.winWithMisses?.[0].text).not.toBe(a.winWithMisses?.[0].text);
       expect(b.winWithOneMiss?.[0].text).not.toBe(a.winWithOneMiss?.[0].text);
     }
-    const drill = (k: number) => buildShift(HELP_DESK_BANK, planDrill(HELP_DESK_BANK, "guard-data", { playerId: "rot", k, today: TODAY }), SHIFT_TEXT, { agent: AGENT });
+    const drill = (k: number) => buildShift(HELP_DESK_BANK, planDrill(HELP_DESK_BANK, "guard-data", { playerId: "rot", k, today: TODAY }), SHIFT_TEXT, OPTS);
     expect(drill(1).outro.drillWin?.[0].text).not.toBe(drill(0).outro.drillWin?.[0].text);
     expect(at(0).outro.drillWin).toBeUndefined();
   });
@@ -275,7 +277,7 @@ describe("buildShift", () => {
     const withCred = planDaily(HELP_DESK_BANK, progress(), { playerId: "cred", today: TODAY });
     const tickets = HELP_DESK_BANK.filter((t) => !t.steps.some((s) => s.category === "credential"));
     const noCred: ShiftSpec = { ...withCred, ticketIds: tickets.slice(0, 2).map((t) => t.id), stepIds: interleave(tickets.slice(0, 2)).map((s) => s.id) };
-    expect(buildShift(HELP_DESK_BANK, noCred, SHIFT_TEXT, { agent: AGENT }).starterDeck).not.toContain("policy-callback");
+    expect(buildShift(HELP_DESK_BANK, noCred, SHIFT_TEXT, OPTS).starterDeck).not.toContain("policy-callback");
   });
 
   it("resumes: a saved battle rebuilt from progress.shift passes canResume", () => {
@@ -380,7 +382,7 @@ describe("planDrill", () => {
 
   it("builds a one-plan-at-a-time drill with Inspect, Block and Escalate always in hand", () => {
     const spec = planDrill(HELP_DESK_BANK, "verify-identity", { playerId: "b", k: 1, today: TODAY });
-    const enc = buildShift(HELP_DESK_BANK, spec, SHIFT_TEXT, { agent: AGENT });
+    const enc = buildShift(HELP_DESK_BANK, spec, SHIFT_TEXT, OPTS);
     expect(enc.mode).toBe("drill");
     expect(enc.id).toBe("hd-drill-verify-identity-1");
     expect(enc.title).toBe("Drill: Check who's asking");

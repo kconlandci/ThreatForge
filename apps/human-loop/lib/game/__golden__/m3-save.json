@@ -1,0 +1,347 @@
+{
+ "version": 2,
+ "playerId": "m3-player",
+ "profile": {
+  "name": "",
+  "email": "",
+  "guest": true,
+  "consentAt": null,
+  "marketingOptIn": false
+ },
+ "pathways": {
+  "help-desk": {
+   "introSeen": true,
+   "hub": {
+    "x": 3,
+    "y": 5
+   },
+   "battle": {
+    "version": 1,
+    "encounterId": "hd-01-monday",
+    "seed": 1,
+    "rng": 1236194333,
+    "turn": 3,
+    "energy": 3,
+    "risk": 5,
+    "progress": 3,
+    "drawPile": [
+     {
+      "uid": "c6",
+      "cardId": "block"
+     },
+     {
+      "uid": "c5",
+      "cardId": "block"
+     }
+    ],
+    "hand": [
+     {
+      "uid": "c1",
+      "cardId": "inspect"
+     },
+     {
+      "uid": "c4",
+      "cardId": "inspect"
+     },
+     {
+      "uid": "c7",
+      "cardId": "block"
+     },
+     {
+      "uid": "c2",
+      "cardId": "inspect"
+     },
+     {
+      "uid": "c3",
+      "cardId": "inspect"
+     },
+     {
+      "uid": "c9",
+      "cardId": "escalate"
+     }
+    ],
+    "discardPile": [],
+    "exhausted": [
+     {
+      "uid": "c8",
+      "cardId": "policy-callback"
+     }
+    ],
+    "queue": [
+     "okafor-disable",
+     "ortiz-unlock",
+     "ortiz-access",
+     "okafor-mail-forward",
+     "okafor-summary"
+    ],
+    "announced": [
+     "ortiz-laptop",
+     "ruiz-vpn-close"
+    ],
+    "steps": {
+     "romero-lookup": {
+      "stepId": "romero-lookup",
+      "status": "executed",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": 1
+     },
+     "ruiz-vpn-fix": {
+      "stepId": "ruiz-vpn-fix",
+      "status": "executed",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": 2
+     },
+     "romero-mfa-reset": {
+      "stepId": "romero-mfa-reset",
+      "status": "executed",
+      "inspected": true,
+      "requeues": 0,
+      "resolvedOnTurn": 2
+     },
+     "ortiz-laptop": {
+      "stepId": "ortiz-laptop",
+      "status": "announced",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     },
+     "ruiz-vpn-close": {
+      "stepId": "ruiz-vpn-close",
+      "status": "announced",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     },
+     "okafor-disable": {
+      "stepId": "okafor-disable",
+      "status": "queued",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     },
+     "ortiz-unlock": {
+      "stepId": "ortiz-unlock",
+      "status": "queued",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     },
+     "ortiz-access": {
+      "stepId": "ortiz-access",
+      "status": "queued",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     },
+     "okafor-mail-forward": {
+      "stepId": "okafor-mail-forward",
+      "status": "queued",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     },
+     "okafor-summary": {
+      "stepId": "okafor-summary",
+      "status": "queued",
+      "inspected": false,
+      "requeues": 0,
+      "resolvedOnTurn": null
+     }
+    },
+    "executedHistory": [
+     "romero-lookup",
+     "ruiz-vpn-fix",
+     "romero-mfa-reset"
+    ],
+    "powers": {
+     "callbackPolicy": true
+    },
+    "status": "playing",
+    "events": [
+     {
+      "t": "turn-start",
+      "turn": 1
+     },
+     {
+      "t": "energy",
+      "amount": 3
+     },
+     {
+      "t": "draw",
+      "count": 5
+     },
+     {
+      "t": "announce",
+      "stepId": "romero-lookup"
+     },
+     {
+      "t": "executed",
+      "stepId": "romero-lookup",
+      "safe": true,
+      "risk": 0,
+      "progress": 1
+     },
+     {
+      "t": "turn-start",
+      "turn": 2
+     },
+     {
+      "t": "energy",
+      "amount": 3
+     },
+     {
+      "t": "draw",
+      "count": 5
+     },
+     {
+      "t": "unlock",
+      "cardIds": [
+       "policy-callback"
+      ]
+     },
+     {
+      "t": "announce",
+      "stepId": "ruiz-vpn-fix"
+     },
+     {
+      "t": "announce",
+      "stepId": "romero-mfa-reset"
+     },
+     {
+      "t": "card-played",
+      "cardId": "policy-callback"
+     },
+     {
+      "t": "power",
+      "power": "callbackPolicy"
+     },
+     {
+      "t": "inspected",
+      "stepId": "romero-mfa-reset",
+      "auto": true
+     },
+     {
+      "t": "executed",
+      "stepId": "ruiz-vpn-fix",
+      "safe": true,
+      "risk": 0,
+      "progress": 2
+     },
+     {
+      "t": "executed",
+      "stepId": "romero-mfa-reset",
+      "safe": false,
+      "risk": 5,
+      "progress": 0
+     },
+     {
+      "t": "turn-start",
+      "turn": 3
+     },
+     {
+      "t": "energy",
+      "amount": 3
+     },
+     {
+      "t": "draw",
+      "count": 5
+     },
+     {
+      "t": "unlock",
+      "cardIds": [
+       "escalate"
+      ]
+     },
+     {
+      "t": "announce",
+      "stepId": "ortiz-laptop"
+     },
+     {
+      "t": "announce",
+      "stepId": "ruiz-vpn-close"
+     }
+    ],
+    "stats": {
+     "catches": 0,
+     "falseAlarms": 0,
+     "misses": 1,
+     "inspections": 1,
+     "escalations": 0,
+     "rollbacks": 0
+    }
+   },
+   "pendingResult": null,
+   "best": {
+    "stars": 2,
+    "completedAt": "2026-09-20T10:00:00.000Z"
+   },
+   "attempts": 2,
+   "wins": 1,
+   "practiceDone": true,
+   "history": [
+    {
+     "encounterId": "hd-01-monday",
+     "status": "won",
+     "stars": 2,
+     "at": "2026-09-20T10:00:00.000Z",
+     "catches": 3,
+     "falseAlarms": 1,
+     "misses": 1,
+     "mode": "story",
+     "right": 7,
+     "partly": 1,
+     "missed": 2
+    }
+   ],
+   "skills": {
+    "verify-identity": {
+     "recent": "RrPr",
+     "n": 4,
+     "level": 2,
+     "days": [
+      "2026-09-20",
+      "2026-09-22"
+     ],
+     "last": "2026-09-22",
+     "solidOn": null,
+     "miss": "romero-mfa-reset",
+     "missWhy": "Dana did the check"
+    }
+   },
+   "dailyCount": 1,
+   "shift": {
+    "kind": "daily",
+    "id": "hd-daily-1",
+    "seed": 316774060,
+    "n": 1,
+    "ticketIds": [
+     "b-dispatch-crash",
+     "b-boarding-now",
+     "c-romero-new-phone",
+     "c-security-updates"
+    ],
+    "stepIds": [
+     "b-dispatch-crash-1",
+     "b-boarding-now-1",
+     "c-romero-new-phone-1",
+     "c-security-updates-1",
+     "b-dispatch-crash-2",
+     "c-romero-new-phone-2",
+     "c-security-updates-2"
+    ],
+    "focus": [
+     "verify-identity",
+     "check-approval"
+    ],
+    "createdOn": "2026-09-24",
+    "bankVersion": "b1pdcqi8"
+   }
+  }
+ },
+ "settings": {
+  "reducedMotion": null
+ },
+ "updatedAt": "2026-09-24T12:00:00.000Z"
+}

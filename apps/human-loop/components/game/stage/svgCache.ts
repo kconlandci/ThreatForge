@@ -2,7 +2,7 @@
  * Shared SVG text cache for the stage art. No Phaser here, so the game page can start these
  * fetches (lib/client/preloadStage.ts) while the Phaser chunk is still downloading.
  */
-import { SPRITES } from "@/lib/game/assets";
+import { SPRITES, type SpriteKey } from "@/lib/game/assets";
 
 const FETCH_TIMEOUT_MS = 8000;
 const svgCache = new Map<string, Promise<string | null>>();
@@ -30,7 +30,13 @@ export function fetchSvg(url: string): Promise<string | null> {
   return p;
 }
 
-/** Start fetching every sprite file (safe to call more than once). */
-export function prefetchAllSvgs(): void {
-  for (const def of Object.values(SPRITES)) void fetchSvg(def.file);
+/** Sprites every pathway's stage uses. */
+export const SHARED_SPRITES: SpriteKey[] = ["player", "marker-exclaim", "tap-ring"];
+
+/** Start fetching these sprite files (safe to call more than once). */
+export function prefetchSvgs(keys: readonly SpriteKey[]): void {
+  for (const key of keys) {
+    const def = SPRITES[key];
+    if (def) void fetchSvg(def.file);
+  }
 }

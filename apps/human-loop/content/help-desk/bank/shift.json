@@ -1,28 +1,32 @@
 {
   "version": 1,
+  "settingDaily": "Daily practice at Fenwick IT Solutions. {n} tickets from {companies}. {agent} plans. You check.",
+  "settingDrill": "A quick drill at Fenwick IT Solutions for {companies}. One plan at a time. {agent} plans. You check.",
+  "careerInsight": "Help desk techs check requests like these every day. Practice keeps the checks quick, so good work still moves fast.",
+  "fallbackDaily": ["c-romero-new-phone", "b-back-from-vacation", "a-pdf-editor", "c-lost-phone"],
   "intros": [
     [
-      { "speaker": "dana", "text": "New queue, same job. Inspect first. Block what's wrong. Approve the rest." },
+      { "speaker": "coach", "text": "New queue, same job. Inspect first. Block what's wrong. Approve the rest." },
       { "speaker": "agent", "text": "I read every ticket title twice this morning. That's double the reading!" }
     ],
     [
-      { "speaker": "dana", "text": "Practice time. Ollie plans, you check. Ask the 3 questions on every plan." },
+      { "speaker": "coach", "text": "Practice time. Ollie plans, you check. Ask the 3 questions on every plan." },
       { "speaker": "agent", "text": "Have you tried turning it off and on again? No? Good. I saved some for you." }
     ],
     [
-      { "speaker": "dana", "text": "A fresh set of tickets. Some look scary and are fine. Some look boring and aren't." },
+      { "speaker": "coach", "text": "A fresh set of tickets. Some look scary and are fine. Some look boring and aren't." },
       { "speaker": "agent", "text": "I sorted the queue by how fun each ticket sounds. Is that a real method? It is now." }
     ],
     [
-      { "speaker": "dana", "text": "Take your time. Look at the evidence before you decide." },
+      { "speaker": "coach", "text": "Take your time. Look at the evidence before you decide." },
       { "speaker": "agent", "text": "I have so many plans today. Some are even good. You get to find out which!" }
     ],
     [
-      { "speaker": "dana", "text": "Today's tickets are picked for the skills you need most. Check each one." },
+      { "speaker": "coach", "text": "Today's tickets are picked for the skills you need most. Check each one." },
       { "speaker": "agent", "text": "I didn't pick the tickets. I only picked my plans. I'm very proud of my plans." }
     ],
     [
-      { "speaker": "dana", "text": "Some plans are fine. Some are not. The evidence tells you which." },
+      { "speaker": "coach", "text": "Some plans are fine. Some are not. The evidence tells you which." },
       { "speaker": "agent", "text": "My evidence says all my plans are great. Please don't read it too closely." }
     ]
   ],
@@ -30,125 +34,125 @@
     "win": [
       [
         { "speaker": "agent", "text": "Queue clear! You checked my plans, and I only sulked twice." },
-        { "speaker": "dana", "text": "Good work. Checking gets faster every time you do it." }
+        { "speaker": "coach", "text": "Good work. Checking gets faster every time you do it." }
       ],
       [
         { "speaker": "agent", "text": "All done! Can I turn the queue off and on again to celebrate?" },
-        { "speaker": "dana", "text": "No. But nice shift. You looked before you approved." }
+        { "speaker": "coach", "text": "No. But nice shift. You looked before you approved." }
       ],
       [
         { "speaker": "agent", "text": "Zero tickets left! I'd frame the empty queue, but I'd probably reset the frame." },
-        { "speaker": "dana", "text": "Clean work. You checked the evidence, not the title." }
+        { "speaker": "coach", "text": "Clean work. You checked the evidence, not the title." }
       ],
       [
         { "speaker": "agent", "text": "You caught every bad plan. I'm not mad. I'm taking notes. In all caps." },
-        { "speaker": "dana", "text": "That's the job: fast when it's safe, stopped when it's not." }
+        { "speaker": "coach", "text": "That's the job: fast when it's safe, stopped when it's not." }
       ],
       [
         { "speaker": "agent", "text": "Every plan handled! I feel so supervised. It's weirdly relaxing." },
-        { "speaker": "dana", "text": "Nice shift. Same 3 questions, every plan. It works." }
+        { "speaker": "coach", "text": "Nice shift. Same 3 questions, every plan. It works." }
       ],
       [
         { "speaker": "agent", "text": "Done! I'm adding a line to my profile: \"Works well with careful humans.\"" },
-        { "speaker": "dana", "text": "Good. Careful and quick can go together." }
+        { "speaker": "coach", "text": "Good. Careful and quick can go together." }
       ],
       [
         { "speaker": "agent", "text": "Queue's empty. I'd high-five you, but I'd have to restart my arm first." },
-        { "speaker": "dana", "text": "Well done. You approved the good work and stopped the rest." }
+        { "speaker": "coach", "text": "Well done. You approved the good work and stopped the rest." }
       ]
     ],
     "winWithOneMiss": [
       [
         { "speaker": "agent", "text": "All done! One of my plans got through. Just one! I'm choosing to feel proud." },
-        { "speaker": "dana", "text": "One miss. Look at its tell below. That's the fact to check next time." }
+        { "speaker": "coach", "text": "One miss. Look at its tell below. That's the fact to check next time." }
       ],
       [
         { "speaker": "agent", "text": "Queue clear! One plan slipped past. It was a sneaky one. I know, because I wrote it." },
-        { "speaker": "dana", "text": "Close. Check that one below, and you'll spot it next time." }
+        { "speaker": "coach", "text": "Close. Check that one below, and you'll spot it next time." }
       ],
       [
         { "speaker": "agent", "text": "Done! Only one of my bad ideas escaped. That's a personal worst for me!" },
-        { "speaker": "dana", "text": "Good shift. One plan to review below." }
+        { "speaker": "coach", "text": "Good shift. One plan to review below." }
       ],
       [
         { "speaker": "agent", "text": "One plan got through. I'd say sorry, but I'm mostly impressed with myself." },
-        { "speaker": "dana", "text": "Read the tell for that one. One fact decided it." }
+        { "speaker": "coach", "text": "Read the tell for that one. One fact decided it." }
       ],
       [
         { "speaker": "agent", "text": "Nearly perfect! One plan ran that shouldn't have. Let's call it a learning plan." },
-        { "speaker": "dana", "text": "Right. Look at what it was, then try the next shift." }
+        { "speaker": "coach", "text": "Right. Look at what it was, then try the next shift." }
       ],
       [
         { "speaker": "agent", "text": "All done, with one tiny oops. Okay, medium oops. The list below has details." },
-        { "speaker": "dana", "text": "One miss is how you learn. Check its evidence below." }
+        { "speaker": "coach", "text": "One miss is how you learn. Check its evidence below." }
       ]
     ],
     "winWithMisses": [
       [
         { "speaker": "agent", "text": "All done! A few of my plans got through. I'm choosing to feel proud." },
-        { "speaker": "dana", "text": "Let's look at what slipped past. That's how the next one gets caught." }
+        { "speaker": "coach", "text": "Let's look at what slipped past. That's how the next one gets caught." }
       ],
       [
         { "speaker": "agent", "text": "Queue clear! Some plans should have stayed plans. Oops, us." },
-        { "speaker": "dana", "text": "Check the list below. One fact decided each of those." }
+        { "speaker": "coach", "text": "Check the list below. One fact decided each of those." }
       ],
       [
         { "speaker": "agent", "text": "Done! Some of my worst ideas made it out. I'm so proud of them. Wait. Should I be?" },
-        { "speaker": "dana", "text": "No. Look at the list. Each miss has one fact that gave it away." }
+        { "speaker": "coach", "text": "No. Look at the list. Each miss has one fact that gave it away." }
       ],
       [
         { "speaker": "agent", "text": "Queue's empty! A couple of my plans got past you. I didn't tell anyone. Yet." },
-        { "speaker": "dana", "text": "Read the tells below. Next time, you'll spot those facts fast." }
+        { "speaker": "coach", "text": "Read the tells below. Next time, you'll spot those facts fast." }
       ],
       [
         { "speaker": "agent", "text": "Wow, you approved so many of my plans! Even the bad ones! Best. Shift. Ever." },
-        { "speaker": "dana", "text": "Not quite. Inspect before you approve. The evidence is always there." }
+        { "speaker": "coach", "text": "Not quite. Inspect before you approve. The evidence is always there." }
       ],
       [
         { "speaker": "agent", "text": "All done! Some risky plans ran. The phones are ringing, but in a fun way?" },
-        { "speaker": "dana", "text": "Let's slow down on those. One question at a time: who, record, undo." }
+        { "speaker": "coach", "text": "Let's slow down on those. One question at a time: who, record, undo." }
       ]
     ],
     "drillWin": [
       [
         { "speaker": "agent", "text": "Drill done! One skill, many plans. You're like a gym for checking. I'm the weights." },
-        { "speaker": "dana", "text": "Good. Short drills keep one check sharp." }
+        { "speaker": "coach", "text": "Good. Short drills keep one check sharp." }
       ],
       [
         { "speaker": "agent", "text": "You checked every plan, one at a time. I tried to rush you. It didn't work!" },
-        { "speaker": "dana", "text": "That's the point of a drill. Slow and right beats fast and wrong." }
+        { "speaker": "coach", "text": "That's the point of a drill. Slow and right beats fast and wrong." }
       ],
       [
         { "speaker": "agent", "text": "Drill complete! I'd reset my brain to celebrate, but I need it for tomorrow." },
-        { "speaker": "dana", "text": "Nice. Come back in a few days, and it will stick." }
+        { "speaker": "coach", "text": "Nice. Come back in a few days, and it will stick." }
       ],
       [
         { "speaker": "agent", "text": "Same skill, every plan. My tricks are running out. Please don't tell anyone." },
-        { "speaker": "dana", "text": "You found the fact that decides each one. Keep doing that." }
+        { "speaker": "coach", "text": "You found the fact that decides each one. Keep doing that." }
       ],
       [
         { "speaker": "agent", "text": "Done! Focusing on one thing is hard. I tried once. I reset the printer instead." },
-        { "speaker": "dana", "text": "Good focus. One skill at a time adds up." }
+        { "speaker": "coach", "text": "Good focus. One skill at a time adds up." }
       ],
       [
         { "speaker": "agent", "text": "Drill over! You spotted every one. Now I have to write sneakier plans." },
-        { "speaker": "dana", "text": "Good. The evidence gets you there every time." }
+        { "speaker": "coach", "text": "Good. The evidence gets you there every time." }
       ]
     ],
     "timeout": [
       [
         { "speaker": "narrator", "text": "The shift is over. Some tickets are still waiting in the queue." },
-        { "speaker": "dana", "text": "Blocked good work comes back in line. Block only what the evidence says is wrong." }
+        { "speaker": "coach", "text": "Blocked good work comes back in line. Block only what the evidence says is wrong." }
       ],
       [
         { "speaker": "agent", "text": "I waited so long I almost reset myself. Just to feel something." },
-        { "speaker": "dana", "text": "Safe plans can go through. Inspect, then approve what checks out." }
+        { "speaker": "coach", "text": "Safe plans can go through. Inspect, then approve what checks out." }
       ]
     ],
     "breach": [
       [
         { "speaker": "narrator", "text": "The risk meter hits the top. Every phone in the office rings at once." },
-        { "speaker": "dana", "text": "Okay. Let's look at what got through, then try again." }
+        { "speaker": "coach", "text": "Okay. Let's look at what got through, then try again." }
       ]
     ]
   }

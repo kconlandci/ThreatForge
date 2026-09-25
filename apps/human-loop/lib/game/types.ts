@@ -10,6 +10,7 @@ export type CardId =
   | "escalate"
   | "rollback"
   | "policy-callback"
+  | "policy-look-first"
   | "coffee";
 
 /** What a card is played on. */
@@ -37,13 +38,21 @@ export interface CardDef {
   exhaust?: boolean;
   /** lucide-react icon name used by the UI, e.g. "Search". */
   icon: string;
+  /**
+   * A policy card: while it is on (powers.callbackPolicy), announced plans in these categories are
+   * inspected automatically. An encounter holds at most one policy card (see engine policyCardOf).
+   */
+  autoInspect?: StepCategory[];
+  /** The refusal when a policy card is played while its policy is already on. */
+  alreadyOn?: string;
 }
 
 /* ------------------------------------------------------------------ */
 /* Encounter content (authored as JSON in /content)                    */
 /* ------------------------------------------------------------------ */
 
-export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data";
+/** Per pathway, content/<id>/pathway.json "categories" lists the ones its content may use. */
+export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data" | "endpoint" | "network";
 
 /** Lens skills: each help desk step is tagged with the one skill it tests (authored). */
 export type SkillId =
@@ -55,10 +64,14 @@ export type SkillId =
   | "safe-change";
 /** Lens skills plus the calibration skill "approve what checks out" (computed, never authored). */
 export type MasterySkillId = SkillId | "approve-checked";
-/** Dana's three questions: Who asked? / Does it match the record? / Can we undo it? */
-export type DanaQuestion = "who" | "record" | "undo";
+/** The coach's three questions, shared by every pathway: Who asked? / Does it match the record? / Can we undo it? */
+export type CheckQuestion = "who" | "record" | "undo";
+/** @deprecated Use CheckQuestion. */
+export type DanaQuestion = CheckQuestion;
 /** Hidden generator and analytics tag. Never shown before a plan resolves; the coach never reads it. */
 export type StepTwist = "scary-safe" | "routine-risky";
+/** Hidden tag on a risky plan: the agent does too much ("over") or trusts too much ("under"). */
+export type StepDirection = "over" | "under";
 
 export interface Evidence {
   label: string;
@@ -68,7 +81,8 @@ export interface Evidence {
 }
 
 export interface DialogueLine {
-  speaker: "dana" | "agent" | "narrator";
+  /** "coach" is the pathway's lead (Dana on the help desk). */
+  speaker: "coach" | "agent" | "narrator";
   text: string;
 }
 
@@ -101,7 +115,20 @@ export interface AgentStep {
   /** At most 80 characters: the one fact that decided it. Shown only after the plan resolves. */
   tell?: string;
   twist?: StepTwist;
+  /** Risky plans only (required in cybersecurity content). Hidden like twist; the coach never reads it. */
+  direction?: StepDirection;
 }
+
+/** The pathway's lead, who coaches, resolves escalations and says the debrief lines. */
+export interface CoachInfo {
+  name: string;
+  role: string;
+  /** Sprite key, e.g. "dana" (public/game/sprites/dana.svg). */
+  spriteKey: string;
+}
+
+/** Result-screen headline pools (engine.ts HEADLINES has the Help Desk lines). */
+export type HeadlineKey = "perfect" | "sharp" | "lucky" | "jumpy" | "leaky" | "scraped" | "breach" | "timeout" | "playing";
 
 /** What kind of shift an encounter is. Missing means "story" (or "practice" when practice is set). */
 export type EncounterMode = "story" | "practice" | "daily" | "drill";
@@ -152,15 +179,26 @@ export interface Encounter {
     drillWin?: DialogueLine[];
   };
   debrief: { skillTag: string; takeaway: string; careerInsight: string };
+  /**
+   * Hydrated by lib/pathways/create.ts from pathway.json (never authored in encounter JSON).
+   * Missing means the Help Desk defaults (Dana).
+   */
+  coach?: CoachInfo;
+  /** Hydrated like coach: per-pathway headline lines; a missing key uses the engine's default pool. */
+  headlines?: Partial<Record<HeadlineKey, string[]>>;
+  /** Practice only: the coach's lines on the first two evidence sheets (coach.ts p0-c, p1-c). */
+  coachScript?: { firstSafeSheet: string; firstRiskySheet: string };
 }
 
-/** A help desk ticket from the bank (content/help-desk/bank/tickets-*.json). */
+/** The Help Desk clients. Each pathway lists its own in pathway.json "companies" (content tests check them). */
 export type BankCompany = "Harlow & Cole" | "Bramwell Logistics" | "Pinecrest Dental";
 
+/** A ticket from a pathway's bank (content/<pathway>/bank/tickets-*.json). */
 export interface BankTicket {
   /** Writer letter + "-" + kebab slug, e.g. "a-sim-swap"; at most 24 characters. */
   id: string;
-  company: BankCompany;
+  /** One of the pathway's companies (pathway.json). */
+  company: string;
   /** At most 40 characters, player-facing, e.g. "Call about a new phone". */
   title: string;
   difficulty: 1 | 2 | 3;
@@ -168,9 +206,16 @@ export interface BankTicket {
   steps: AgentStep[];
 }
 
-/** Shell text for generated shifts (content/help-desk/bank/shift.json). */
+/** Shell text for generated shifts (content/<pathway>/bank/shift.json). */
 export interface ShiftText {
   version: number;
+  /** Daily setting template: {n} tickets, {companies}, {agent} (short name). Default: the Help Desk line. */
+  settingDaily?: string;
+  /** Drill setting template: {companies}, {agent}. */
+  settingDrill?: string;
+  careerInsight?: string;
+  /** Ticket ids for the daily used when no draw passes the rules. Default: shiftGen FALLBACK_DAILY. */
+  fallbackDaily?: string[];
   intros: DialogueLine[][];
   outros: {
     win: DialogueLine[][];

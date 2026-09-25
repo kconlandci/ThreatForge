@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { coachHint, drillCoach, hintParts, plainHint, practiceCoach, sheetCoach, shiftCoach, type CoachUi } from "./coach";
+import { cardPrompt, coachHint, coachName, drillCoach, unlockTip, hintParts, plainHint, practiceCoach, sheetCoach, shiftCoach, type CoachUi } from "./coach";
 import { HELP_DESK_BANK, HELP_DESK_ENCOUNTER as E, HELP_DESK_PRACTICE as P } from "./content";
 import { createBattle, endTurn } from "./engine";
 import { tryPlay } from "./fixtures";
 import { LENS_SKILLS } from "./skills";
+import { HELP_DESK } from "@/lib/pathways/help-desk";
 import type { BattleState, CardId, Encounter } from "./types";
 
 const closed: CoachUi = { selectedCardId: null, sheetStepId: null };
@@ -358,7 +359,7 @@ describe("the coach never reads safe or redFlag", () => {
     const fs = await import("node:fs");
     const src = fs.readFileSync(new URL("./coach.ts", import.meta.url), "utf8");
     const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-    expect(code).not.toMatch(/\.safe\b|redFlag/);
+    expect(code).not.toMatch(/\.safe\b|redFlag|\.twist\b|\.direction\b/);
   });
 });
 
@@ -369,13 +370,43 @@ describe("drillCoach (Where to look, until Solid)", () => {
       const safe = steps.find((s) => s.skill === skill && s.safe)!;
       const risky = steps.find((s) => s.skill === skill && !s.safe)!;
       for (const level of [0, 1, 2] as const) {
-        const a = drillCoach(safe.skill, level);
+        const a = drillCoach(safe.skill, level, HELP_DESK.skill(safe.skill!).whereToLook);
         expect(a).toMatch(/^Where to look: /);
-        expect(drillCoach(risky.skill, level)).toBe(a);
+        expect(drillCoach(risky.skill, level, HELP_DESK.skill(risky.skill!).whereToLook)).toBe(a);
       }
-      expect(drillCoach(skill, 3)).toBeNull();
-      expect(drillCoach(skill, 4)).toBeNull();
+      expect(drillCoach(skill, 3, HELP_DESK.skill(skill).whereToLook)).toBeNull();
+      expect(drillCoach(skill, 4, HELP_DESK.skill(skill).whereToLook)).toBeNull();
     }
     expect(drillCoach(undefined)).toBeNull();
+  });
+});
+
+describe("pathway wording", () => {
+  const kofi = { name: "Kofi", role: "SOC lead", spriteKey: "kofi" };
+  const robo = { ...P.agent, name: "Patch" };
+
+  it("uses the practice coachScript for the first two sheets, else the Help Desk lines", () => {
+    const script = { firstSafeSheet: "Safe sheet. Tap **Looks OK**.", firstRiskySheet: "Risky sheet. Tap **Block**." };
+    const CP: Encounter = { ...P, coachScript: script };
+    expect(practiceCoach(t1i, CP, open(t1i)).text).toBe(script.firstSafeSheet);
+    expect(practiceCoach(t2i, CP, open(t2i)).text).toBe(script.firstRiskySheet);
+    const bare: Encounter = { ...P, coachScript: undefined };
+    expect(practiceCoach(t1i, bare, open(t1i)).text).toBe("Real ticket. Work email. Public guide. Tap **Looks OK**.");
+    expect(practiceCoach(t2i, bare, open(t2i)).text).toBe("Who asked? Check the **sender address**. Wrong? Tap **Block**.");
+  });
+
+  it("names the pathway's agent and coach", () => {
+    const CP: Encounter = { ...P, agent: robo, coach: kofi };
+    expect(practiceCoach(t1, CP, closed).text).toBe("Patch has a plan. Check it first: tap **Inspect**.");
+    expect(practiceCoach(t1i, CP, closed).text).toBe("Looks fine. Tap **Approve** to let Patch do it.");
+    const CE: Encounter = { ...E, coach: kofi };
+    expect(coachName(CE)).toBe("Kofi");
+    expect(coachName({})).toBe("Dana");
+    expect(unlockTip("escalate", CE)).toBe("New card: **Escalate**. Not sure? Send the plan to Kofi.");
+    expect(unlockTip("escalate", E)).toBe("New card: **Escalate**. Not sure? Send the plan to Dana.");
+    expect(unlockTip("policy-look-first", CE)).toBe("New card: **Policy: Look First**. It inspects every device and network plan.");
+    let s = createBattle(CE, 3);
+    for (let i = 0; i < 3 && s.status === "playing"; i++) s = endTurn(s, CE);
+    if (s.status === "playing" && s.announced.length) expect(cardPrompt(s, CE, "escalate").text).toMatch(/send it to Kofi\.$/);
   });
 });

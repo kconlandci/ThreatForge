@@ -4,8 +4,8 @@ import { useId, useRef } from "react";
 import { Play, Target } from "lucide-react";
 import { Sheet } from "@/components/battle/Sheet";
 import { buttonClass } from "@/components/site/ui";
-import { helpDeskStep } from "@/lib/game/content";
-import { SKILLS } from "@/lib/game/skills";
+import { reasonText } from "@/lib/game/mastery";
+import { usePathway } from "@/lib/pathways/context";
 import { nextPipText, recentCalls } from "@/lib/game/skillsView";
 import type { MasterySkillId, SkillRecord } from "@/lib/game/types";
 import { CallRow, Pips, skillIcon } from "./SkillBits";
@@ -28,9 +28,10 @@ export function SkillDetail({
 }) {
   const titleId = useId();
   const btnRef = useRef<HTMLButtonElement>(null);
-  const info = skill ? SKILLS[skill] : null;
+  const pathway = usePathway();
+  const info = skill ? pathway.skill(skill) : null;
   const Icon = skill ? skillIcon(skill) : Target;
-  const miss = helpDeskStep(record?.miss);
+  const miss = pathway.step(record?.miss);
   return (
     <Sheet
       open={!!skill}
@@ -79,6 +80,12 @@ export function SkillDetail({
             <p className={k.detailLabel}>Where to look</p>
             <p className={k.detailText}>{info.whereToLook}</p>
           </div>
+          {info.example ? (
+            <div className={k.detailBlock}>
+              <p className={k.detailLabel}>Example</p>
+              <p className={k.detailText}>{info.example}</p>
+            </div>
+          ) : null}
           <div className={k.detailBlock}>
             <p className={k.detailLabel}>Next pip</p>
             <p className={k.detailText}>{nextPipText(skill as MasterySkillId, record?.level ?? 0)}</p>
@@ -94,7 +101,7 @@ export function SkillDetail({
               <p className={k.detailLabel}>From your latest miss</p>
               <p className={k.tell}>
                 <span className={k.tellIntent}>{miss.intent}</span>
-                {record?.missWhy ? `${record.missWhy}. ` : ""}
+                {record?.missWhy ? `${reasonText(record.missWhy, pathway.coach.name)}. ` : ""}
                 {miss.tell}
               </p>
             </div>

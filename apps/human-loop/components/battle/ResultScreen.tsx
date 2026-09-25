@@ -9,7 +9,8 @@ import { blindBlocks, blindSafeBlocks, scoreBattle } from "@/lib/game/engine";
 import { skillName } from "@/lib/game/skills";
 import type { BattleState, Encounter, MasterySkillId } from "@/lib/game/types";
 import { PRACTICE_BTN } from "./ShiftResult";
-import { SpeakerFace, speakerName } from "./SpeakerFace";
+import { usePathway } from "@/lib/pathways/context";
+import { SpeakerFace, speakerName, speakerNames } from "./SpeakerFace";
 import r from "./result.module.css";
 
 export interface ResultScreenProps {
@@ -37,6 +38,7 @@ export function ResultScreen({
   practiceSkill = null,
   onPractice,
 }: ResultScreenProps) {
+  const { config } = usePathway();
   const score = scoreBattle(state, encounter);
   const won = state.status === "won";
   const outro = won
@@ -87,7 +89,7 @@ export function ResultScreen({
       ) : null}
       <button type="button" className={buttonClass(practice ? "secondary" : "primary", "lg")} onClick={onPlayAgain}>
         <RotateCcw className="h-5 w-5" aria-hidden="true" />
-        {practice ? "Replay Monday" : "Play again"}
+        {practice ? config.copy.replayStory : "Play again"}
       </button>
       <button type="button" className={buttonClass("secondary", "lg")} onClick={onOffice}>
         <Building className="h-5 w-5" aria-hidden="true" />
@@ -110,7 +112,7 @@ export function ResultScreen({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={r.heroFallback}
-                src={`/game/sprites/ollie-${won ? "celebrate" : "sad"}.svg`}
+                src={`/game/sprites/${encounter.agent.spriteKey}-${won ? "celebrate" : "sad"}.svg`}
                 alt=""
                 width={220}
                 height={220}
@@ -164,7 +166,7 @@ export function ResultScreen({
         <section className={r.section} aria-labelledby="hl-outro-title">
           <p className={r.eyebrow}>After the shift</p>
           <h2 id="hl-outro-title" className={r.h2}>
-            {won ? "Dana stops by" : "Dana stops by. She has notes."}
+            {won ? config.copy.resultHeading.won : config.copy.resultHeading.lost}
           </h2>
           <div className={r.chat}>
             {outro.map((line, i) => (
@@ -172,7 +174,7 @@ export function ResultScreen({
                 <SpeakerFace speaker={line.speaker} size={40} mood={won ? "celebrate" : "sad"} />
                 <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
                   {line.speaker !== "narrator" ? (
-                    <span className={r.lineName}>{speakerName(line.speaker, encounter.agent.name)}</span>
+                    <span className={r.lineName}>{speakerName(line.speaker, speakerNames(encounter))}</span>
                   ) : null}
                   {line.text}
                 </p>

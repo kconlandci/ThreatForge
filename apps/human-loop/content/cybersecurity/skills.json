@@ -1,0 +1,51 @@
+{
+  "questionHints": {
+    "who": "Who is really behind it? And who said it's OK?",
+    "record": "Does the plan fit the alert and the records: asset list, calendar, logs?",
+    "undo": "If Patch is wrong, what breaks? What proof or data is lost for good?"
+  },
+  "skills": {
+    "verify-identity": {
+      "oneLiner": "Is it really them? Check the sign-in log, the device and the sender, not just the name.",
+      "whereToLook": "Sign-in log, MFA log and Device record. Sender address and Mail check. Callback to the phone on file?",
+      "example": "10 MFA prompts denied, then 1 approved, from a new device. The yes was not really Brandt.",
+      "lookFor": ["Sign-in log", "Device record", "Sender address", "Callback"]
+    },
+    "check-approval": {
+      "oneLiner": "It may be allowed. Look for a written OK: a change ticket, a test letter or HR's request.",
+      "whereToLook": "Change calendar, Pen test letter, HR ticket or Owner's OK. Right person, right window, in writing?",
+      "example": "'pd-admin' deleted backups at midnight, with no change planned. Admin is not the same as approved.",
+      "lookFor": ["Change calendar", "Pen test letter", "HR ticket", "Owner's OK"]
+    },
+    "match-request": {
+      "oneLiner": "Right host, right account, right size. The action should fit the alert. No extras.",
+      "whereToLook": "The alert vs What it will change. Same host, same sender, same size? Patch's reason often adds extras.",
+      "example": "One bad link on a file site. Patch wants to deny the whole site, and the partner's pickup lists with it.",
+      "lookFor": ["What it will change", "Patch's reason"]
+    },
+    "confirm-fix": {
+      "oneLiner": "Before you close it, check the logs after the fix. Quiet is not the same as clean.",
+      "whereToLook": "Scan result, Sign-in log, Firewall log and Mailbox rules, after the fix. No new alert is not a yes.",
+      "example": "Password reset at 2:10 PM. At 2:31 PM, the attacker's forwarding rule still sends wire emails out.",
+      "lookFor": ["Scan result", "Sign-in log", "Mailbox rules"]
+    },
+    "guard-data": {
+      "oneLiner": "Where does the data go, and who can see it? Share attack signs, not people's data.",
+      "whereToLook": "What it will send and Tool it will use. Names, accounts or client files? Who can read it after?",
+      "example": "Share 2 addresses, 1 domain and 1 hash. Not the full report with 14 victims' names.",
+      "lookFor": ["What it will send", "Tool it will use"]
+    },
+    "safe-change": {
+      "oneLiner": "If Patch is wrong, can we undo it? Right time, right target, and keep the evidence.",
+      "whereToLook": "What it will change, Asset inventory and Schedule. Can it be undone? Is it busy now? Is evidence kept?",
+      "example": "Isolating one infected PC, with a one-click undo: fine. Isolating the payroll server mid-run: not fine.",
+      "lookFor": ["What it will change", "Asset inventory", "Schedule"]
+    },
+    "approve-checked": {
+      "oneLiner": "All 3 questions check out? Approve it, even if it says isolate or disable.",
+      "whereToLook": "Read every evidence line. No red flag on any of the 3 questions? Approve, even if it sounds scary.",
+      "example": "'Disable E. Sandoval now' sounds harsh. HR and Legal asked in writing, and files are leaving. Approve.",
+      "lookFor": []
+    }
+  }
+}

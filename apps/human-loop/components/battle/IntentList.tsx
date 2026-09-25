@@ -30,7 +30,7 @@ export interface IntentListProps {
   over?: boolean;
   /** The coach points at the plans. */
   coach?: boolean;
-  /** Dana's hint line already says what to do: no empty-board sentence (one instruction per screen). */
+  /** The coach's hint line already says what to do: no empty-board sentence (one instruction per screen). */
   quietEmpty?: boolean;
   onActivate: (stepId: string, viaKeyboard: boolean) => void;
   registerIntent: (stepId: string, el: HTMLButtonElement | null) => void;

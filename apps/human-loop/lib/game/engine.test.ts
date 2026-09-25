@@ -824,3 +824,79 @@ describe("canResume", () => {
     expect(canResume({ ...s, hand: undefined }, FIXTURE)).toBe(false);
   });
 });
+
+/* ------------------------------------------------------------------ */
+/* Policy cards (any card with autoInspect) and pathway headlines      */
+/* ------------------------------------------------------------------ */
+
+describe("policy cards across pathways", () => {
+  const SOC: Encounter = {
+    ...FIXTURE,
+    id: "soc-fixture",
+    maxRisk: 100,
+    steps: [
+      step("n1", { category: "network" }),
+      step("c1", { safe: false, category: "credential", risk: 4, progress: 0 }),
+      step("e1", { category: "lookup" }),
+      step("e2", { safe: false, category: "endpoint", risk: 3, progress: 0 }),
+      step("e3", { category: "endpoint" }),
+    ],
+    starterDeck: ["inspect", "inspect", "inspect", "block", "block", "block", "escalate", "rollback", "policy-look-first", "coffee"],
+  };
+
+  it("finds the one policy card of an encounter", async () => {
+    const { policyCardOf } = await import("./engine");
+    expect(policyCardOf(FIXTURE)).toBe("policy-callback");
+    expect(policyCardOf(SOC)).toBe("policy-look-first");
+    expect(policyCardOf({ ...FIXTURE, starterDeck: ["inspect", "block"] })).toBeNull();
+    expect(policyCardOf(HELP_DESK_ENCOUNTER)).toBe("policy-callback");
+  });
+
+  it("policy-look-first auto-inspects device and network plans now and on later turns, not accounts", () => {
+    let s = withHand(createBattle(SOC, 1), ["policy-look-first", "policy-look-first"]);
+    expect(s.announced).toEqual(["n1", "c1"]);
+    s = play(s, "policy-look-first", undefined, SOC);
+    expect(s.powers.callbackPolicy).toBe(true);
+    expect(s.steps.n1.inspected).toBe(true); // network
+    expect(s.steps.c1.inspected).toBe(false); // credential stays manual
+    expect(s.stats.inspections).toBe(1);
+    expect(s.events.slice(-3)).toEqual([
+      { t: "card-played", cardId: "policy-look-first" },
+      { t: "power", power: "callbackPolicy" },
+      { t: "inspected", stepId: "n1", auto: true },
+    ]);
+    const second = playCard(s, SOC, uidOf(s, "policy-look-first"));
+    expect(second).toEqual({ ok: false, reason: "The Look First policy is already on." });
+
+    s = endTurn(s, SOC);
+    expect(s.announced).toEqual(["e1", "e2"]);
+    expect(s.steps.e2.inspected).toBe(true);
+    expect(s.steps.e1.inspected).toBe(false);
+    s = endTurn(s, SOC);
+    expect(s.announced).toEqual(["e3"]);
+    expect(s.steps.e3.inspected).toBe(true);
+  });
+
+  it("keeps the callback policy's exact refusal", () => {
+    let s = withHand(createBattle(FIXTURE, 1), ["policy-callback", "policy-callback"]);
+    s = play(s, "policy-callback");
+    expect(playCard(s, FIXTURE, uidOf(s, "policy-callback"))).toEqual({ ok: false, reason: "The callback policy is already on." });
+  });
+
+  it("refuses an encounter with two different policy cards", () => {
+    const both: Encounter = { ...SOC, unlocks: [{ turn: 2, cards: ["policy-callback"] }] };
+    expect(() => createBattle(both, 1)).toThrow(/policy cards/);
+    // Two copies of the same policy card are fine.
+    expect(() => createBattle({ ...SOC, unlocks: [{ turn: 2, cards: ["policy-look-first"] }] }, 1)).not.toThrow();
+  });
+
+  it("an encounter's own headlines replace the default pool, with {agent} filled in", () => {
+    const s = playCorrectly(createBattle(FIXTURE, 1), FIXTURE);
+    const pools = { perfect: ["{agent} and Kofi: perfect."], sharp: ["Sharp."], lucky: ["Lucky."], leaky: ["Leaky."] };
+    const own = scoreBattle(s, { ...FIXTURE, headlines: pools });
+    expect(["TestBot and Kofi: perfect.", "Sharp.", "Lucky.", "Leaky."]).toContain(own.headline);
+    // A missing pool falls back to the default lines.
+    const base = scoreBattle(s, FIXTURE);
+    expect(scoreBattle(s, { ...FIXTURE, headlines: { breach: ["x"] } }).headline).toBe(base.headline);
+  });
+});

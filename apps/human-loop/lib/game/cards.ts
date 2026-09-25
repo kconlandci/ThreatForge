@@ -1,7 +1,11 @@
+import { HELP_DESK_CARD_COPY } from "./helpDeskDefaults";
 import type { CardDef, CardId } from "./types";
 
 /**
  * Oversight cards. Numbers may be tuned by the engine owner; ids and targets are the contract.
+ * Mechanics live here for every pathway; a pathway may reword name/text/short/flavor through
+ * pathway.json "cards" (see PathwayBundle.cardCopy). The rules text here is the Help Desk wording.
+ * A card with `autoInspect` is a policy card (engine.ts policyCardOf).
  * Costs are balanced against encounter energy (3 per turn) by lib/game/balance.test.ts.
  */
 export const CARDS: Record<CardId, CardDef> = {
@@ -32,9 +36,7 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 2,
     kind: "skill",
     target: "intent",
-    text: "Send a plan to Dana. She gets it right.",
-    short: "Send a plan to Dana.",
-    flavor: "Dana has seen things. Dana fears nothing.",
+    ...HELP_DESK_CARD_COPY.escalate,
     icon: "ArrowUpRight",
   },
   rollback: {
@@ -59,6 +61,22 @@ export const CARDS: Record<CardId, CardDef> = {
     flavor: "Guardrails scale. You don't.",
     exhaust: true,
     icon: "ScrollText",
+    autoInspect: ["credential"],
+    alreadyOn: "The callback policy is already on.",
+  },
+  "policy-look-first": {
+    id: "policy-look-first",
+    name: "Policy: Look First",
+    cost: 1,
+    kind: "power",
+    target: "none",
+    text: "Device and network plans get auto-inspected.",
+    short: "Auto-inspects device & network.",
+    flavor: "Lock it out? Look first.",
+    exhaust: true,
+    icon: "ScrollText",
+    autoInspect: ["endpoint", "network"],
+    alreadyOn: "The Look First policy is already on.",
   },
   coffee: {
     id: "coffee",
@@ -67,7 +85,7 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: "skill",
     target: "none",
     text: "Draw 2 cards.",
-    flavor: "Brewed before Ollie “fixed” the machine.",
+    flavor: HELP_DESK_CARD_COPY.coffeeFlavor,
     exhaust: true,
     icon: "Coffee",
   },

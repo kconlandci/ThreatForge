@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { CARDS } from "@/lib/game/cards";
+import { usePathway } from "@/lib/pathways/context";
 import type { CardId } from "@/lib/game/types";
 import type { HandStack } from "@/lib/game/useBattle";
 import { CardView } from "./CardView";
@@ -25,7 +25,7 @@ export interface HandProps {
   /** Cards the practice coach has locked, and the reason for their accessible names. */
   lockedCards: CardId[];
   lockedLabel?: string;
-  /** Shown when the hand is empty (null: say nothing, e.g. Dana's hint already covers it). */
+  /** Shown when the hand is empty (null: say nothing, e.g. the coach's hint already covers it). */
   emptyText?: string | null;
   /** The stack the coach points at. */
   coachCardId: CardId | null;
@@ -53,6 +53,7 @@ export function Hand({
   onLockedTap,
   registerCard,
 }: HandProps) {
+  const { cardCopy } = usePathway();
   const boxRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(320);
 
@@ -98,7 +99,7 @@ export function Hand({
       {n === 0 && emptyText ? <p className={s.handEmpty}>{emptyText}</p> : null}
       {stacks.map((x, i) => {
         const d = i - mid;
-        const def = CARDS[x.cardId];
+        const def = cardCopy(x.cardId);
         const isLocked = lockedCards.includes(x.cardId);
         const covered = i < n - 1 && overlap > cw * 0.12 ? overlap - gap : 0;
         const spread =

@@ -10,7 +10,7 @@ import { shiftTally } from "@/lib/game/mastery";
 import { skillName } from "@/lib/game/skills";
 import { orderMoves, planLines, recentCalls, reviewDays, tallyHeadline, weakestInShift } from "@/lib/game/skillsView";
 import type { BattleState, Encounter, MasterySkillId, PathwayProgress, SkillLevel } from "@/lib/game/types";
-import { SpeakerFace, speakerName } from "./SpeakerFace";
+import { SpeakerFace, speakerName, speakerNames } from "./SpeakerFace";
 import r from "./result.module.css";
 
 /** "Practice this: Approve what checks out" can be long: wrap to a balanced second line, never overflow. */
@@ -105,7 +105,7 @@ export function ShiftResult({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={r.heroFallback}
-                src={`/game/sprites/ollie-${mood}.svg`}
+                src={`/game/sprites/${encounter.agent.spriteKey}-${mood}.svg`}
                 alt=""
                 width={220}
                 height={220}
@@ -130,7 +130,7 @@ export function ShiftResult({
                   <SpeakerFace speaker={quip.speaker} size={40} mood={mood} />
                   <p className={`${r.lineBubble} ${quip.speaker === "narrator" ? r.lineNarrator : ""}`}>
                     {quip.speaker !== "narrator" ? (
-                      <span className={r.lineName}>{speakerName(quip.speaker, encounter.agent.name)}</span>
+                      <span className={r.lineName}>{speakerName(quip.speaker, speakerNames(encounter))}</span>
                     ) : null}
                     {quip.text}
                   </p>

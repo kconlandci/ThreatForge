@@ -9,13 +9,17 @@
  */
 import { daysBetween, isDay, need } from "./mastery";
 import { nextFloat, seedState, shuffle } from "./rng";
-import { MASTERY_SKILLS, SKILLS, skillName } from "./skills";
+import { CARDS } from "./cards";
+import { MASTERY_SKILLS, skillName } from "./skills";
+import type { PathwayId } from "@/lib/types";
 import type {
   AgentStep,
   BankTicket,
   CardId,
+  CoachInfo,
   DialogueLine,
   Encounter,
+  HeadlineKey,
   MasterySkillId,
   PathwayProgress,
   ShiftSpec,
@@ -36,7 +40,7 @@ export const ORDER_TRIES = 24;
 export const MERGE_TRIES = 48;
 /** Dailies finished before D3 tickets can appear (then at most 1 per shift). */
 export const D3_AFTER_DAILIES = 2;
-/** 8 plans, 5 safe, both twists, 2 companies, D1-D2 only. */
+/** Help Desk: 8 plans, 5 safe, both twists, 2 companies, D1-D2 only. A pathway sets its own in shift.json. */
 export const FALLBACK_DAILY = ["c-romero-new-phone", "b-back-from-vacation", "a-pdf-editor", "c-lost-phone"];
 
 export const DRILL_MIN_PLANS = 4;
@@ -44,7 +48,10 @@ export const DRILL_MAX_PLANS = 7;
 /** Tickets played this recently are avoided in drills when there are others. */
 export const DRILL_RECENT_DAYS = 7;
 
-/** Monday's end-of-shift deck (Policy: Callback is added only when a shift has a credential plan). */
+/**
+ * The story shift's end-of-shift deck. The pathway's policy card (BuildOptions.policyCard) is added
+ * only when a shift has a plan it would inspect.
+ */
 const DAILY_DECK: CardId[] = [
   "inspect",
   "inspect",
@@ -188,6 +195,10 @@ export interface PlanOptions {
   playerId: string;
   /** YYYY-MM-DD, the player's local day. */
   today: string;
+  /** The pathway's encounter id prefix (default "hd"): seeds and ids are `${prefix}-daily-...`. */
+  prefix?: string;
+  /** Ticket ids used when no draw passes the rules (default FALLBACK_DAILY, the Help Desk list). */
+  fallback?: string[];
 }
 
 /** The daily's focus: the top 2 skills by need, ties broken by a seeded draw. */
@@ -282,7 +293,8 @@ function hasRiskyOf(t: BankTicket, skill: MasterySkillId | null): boolean {
 /** Plan today's (or the next) Daily practice. Same player + same progress.dailyCount = same shift. */
 export function planDaily(bank: BankTicket[], progress: PathwayProgress, opts: PlanOptions): ShiftSpec {
   const n = Math.max(0, Math.floor(progress.dailyCount ?? 0));
-  const seed = seedState(`${opts.playerId}|hd-daily|${n}`);
+  const prefix = opts.prefix ?? "hd";
+  const seed = seedState(`${opts.playerId}|${prefix}-daily|${n}`);
   const rng = new Rng(seed);
   const focus = pickFocus(progress, opts.today, rng);
   const needs = new Map(MASTERY_SKILLS.map((s) => [s, need(progress.skills?.[s], opts.today)]));
@@ -328,13 +340,13 @@ export function planDaily(bank: BankTicket[], progress: PathwayProgress, opts: P
   let chosen = best as { tickets: BankTicket[]; steps: AgentStep[]; rank: number } | null;
   if (!chosen) {
     const byId = new Map(bank.map((t) => [t.id, t]));
-    const fallback = FALLBACK_DAILY.map((id) => byId.get(id)).filter((t): t is BankTicket => !!t);
+    const fallback = (opts.fallback ?? FALLBACK_DAILY).map((id) => byId.get(id)).filter((t): t is BankTicket => !!t);
     chosen = { ...orderDaily(fallback, rng), rank: 99 };
   }
 
   return {
     kind: "daily",
-    id: `hd-daily-${n}`,
+    id: `${prefix}-daily-${n}`,
     seed,
     n,
     ticketIds: chosen.tickets.map((t) => t.id),
@@ -400,7 +412,8 @@ function randomMerge(tickets: BankTicket[], rng: Rng): AgentStep[] {
 /** Plan a "Practice this" drill: 2-3 tickets with 2+ safe and 2+ risky plans of the skill, 4-7 plans. */
 export function planDrill(bank: BankTicket[], skill: MasterySkillId, opts: DrillOptions): ShiftSpec {
   const k = Math.max(0, Math.floor(opts.k));
-  const seed = seedState(`${opts.playerId}|hd-drill|${skill}|${k}`);
+  const prefix = opts.prefix ?? "hd";
+  const seed = seedState(`${opts.playerId}|${prefix}-drill|${skill}|${k}`);
   const rng = new Rng(seed);
   const pool = bank.filter((t) => t.steps.some((s) => drillKind(skill, s)));
   const count = (ts: BankTicket[], kind: "safe" | "risky") =>
@@ -448,7 +461,7 @@ export function planDrill(bank: BankTicket[], skill: MasterySkillId, opts: Drill
 
   return {
     kind: "drill",
-    id: `hd-drill-${skill}-${k}`,
+    id: `${prefix}-drill-${skill}-${k}`,
     seed,
     n: k,
     ticketIds: tickets.map((t) => t.id),
@@ -506,8 +519,27 @@ function listNames(names: string[]): string {
 }
 
 export interface BuildOptions {
-  /** The help desk agent (Ollie), copied from the fixed shifts. */
+  /** The pathway's agent, copied from its fixed shifts. */
   agent: Encounter["agent"];
+  /** Default "help-desk". */
+  pathwayId?: PathwayId;
+  /** Hydrated onto the encounter (see lib/pathways/create.ts). */
+  coach?: CoachInfo;
+  headlines?: Partial<Record<HeadlineKey, string[]>>;
+  /** Added to a daily's deck when some plan is in its autoInspect categories. Default "policy-callback". */
+  policyCard?: CardId;
+  /** The pathway's skill copy (the debrief takeaway is the lead focus's oneLiner). */
+  skillCopy: (id: MasterySkillId) => { oneLiner: string };
+}
+
+/** Default shell text: the Help Desk lines. {n} tickets, {companies}, {agent} (short name). */
+const DEFAULT_SETTING_DAILY = "Daily practice at Fenwick IT Solutions. {n} tickets from {companies}. {agent} plans. You check.";
+const DEFAULT_SETTING_DRILL = "A quick drill at Fenwick IT Solutions for {companies}. One plan at a time. {agent} plans. You check.";
+const DEFAULT_CAREER_INSIGHT =
+  "Help desk techs check requests like these every day. Practice keeps the checks quick, so good work still moves fast.";
+
+function fill(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{(n|companies|agent)\}/g, (_, k: string) => vars[k] ?? "");
 }
 
 /** Rebuild the Encounter for a Daily practice or drill spec. Pure: same spec, same encounter. */
@@ -538,9 +570,14 @@ export function buildShift(bank: BankTicket[], spec: ShiftSpec, text: ShiftText,
     const drillWin = pickLines(text.outros.drillWin, turn);
     if (drillWin.length) outro.drillWin = drillWin;
   }
+  const vars = {
+    n: String(tickets.length),
+    companies: listNames(companies),
+    agent: opts.agent.name.split(" ")[0] || opts.agent.name,
+  };
   const common = {
     id: spec.id,
-    pathwayId: "help-desk" as const,
+    pathwayId: opts.pathwayId ?? ("help-desk" as const),
     agent: { ...opts.agent },
     intro,
     outro,
@@ -550,10 +587,11 @@ export function buildShift(bank: BankTicket[], spec: ShiftSpec, text: ShiftText,
     maxRisk: riskySum + 1,
     debrief: {
       skillTag: skillName(lead),
-      takeaway: SKILLS[lead].oneLiner,
-      careerInsight:
-        "Help desk techs check requests like these every day. Practice keeps the checks quick, so good work still moves fast.",
+      takeaway: opts.skillCopy(lead).oneLiner,
+      careerInsight: text.careerInsight ?? DEFAULT_CAREER_INSIGHT,
     },
+    ...(opts.coach ? { coach: { ...opts.coach } } : {}),
+    ...(opts.headlines ? { headlines: opts.headlines } : {}),
   };
 
   if (spec.kind === "drill") {
@@ -562,7 +600,7 @@ export function buildShift(bank: BankTicket[], spec: ShiftSpec, text: ShiftText,
       mode: "drill",
       title: `Drill: ${skillName(lead)}`,
       subtitle: `${steps.length} plans · one at a time`,
-      setting: `A quick drill at Fenwick IT Solutions for ${listNames(companies)}. One plan at a time. Ollie plans. You check.`,
+      setting: fill(text.settingDrill ?? DEFAULT_SETTING_DRILL, vars),
       maxTurns: steps.length + 3,
       handSize: 3,
       actionsPerTurn: [1],
@@ -571,13 +609,15 @@ export function buildShift(bank: BankTicket[], spec: ShiftSpec, text: ShiftText,
   }
 
   const deck = DAILY_DECK.slice();
-  if (steps.some((s) => s.category === "credential")) deck.push("policy-callback");
+  const policy = opts.policyCard ?? "policy-callback";
+  const covers = CARDS[policy]?.autoInspect ?? [];
+  if (steps.some((s) => covers.includes(s.category))) deck.push(policy);
   return {
     ...common,
     mode: "daily",
     title: "Daily practice",
     subtitle: `${tickets.length} tickets · Focus: ${focus.map(skillName).join(", ")}`,
-    setting: `Daily practice at Fenwick IT Solutions. ${tickets.length} tickets from ${listNames(companies)}. Ollie plans. You check.`,
+    setting: fill(text.settingDaily ?? DEFAULT_SETTING_DAILY, vars),
     // 1 + 2 x 6 = 13 slots: enough for 10 plans and 3 blocked-and-requeued safe plans.
     maxTurns: 7,
     handSize: 5,

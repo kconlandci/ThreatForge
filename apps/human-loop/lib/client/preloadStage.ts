@@ -4,7 +4,7 @@
  * Start downloading the Phaser stage early (it is ~350 KB gzipped), so it is parsed by the
  * time the game screen mounts. Safe to call many times; a failed preload is retried later.
  */
-import { prefetchAllSvgs } from "@/components/game/stage/svgCache";
+import { SHARED_SPRITES, prefetchSvgs } from "@/components/game/stage/svgCache";
 
 let pending: Promise<unknown> | null = null;
 
@@ -16,8 +16,9 @@ export function preloadStage(): void {
   ]).catch(() => {
     pending = null;
   });
-  // The sprite files are small; fetch them alongside the Phaser chunk instead of after it.
-  prefetchAllSvgs();
+  // The shared sprite files are small; fetch them alongside the Phaser chunk instead of after it.
+  // The game shell prefetches its own pathway's art (stageSprites), never another pathway's.
+  prefetchSvgs(SHARED_SPRITES);
 }
 
 /** Preload when the browser is idle (falls back to a short timeout). */

@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "settingDaily": "Daily practice at Fenwick IT Solutions' security center. {n} tickets from {companies}. {agent} plans. You check.",
+  "settingDrill": "A quick drill at Fenwick IT Solutions' security center for {companies}. One plan at a time. {agent} plans. You check.",
+  "careerInsight": "SOC analysts check alerts like these every day. Practice keeps the checks quick, so real threats still get stopped fast.",
+  "fallbackDaily": ["cy-b-firewall-asks", "cy-b-xray-vendor", "cy-a-legit-esign", "cy-b-ioc-share"],
+  "intros": [
+    [
+      { "speaker": "coach", "text": "New queue, same job. Inspect first. Block what's wrong. Approve the rest." },
+      { "speaker": "agent", "text": "I read every alert title twice. Some of them twice more. In capital letters." }
+    ],
+    [
+      { "speaker": "coach", "text": "Some plans look scary and are fine. Some look boring and aren't. The evidence tells you which." },
+      { "speaker": "agent", "text": "I sorted today's alerts by how dramatic they sound. Is that a real method? It is now." }
+    ],
+    [
+      { "speaker": "coach", "text": "Today's alerts are picked for the skills you need most. Ask the 3 questions on every plan." },
+      { "speaker": "agent", "text": "I only want to isolate three things today. Four at most. Five if one is very suspicious." }
+    ],
+    [
+      { "speaker": "coach", "text": "Look first. Then lock. That's the plan for every alert today." },
+      { "speaker": "agent", "text": "I named today's first alert OPERATION MIDNIGHT STAPLER. It's about a printer. I think." }
+    ],
+    [
+      { "speaker": "coach", "text": "Patch will be wrong both ways today: too much, and too little. Watch for both." },
+      { "speaker": "agent", "text": "Two ways to be wrong? Then I have two ways to be right! Wait. That's not how it works." }
+    ],
+    [
+      { "speaker": "coach", "text": "Take your time. Read the evidence, not the alert title." },
+      { "speaker": "agent", "text": "My confidence today is 99%. Kofi says a number is not evidence. It's a very big number, though." }
+    ],
+    [
+      { "speaker": "coach", "text": "Contain the threat, not the business. Right size, every time." },
+      { "speaker": "agent", "text": "I brought my big orange LOCK button today. Just in case. It's always just in case." }
+    ]
+  ],
+  "outros": {
+    "win": [
+      [
+        { "speaker": "agent", "text": "Queue clear! I didn't isolate a single innocent stapler. Growth!" },
+        { "speaker": "coach", "text": "Good work. You stopped the bad calls and let the good work through." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done! Can I lock the empty queue to celebrate? Just a little?" },
+        { "speaker": "coach", "text": "No. But nice shift. You looked first, then decided." }
+      ],
+      [
+        { "speaker": "agent", "text": "Every alert handled! My siren is off. It feels strange. Peaceful. Suspicious." },
+        { "speaker": "coach", "text": "Clean work. You checked the evidence, not the alert title." }
+      ],
+      [
+        { "speaker": "agent", "text": "You stopped every bad plan. I wrote a report about it. It's called OPERATION YOU WIN." },
+        { "speaker": "coach", "text": "Good. Same 3 questions, every plan. It works." }
+      ],
+      [
+        { "speaker": "agent", "text": "Zero alerts left! I would guard the empty queue, but there is nothing to guard." },
+        { "speaker": "coach", "text": "Nice shift. Right size, every time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! I only yelled INTRUDER twice today. Both times, it was the cleaning crew." },
+        { "speaker": "coach", "text": "Good. Careful and fast. We need both." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue's empty! I didn't lock anyone out by mistake. Not even the coffee machine. Again." },
+        { "speaker": "coach", "text": "Well done. The threats stayed out, and the business kept running." }
+      ]
+    ],
+    "winWithOneMiss": [
+      [
+        { "speaker": "agent", "text": "One of my plans got through. Just one! I'm calling it a small, brave mistake." },
+        { "speaker": "coach", "text": "One miss. Read its tell below. That's the fact to check next time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! One plan got past you. My confidence was 97%. That did not help." },
+        { "speaker": "coach", "text": "Close. Check that one below. A confidence number is never evidence." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Only one of my plans should have stayed a plan. The big screen is a little orange." },
+        { "speaker": "coach", "text": "Good shift. We'll look at that one plan below." }
+      ],
+      [
+        { "speaker": "agent", "text": "One plan got through. I'd say sorry, but my siren is too busy blinking." },
+        { "speaker": "coach", "text": "Read its tell below. One fact decided that plan." }
+      ],
+      [
+        { "speaker": "agent", "text": "Nearly perfect! One plan ran that shouldn't have. I'm calling it a training exercise." },
+        { "speaker": "coach", "text": "Fine. Look at what it was, then try the next shift." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done, with one oops. Just one. I already named it OPERATION TINY OOPS." },
+        { "speaker": "coach", "text": "One miss is how we learn. Check its evidence below." }
+      ]
+    ],
+    "winWithMisses": [
+      [
+        { "speaker": "agent", "text": "A few of my plans got through. The big screen is very red. Is red good?" },
+        { "speaker": "coach", "text": "No. Let's look at each one. One fact decided every miss." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Some plans should have stayed plans. My siren is very quiet now." },
+        { "speaker": "coach", "text": "Check the list below. Each miss has one fact that gave it away." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Some of my plans ran. I locked too much, or too little. Maybe both!" },
+        { "speaker": "coach", "text": "Maybe both. Read the tells below. Too much and too little both hurt." }
+      ],
+      [
+        { "speaker": "agent", "text": "You said yes to lots of my plans! My confidence is now 100%. That's bad, isn't it?" },
+        { "speaker": "coach", "text": "It is. Confidence is not evidence. Inspect before you approve." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue's empty! Some of my plans got past you. The night shift will find them." },
+        { "speaker": "coach", "text": "Let's find them first. Read the tells below." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done! Some risky plans ran. Every screen on the wall is blinking at me." },
+        { "speaker": "coach", "text": "Let's slow down. One question at a time: who, record, undo." }
+      ]
+    ],
+    "drillWin": [
+      [
+        { "speaker": "agent", "text": "Drill done! I tried every trick I know. You checked every one. Rude. But fair." },
+        { "speaker": "coach", "text": "Good. Short drills keep one check sharp." }
+      ],
+      [
+        { "speaker": "agent", "text": "One skill, lots of plans. I tried to rush you. It did not work!" },
+        { "speaker": "coach", "text": "That's the point of a drill. Look first, then decide." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill complete! I wanted a lockdown to celebrate. Kofi put tape over my button." },
+        { "speaker": "coach", "text": "Nice. Practice again in a few days. That helps you remember." }
+      ],
+      [
+        { "speaker": "agent", "text": "Same skill, every plan. I'm running out of tricks. Please don't tell the other robots." },
+        { "speaker": "coach", "text": "You found the one fact in each plan. Keep looking for it." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Focusing on one thing is hard. I tried once. I isolated the printer instead." },
+        { "speaker": "coach", "text": "Good focus. One skill at a time, a little every day." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill over! You spotted every one. Now I need sneakier plans. OPERATION SNEAKY PLANS." },
+        { "speaker": "coach", "text": "Good. The evidence shows the answer every time." }
+      ]
+    ],
+    "timeout": [
+      [
+        { "speaker": "narrator", "text": "The shift is over. Some alerts are still waiting in the queue." },
+        { "speaker": "coach", "text": "Blocked good work comes back in line. Block only what the evidence says is wrong." }
+      ],
+      [
+        { "speaker": "agent", "text": "I waited so long, I gave 40 alerts names. I named them all 'Stapler'." },
+        { "speaker": "coach", "text": "Safe plans can go through. Look first. Then approve what checks out." }
+      ],
+      [
+        { "speaker": "agent", "text": "Time's up! The queue is still blinking. I blinked back. It did not help." },
+        { "speaker": "coach", "text": "Next time, approve what checks out. Save your blocks for real problems." }
+      ]
+    ],
+    "breach": [
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The video wall turns red, one screen at a time." },
+        { "speaker": "coach", "text": "Okay. Let's look at what got through, then try again." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The alert light on the wall spins orange." },
+        { "speaker": "coach", "text": "Okay. We'll go through each one together. Then we try again." }
+      ]
+    ]
+  }
+}

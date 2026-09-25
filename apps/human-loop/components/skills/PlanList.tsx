@@ -3,14 +3,14 @@
 import { useId, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Debrief } from "@/components/battle/Debrief";
-import { SKILLS } from "@/lib/game/skills";
+import { skillName } from "@/lib/game/skills";
 import { QUESTION_TITLES, planLines } from "@/lib/game/skillsView";
 import type { BattleState, Encounter } from "@/lib/game/types";
 import { ResultShape, questionIcon } from "./SkillBits";
 import k from "./skills.module.css";
 
 /**
- * One line per plan, mistakes first: the result shape, Dana's question and the skill, the plan
+ * One line per plan, mistakes first: the result shape, the skill's question and the skill, the plan
  * itself (small, grey), then the tell. In a drill (one skill) the plan leads instead of the skill. Tapping a line opens the full debrief row (what happened, the lesson, what gave it away).
  */
 export function PlanList({ state, encounter }: { state: BattleState; encounter: Encounter }) {
@@ -47,7 +47,7 @@ export function PlanList({ state, encounter }: { state: BattleState; encounter: 
                   <span className={k.planQ} role="img" aria-label={question ? QUESTION_TITLES[question] : "All 3 check out"}>
                     <QIcon className="h-3.5 w-3.5" strokeWidth={2.6} aria-hidden="true" />
                   </span>
-                  {drill ? step.intent : step.skill ? SKILLS[step.skill].name : "Plan"}
+                  {drill ? step.intent : step.skill ? skillName(step.skill) : "Plan"}
                 </span>
                 {drill ? null : <span className={`${k.planIntent} block`}>{step.intent}</span>}
                 <span className={`${k.planText} block`}>{text}</span>

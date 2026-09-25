@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from "react";
 import { ChevronRight, X, type LucideIcon } from "lucide-react";
 import { SpeakerFace, speakerName, type Speaker } from "@/components/battle/SpeakerFace";
+import { usePathway } from "@/lib/pathways/context";
 import h from "./hub.module.css";
 
 const CHARS_PER_SEC = 55;
@@ -73,7 +74,8 @@ export function DialogueBox({
   const { shown, done, finish } = useTypewriter(text, reducedMotion);
   const fallbackRef = useRef<HTMLButtonElement>(null);
   const nextRef = focusRef ?? fallbackRef;
-  const displayName = name ?? speakerName(speaker, agentName);
+  const { coach } = usePathway();
+  const displayName = name ?? speakerName(speaker, { agentName, coachName: coach.name });
 
   return (
     <section

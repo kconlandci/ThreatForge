@@ -5,16 +5,18 @@
  */
 import * as Phaser from "phaser";
 import type { StageBus, StageMode, ToStage } from "@/lib/game/bus";
-import type { GridPos } from "@/lib/game/hubMap";
+import { buildWalkable, type GridPos, type StageSetup } from "@/lib/game/hubMap";
 import { BattleScene } from "./BattleScene";
 import { BootScene } from "./BootScene";
 import { HubScene } from "./HubScene";
+import { hubBounds } from "./layout";
 import { pickDpr, readFonts, type StageHandle, type StageRuntime } from "./runtime";
 import type { StageScene } from "./StageScene";
 
 export interface CreateStageOptions {
   parent: HTMLElement;
   bus: StageBus;
+  stage: StageSetup;
   mode: StageMode;
   reducedMotion: boolean;
   initialHubPos: GridPos | null;
@@ -36,6 +38,9 @@ export function createStage(opts: CreateStageOptions): StageHandle & { debug: St
 
   const rt: StageRuntime = {
     bus: opts.bus,
+    stage: opts.stage,
+    walkable: buildWalkable(opts.stage.hubMap),
+    hubBounds: hubBounds(opts.stage.hubMap),
     dpr,
     cssW,
     cssH,

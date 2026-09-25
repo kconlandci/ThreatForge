@@ -21,7 +21,6 @@
  *   can see how people are doing without reading JSON. Rows per save and per player per day are
  *   capped, since history comes from the browser.
  */
-import { HELP_DESK_ENCOUNTER } from "@/lib/game/content";
 import { LEVEL_NAMES } from "@/lib/game/mastery";
 import { MASTERY_SKILLS, isMasterySkillId, skillName } from "@/lib/game/skills";
 import type { BattleStatus, EncounterMode, MasterySkillId, SaveData, SaveProfile } from "@/lib/game/types";
@@ -139,10 +138,16 @@ const OUTCOMES: Partial<Record<BattleStatus, string>> = {
   "lost-breach": "Breach",
   "lost-timeout": "Out of time",
 };
-const ENCOUNTER_TITLES = new Map<string, string>([[HELP_DESK_ENCOUNTER.id, HELP_DESK_ENCOUNTER.title]]);
+/** Each pathway's story shift title by encounter id (from the registry; no content is imported). */
+const ENCOUNTER_TITLES = new Map<string, string>(
+  PATHWAYS.flatMap((p) => (p.storyId && p.storyTitle ? [[p.storyId, p.storyTitle] as [string, string]] : [])),
+);
 const MODE_NAMES: Record<EncounterMode, string> = { story: "Story", practice: "Practice", daily: "Daily", drill: "Drill" };
-const DAILY_ID_RE = /^hd-daily-\d+$/;
-const DRILL_ID_RE = /^hd-drill-([a-z-]+)-\d+$/;
+const ID_PREFIXES = PATHWAYS.flatMap((p) => (p.idPrefix ? [p.idPrefix] : [])).join("|");
+/** "hd-daily-7", "cy-daily-2". */
+const DAILY_ID_RE = new RegExp(`^(${ID_PREFIXES})-daily-\\d+$`);
+/** "hd-drill-verify-identity-2": group 2 is the skill. */
+const DRILL_ID_RE = new RegExp(`^(${ID_PREFIXES})-drill-([a-z-]+)-\\d+$`);
 
 /**
  * The Encounter column: the fixed shift's title ("Monday, 8:57 AM"), else the id itself
@@ -156,7 +161,7 @@ function encounterColumn(encounterId: string): string {
 export function generatedShiftTitle(encounterId: string): string | null {
   if (DAILY_ID_RE.test(encounterId)) return "Daily practice";
   const drill = DRILL_ID_RE.exec(encounterId);
-  if (drill && isMasterySkillId(drill[1])) return `Drill: ${skillName(drill[1])}`;
+  if (drill && isMasterySkillId(drill[2])) return `Drill: ${skillName(drill[2])}`;
   return null;
 }
 
@@ -751,9 +756,12 @@ function optionalResultFields(result: ShiftResult): Record<string, unknown> {
   return out;
 }
 
-/** "Check who's asking: Solid; Confirm the fix: Learning" from the help desk skills in a save. */
-export function skillLevelsText(save: SaveData): string {
-  const progress = (save.pathways as Record<string, unknown>)["help-desk"];
+/** The Skill levels column is kept to this many characters. */
+export const SKILL_LEVELS_MAX = 1000;
+
+/** "Check who's asking: Solid; Confirm the fix: Learning" for one pathway's skills in a save. */
+function pathwaySkillLevels(save: SaveData, pathwayId: string): string {
+  const progress = (save.pathways as Record<string, unknown>)[pathwayId];
   const skills = isPlainObject(progress) && isPlainObject(progress.skills) ? progress.skills : {};
   const parts: string[] = [];
   for (const id of MASTERY_SKILLS) {
@@ -762,6 +770,19 @@ export function skillLevelsText(save: SaveData): string {
     if (level > 0) parts.push(`${skillName(id)}: ${LEVEL_NAMES[level as 1 | 2 | 3 | 4]}`);
   }
   return parts.join("; ");
+}
+
+/**
+ * The Skill levels column. Only Help Desk skills: "Check who's asking: Solid; Confirm the fix:
+ * Learning" (as before). Skills in more than one pathway: "Help Desk — …; … | Cybersecurity — …",
+ * trimmed to SKILL_LEVELS_MAX.
+ */
+export function skillLevelsText(save: SaveData): string {
+  const per = PATHWAYS.map((p) => ({ name: p.name, id: p.id, text: pathwaySkillLevels(save, p.id) })).filter((x) => x.text);
+  if (per.length === 0) return "";
+  if (per.length === 1 && per[0].id === "help-desk") return per[0].text;
+  const text = per.map((x) => `${x.name} — ${x.text}`).join(" | ");
+  return text.length <= SKILL_LEVELS_MAX ? text : `${text.slice(0, SKILL_LEVELS_MAX - 1)}…`;
 }
 
 export function resultFields(result: ShiftResult, playerName: string, playerRecordId: string): Record<string, unknown> {

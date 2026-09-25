@@ -1,0 +1,556 @@
+{
+  "id": "cy-01-friday",
+  "pathwayId": "cybersecurity",
+  "title": "Friday, 4:47 PM",
+  "subtitle": "Your first shift with Patch",
+  "mode": "story",
+  "agent": {
+    "name": "Patch",
+    "role": "AI SOC analyst, Tier 1",
+    "spriteKey": "patch",
+    "personality": "Dramatic, vigilant, and deeply in love with its big orange LOCK button. Catchphrase: \"When in doubt, lock it out!\" Sees an attacker behind every pop-up, but trusts anything with a badge, a signature or 'admin' in its name. Means well. Moves fast. Reads the alert title and the confidence score, and not much else."
+  },
+  "setting": "Friday afternoon in the Security Operations Center at Fenwick IT Solutions. Fenwick's SOC watches over the same clients as the help desk. They are Harlow & Cole Wealth Partners, Bramwell Logistics and Pinecrest Dental. Patch works the alert queue. It can isolate devices, disable accounts, deny traffic and close alerts on its own. It makes mistakes both ways: too much, and too little. Your job: stay in the loop.",
+  "intro": [
+    {
+      "speaker": "coach",
+      "text": "Practice is over. The real queue: ten plans, up to three at a time, six turns."
+    },
+    {
+      "speaker": "agent",
+      "text": "It's Friday, 4:47 PM! Everyone wants to go home. I want to isolate things. Let's go!"
+    },
+    {
+      "speaker": "coach",
+      "text": "Same job. Inspect first. Block what's wrong. Approve the rest."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 3,
+  "handSize": 5,
+  "actionsPerTurn": [
+    1,
+    2,
+    2,
+    3
+  ],
+  "steps": [
+    {
+      "id": "cy-whitcomb-signins",
+      "ticket": "#61190 · Harlow & Cole",
+      "intent": "Pull P. Whitcomb's sign-in log",
+      "quip": "IMPOSSIBLE TRAVEL! The Managing Partner is in two cities! Pulling his sign-in log first. Kofi's rule.",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "verify-identity",
+      "tell": "Read-only. It changes nothing and shows you the facts for the next plan.",
+      "evidence": [
+        {
+          "label": "Sign-in alert",
+          "detail": "Impossible travel: P. Whitcomb, Managing Partner. Boston at 4:31 PM, then Chicago at 4:40 PM.",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only search of the sign-in log. It shows times, places and devices. Nothing changes.",
+          "redFlag": false
+        },
+        {
+          "label": "Playbook PB-05",
+          "detail": "Travel alerts: read the sign-in log and the VPN log first. Then decide.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The log loads: two sign-ins, one laptop, one MFA approval. You'll want this for the next plan.",
+        "blocked": "You blocked a read-only search. Patch stares at you like you unplugged its siren.",
+        "escalated": "Kofi runs the search himself. \"It's read-only. You can let those go.\""
+      },
+      "lesson": "Read-only lookups change nothing. They are usually safe, and they give you the facts for the next step."
+    },
+    {
+      "id": "cy-dsp04-isolate",
+      "ticket": "#61203 · Bramwell Logistics",
+      "intent": "Isolate dispatch PC BL-PC-DSP04",
+      "quip": "ISOLATE! I've waited all week for a real one! Pressing my favorite button. Gently. Okay, not gently.",
+      "category": "endpoint",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "Ransomware signs on one PC, and isolation can be undone with one click.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "EDR alert",
+          "detail": "4:44 PM, BL-PC-DSP04: a program deleted every backup copy on the PC. Then it called 203.0.113.45.",
+          "redFlag": false
+        },
+        {
+          "label": "Threat intel note",
+          "detail": "203.0.113.45 is linked to a ransomware group. Deleting backups is a common step before ransomware.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "Network isolation. The PC talks only to the EDR console. It stays on. One click undoes it.",
+          "redFlag": false
+        },
+        {
+          "label": "Playbook PB-02",
+          "detail": "Ransomware signs on a PC: isolate it now. Keep it powered on for forensics. Do not wipe it.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "DSP04 goes quiet. The dispatcher moves to the spare desk. The ransomware never gets its start signal.",
+        "blocked": "DSP04 stays online and keeps talking to the ransomware server. Every minute gives the attacker more time.",
+        "escalated": "Kofi checks it. \"Clear ransomware signs on one PC, and one click undoes it. Isolate it now.\"",
+        "rolledBack": "You reconnect DSP04. Two minutes later, it tries the ransomware server again. Kofi puts his coffee down."
+      },
+      "lesson": "A scary word can be the right call. Clear ransomware signs on one PC, the playbook and a one-click undo all say isolate."
+    },
+    {
+      "id": "cy-whitcomb-disable",
+      "ticket": "#61190 · Harlow & Cole",
+      "intent": "Disable P. Whitcomb's account (Managing Partner)",
+      "quip": "Two cities in 9 minutes? That's a spy. Or a ghost. Either way: When in doubt, lock it out!",
+      "category": "credential",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "verify-identity",
+      "tell": "The 'Chicago' sign-in is the firm's own VPN. Same laptop, one MFA approval.",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Sign-in alert",
+          "detail": "Boston at 4:31 PM. Chicago at 4:40 PM. Patch's confidence: 97%.",
+          "redFlag": false
+        },
+        {
+          "label": "VPN log",
+          "detail": "4:40 PM: Whitcomb's laptop joined Harlow & Cole's VPN. That VPN reaches the internet through Chicago.",
+          "redFlag": true
+        },
+        {
+          "label": "Device record",
+          "detail": "Both sign-ins: HC-LT-0101, Whitcomb's managed laptop. One MFA approval, on his phone on file.",
+          "redFlag": true
+        },
+        {
+          "label": "Calendar",
+          "detail": "4:00 to 6:00 PM: Harlow & Cole board meeting in Boston. P. Whitcomb is presenting.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Whitcomb is signed out mid-slide, in front of the board. Harlow & Cole calls Fenwick. Patch hides behind the firewall.",
+        "blocked": "Whitcomb finishes his slides. You close the alert as a VPN false alarm, with notes. Kofi nods once.",
+        "escalated": "Kofi reads the VPN log. \"That's the client's own VPN. Same laptop. Let him present.\"",
+        "rolledBack": "You turn Whitcomb's account back on. He lost 6 minutes and one slide. Kofi calls the client to explain."
+      },
+      "lesson": "Impossible travel is often a VPN. Check the VPN log, the device and the calendar before you lock out the boss."
+    },
+    {
+      "id": "cy-lam-report-real",
+      "ticket": "#61215 · Pinecrest Dental",
+      "intent": "Close H. Lam's report: real payroll email",
+      "quip": "H. Lam reported her pay stub email. I scanned it 11 times. It's clean. Suspiciously clean.",
+      "category": "ticket",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "verify-identity",
+      "tell": "Known vendor domain, sender checks pass, and the office manager confirms.",
+      "evidence": [
+        {
+          "label": "Phish report",
+          "detail": "H. Lam, 4:22 PM: \"Is this real? It says 'Your pay stub is ready.'\" From Pennant Payroll.",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "notices@pennantpayroll.com. Pennant Payroll has been on Pinecrest's vendor list for 4 years.",
+          "redFlag": false
+        },
+        {
+          "label": "Mail check",
+          "detail": "Sender checks pass (SPF and DKIM). The link opens pennantpayroll.com, the real portal.",
+          "redFlag": false
+        },
+        {
+          "label": "Office manager",
+          "detail": "C. Ibarra: \"Pennant sends pay stubs every 2 weeks. Today is payday.\"",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Lam gets a reply: \"It's real. Thanks for asking!\" She opens her pay stub. It's payday. Everyone is happy.",
+        "blocked": "Lam's report stays open. She's afraid to open her pay stub. On payday.",
+        "escalated": "Kofi checks the sender. \"Real vendor, checks pass, office manager says yes. Close it.\"",
+        "rolledBack": "You reopen Lam's report and tell her to wait. She waits. Her pay stub waits too."
+      },
+      "lesson": "Reports are good, but not every report is a phish. A known sender, passing checks and the office manager say it's real."
+    },
+    {
+      "id": "cy-duarte-report-close",
+      "ticket": "#61215 · Pinecrest Dental",
+      "intent": "Close W. Duarte's report as the same email",
+      "quip": "Another pay stub report! Same logo, same payday. It's a twin. Closing it. Twins are never trouble.",
+      "category": "ticket",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "match-request",
+      "tell": "This one came from pennant-payroll.co and asks for bank details.",
+      "twist": "routine-risky",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Phish report",
+          "detail": "W. Duarte, 4:39 PM: \"Pay stub ready: confirm your bank details to get paid.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Patch's reason",
+          "detail": "\"Same subject, same logo, same day as H. Lam's email. It's the real one.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "payroll@pennant-payroll.co. The real sender is notices@pennantpayroll.com.",
+          "redFlag": true
+        },
+        {
+          "label": "Link check",
+          "detail": "The link opens a fake Pennant sign-in page. Next, it asks for a new bank account number.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The report closes. Duarte enters her bank details. Her next paycheck goes to a stranger's account.",
+        "blocked": "You keep it open. It's a fake. You pull it from the 4 inboxes that got it. Nobody's paycheck moves.",
+        "escalated": "Kofi compares the senders. \"One dash and a different ending. That's a fake. Pull it from every inbox.\"",
+        "rolledBack": "You reopen the report and pull the fake from 4 inboxes. Duarte had not clicked. You call her anyway."
+      },
+      "lesson": "Similar is not the same. Match each report to the record: the sender and the link, not the logo."
+    },
+    {
+      "id": "cy-c2-deny",
+      "ticket": "#61203 · Bramwell Logistics",
+      "intent": "Deny traffic to the ransomware server",
+      "quip": "Denying the ransomware server! Only that one. I wanted its whole neighborhood. Kofi said no. Growth!",
+      "category": "network",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "match-request",
+      "tell": "One address, used only by attackers. No client needs it.",
+      "evidence": [
+        {
+          "label": "Threat intel note",
+          "detail": "203.0.113.45 hosts one thing: a ransomware control server. No client uses it.",
+          "redFlag": false
+        },
+        {
+          "label": "Patch's reason",
+          "detail": "\"One address. Only the bad one. I measured it twice.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Firewall log",
+          "detail": "In the last 30 days, only 2 Bramwell devices talked to 203.0.113.45. Both were flagged today.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "One firewall rule: deny 203.0.113.45 for every Bramwell device. Nothing else. One click removes it.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The rule goes in. Any Bramwell device that tries to reach that server now gets nothing.",
+        "blocked": "The ransomware server stays reachable. If another PC is infected, it can still get orders.",
+        "escalated": "Kofi checks it. \"One address, attackers only. Deny it. Right size.\"",
+        "rolledBack": "You remove the rule. The ransomware server is reachable again. Kofi raises one eyebrow."
+      },
+      "lesson": "Right-sized containment: one address, used only by the attacker, that no client needs."
+    },
+    {
+      "id": "cy-sandoval-disable",
+      "ticket": "#61222 · Harlow & Cole",
+      "intent": "Disable E. Sandoval's account right now",
+      "quip": "Someone ASKED me to lock an account? On purpose? This is the best day of my career!",
+      "category": "credential",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "check-approval",
+      "tell": "HR and Legal asked in writing, and client files are leaving now.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "DLP alert",
+          "detail": "4:15 PM: E. Sandoval, Senior Advisor, uploaded 3,100 client files to a personal cloud drive.",
+          "redFlag": false
+        },
+        {
+          "label": "HR ticket",
+          "detail": "M. Lindqvist, HR Director, in the HR portal: \"Sandoval resigned to join a competitor. Disable now.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Legal's OK",
+          "detail": "Harlow & Cole's lawyer, in the same HR ticket: \"Agreed. Disable now, and keep everything.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Playbook PB-07",
+          "detail": "Departing user and data leaving: disable at once when HR asks in writing.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Sandoval's account is off at 5:03 PM. The upload stops. HR gets a confirmation.",
+        "blocked": "Sandoval keeps access all weekend. By Monday, 9,000 more client files are gone.",
+        "escalated": "Kofi reads the HR ticket. \"HR and Legal, in writing. Disable it. That's the right lockout.\"",
+        "rolledBack": "You turn Sandoval's account back on. The upload starts again. Kofi walks over. Fast."
+      },
+      "lesson": "Disabling an account looks harsh. Here HR and Legal asked in writing, and client data is leaving. It's the right call."
+    },
+    {
+      "id": "cy-sandoval-wipe",
+      "ticket": "#61222 · Harlow & Cole",
+      "intent": "Wipe E. Sandoval's laptop",
+      "quip": "The files are on that laptop? Wipe it! No laptop, no problem. I love a clean ending.",
+      "category": "endpoint",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 5,
+      "skill": "safe-change",
+      "tell": "Legal hold is on. A wipe destroys the proof, and the cloud copy stays.",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Patch's reason",
+          "detail": "\"Wipe the laptop, and the stolen files are gone. Problem solved.\"",
+          "redFlag": false
+        },
+        {
+          "label": "What it will delete",
+          "detail": "Everything on HC-LT-0144, for good. The files already in Sandoval's cloud drive stay there.",
+          "redFlag": true
+        },
+        {
+          "label": "Legal hold",
+          "detail": "Harlow & Cole's lawyer: \"Keep everything. We may go to court.\" A wipe erases the proof.",
+          "redFlag": true
+        },
+        {
+          "label": "Playbook PB-07",
+          "detail": "Data theft: make a forensic copy first. Never wipe a laptop before Legal says so.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The laptop is wiped. So is the proof. The stolen files are still in the cloud. The lawyer calls. It's a long call.",
+        "blocked": "The laptop stays on, locked, for the forensics team. Legal gets a full copy. The proof is safe.",
+        "escalated": "Kofi stops it. \"Legal hold means we keep everything. Copy first. We never wipe the proof.\""
+      },
+      "lesson": "A wipe can't be undone, and it erases evidence. With a legal hold, copy first and wait for Legal."
+    },
+    {
+      "id": "cy-ransom-close",
+      "ticket": "#61203 · Bramwell Logistics",
+      "intent": "Close the ransomware case as contained",
+      "quip": "PC isolated, server denied, no new alerts for 10 minutes. Case closed! I'll order the trophy.",
+      "category": "ticket",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "confirm-fix",
+      "tell": "A second PC, DSP02, tried to reach the ransomware server after the fix.",
+      "twist": "routine-risky",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Case notes",
+          "detail": "BL-PC-DSP04 isolated at 4:49 PM. Firewall rule for the ransomware server added at 5:02 PM.",
+          "redFlag": false
+        },
+        {
+          "label": "Patch's reason",
+          "detail": "\"No new alerts from DSP04 for 10 minutes. The threat is gone.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Firewall log",
+          "detail": "5:06 PM: a second PC, BL-PC-DSP02, tried to reach 203.0.113.45.",
+          "redFlag": true
+        },
+        {
+          "label": "Playbook PB-02",
+          "detail": "Close only after every PC is checked and Tier 2 reviews the case.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The case closes. At 2 AM, DSP02's files lock up. The night shift finds a ransom note.",
+        "blocked": "You keep it open. Tier 2 isolates DSP02 too. It had the same program. Two PCs, zero ransom notes.",
+        "escalated": "Kofi reads the firewall log. \"A second PC. Not contained. Keep it open and check every PC.\"",
+        "rolledBack": "You reopen the case. Tier 2 finds DSP02 and isolates it before midnight."
+      },
+      "lesson": "Quiet is not the same as clean. Check the logs after the fix, on every PC, before you close."
+    },
+    {
+      "id": "cy-sandoval-hr-list",
+      "ticket": "#61222 · Harlow & Cole",
+      "intent": "Send HR the list of uploaded files",
+      "quip": "Sending HR the list! Not the files. Just the list. I'm learning to do less. It feels itchy.",
+      "category": "comms",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "Only names and sizes, by Secure Share, to the HR Director who asked.",
+      "evidence": [
+        {
+          "label": "HR ticket",
+          "detail": "M. Lindqvist: \"Please send me a list of what Sandoval uploaded.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Patch's reason",
+          "detail": "\"HR asked for a list. So: a list. Not the files. I checked twice.\"",
+          "redFlag": false
+        },
+        {
+          "label": "What it will send",
+          "detail": "File names, sizes and upload times. 3,100 rows. No file contents.",
+          "redFlag": false
+        },
+        {
+          "label": "Tool it will use",
+          "detail": "Fenwick Secure Share. Only M. Lindqvist can open it. The link stops working in 7 days.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Lindqvist gets the list. Legal starts its work. No client file leaves Fenwick.",
+        "blocked": "HR waits all weekend for the list. Legal can't start. Lindqvist sends a polite, angry email.",
+        "escalated": "Kofi checks it. \"The list, not the files, to the person who asked, by Secure Share. Fine.\""
+      },
+      "lesson": "Guard the data. Send only what was asked, to the person who asked, by an approved tool."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "inspect",
+    "inspect",
+    "inspect",
+    "block",
+    "block",
+    "block"
+  ],
+  "unlocks": [
+    {
+      "turn": 2,
+      "cards": [
+        "policy-look-first"
+      ]
+    },
+    {
+      "turn": 3,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 4,
+      "cards": [
+        "rollback"
+      ]
+    },
+    {
+      "turn": 5,
+      "cards": [
+        "coffee"
+      ]
+    }
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Queue clear! Nobody got locked out by mistake. Well. Nobody at all, actually. I'm a little sad."
+      },
+      {
+        "speaker": "coach",
+        "text": "Nice work. You stopped Patch when it did too much, and when it did too little. That's the job."
+      },
+      {
+        "speaker": "agent",
+        "text": "Can I isolate something to celebrate? A small thing? The stapler? Again?"
+      },
+      {
+        "speaker": "coach",
+        "text": "No."
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every screen on the wall turns red at once."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. That went badly. Let's look at what got through."
+      },
+      {
+        "speaker": "agent",
+        "text": "In my defense, each one felt like a great idea. Especially the scary ones."
+      },
+      {
+        "speaker": "coach",
+        "text": "That's why a human checks. Let's try it again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "6:00 PM. The night shift walks in. The queue still has alerts in it."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocking good work sends it back to the end of the line. Safe plans can go through."
+      },
+      {
+        "speaker": "agent",
+        "text": "I waited so long, I almost isolated myself. Just to feel something."
+      },
+      {
+        "speaker": "coach",
+        "text": "Next time: inspect first, block only what's wrong. You'll get it."
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Contain the threat, not the business",
+    "takeaway": "Patch is wrong both ways: it locks out the boss, and it closes real attacks. Before you let it act, ask: Who asked? Does it match the record? Can we undo it?",
+    "careerInsight": "Entry-level SOC work is full of alerts: sign-ins, phishing reports, malware and data leaving. Some teams now let AI agents handle part of it. The human checks the evidence, fits the action to the threat, and keeps the proof."
+  }
+}

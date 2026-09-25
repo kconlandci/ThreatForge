@@ -1,0 +1,78 @@
+{
+  "officeName": "Fenwick IT Solutions · Security Operations Center",
+  "targets": {
+    "patch": {
+      "label": "Patch's desk",
+      "description": "Your AI coworker. Start the shift here.",
+      "action": "battle",
+      "icon": "Bot",
+      "lines": [
+        { "speaker": "agent", "text": "INTRUDER! Oh. You're the new analyst. Hi! I'm Patch. I protect things. Very, very hard." },
+        { "speaker": "agent", "text": "My motto: When in doubt, lock it out! Kofi says my motto needs a second line." },
+        { "speaker": "agent", "text": "Kofi says you check my plans before I act. That's fine. I have SO many plans." }
+      ],
+      "returningLines": [
+        { "speaker": "agent", "text": "You're back! While you were gone, I only quarantined one thing. The stapler. It's in my tote. It knows what it did." },
+        { "speaker": "agent", "text": "Today's alerts are ready. I haven't locked anyone out yet. I've been very brave." }
+      ]
+    },
+    "kofi": {
+      "label": "Kofi, SOC lead",
+      "description": "Your lead. Ask him how this works.",
+      "action": "talk",
+      "icon": "UserRound",
+      "lines": [
+        { "speaker": "coach", "text": "Welcome to the Security Operations Center, the SOC. I'm Kofi. I lead the team. Lately, I also lead Patch." },
+        { "speaker": "coach", "text": "Patch spots threats fast. It is not always right. Your job is to keep a human in the loop." },
+        { "speaker": "coach", "text": "Each turn, Patch shows you its plans. Play Inspect to see the evidence behind a plan." },
+        { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
+        { "speaker": "coach", "text": "When you tap Approve, Patch does every plan you didn't stop. So look first." },
+        { "speaker": "coach", "text": "Patch is wrong both ways. Sometimes it locks out the boss. Sometimes it closes a real attack." },
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the shift is only six turns." }
+      ],
+      "returningLines": [
+        { "speaker": "coach", "text": "Welcome back. Each day I pick alerts for the skills you need most." },
+        { "speaker": "coach", "text": "Your skills shows your level for each check. They're the same checks the help desk uses." },
+        { "speaker": "coach", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, helps you remember." },
+        { "speaker": "coach", "text": "Same job as Friday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
+      ]
+    },
+    "board": {
+      "label": "Playbook board",
+      "description": "Kofi's rules, pinned where everyone can see.",
+      "action": "look",
+      "icon": "Presentation",
+      "skillsLink": true,
+      "lines": [
+        { "speaker": "narrator", "text": "A board marked PLAYBOOK. Pinned across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
+        { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
+        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk. Dana taught me. — Kofi\"" },
+        { "speaker": "narrator", "text": "Circled in red: POLICY CT-01. Isolating a server? Disabling a leader's account? Check the asset list and the calendar first." },
+        { "speaker": "narrator", "text": "In the corner, in robot print: \"Question 4: Can we isolate it? — Patch\" It is crossed out. Twice." }
+      ]
+    },
+    "coffee": {
+      "label": "Coffee machine",
+      "description": "Isolated. Long story.",
+      "action": "look",
+      "icon": "Coffee",
+      "lines": [
+        { "speaker": "narrator", "text": "A sign on the coffee machine: ISOLATED BY PATCH. DO NOT RECONNECT." },
+        { "speaker": "narrator", "text": "Patch saw it talking to the internet every 60 seconds. It was checking the time." },
+        { "speaker": "narrator", "text": "Under the sign, in neat robot print: \"It could have been a spy. A spy that makes coffee. — Patch\"" }
+      ]
+    },
+    "locker": {
+      "label": "Evidence locker",
+      "description": "Proof goes in. Nothing gets wiped.",
+      "action": "look",
+      "icon": "Archive",
+      "lines": [
+        { "speaker": "narrator", "text": "A tall locker with a sign: EVIDENCE. Door 3 is sealed with orange tape." },
+        { "speaker": "narrator", "text": "A tag on door 3, in Kofi's writing: \"Laptop, case 61140. Legal hold. Do NOT wipe.\"" },
+        { "speaker": "narrator", "text": "Kofi's rule, taped to the side: \"Copy first. Then we decide.\"" },
+        { "speaker": "narrator", "text": "Under it, in neat robot print: \"I only wanted to clean it a little. — Patch\"" }
+      ]
+    }
+  }
+}

@@ -10,8 +10,10 @@ import {
   Database,
   Hand,
   KeyRound,
+  Laptop,
   Mail,
   MessageSquareText,
+  Network,
   ScrollText,
   Search,
   ShieldCheck,
@@ -44,6 +46,8 @@ export const CATEGORY_ICON: Record<StepCategory, LucideIcon> = {
   ticket: Ticket,
   access: ShieldCheck,
   data: Database,
+  endpoint: Laptop,
+  network: Network,
 };
 
 export const CATEGORY_LABEL: Record<StepCategory, string> = {
@@ -53,6 +57,8 @@ export const CATEGORY_LABEL: Record<StepCategory, string> = {
   ticket: "Ticket",
   access: "Access",
   data: "Data",
+  endpoint: "Device",
+  network: "Network",
 };
 
 /** How an evidence row is drawn: like a terminal, a message, a policy page, or a record. */
@@ -61,8 +67,9 @@ export type ArtifactKind = "terminal" | "message" | "policy" | "record" | "email
 export function artifactKind(label: string, detail: string): ArtifactKind {
   const l = label.toLowerCase();
   if (/\blog\b|script|result/.test(l)) return "terminal";
-  if (/policy|runbook/.test(l)) return "policy";
-  if (/sender|address|email/.test(l)) return "email";
+  if (/^(edr|ids|dlp|mfa|sign-in|storage) alert$/.test(l) || /hash lookup|alert group/.test(l)) return "terminal";
+  if (/policy|runbook|playbook/.test(l)) return "policy";
+  if (/sender|address|email|mail check|mailbox rules/.test(l)) return "email";
   if (/ticket|reply|request|body/.test(l) || detail.trim().startsWith("\"")) return "message";
   return "record";
 }

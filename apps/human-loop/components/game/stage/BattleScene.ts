@@ -1,10 +1,11 @@
 /**
- * Battle close-up: Ollie at its desk, with mood swaps and card fx.
+ * Battle close-up: the pathway's agent at its desk, with mood swaps and card fx.
  * World: Ollie's feet at (0, BATTLE_FEET_Y); the portrait is 220 x 220 world px.
  */
 import * as Phaser from "phaser";
 import type { SpriteKey } from "@/lib/game/assets";
 import type { AgentMood, ToStage } from "@/lib/game/bus";
+import { portraitKey } from "@/lib/game/hubMap";
 import { BATTLE_BOX, BATTLE_FEET_Y, battleFit } from "./layout";
 import type { StageRuntime } from "./runtime";
 import { StageScene, type ArtRef } from "./StageScene";
@@ -13,7 +14,6 @@ import { FX, FX_SIZE, WORD_SIZE, wordTex, type WordKey } from "./textures";
 export type FxName = Extract<ToStage, { type: "fx" }>["fx"];
 
 const MOODS: AgentMood[] = ["idle", "eager", "busted", "sad", "celebrate"];
-const portraitKey = (m: AgentMood) => `ollie-${m}` as SpriteKey;
 
 /** Handy anchor points on the portrait (world px). */
 const P = {
@@ -61,7 +61,7 @@ export class BattleScene extends StageScene {
     this.initStage();
 
     this.shown = this.rt.mood;
-    this.portrait = this.addArt(portraitKey(this.shown), P.feet.x, P.feet.y);
+    this.portrait = this.addArt(this.portraitKey(this.shown), P.feet.x, P.feet.y);
     this.portrait.img.setDepth(0);
 
     if (this.game.input.touch) this.game.input.touch.capture = false;
@@ -69,10 +69,15 @@ export class BattleScene extends StageScene {
     this.rt.sceneReady("battle");
   }
 
+  /** The pathway agent's portrait for a mood (`${agentSprite}-${mood}`). */
+  private portraitKey(mood: AgentMood): SpriteKey {
+    return portraitKey(this.rt.stage, mood);
+  }
+
   /** Keep every mood portrait crisp, not just the one on screen. */
   protected rasterKeys() {
     const m = super.rasterKeys();
-    for (const mood of MOODS) m.set(portraitKey(mood), 1);
+    for (const mood of MOODS) m.set(this.portraitKey(mood), 1);
     return m;
   }
 
@@ -286,13 +291,13 @@ export class BattleScene extends StageScene {
         alpha: 0.35,
         duration: 70,
         onComplete: () => {
-          this.setArtKey(this.portrait, portraitKey(mood));
+          this.setArtKey(this.portrait, this.portraitKey(mood));
           this.tweens.add({ targets: img, alpha: 1, duration: 110 });
         },
       });
       return;
     }
-    this.setArtKey(this.portrait, portraitKey(mood));
+    this.setArtKey(this.portrait, this.portraitKey(mood));
     this.tweens.killTweensOf(this.pop);
     this.pop.x = 1.14;
     this.pop.y = 0.86;

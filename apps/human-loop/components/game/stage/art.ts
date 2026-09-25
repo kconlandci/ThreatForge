@@ -76,12 +76,12 @@ export async function loadArt(
   return done;
 }
 
-/** First load: sprites (all by default) at their starting scale; placeholders for failures. */
+/** First load: these sprites at their starting scale; placeholders for failures. */
 export async function loadAllArt(
   scene: Phaser.Scene,
   rt: StageRuntime,
   scaleFor: (key: SpriteKey) => number,
-  keys: SpriteKey[] = Object.keys(SPRITES) as SpriteKey[],
+  keys: SpriteKey[],
 ) {
   const wants = keys.map((key) => ({ key, scale: scaleFor(key) }));
   const ok = new Set(await loadArt(scene, rt, wants));

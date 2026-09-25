@@ -1,18 +1,11 @@
 "use client";
 
 import { useId } from "react";
-import { Bot, ChevronRight, Coffee, Presentation, Printer, UserRound, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Sheet } from "@/components/battle/Sheet";
-import { HUB_TARGET_IDS, type HubContent, type HubTargetId } from "@/lib/game/hub";
+import type { HubContent, HubTargetId } from "@/lib/game/hub";
+import { hubIcon } from "./hubIcons";
 import h from "./hub.module.css";
-
-export const TARGET_ICON: Record<HubTargetId, LucideIcon> = {
-  ollie: Bot,
-  dana: UserRound,
-  whiteboard: Presentation,
-  coffee: Coffee,
-  printer: Printer,
-};
 
 /** Keyboard- and screen-reader-friendly way around the office: every spot as a button. */
 export function RoomList({
@@ -43,10 +36,9 @@ export function RoomList({
       }
     >
       <ul className={h.rooms}>
-        {HUB_TARGET_IDS.map((id) => {
+        {Object.keys(hub.targets).map((id) => {
           const t = hub.targets[id];
-          if (!t) return null;
-          const Icon = TARGET_ICON[id];
+          const Icon = hubIcon(t.icon);
           return (
             <li key={id}>
               <button

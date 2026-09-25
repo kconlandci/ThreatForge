@@ -14,7 +14,9 @@
  * `cloud: false` / `stored: false` mean the database is not configured (or unreachable).
  * `retry: true` (with Retry-After) means storage is only temporarily unavailable: ask again later.
  */
-import type { PathwayId } from "@/lib/types";
+import { PATHWAYS, type PathwayId } from "@/lib/types";
+
+const getPathwayMeta = (id: PathwayId) => PATHWAYS.find((p) => p.id === id);
 import { isDay, isMissReason, RECENT_MAX, RECORD_DAYS_MAX, APPLIED_MAX, PRACTICE_DAYS_KEEP } from "@/lib/game/mastery";
 import { isMasterySkillId } from "@/lib/game/skills";
 import type {
@@ -372,8 +374,9 @@ export function emptyPathwayProgress(): PathwayProgress {
  * The practice shift is behind the player: they finished or skipped it, or they already played
  * the real shift (saves from before the practice shift existed).
  */
-export function practiceDone(p: PathwayProgress): boolean {
-  return p.practiceDone === true || p.attempts > 0 || p.history.some((h) => h.encounterId === "hd-01-monday");
+export function practiceDone(p: PathwayProgress, pathwayId: PathwayId = "help-desk"): boolean {
+  const storyId = getPathwayMeta(pathwayId)?.storyId;
+  return p.practiceDone === true || p.attempts > 0 || (!!storyId && p.history.some((h) => h.encounterId === storyId));
 }
 
 export function loadSave(): SaveData {

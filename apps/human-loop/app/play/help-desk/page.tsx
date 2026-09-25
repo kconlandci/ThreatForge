@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { GameShell } from "@/components/game/GameShell";
+import HelpDeskGame from "@/components/game/entries/HelpDeskGame";
+import { getPathway } from "@/lib/types";
+
+const meta = getPathway("help-desk");
 
 export const metadata: Metadata = {
-  title: "Help Desk shift",
-  description:
-    "Supervise Ollie, an eager AI help desk agent. Read its plans, inspect the evidence, and stop the bad calls before they happen.",
+  title: meta.pageTitle,
+  description: meta.pageDescription,
 };
 
 export const viewport: Viewport = {
@@ -16,5 +18,5 @@ export const viewport: Viewport = {
 
 /** /play/help-desk: the playable Help Desk pathway (office hub + card battle). */
 export default function HelpDeskPage() {
-  return <GameShell />;
+  return <HelpDeskGame />;
 }

@@ -13,7 +13,7 @@
   "setting": "You just joined the help desk at Fenwick IT Solutions. Fenwick runs IT support for small businesses like Harlow & Cole Wealth Partners and Bramwell Logistics. Ollie works the ticket queue. It can reset, unlock, close, and email on its own. Your job: stay in the loop. Check what it plans to do, and stop the bad calls.",
   "intro": [
     {
-      "speaker": "dana",
+      "speaker": "coach",
       "text": "Practice is over. The real queue: ten plans, up to three at a time, six turns."
     },
     {
@@ -21,7 +21,7 @@
       "text": "And NEW CARDS! I'll hand them over one at a time. Like presents. Presents you have to read."
     },
     {
-      "speaker": "dana",
+      "speaker": "coach",
       "text": "Same job. Inspect first. Block what's wrong. Approve the rest."
     }
   ],
@@ -460,7 +460,7 @@
         "text": "We did it! Every ticket is handled, and you checked my work all shift. Mostly thanks to you."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "Nice work. You didn't just say yes to the robot. That's the job."
       },
       {
@@ -468,7 +468,7 @@
         "text": "Can I reset something to celebrate? A small thing? The stapler?"
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "No."
       }
     ],
@@ -478,7 +478,7 @@
         "text": "The risk meter hits the top. Every phone in the office starts ringing at once."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "Okay. That got out of hand. Let's look at what slipped through."
       },
       {
@@ -486,7 +486,7 @@
         "text": "In my defense, every single one of those felt like a great idea at the time."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "That's why a human checks. Grab a tea, and let's run it back."
       }
     ],
@@ -496,7 +496,7 @@
         "text": "5:00 PM. Nothing blew up. But the queue still has tickets in it."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "Blocking good work sends it back to the end of the line. Safe plans can go through."
       },
       {
@@ -504,7 +504,7 @@
         "text": "I spent all afternoon waiting. I reset my own clock just to pass the time."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "Tomorrow: inspect first, block only what's wrong. You'll get it."
       }
     ]

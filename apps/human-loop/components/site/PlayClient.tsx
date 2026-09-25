@@ -15,6 +15,8 @@ import {
   type SaveData,
 } from "@/lib/client/save";
 import { preloadStageWhenIdle } from "@/lib/client/preloadStage";
+import type { PathwayProgress } from "@/lib/game/types";
+import { livePathways, type PathwayId } from "@/lib/types";
 import { PathwayPicker } from "./PathwayPicker";
 import { SignUpForm, type SignUpValues } from "./SignUpForm";
 import { buttonClass } from "./ui";
@@ -58,7 +60,7 @@ function SignUpView({
           />
           <div className="relative">
             <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-teal-tint">
-              Fenwick IT Solutions · Help Desk
+              Fenwick IT Solutions
             </p>
             <h1
               ref={headingRef}
@@ -71,7 +73,7 @@ function SignUpView({
               Sign up to save your progress. Or jump in as a guest.
             </p>
             <ul className="mt-6 hidden space-y-2.5 md:block">
-              {["Read Ollie's plan", "Inspect the evidence", "Approve it, block it, or escalate it"].map((t, i) => (
+              {["Read your AI coworker's plan", "Inspect the evidence", "Approve it, block it, or escalate it"].map((t, i) => (
                 <li key={t} className="flex items-center gap-3 text-[16px] font-semibold text-paper">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 border-ink bg-orange font-display text-sm font-bold text-ink">
                     {i + 1}
@@ -392,7 +394,9 @@ function PickerView({
   onReset: () => Promise<boolean>;
   onSignOut: () => Promise<void>;
 }) {
-  const helpDesk = save.pathways["help-desk"] ? getPathwayProgress(save, "help-desk") : null;
+  const progress = Object.fromEntries(
+    livePathways().map((p) => [p.id, save.pathways[p.id] ? getPathwayProgress(save, p.id) : null]),
+  ) as Partial<Record<PathwayId, PathwayProgress | null>>;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -441,7 +445,7 @@ function PickerView({
       </div>
 
       <div className="mt-6 sm:mt-8">
-        <PathwayPicker helpDesk={helpDesk} />
+        <PathwayPicker progress={progress} />
       </div>
     </div>
   );

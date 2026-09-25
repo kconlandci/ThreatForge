@@ -3,10 +3,12 @@ import { SiteFooter } from "@/components/site/Footer";
 import { SiteHeader } from "@/components/site/Header";
 import { PlayClient } from "@/components/site/PlayClient";
 import { container } from "@/components/site/ui";
+import { openNowSentence } from "@/lib/site/pathways";
+import { livePathways } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Play",
-  description: "Sign up or play as a guest, then pick your pathway. Help Desk is live now.",
+  description: `Sign up or play as a guest, then pick your pathway. ${openNowSentence(livePathways())}`,
 };
 
 /** /play: sign-up (or guest) and the pathway picker. The interactive part is a client component. */

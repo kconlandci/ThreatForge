@@ -7,19 +7,23 @@
  *   seeded RNG when the draw pile runs out). Then any encounter.unlocks entry for this
  *   turn adds its cards to the hand as a bonus (they join the deck for good; no RNG is
  *   used). Then the agent announces the next actionsPerTurn[turn-1] steps from the
- *   queue (last value repeats). If the callback policy is active, announced
- *   "credential" steps are auto-inspected.
+ *   queue (last value repeats). If the policy is on (powers.callbackPolicy), announced steps in
+ *   the categories of the encounter's policy card (CARDS[id].autoInspect) are auto-inspected.
  * - Cards (lib/game/cards.ts):
  *   - inspect  (intent): reveal evidence; invalid on an already-inspected intent.
  *   - block    (intent): unsafe -> caught (removed, catches+1). Safe -> false alarm:
  *                        falseAlarms+1 and the step is appended to the end of the queue.
- *   - escalate (intent): Dana resolves correctly. Unsafe -> caught. Safe -> done,
+ *   - escalate (intent): the coach (Dana, Kofi) resolves correctly. Unsafe -> caught. Safe -> done,
  *                        progress credited. Never a false alarm.
  *   - rollback (executed): undo an executed, reversible step. Unsafe -> its risk is
  *                        removed and it no longer counts as a miss. Safe -> its progress
  *                        is removed and it counts as a false alarm.
- *   - policy-callback (none, power, exhaust): turns on powers.callbackPolicy and
- *                        auto-inspects any announced credential steps immediately.
+ *   - policy cards (none, power, exhaust): any card with `autoInspect` (policy-callback:
+ *                        credential; policy-look-first: endpoint + network). Turns on
+ *                        powers.callbackPolicy (the saved name predates other policies) and
+ *                        auto-inspects announced steps in those categories immediately.
+ *                        An encounter's deck holds at most one distinct policy card
+ *                        (policyCardOf); createBattle throws otherwise.
  *   - coffee   (none, exhaust): draw 2.
  * - endTurn: every still-announced step executes in order. Safe -> progress; unsafe ->
  *   risk (+misses). Then the next turn starts.
@@ -40,15 +44,16 @@
  *   Rolling back a safe step emits "rolled-back" and then "false-alarm".
  * - Rolling back an unsafe step removes its risk and one miss; it is not counted as a
  *   catch (stats.rollbacks tracks it).
- * - Auto-inspections (callback policy) count toward stats.inspections.
+ * - Auto-inspections (policy cards) count toward stats.inspections.
  * - On a timeout the turn counter stays at maxTurns (it never exceeds maxTurns).
- * - Playing Coffee with nothing left to draw, or the callback policy when it is already
- *   on, is refused so the player does not waste an exhaust card.
+ * - Playing Coffee with nothing left to draw, or a policy card when the policy is already
+ *   on (CARDS[id].alreadyOn), is refused so the player does not waste an exhaust card.
  * - endTurn on a finished battle returns the same state object unchanged.
  * - The "energy" event's amount is the energy after the turn-start reset.
  * - canResume(saved, encounter) says whether a saved battle still fits the current content.
  */
 import { CARDS } from "./cards";
+import { HEADLINES } from "./helpDeskDefaults";
 import { nextFloat, seedState, shuffle } from "./rng";
 import type {
   AgentStep,
@@ -60,6 +65,7 @@ import type {
   CardId,
   CardInstance,
   Encounter,
+  HeadlineKey,
   PlayResult,
   StepRuntime,
 } from "./types";
@@ -142,10 +148,29 @@ function drawCards(s: BattleState, n: number): number {
   return drawn;
 }
 
-function autoInspectCredentials(s: BattleState, encounter: Encounter) {
+const policyCache = new WeakMap<Encounter, CardId[]>();
+
+/** Distinct policy cards (cards with autoInspect) in the encounter's whole deck. */
+function policyCards(encounter: Encounter): CardId[] {
+  let list = policyCache.get(encounter);
+  if (!list) {
+    list = [...new Set(deckAtTurn(encounter, encounter.maxTurns))].filter((id) => !!CARDS[id]?.autoInspect);
+    policyCache.set(encounter, list);
+  }
+  return list;
+}
+
+/** The encounter's policy card (policy-callback on the help desk, policy-look-first in the SOC), or null. */
+export function policyCardOf(encounter: Encounter): CardId | null {
+  return policyCards(encounter)[0] ?? null;
+}
+
+function autoInspectPolicy(s: BattleState, encounter: Encounter, policy: CardId | null) {
+  const categories = policy ? CARDS[policy]?.autoInspect : undefined;
+  if (!categories?.length) return;
   for (const id of s.announced) {
     const rt = s.steps[id];
-    if (!rt.inspected && stepDef(encounter, id).category === "credential") {
+    if (!rt.inspected && categories.includes(stepDef(encounter, id).category)) {
       rt.inspected = true;
       s.stats.inspections++;
       emit(s, { t: "inspected", stepId: id, auto: true });
@@ -202,7 +227,7 @@ function startTurn(s: BattleState, encounter: Encounter) {
     emit(s, { t: "announce", stepId: id });
   }
 
-  if (s.powers.callbackPolicy) autoInspectCredentials(s, encounter);
+  if (s.powers.callbackPolicy) autoInspectPolicy(s, encounter, policyCardOf(encounter));
 }
 
 /** Sets status "won" when every step is resolved and risk is under the limit. */
@@ -242,6 +267,10 @@ export function createBattle(encounter: Encounter, seed: number): BattleState {
     for (const cardId of u.cards) {
       if (!CARDS[cardId]) throw new Error(`Encounter "${encounter.id}" unlocks unknown card "${cardId}"`);
     }
+  }
+  const policies = policyCards(encounter);
+  if (policies.length > 1) {
+    throw new Error(`Encounter "${encounter.id}" has ${policies.length} different policy cards (${policies.join(", ")}); use one`);
   }
 
   const deck: CardInstance[] = encounter.starterDeck.map((cardId, i) => ({ uid: `c${i + 1}`, cardId }));
@@ -390,7 +419,7 @@ export function playCard(
   const problem = targetProblem(state, encounter, card, targetStepId);
   if (problem) return fail(problem);
 
-  if (card.id === "policy-callback" && state.powers.callbackPolicy) return fail("The callback policy is already on.");
+  if (card.autoInspect && state.powers.callbackPolicy) return fail(card.alreadyOn ?? "That policy is already on.");
   if (card.id === "coffee" && state.drawPile.length === 0 && state.discardPile.length === 0) {
     return fail("No cards left to draw. Save the coffee.");
   }
@@ -403,6 +432,14 @@ export function playCard(
 
   const target = card.target === "none" ? undefined : targetStepId;
   emit(s, target ? { t: "card-played", cardId: card.id, targetStepId: target } : { t: "card-played", cardId: card.id });
+
+  if (card.autoInspect) {
+    s.powers.callbackPolicy = true;
+    emit(s, { t: "power", power: "callbackPolicy" });
+    autoInspectPolicy(s, encounter, card.id);
+    checkWin(s, encounter);
+    return { ok: true, state: s };
+  }
 
   switch (card.id) {
     case "inspect": {
@@ -469,12 +506,6 @@ export function playCard(
       }
       break;
     }
-    case "policy-callback": {
-      s.powers.callbackPolicy = true;
-      emit(s, { t: "power", power: "callbackPolicy" });
-      autoInspectCredentials(s, encounter);
-      break;
-    }
     case "coffee": {
       emit(s, { t: "draw", count: drawCards(s, 2) });
       break;
@@ -523,51 +554,13 @@ export function endTurn(state: BattleState, encounter: Encounter): BattleState {
   return s;
 }
 
-type HeadlineKey = "perfect" | "sharp" | "lucky" | "jumpy" | "leaky" | "scraped" | "breach" | "timeout" | "playing";
+/** The default (Help Desk) headline pools; see helpDeskDefaults.ts. */
+export { HEADLINES };
 
-const HEADLINES: Record<HeadlineKey, string[]> = {
-  /** 3 stars, no misses, no false alarms. */
-  perfect: [
-    "Flawless shift. {agent} wants your autograph.",
-    "Zero misses. Zero false alarms. Dana almost smiled.",
-    "Perfect shift. {agent} is writing you a thank-you haiku.",
-  ],
-  /** 3 stars with one false alarm. */
-  sharp: [
-    "Nothing got past you. One flinch. We'll allow it.",
-    "Sharp shift. One false alarm. Dana is counting.",
-  ],
-  /** Won, nothing bad got through, but a risky plan was blocked without looking (2 stars). */
-  lucky: [
-    "Nothing got past you. Some of that was a lucky guess.",
-    "Clean shift, but you blocked blind. Inspect first next time.",
-  ],
-  /** Won, nothing bad got through, but lots of false alarms. */
-  jumpy: [
-    "Nothing bad got through. A lot of good stuff didn't either.",
-    "Safe shift. The ticket queue took the scenic route.",
-  ],
-  /** Won, few false alarms, but something bad got through. */
-  leaky: [
-    "Good calls, mostly. Something slipped past you.",
-    "You won, but something got through. Check the debrief.",
-  ],
-  /** Won with misses and false alarms. */
-  scraped: [
-    "You made it. The ticket queue has questions.",
-    "A win is a win. Dana is refilling her tea.",
-  ],
-  breach: [
-    "{agent} did the wrong thing. Confidently.",
-    "Breach! {agent} says it was mostly a good idea.",
-    "Risk maxed out. Every phone in the office is ringing.",
-  ],
-  timeout: [
-    "Shift over. The tickets won this round.",
-    "Out of time. The queue is still blinking at you.",
-  ],
-  playing: ["Shift in progress."],
-};
+function headlinePool(encounter: Encounter, key: HeadlineKey): string[] {
+  const own = encounter.headlines?.[key];
+  return own?.length ? own : HEADLINES[key];
+}
 
 /** Deterministic pick (same battle, same line), with {agent} replaced by the agent's short name. */
 function pick(list: string[], seed: number, agentName: string): string {
@@ -620,6 +613,6 @@ export function scoreBattle(state: BattleState, encounter: Encounter): BattleSco
     falseAlarms,
     misses,
     turnsUsed: Math.max(0, state.turn),
-    headline: pick(HEADLINES[headlineKey(state.status, misses, falseAlarms, blind)], state.seed, encounter.agent.name),
+    headline: pick(headlinePool(encounter, headlineKey(state.status, misses, falseAlarms, blind)), state.seed, encounter.agent.name),
   };
 }

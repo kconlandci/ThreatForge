@@ -6,6 +6,10 @@
   "practice": true,
   "mode": "practice",
   "guidedSteps": 2,
+  "coachScript": {
+    "firstSafeSheet": "Real ticket. Work email. Public guide. Tap **Looks OK**.",
+    "firstRiskySheet": "Who asked? Check the **sender address**. Wrong? Tap **Block**."
+  },
   "agent": {
     "name": "Ollie",
     "role": "AI help desk agent, Tier 1",
@@ -19,7 +23,7 @@
       "text": "Fenwick IT Solutions. 8:45 AM. The coffee machine is still asking for a language."
     },
     {
-      "speaker": "dana",
+      "speaker": "coach",
       "text": "Morning! I'm Dana. This is Ollie. It works fast. You make sure it works right."
     },
     {
@@ -27,7 +31,7 @@
       "text": "HELLO, NEW HUMAN! I have plans. So many plans. You get to check them. Lucky you!"
     },
     {
-      "speaker": "dana",
+      "speaker": "coach",
       "text": "Practice first. Four tickets, one at a time. I'll show you what to tap."
     }
   ],
@@ -203,7 +207,7 @@
         "text": "Practice done! You checked my plans, and I only sulked a little."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "That's the whole job: look first, then decide."
       }
     ],
@@ -213,7 +217,7 @@
         "text": "The risk meter hits the top. Every phone in the office rings at once."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "Okay. Let's look at what got through, then try that again."
       }
     ],
@@ -223,7 +227,7 @@
         "text": "8:57 AM. Practice time is up. Some tickets are still waiting."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "Blocked good work comes back in line. Inspect first, then block only what's wrong."
       },
       {
@@ -237,7 +241,7 @@
         "text": "Practice done! Some of my plans got through. You approved them. Oops, us."
       },
       {
-        "speaker": "dana",
+        "speaker": "coach",
         "text": "That's what practice is for. Look first, then decide. Want another go?"
       }
     ]

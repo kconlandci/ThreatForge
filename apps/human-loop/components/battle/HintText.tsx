@@ -1,6 +1,6 @@
 import { hintParts } from "@/lib/game/coach";
 
-/** Dana's hint text, with **control names** in bold. */
+/** The coach's hint text, with **control names** in bold. */
 export function HintText({ text }: { text: string }) {
   return (
     <>
