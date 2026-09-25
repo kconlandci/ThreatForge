@@ -11,12 +11,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentMood, ToStage } from "./bus";
 import { CARDS } from "./cards";
-import { endTurn as engineEndTurn, playCard as enginePlayCard } from "./engine";
+import { deckAtTurn, endTurn as engineEndTurn, playCard as enginePlayCard } from "./engine";
 import type {
   AgentStep,
   BattleEvent,
   BattleState,
   BattleStatus,
+  CardId,
+  CardInstance,
   Encounter,
   Evidence,
   PlayResult,
@@ -106,6 +108,58 @@ export function autoInspectedIds(state: BattleState): Set<string> {
   return ids;
 }
 
+export { deckAtTurn };
+
+/** Fixed order of the hand's stacks: the core loop first, then the cards that unlock later. */
+export const HAND_ORDER: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "coffee"];
+
+export interface HandStack {
+  cardId: CardId;
+  /** Uids of every copy in hand, in hand order. Playing the stack uses the first. */
+  uids: string[];
+}
+
+/**
+ * Group the hand into one stack per card type, in HAND_ORDER. Types in `last` (the cards that
+ * are NEW this turn) go to the right end, so the new card is never half hidden in the fan.
+ */
+export function groupHand(hand: CardInstance[], last?: ReadonlySet<CardId>): HandStack[] {
+  const by = new Map<CardId, string[]>();
+  for (const c of hand) {
+    const list = by.get(c.cardId);
+    if (list) list.push(c.uid);
+    else by.set(c.cardId, [c.uid]);
+  }
+  const all = [...HAND_ORDER, ...[...by.keys()].filter((id) => !HAND_ORDER.includes(id))];
+  const order = last?.size ? [...all.filter((id) => !last.has(id)), ...all.filter((id) => last.has(id))] : all;
+  return order.filter((id) => by.has(id)).map((cardId) => ({ cardId, uids: by.get(cardId) as string[] }));
+}
+
+/**
+ * Cards that wear the NEW ribbon: unlocked at the start of this turn and not played yet. A card
+ * unlocked on an earlier turn loses its ribbon, so ribbons never pile up in the hand.
+ */
+export function newCardIds(state: BattleState): Set<CardId> {
+  const fresh = new Set<CardId>();
+  const evs = eventsThisTurn(state);
+  for (const ev of evs) if (ev.t === "unlock") ev.cardIds.forEach((id) => fresh.add(id));
+  for (const ev of evs) if (ev.t === "card-played") fresh.delete(ev.cardId);
+  return fresh;
+}
+
+/** Events since the current turn started (the turn-start event included). */
+export function eventsThisTurn(state: BattleState): BattleEvent[] {
+  for (let i = state.events.length - 1; i >= 0; i--) {
+    if (state.events[i].t === "turn-start") return state.events.slice(i);
+  }
+  return state.events;
+}
+
+/** Card types unlocked at the start of the current turn. */
+export function unlockedThisTurn(state: BattleState): CardId[] {
+  return eventsThisTurn(state).flatMap((ev) => (ev.t === "unlock" ? ev.cardIds : []));
+}
+
 /** New events since `prev` (the engine only ever appends). */
 export function newEvents(prev: BattleState, next: BattleState): BattleEvent[] {
   return next.events.slice(prev.events.length);
@@ -141,6 +195,8 @@ export interface Beat {
   /** turn beats: the new turn number and how many intents were announced. */
   turn?: number;
   announced?: number;
+  /** turn beats: cards that joined the hand (and the deck) this turn. */
+  unlocked?: CardId[];
   /** player beats: open the evidence panel for this step (a manual Inspect). */
   openEvidence?: string;
   status?: BattleStatus;
@@ -307,6 +363,12 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
         b.log.push(`${agent} plans to: ${intentOf(ev.stepId)} (${step?.ticket ?? ""}).`);
         break;
       }
+      case "unlock": {
+        const b = current();
+        b.unlocked = [...(b.unlocked ?? []), ...ev.cardIds];
+        for (const id of ev.cardIds) b.log.push(`New card: ${CARDS[id]?.name ?? id}.`);
+        break;
+      }
       case "energy":
         break;
       case "end": {
@@ -377,7 +439,7 @@ export function debriefRows(state: BattleState, encounter: Encounter): DebriefRo
     if (step.safe) {
       switch (runtime.status) {
         case "executed":
-          resolution = `You let ${agent} do it.${falseBlocks}`;
+          resolution = `You approved it.${falseBlocks}`;
           grade = runtime.requeues > 0 ? "ok" : "good";
           break;
         case "escalated":

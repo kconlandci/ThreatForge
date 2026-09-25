@@ -35,27 +35,36 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { BattleView } from "@/components/battle/BattleView";
+import { PracticeResult } from "@/components/battle/PracticeResult";
 import { ResultScreen } from "@/components/battle/ResultScreen";
 import { Sheet } from "@/components/battle/Sheet";
 import { cardIcon } from "@/components/battle/icons";
-import { HubOverlay } from "@/components/hub/HubOverlay";
+import { HubOverlay, type ResumeKind } from "@/components/hub/HubOverlay";
 import { IntroSequence } from "@/components/hub/IntroSequence";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
 import { preloadStage } from "@/lib/client/preloadStage";
-import { getPathwayProgress, loadSave, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
+import { getPathwayProgress, loadSave, practiceDone, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
 import { createBus, type StageMode } from "@/lib/game/bus";
 import { CARDS } from "@/lib/game/cards";
-import { HELP_DESK_ENCOUNTER, HELP_DESK_HUB } from "@/lib/game/content";
-import { canResume, createBattle, scoreBattle } from "@/lib/game/engine";
+import { HELP_DESK_ENCOUNTER, HELP_DESK_HUB, HELP_DESK_PRACTICE, helpDeskEncounter } from "@/lib/game/content";
+import { canResume, createBattle, deckAtTurn, scoreBattle } from "@/lib/game/engine";
 import type { HubTargetId } from "@/lib/game/hub";
 import type { BattleState, CardId, PathwayProgress } from "@/lib/game/types";
+import { HAND_ORDER } from "@/lib/game/useBattle";
 import g from "./GameShell.module.css";
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), { ssr: false });
 
+/** The real shift. Anything that belongs to a saved battle uses helpDeskEncounter(battle.encounterId). */
 const ENC = HELP_DESK_ENCOUNTER;
+const PRACTICE = HELP_DESK_PRACTICE;
 const HUB = HELP_DESK_HUB;
+
+/** A saved battle that is still in progress and fits the current content of its own encounter. */
+function resumable(b: BattleState | null | undefined): BattleState | null {
+  return b && b.status === "playing" && canResume(b, helpDeskEncounter(b.encounterId)) ? b : null;
+}
 const PATHWAY = "help-desk" as const;
 
 type View = "boot" | "resume" | "intro" | "hub" | "battle" | "result";
@@ -111,6 +120,8 @@ function GameMenu({
   onOfficeList,
   onLeaveBattle,
   onHowTo,
+  onPracticeAgain,
+  canPracticeAgain,
 }: {
   view: View;
   /** The battle has ended (its result screen is one tap away): no "Pause". */
@@ -120,6 +131,9 @@ function GameMenu({
   onOfficeList: () => void;
   onLeaveBattle: () => void;
   onHowTo: () => void;
+  onPracticeAgain: () => void;
+  /** False while a real shift is saved: practice would take its battle slot and lose it. */
+  canPracticeAgain: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -200,6 +214,14 @@ function GameMenu({
               Office list
             </button>
           ) : null}
+          {view === "hub" && canPracticeAgain ? (
+            <button type="button" className={g.menuItem} onClick={run(onPracticeAgain)}>
+              <span className={g.menuIcon} aria-hidden="true">
+                <RotateCcw className="h-5 w-5" />
+              </span>
+              Practice again
+            </button>
+          ) : null}
           {view === "battle" && !battleOver ? (
             <button type="button" className={g.menuItem} onClick={run(onLeaveBattle)}>
               <span className={g.menuIcon} aria-hidden="true">
@@ -221,9 +243,16 @@ function GameMenu({
   );
 }
 
-function HowToPlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+/** Cards to list in "How to play": the practice pair, the cards unlocked so far, or all six. */
+export interface HowDeck {
+  practice: boolean;
+  cards: CardId[];
+}
+
+const ALL_CARDS: HowDeck = { practice: false, cards: HAND_ORDER };
+
+function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onClose: () => void }) {
   const titleId = useId();
-  const order: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "coffee"];
   return (
     <Sheet
       open={open}
@@ -238,18 +267,42 @@ function HowToPlay({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
       }
     >
-      <ol className="mb-4 list-decimal space-y-1.5 pl-5 text-[16px] leading-relaxed text-ink">
-        <li>Each turn, {ENC.agent.name} shows its plans. They run in order.</li>
-        <li>Tap a card, then tap a plan. Cards cost energy (the orange number).</li>
-        <li>When you are done, let it proceed. Anything you did not stop will happen.</li>
-        <li>Stop the risky plans. Let the safe ones run. Finish before the shift ends.</li>
-      </ol>
-      <p className="mb-3 rounded-xl bg-teal-tint px-3 py-2 text-[15px] text-ink">
-        <strong className="font-display">3 questions before you approve:</strong> Who asked? Does it match the record? Can we
-        undo it?
-      </p>
+      {deck.practice ? (
+        <ol className="mb-4 list-decimal space-y-1.5 pl-5 text-[16px] leading-relaxed text-ink">
+          <li>{ENC.agent.name.split(" ")[0]} shows a plan.</li>
+          <li>Tap Inspect, then the plan, to see the evidence.</li>
+          <li>Something wrong? Block it. Looks fine? Approve.</li>
+        </ol>
+      ) : (
+        <>
+          <ol className="mb-3 list-decimal space-y-1.5 pl-5 text-[16px] leading-relaxed text-ink">
+            <li>
+              <strong className="font-display">Check.</strong> Tap Inspect, then a plan, to see the evidence.
+            </li>
+            <li>
+              <strong className="font-display">Decide.</strong> Block what&apos;s wrong. Not sure? Escalate to Dana.
+            </li>
+            <li>
+              <strong className="font-display">Approve.</strong> {ENC.agent.name.split(" ")[0]} does every plan you didn&apos;t
+              stop.
+            </li>
+          </ol>
+          <ul className="mb-3 space-y-1 text-[15px] text-ink">
+            <li>
+              <strong className="font-display">Risk:</strong> risky plans that run fill the bar. Full bar = breach.
+            </li>
+            <li>
+              <strong className="font-display">Turns:</strong> handle every plan before the shift ends.
+            </li>
+          </ul>
+          <p className="mb-3 rounded-xl bg-teal-tint px-3 py-2 text-[15px] text-ink">
+            <strong className="font-display">3 questions before you approve:</strong> Who asked? Does it match the record? Can
+            we undo it?
+          </p>
+        </>
+      )}
       <ul className={g.howList}>
-        {order.map((id) => {
+        {deck.cards.map((id) => {
           const c = CARDS[id];
           const Icon = cardIcon(c.icon);
           const power = c.kind === "power";
@@ -264,12 +317,12 @@ function HowToPlay({ open, onClose }: { open: boolean; onClose: () => void }) {
                 aria-hidden="true"
               >
                 <Icon className="h-5 w-5" />
-                <span className={g.howCost}>{c.cost}</span>
+                {deck.practice ? null : <span className={g.howCost}>{c.cost}</span>}
               </span>
               <span className="min-w-0">
                 <span className="block font-display text-[16px] font-bold text-ink">
                   {c.name}
-                  <span className="sr-only">, costs {c.cost} energy</span>
+                  {deck.practice ? null : <span className="sr-only">, costs {c.cost} energy</span>}
                   {c.exhaust ? <span className="ml-2 text-[13px] font-semibold text-muted">One use</span> : null}
                 </span>
                 <span className="block text-[15px] text-ink">{c.text}</span>
@@ -304,6 +357,9 @@ export function GameShell() {
   const [walking, setWalking] = useState<HubTargetId | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
+  const [howDeck, setHowDeck] = useState<HowDeck>(ALL_CARDS);
+  // One-time office note: a saved shift no longer fits the updated content and was cleared.
+  const [note, setNote] = useState<string | null>(null);
   const [initialHubPos, setInitialHubPos] = useState<{ x: number; y: number } | null>(null);
   const walkingRef = useRef<HubTargetId | null>(null);
   const viewRef = useRef<View>("boot");
@@ -351,9 +407,9 @@ export function GameShell() {
         setView("hub");
         return;
       }
-      import("@/lib/game/fixtures").then(({ fixtureBattle, FIXTURE_NAMES }) => {
+      import("@/lib/game/fixtures").then(({ fixtureBattle, fixtureEncounter, FIXTURE_NAMES }) => {
         const name = FIXTURE_NAMES.find((n) => n === fixture) ?? "start";
-        const st = fixtureBattle(name, ENC);
+        const st = fixtureBattle(name, fixtureEncounter(name));
         if (st.status === "playing") {
           setBattle(st);
           setView("battle");
@@ -365,14 +421,19 @@ export function GameShell() {
       return;
     }
 
-    if (p.pendingResult && p.pendingResult.status !== "playing" && canResume(p.pendingResult, ENC)) {
+    // Every saved battle is checked against its own encounter (practice or the real shift).
+    const pending = p.pendingResult;
+    if (pending && pending.status !== "playing" && canResume(pending, helpDeskEncounter(pending.encounterId))) {
       // The last shift ended but its result screen was never left (reload, or the tab closed).
-      setFinalState(p.pendingResult);
+      setFinalState(pending);
       setView("result");
-    } else if (p.battle && p.battle.status === "playing" && canResume(p.battle, ENC)) {
+    } else if (resumable(p.battle)) {
       setView("resume");
     } else {
-      if (p.battle) setSave(patchProgress((x) => ({ ...x, battle: null })));
+      // A shift saved before the content changed (e.g. the old 12-card deck) starts fresh.
+      // History, attempts and best are kept.
+      if (p.battle?.encounterId === ENC.id) setNote("The shift was updated, so it starts fresh.");
+      if (p.battle || p.pendingResult) setSave(patchProgress((x) => ({ ...x, battle: null, pendingResult: null })));
       setView(p.introSeen ? "hub" : "intro");
     }
   }, [router]);
@@ -476,13 +537,24 @@ export function GameShell() {
     setView("battle");
   }, []);
 
+  const startPractice = useCallback(() => beginBattle(createBattle(PRACTICE, newSeed())), [beginBattle]);
+  const newShift = useCallback(() => beginBattle(createBattle(ENC, newSeed())), [beginBattle]);
+
+  /** The hub's main button: resume a saved battle, else practice (first time), else the real shift. */
   const startShift = useCallback(() => {
     const p = getPathwayProgress(loadSave(), PATHWAY);
-    const saved = p.battle && p.battle.status === "playing" && canResume(p.battle, ENC) ? p.battle : null;
-    beginBattle(saved ?? createBattle(ENC, newSeed()));
-  }, [beginBattle]);
+    const saved = resumable(p.battle);
+    if (saved) beginBattle(saved);
+    else if (!practiceDone(p)) startPractice();
+    else newShift();
+  }, [beginBattle, startPractice, newShift]);
 
-  const newShift = useCallback(() => beginBattle(createBattle(ENC, newSeed())), [beginBattle]);
+  /** "Start over" in the resume prompt: a fresh battle of the same kind. */
+  const restartSaved = useCallback(() => {
+    const p = getPathwayProgress(loadSave(), PATHWAY);
+    if (p.battle && helpDeskEncounter(p.battle.encounterId).practice) startPractice();
+    else newShift();
+  }, [startPractice, newShift]);
 
   const onBattleSave = useCallback((st: BattleState) => {
     if (st.status === "playing") {
@@ -492,7 +564,14 @@ export function GameShell() {
     const key = `${st.seed}:${st.events.length}`;
     if (recorded.current === key) return;
     recorded.current = key;
-    const score = scoreBattle(st, ENC);
+    const enc = helpDeskEncounter(st.encounterId);
+    if (enc.practice) {
+      // Practice never counts: no attempts, wins, best or history. It only unlocks the real shift.
+      setSave(patchProgress((p) => ({ ...p, battle: null, pendingResult: st, practiceDone: true })));
+      setFinalState(st);
+      return;
+    }
+    const score = scoreBattle(st, enc);
     const now = new Date().toISOString();
     const won = st.status === "won";
     setSave(
@@ -534,8 +613,30 @@ export function GameShell() {
   }, []);
 
   const finishIntro = useCallback(() => {
-    setSave(patchProgress((p) => ({ ...p, introSeen: true })));
+    const next = patchProgress((p) => ({ ...p, introSeen: true }));
+    setSave(next);
+    // New players go straight from the intro into practice (no walk through the office first).
+    if (!practiceDone(getPathwayProgress(next, PATHWAY))) startPractice();
+    else setView("hub");
+  }, [startPractice]);
+
+  /** For presenters: mark practice as done and go to the office, where "Start shift" waits. */
+  const skipPractice = useCallback(() => {
+    setSave(patchProgress((p) => ({ ...p, introSeen: true, practiceDone: true })));
+    setDialogue(null);
     setView("hub");
+  }, []);
+
+  const openHowTo = useCallback(() => {
+    if (viewRef.current === "battle") {
+      const b = getPathwayProgress(loadSave(), PATHWAY).battle;
+      const enc = helpDeskEncounter(b?.encounterId);
+      const deck = new Set(deckAtTurn(enc, b?.turn ?? 1));
+      setHowDeck({ practice: !!enc.practice, cards: HAND_ORDER.filter((id) => deck.has(id)) });
+    } else {
+      setHowDeck(ALL_CARDS);
+    }
+    setHowOpen(true);
   }, []);
 
   const toggleMotion = useCallback(() => {
@@ -547,11 +648,17 @@ export function GameShell() {
   /* ---------------------------------------------------------------- */
 
   const stageMode: StageMode = view === "battle" || view === "result" ? "battle" : "hub";
-  const hasBattle = !!(save && getPathwayProgress(save, PATHWAY).battle);
-  const resumeState = view === "resume" && save ? getPathwayProgress(save, PATHWAY).battle : null;
+  const progress = save ? getPathwayProgress(save, PATHWAY) : null;
+  const savedBattle = resumable(progress?.battle);
+  const savedEnc = savedBattle ? helpDeskEncounter(savedBattle.encounterId) : null;
+  const resumeKind: ResumeKind = savedEnc ? (savedEnc.practice ? "practice" : "shift") : null;
+  const practiceNext = !!progress && !practiceDone(progress);
+  const resumeState = view === "resume" ? savedBattle : null;
   const inHub = view === "hub" || view === "intro" || view === "resume";
   const battleOver = view === "battle" && !!finalState && finalState.status !== "playing";
-  const firstShift = !!save && getPathwayProgress(save, PATHWAY).attempts === 0;
+  const battleEnc = battle ? helpDeskEncounter(battle.encounterId) : ENC;
+  const resultEnc = finalState ? helpDeskEncounter(finalState.encounterId) : ENC;
+  const firstShift = !!progress && progress.attempts === 0 && !battleEnc.practice;
 
   return (
     <div id="hl-game-root" className={`${g.root} ${reducedMotion ? "hl-rm" : ""}`} data-view={view}>
@@ -575,7 +682,9 @@ export function GameShell() {
             onToggleMotion={toggleMotion}
             onOfficeList={() => setRoomsOpen(true)}
             onLeaveBattle={backToOffice}
-            onHowTo={() => setHowOpen(true)}
+            onHowTo={openHowTo}
+            onPracticeAgain={startPractice}
+            canPracticeAgain={resumeKind !== "shift"}
           />
         ) : null}
       </header>
@@ -625,10 +734,13 @@ export function GameShell() {
                 encounter={ENC}
                 dialogue={dialogue}
                 walking={walking}
-                hasBattle={hasBattle}
+                resumeKind={resumeKind}
+                practiceNext={practiceNext}
+                note={note}
+                onDismissNote={() => setNote(null)}
+                onSkipPractice={skipPractice}
                 reducedMotion={reducedMotion}
                 onOpenRooms={() => setRoomsOpen(true)}
-                onGo={goTo}
                 onCloseDialogue={() => {
                   // Keep keyboard focus in the game when the dialogue (and its focused button) goes away.
                   const hadFocus = document.activeElement?.closest("section") != null;
@@ -638,7 +750,14 @@ export function GameShell() {
                 onStartShift={startShift}
               />
             ) : null}
-            {view === "intro" ? <IntroSequence encounter={ENC} reducedMotion={reducedMotion} onDone={finishIntro} /> : null}
+            {view === "intro" ? (
+              <IntroSequence
+                encounter={practiceNext ? PRACTICE : ENC}
+                reducedMotion={reducedMotion}
+                onDone={finishIntro}
+                onSkipPractice={practiceNext ? skipPractice : undefined}
+              />
+            ) : null}
             {view === "resume" && resumeState ? (
               <div className="absolute inset-0 z-40 grid place-items-center bg-ink/35 p-4">
                 <section
@@ -650,17 +769,19 @@ export function GameShell() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/game/sprites/resetbot-eager.svg" alt="" width={220} height={220} className="mx-auto h-24 w-24" />
                   <h2 id="hl-resume-title" className="mt-1 font-display text-2xl font-bold text-ink">
-                    Your shift is still open
+                    {resumeKind === "practice" ? "Your practice is still open" : "Your shift is still open"}
                   </h2>
                   <p className="mt-1 text-[16px] text-ink-soft">{ENC.agent.name} saved your spot. Pick up where you left off?</p>
-                  <p className="mt-3 flex flex-wrap justify-center gap-1.5">
-                    <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
-                      Turn {resumeState.turn} of {ENC.maxTurns}
-                    </span>
-                    <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
-                      Risk {resumeState.risk}/{ENC.maxRisk}
-                    </span>
-                  </p>
+                  {resumeKind === "shift" && savedEnc ? (
+                    <p className="mt-3 flex flex-wrap justify-center gap-1.5">
+                      <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
+                        Turn {resumeState.turn} of {savedEnc.maxTurns}
+                      </span>
+                      <span className="rounded-full border-2 border-line bg-paper-soft px-3 py-0.5 font-display text-[14px] font-semibold">
+                        Risk {resumeState.risk}/{savedEnc.maxRisk}
+                      </span>
+                    </p>
+                  ) : null}
                   <div className="mt-5 flex flex-col gap-2.5">
                     <button
                       ref={resumeBtnRef}
@@ -669,15 +790,15 @@ export function GameShell() {
                       className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border-2 border-ink bg-orange px-5 font-display text-lg font-bold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
                     >
                       <Play className="h-5 w-5" aria-hidden="true" fill="currentColor" />
-                      Resume your shift
+                      {resumeKind === "practice" ? "Resume practice" : "Resume your shift"}
                     </button>
                     <button
                       type="button"
-                      onClick={newShift}
+                      onClick={restartSaved}
                       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-ink bg-paper px-5 font-display text-base font-semibold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
                     >
                       <RotateCcw className="h-5 w-5" aria-hidden="true" />
-                      Start a new shift
+                      {resumeKind === "practice" ? "Start over" : "Start a new shift"}
                     </button>
                   </div>
                 </section>
@@ -689,7 +810,7 @@ export function GameShell() {
         {view === "battle" && battle ? (
           <BattleView
             key={battleKey}
-            encounter={ENC}
+            encounter={battleEnc}
             initial={battle}
             bus={bus}
             stage={<StageSlot host={host} />}
@@ -701,10 +822,21 @@ export function GameShell() {
           />
         ) : null}
 
-        {view === "result" && finalState ? (
+        {view === "result" && finalState && resultEnc.practice ? (
+          <PracticeResult
+            state={finalState}
+            encounter={resultEnc}
+            next={ENC}
+            stage={<StageSlot host={host} />}
+            stageReady={stageReady}
+            onStartShift={newShift}
+            onPracticeAgain={startPractice}
+            onOffice={backToOffice}
+          />
+        ) : view === "result" && finalState ? (
           <ResultScreen
             state={finalState}
-            encounter={ENC}
+            encounter={resultEnc}
             stage={<StageSlot host={host} />}
             stageReady={stageReady}
             onPlayAgain={newShift}
@@ -728,7 +860,7 @@ export function GameShell() {
         : null}
 
       <RoomList open={roomsOpen} hub={HUB} onClose={() => setRoomsOpen(false)} onGo={goTo} />
-      <HowToPlay open={howOpen} onClose={() => setHowOpen(false)} />
+      <HowToPlay open={howOpen} deck={howDeck} onClose={() => setHowOpen(false)} />
     </div>
   );
 }

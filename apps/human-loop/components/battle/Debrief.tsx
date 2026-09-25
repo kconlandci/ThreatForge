@@ -12,8 +12,25 @@ const GRADE: Record<Grade, { cls: string; label: string; Icon: typeof Check }> =
 };
 
 /** Every plan of the shift: was it safe, what happened, the lesson, and what gave it away. */
-export function Debrief({ state, encounter }: { state: BattleState; encounter: Encounter }) {
-  const rows = debriefRows(state, encounter);
+export function Debrief({
+  state,
+  encounter,
+  only,
+  mistakesFirst = false,
+}: {
+  state: BattleState;
+  encounter: Encounter;
+  /** Show only these steps (the practice result lists just the mistakes). */
+  only?: Set<string>;
+  /** List misses first, then calls that cost something, then the rest (each group in queue order). */
+  mistakesFirst?: boolean;
+}) {
+  const rank: Record<Grade, number> = { bad: 0, ok: 1, good: 2, none: 3 };
+  const rows = debriefRows(state, encounter)
+    .filter((row) => !only || only.has(row.step.id))
+    .map((row, i) => ({ row, i }))
+    .sort((a, b) => (mistakesFirst ? rank[a.row.grade] - rank[b.row.grade] : 0) || a.i - b.i)
+    .map(({ row }) => row);
   return (
     <ol className={r.debrief}>
       {rows.map(({ step, resolution, grade, redFlags }) => {

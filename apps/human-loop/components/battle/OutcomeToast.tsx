@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { ChevronRight, CircleCheck, Info, OctagonAlert, TriangleAlert, X } from "lucide-react";
+import { CircleCheck, Info, OctagonAlert, TriangleAlert, X } from "lucide-react";
 import type { ToastSpec } from "@/lib/game/useBattle";
 import s from "./battle.module.css";
 
@@ -9,7 +9,10 @@ export interface ActiveToast extends ToastSpec {
   id: number;
   /** Auto-dismiss time, used for the countdown bar. */
   ms: number;
-  /** Replaces the close button with a labelled "next" button (agent turn). */
+  /**
+   * Agent turn: the label of the main button that advances ("Next", "Next turn"...). The toast
+   * itself then has no button: the one advance control sits in the thumb zone, where Approve was.
+   */
   nextLabel?: string;
 }
 
@@ -33,9 +36,8 @@ const TONE_ICON = {
  * The outcome of the last action ("Caught! …", "Oops. …"). Visual only: the same text goes to
  * the BattleLog live region, so screen readers hear it once.
  *
- * The wrapper and its button persist between agent beats (only the text changes), so keyboard
- * focus on "Next" survives each beat. Agent beats ("Next" button) never time out; other toasts
- * show a countdown that pauses while held (`paused`).
+ * Agent beats never time out: the main button ("Next") advances them. Other toasts show a
+ * countdown that pauses while held (`paused`).
  */
 export function OutcomeToast({
   toast,
@@ -54,7 +56,7 @@ export function OutcomeToast({
   return (
     <div className={s.toastWrap}>
       <div
-        className={`${s.toast} ${TONE_CLASS[toast.tone]} ${toast.nextLabel ? s.toastHasNext : ""} ${paused ? s.toastPaused : ""}`}
+        className={`${s.toast} ${TONE_CLASS[toast.tone]} ${paused ? s.toastPaused : ""}`}
         data-toast={toast.tone}
         style={{ "--ms": `${toast.ms}ms` } as CSSProperties}
         onPointerEnter={() => onHold?.(true)}
@@ -74,12 +76,7 @@ export function OutcomeToast({
           </p>
           <p className={s.toastText}>{toast.text}</p>
         </div>
-        {toast.nextLabel ? (
-          <button type="button" className={`${s.toastBtn} ${s.toastBtnStrong}`} onClick={onDismiss}>
-            {toast.nextLabel}
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
-          </button>
-        ) : (
+        {toast.nextLabel ? null : (
           <button type="button" className={s.toastBtn} onClick={onDismiss} aria-label="Dismiss message">
             <X className="h-5 w-5" aria-hidden="true" />
           </button>

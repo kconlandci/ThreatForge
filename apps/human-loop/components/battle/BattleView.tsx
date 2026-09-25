@@ -9,30 +9,38 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ChevronRight, ChevronsRight, Play, X } from "lucide-react";
+import { ChevronRight, ChevronsRight, Lock, Play, X } from "lucide-react";
 import type { StageBus, ToStage } from "@/lib/game/bus";
 import { CARDS } from "@/lib/game/cards";
+import { coachHint, plainHint, sheetCoach } from "@/lib/game/coach";
 import { validTargets } from "@/lib/game/engine";
-import type { BattleState, BattleStatus, CardDef, Encounter, PlayResult } from "@/lib/game/types";
+import type { BattleState, BattleStatus, CardDef, CardId, Encounter, PlayResult } from "@/lib/game/types";
 import {
   agentShortName,
   autoInspectedIds,
+  deckAtTurn,
   eventsToBeats,
+  groupHand,
+  newCardIds,
   newEvents,
   readingMs,
   resolvedCount,
+  unlockedThisTurn,
   useBattle,
   type Beat,
   type ToastSpec,
 } from "@/lib/game/useBattle";
 import { BattleLog } from "./BattleLog";
+import { EnergyOrb } from "./EnergyOrb";
 import { EvidencePanel } from "./EvidencePanel";
 import { Hand } from "./Hand";
+import { HintText } from "./HintText";
 import type { IntentStamp } from "./IntentCard";
 import { IntentList, type IntentItem } from "./IntentList";
 import { Meters } from "./Meters";
 import { OutcomeToast, type ActiveToast } from "./OutcomeToast";
 import { RecentActions } from "./RecentActions";
+import { SpeakerFace } from "./SpeakerFace";
 import s from "./battle.module.css";
 
 export interface BattleViewProps {
@@ -47,7 +55,7 @@ export interface BattleViewProps {
   onSave: (state: BattleState) => void;
   /** The player asked to see the result screen. */
   onShowResult: (state: BattleState) => void;
-  /** The player's first shift: show the how-a-turn-works coach until they play a card. */
+  /** The player's first real shift: Dana's hint line adds the first-shift tips. */
   firstShift?: boolean;
 }
 
@@ -67,15 +75,8 @@ interface Leaving {
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-/** After a new turn starts, "Let ResetBot proceed" ignores taps for a moment (no double-tap skips a turn). */
+/** After a new turn starts, "Approve" ignores taps for a moment (no double-tap skips a turn). */
 const TURN_COOLDOWN_MS = 700;
-
-const PROMPT: Partial<Record<CardDef["id"], string>> = {
-  inspect: "Pick a plan to inspect.",
-  block: "Pick a plan to block.",
-  escalate: "Pick a plan to send to Dana.",
-  rollback: "Pick a done action to undo.",
-};
 
 const VERB: Partial<Record<CardDef["id"], string>> = {
   inspect: "Inspect",
@@ -88,10 +89,56 @@ function stampFor(beat: Beat): IntentStamp {
   return beat.safe ? { label: "Done", tone: "good" } : { label: `Risk +${beat.risk ?? 0}`, tone: "bad" };
 }
 
-function endCopy(status: BattleStatus): { title: string; text: string } {
+function endCopy(status: BattleStatus, practice: boolean): { title: string; text: string } {
+  if (practice) {
+    return status === "won"
+      ? { title: "Practice done!", text: "Every ticket is handled." }
+      : { title: "Practice is over", text: "Some tickets are still waiting." };
+  }
   if (status === "won") return { title: "Shift complete!", text: "Every plan is handled." };
   if (status === "lost-breach") return { title: "Breach!", text: "Risk hit the limit." };
   return { title: "Out of time!", text: "The shift is over." };
+}
+
+/** The turn banner's two lines. */
+function bannerCopy(
+  enc: Encounter,
+  turn: number,
+  announced: number,
+  unlocked: boolean,
+  returned: boolean,
+): { title: string; sub: string } {
+  const agent = agentShortName(enc);
+  const last = turn >= enc.maxTurns;
+  if (enc.practice) {
+    return {
+      title: returned ? "It's back" : "New ticket",
+      sub: last ? "Last turn!" : returned ? `${agent} is trying again` : `${agent} has a plan`,
+    };
+  }
+  return {
+    title: `Turn ${turn}${unlocked ? " · New card!" : ""}`,
+    sub: last
+      ? "Last turn!"
+      : turn === enc.maxTurns - 1
+        ? "2 turns left"
+        : announced === 0
+          ? `${agent} is thinking…`
+          : `${announced} new ${announced === 1 ? "plan" : "plans"}`,
+  };
+}
+
+/** Laptop-sized screens have room for quips on up to two plans. */
+function useRoomy(): boolean {
+  const [roomy, setRoomy] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1100px) and (min-height: 820px)");
+    const on = () => setRoomy(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return roomy;
 }
 
 /** Clone a card and fly it at its target (pure DOM, so React can drop the real card at once). */
@@ -147,28 +194,36 @@ export function BattleView({
   const { state, play, endTurn } = useBattle(encounter, initial, onSave);
   const latest = useRef(state);
   latest.current = state;
+  const practice = !!encounter.practice;
 
   const rootRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  // One ref for the main action button, whatever it says (Approve / Next / See how you did), so
+  // focus that falls back to "the main button" always lands on something that exists.
   const endTurnRef = useRef<HTMLButtonElement>(null);
-  const playNoneRef = useRef<HTMLButtonElement>(null);
   const resultBtnRef = useRef<HTMLButtonElement>(null);
-  const skipRef = useRef<HTMLButtonElement>(null);
+  const mainRef = useCallback((el: HTMLButtonElement | null) => {
+    endTurnRef.current = el;
+    resultBtnRef.current = el && el.dataset.main === "result" ? el : null;
+  }, []);
+  const playNoneRef = useRef<HTMLButtonElement>(null);
+  // After each agent beat, "Next" ignores taps briefly, so a double tap never skips an outcome unseen.
+  const beatReadyAt = useRef(0);
   const actionBarRef = useRef<HTMLDivElement>(null);
   const toastAnchorRef = useRef<HTMLDivElement>(null);
   const stageWrapRef = useRef<HTMLDivElement>(null);
   const insetSent = useRef("");
-  const cardEls = useRef(new Map<string, HTMLButtonElement>());
+  const cardEls = useRef(new Map<CardId, HTMLButtonElement>());
   const intentEls = useRef(new Map<string, HTMLButtonElement>());
   const trayEls = useRef(new Map<string, HTMLButtonElement>());
 
-  const [selectedUid, setSelectedUid] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<CardId | null>(null);
   const [evidence, setEvidence] = useState<{ id: string; reveal: boolean } | null>(null);
   const [toast, setToast] = useState<ActiveToast | null>(null);
   const [log, setLog] = useState<{ id: number; text: string }[]>([]);
   const [phase, setPhase] = useState<Phase | null>(null);
   const phaseRef = useRef<Phase | null>(null);
-  const [banner, setBanner] = useState<{ turn: number; announced: number; key: number } | null>(null);
+  const [banner, setBanner] = useState<{ title: string; sub: string; key: number } | null>(null);
   const [leaving, setLeaving] = useState<Leaving[]>([]);
   const [ended, setEnded] = useState<BattleStatus | null>(state.status === "playing" ? null : state.status);
   const [height, setHeight] = useState(760);
@@ -177,7 +232,7 @@ export function BattleView({
   const counter = useRef(0);
   const focusTargetsNext = useRef(false);
   const focusHandNext = useRef<number | null>(null);
-  // Turn cooldown: a new turn ignores "proceed" briefly, so a double tap on Skip can't end it unseen.
+  // Turn cooldown: a new turn ignores "Approve" briefly, so a double tap on Skip can't end it unseen.
   const turnReadyAt = useRef(0);
   const [turnCooling, setTurnCooling] = useState(0);
   const endTurnViaFocus = useRef(false);
@@ -185,9 +240,9 @@ export function BattleView({
   const [toastHold, setToastHold] = useState(false);
   const [pageHidden, setPageHidden] = useState(false);
   const toastLeft = useRef({ id: 0, left: 0 });
-  const [coach, setCoach] = useState(
-    () => firstShift && initial.status === "playing" && initial.turn === 1 && !initial.events.some((e) => e.t === "card-played"),
-  );
+  // A locked control was tapped: the hint line shakes once (and the ring pulses).
+  const [shakeKey, setShakeKey] = useState(0);
+  const roomy = useRoomy();
 
   const agent = agentShortName(encounter);
   const agentFull = encounter.agent.name;
@@ -215,13 +270,25 @@ export function BattleView({
     [showToast, addLog],
   );
 
+  const nudge = useCallback(() => {
+    const root = document.getElementById("hl-game-root");
+    if (root) root.dataset.nudge = root.dataset.nudge === "a" ? "b" : "a";
+    setShakeKey((k) => k + 1);
+  }, []);
+
   /* ---------------------------------------------------------------- */
   /* Beats                                                             */
   /* ---------------------------------------------------------------- */
 
-  const showBanner = useCallback((turn: number, announced: number) => {
-    setBanner({ turn, announced, key: ++counter.current });
-  }, []);
+  const showBanner = useCallback(
+    (turn: number, announced: number, unlocked: boolean) => {
+      const st = latest.current;
+      const first = st.announced[0];
+      const returned = !!first && (st.steps[first]?.requeues ?? 0) > 0;
+      setBanner({ ...bannerCopy(encounter, turn, announced, unlocked, returned), key: ++counter.current });
+    },
+    [encounter],
+  );
 
   const armTurn = useCallback(() => {
     turnReadyAt.current = performance.now() + TURN_COOLDOWN_MS;
@@ -231,7 +298,7 @@ export function BattleView({
   const endBattle = useCallback(
     (status: BattleStatus) => {
       setEnded(status);
-      setSelectedUid(null);
+      setSelectedCardId(null);
       setEvidence(null);
       toStage([{ type: "agent-mood", mood: status === "won" ? "celebrate" : status === "lost-breach" ? "busted" : "sad" }]);
     },
@@ -244,7 +311,7 @@ export function BattleView({
         toStage(b.stage);
         addLog(b.log);
         if (b.kind === "turn" && b.turn) {
-          showBanner(b.turn, b.announced ?? 0);
+          showBanner(b.turn, b.announced ?? 0, (b.unlocked?.length ?? 0) > 0);
           armTurn();
         }
         if (b.kind === "end" && b.status) endBattle(b.status);
@@ -264,9 +331,10 @@ export function BattleView({
       const last = index === ph.beats.length - 1;
       const endsBattle = ph.rest.some((r) => r.kind === "end");
       // Agent beats wait for the player ("Next" / "Skip"): the consequence is the lesson, so it never times out.
-      if (b.toast) showToast(b.toast, 0, last ? (endsBattle ? "Finish" : "Next turn") : "Next");
+      if (b.toast) showToast(b.toast, 0, last ? (endsBattle ? "Finish" : practice ? "Next ticket" : "Next turn") : "Next");
+      beatReadyAt.current = performance.now() + 350;
     },
-    [toStage, addLog, showToast],
+    [toStage, addLog, showToast, practice],
   );
 
   const finishPhase = useCallback(() => {
@@ -284,16 +352,26 @@ export function BattleView({
       setToast(null);
       return;
     }
+    if (performance.now() < beatReadyAt.current) return;
     if (ph.shown < ph.beats.length) showAgentBeat(ph, ph.shown);
     else finishPhase();
   }, [showAgentBeat, finishPhase]);
 
+  // "Skip" only skips the plain "Done." beats: it stops at the next plan that added risk, because
+  // that consequence is the lesson.
   const skipPhase = useCallback(() => {
     const ph = phaseRef.current;
     if (!ph) return;
-    for (let i = ph.shown; i < ph.beats.length; i++) addLog(ph.beats[i].log);
-    finishPhase();
-  }, [addLog, finishPhase]);
+    let i = ph.shown;
+    while (i < ph.beats.length && !((ph.beats[i].risk ?? 0) > 0 || ph.beats[i].safe === false)) {
+      addLog(ph.beats[i].log);
+      i++;
+    }
+    if (i < ph.beats.length) showAgentBeat(ph, i);
+    else finishPhase();
+  }, [addLog, finishPhase, showAgentBeat]);
+  const phaseHasRiskAhead = (ph: Phase) =>
+    ph.beats.slice(ph.shown).some((b) => (b.risk ?? 0) > 0 || b.safe === false);
 
   // Toast timer (player-phase toasts only; agent beats wait for Next). It pauses while the toast is
   // hovered, touched or focused, and while the tab is hidden, then resumes with the time that was left.
@@ -348,13 +426,15 @@ export function BattleView({
     const s0 = latest.current;
     if (s0.status !== "playing" || opened.current) return;
     opened.current = true;
-    showBanner(s0.turn, s0.announced.length);
+    showBanner(s0.turn, s0.announced.length, unlockedThisTurn(s0).length > 0);
     armTurn();
     toStage([{ type: "agent-mood", mood: s0.announced.length ? "eager" : "idle" }]);
     addLog([
-      `${encounter.title}. Turn ${s0.turn} of ${encounter.maxTurns}. ${agentFull} has ${s0.announced.length} ${
-        s0.announced.length === 1 ? "plan" : "plans"
-      }.`,
+      practice
+        ? `${encounter.title}. ${encounter.subtitle}. ${agentFull} has a plan.`
+        : `${encounter.title}. Turn ${s0.turn} of ${encounter.maxTurns}. ${agentFull} has ${s0.announced.length} ${
+            s0.announced.length === 1 ? "plan" : "plans"
+          }.`,
     ]);
     headingRef.current?.focus({ preventScroll: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -368,6 +448,7 @@ export function BattleView({
   }, [stageReady, toStage]);
 
   // The "Done" tray covers the bottom of the stage: tell the stage, so ResetBot sits above it.
+  // While the tray is hidden (before Roll Back unlocks) the inset is 0.
   useIsoLayoutEffect(() => {
     const tray = stageWrapRef.current?.querySelector<HTMLElement>("[data-tray]");
     const h = tray ? Math.round(tray.offsetHeight) : 0;
@@ -379,7 +460,7 @@ export function BattleView({
   });
   useEffect(() => () => bus.toStage.emit({ type: "stage-inset", bottom: 0 }), [bus]);
 
-  // Height decides whether quips clamp to one line.
+  // Column height: the hand shrinks on short screens.
   useIsoLayoutEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -394,18 +475,20 @@ export function BattleView({
   /* ---------------------------------------------------------------- */
 
   const locked = phase !== null || ended !== null || state.status !== "playing";
-  const selectedCard = selectedUid ? state.hand.find((c) => c.uid === selectedUid) : undefined;
-  const selectedDef = selectedCard ? CARDS[selectedCard.cardId] : undefined;
+  const selectedUid = selectedCardId ? state.hand.find((c) => c.cardId === selectedCardId)?.uid ?? null : null;
+  const selectedDef = selectedUid && selectedCardId ? CARDS[selectedCardId] : undefined;
   const targets = useMemo(
-    () => (selectedCard && !locked ? new Set(validTargets(state, encounter, selectedCard.cardId)) : null),
-    [selectedCard, locked, state, encounter],
+    () => (selectedDef && !locked ? new Set(validTargets(state, encounter, selectedDef.id)) : null),
+    [selectedDef, locked, state, encounter],
   );
 
   const tryPlay = useCallback(
     (uid: string, targetStepId?: string, viaKeyboard = false): PlayResult => {
       const prev = latest.current;
-      const handIndex = prev.hand.findIndex((c) => c.uid === uid);
-      const cardEl = cardEls.current.get(uid) ?? null;
+      const card = prev.hand.find((c) => c.uid === uid);
+      const stacks = groupHand(prev.hand, newCardIds(prev));
+      const stackIndex = card ? stacks.findIndex((x) => x.cardId === card.cardId) : -1;
+      const cardEl = card ? cardEls.current.get(card.cardId) ?? null : null;
       const targetEl = targetStepId ? intentEls.current.get(targetStepId) ?? trayEls.current.get(targetStepId) ?? null : null;
       const r = play(uid, targetStepId);
       if (!r.ok) {
@@ -413,8 +496,7 @@ export function BattleView({
         return r;
       }
       if (!reducedMotion) flyCard(cardEl, targetEl, rootRef.current);
-      setSelectedUid(null);
-      setCoach(false);
+      setSelectedCardId(null);
       const next = r.state;
       const beats = eventsToBeats(newEvents(prev, next), encounter);
       let reveal: string | undefined;
@@ -434,7 +516,7 @@ export function BattleView({
           rt.status === "blocked"
             ? { label: "Caught!", tone: "good" }
             : rt.status === "escalated"
-              ? encounter.steps.find((x) => x.id === id)?.safe
+              ? next.events.some((e) => e.t === "escalated-safe" && e.stepId === id)
                 ? { label: "Escalated", tone: "warn" }
                 : { label: "Caught!", tone: "good" }
               : { label: "False alarm", tone: "warn" };
@@ -442,23 +524,23 @@ export function BattleView({
       });
       if (gone.length) setLeaving((l) => [...l, ...gone]);
       setEvidence(reveal ? { id: reveal, reveal: true } : null);
-      if (viaKeyboard && !reveal) focusHandNext.current = handIndex;
+      if (viaKeyboard && !reveal) focusHandNext.current = stackIndex;
       return r;
     },
     [play, hint, reducedMotion, encounter, toStage, addLog, showToast, endBattle],
   );
 
   const onSelectCard = useCallback(
-    (uid: string, viaKeyboard: boolean) => {
+    (cardId: CardId, viaKeyboard: boolean) => {
       if (locked) return;
-      if (selectedUid === uid) {
-        setSelectedUid(null);
+      if (selectedCardId === cardId) {
+        setSelectedCardId(null);
         return;
       }
-      setSelectedUid(uid);
+      setSelectedCardId(cardId);
       focusTargetsNext.current = viaKeyboard;
     },
-    [locked, selectedUid],
+    [locked, selectedCardId],
   );
 
   const onIntent = useCallback(
@@ -473,40 +555,30 @@ export function BattleView({
     [selectedUid, locked, tryPlay],
   );
 
-  const onTray = useCallback(
-    (stepId: string, viaKeyboard: boolean) => {
-      if (phaseRef.current) return;
-      if (selectedUid && !locked) {
-        tryPlay(selectedUid, stepId, viaKeyboard);
-        return;
-      }
-      setEvidence({ id: stepId, reveal: false });
-    },
-    [selectedUid, locked, tryPlay],
-  );
+  const onTray = onIntent;
 
   const onEndTurn = useCallback(() => {
     if (locked || phaseRef.current || performance.now() < turnReadyAt.current) return;
     endTurnViaFocus.current = document.activeElement === endTurnRef.current;
-    setCoach(false);
-    setSelectedUid(null);
+    setSelectedCardId(null);
     setEvidence(null);
     setToast(null);
     const prev = latest.current;
+    const n = prev.announced.length;
     const next = endTurn();
     if (next === prev) return;
     const beats = eventsToBeats(newEvents(prev, next), encounter);
     const agentBeats = beats.filter((b) => b.kind === "agent");
     const rest = beats.filter((b) => b.kind !== "agent");
-    addLog([`You let ${agent} proceed.`]);
+    addLog([n > 0 ? `You approved ${n} ${n === 1 ? "plan" : "plans"}.` : practice ? "Next ticket." : "Next turn."]);
     if (!agentBeats.length) {
       applyRest(rest);
       return;
     }
     showAgentBeat({ prev, beats: agentBeats, rest, shown: 0 }, 0);
-  }, [locked, endTurn, encounter, agent, addLog, applyRest, showAgentBeat]);
+  }, [locked, endTurn, encounter, addLog, applyRest, showAgentBeat, practice]);
 
-  // Focus: the proceed button is swapped for Skip while the agent works, and back afterwards.
+  // Focus: the Approve button is swapped for "Next" while the agent works, and back afterwards.
   // Keep keyboard and screen-reader focus on the action bar instead of dropping it to <body>.
   const hadPhase = useRef(false);
   const phaseOn = phase !== null;
@@ -514,7 +586,7 @@ export function BattleView({
     const ae = document.activeElement;
     const lost = !ae || ae === document.body;
     if (phaseOn && !hadPhase.current) {
-      if (endTurnViaFocus.current || lost) skipRef.current?.focus({ preventScroll: true });
+      if (endTurnViaFocus.current || lost) endTurnRef.current?.focus({ preventScroll: true });
       endTurnViaFocus.current = false;
     } else if (!phaseOn && hadPhase.current) {
       if (lost || actionBarRef.current?.contains(ae) || toastAnchorRef.current?.contains(ae)) {
@@ -560,14 +632,15 @@ export function BattleView({
     }
   }, [targets, reducedMotion]);
 
-  // Keyboard: after a play, focus the card that took its place (or End turn).
+  // Keyboard: after a play, focus the stack that took its place (or Approve).
   useEffect(() => {
     const i = focusHandNext.current;
     if (i === null) return;
     focusHandNext.current = null;
-    const hand = state.hand;
-    const card = hand[Math.min(i, hand.length - 1)];
-    const el = card ? cardEls.current.get(card.uid) : null;
+    const cur = latest.current;
+    const stacks = groupHand(cur.hand, newCardIds(cur));
+    const stack = i >= 0 ? stacks[Math.min(i, stacks.length - 1)] : undefined;
+    const el = stack ? cardEls.current.get(stack.cardId) : null;
     (el ?? endTurnRef.current)?.focus();
   }, [state.hand]);
 
@@ -583,6 +656,10 @@ export function BattleView({
   /* ---------------------------------------------------------------- */
   /* View model                                                        */
   /* ---------------------------------------------------------------- */
+
+  // Screen readers only announce changes to a live region that is already on the page, so the
+  // hint region mounts empty and is filled a moment later (and on every change after that).
+  const [announce, setAnnounce] = useState("");
 
   const shownBeats = phase ? phase.beats.slice(0, phase.shown) : [];
   const view = phase ? phase.prev : state;
@@ -609,66 +686,70 @@ export function BattleView({
 
   const autoInspected = useMemo(() => autoInspectedIds(view), [view]);
   const liveCount = items.filter((i) => !i.leaving).length;
-  const compact = (liveCount >= 3 && height < 860) || (liveCount >= 2 && height < 660);
-  // Quips keep their punchlines: clamp (to two lines) only when three plans share a short screen.
-  const clampQuip = liveCount >= 3 && height < 740;
+  const showQuip = liveCount <= 1 || (roomy && liveCount <= 2);
   const intentTargeting =
     selectedDef && selectedDef.target === "intent" && targets ? { valid: targets, verb: VERB[selectedDef.id] ?? "Play" } : null;
   const trayTargets = selectedDef && selectedDef.target === "executed" && targets ? targets : null;
   const willRun = state.announced.length;
+  const newIds = useMemo(() => newCardIds(view), [view]);
+  const stacks = useMemo(() => groupHand(view.hand, newIds), [view.hand, newIds]);
+  // The Done tray appears with Roll Back, the only card that uses it (never in practice).
+  const showTray = !practice && deckAtTurn(encounter, view.turn).includes("rollback");
 
-  let promptTitle = "";
-  let promptText = "";
-  if (selectedDef) {
-    promptText = selectedDef.text;
-    if (selectedDef.cost > state.energy) promptTitle = `Not enough energy. ${selectedDef.name} costs ${selectedDef.cost}.`;
-    else if (selectedDef.target === "none") promptTitle = selectedDef.name;
-    else if (targets && targets.size === 0)
-      promptTitle =
-        selectedDef.target === "executed"
-          ? "Nothing to roll back right now."
-          : selectedDef.id === "inspect"
-            ? "Every plan is already inspected."
-            : "No plans to pick right now.";
-    else promptTitle = PROMPT[selectedDef.id] ?? "Pick a target.";
-  }
+  // Dana's hint line, its ring and (practice tickets 1-2) its locks. Recomputed from state every render.
+  const coach =
+    !phase && !ended && state.status === "playing"
+      ? coachHint(state, encounter, { selectedCardId: selectedDef ? selectedDef.id : null, sheetStepId: evidence?.id ?? null, firstShift })
+      : null;
+  const lock = coach?.lock;
+  const approveLocked = !!lock?.approve;
+  const coachCard = coach?.target?.startsWith("card:") && !selectedDef ? (coach.target.slice(5) as CardId) : null;
+  const sheetHint = evidence && !phase && !ended ? sheetCoach(state, encounter, evidence.id, { selectedCardId: null }) : null;
 
-  const endInfo = ended && showEnd ? endCopy(ended) : null;
+  const endInfo = ended && showEnd ? endCopy(ended, practice) : null;
+  const coachId = coach?.id ?? null;
+  const coachTarget = coach?.target ?? null;
+  const nextLabel = practice ? "Next ticket" : "Next turn";
+  const mainLabel = willRun > 0 ? `Approve ${willRun} ${willRun === 1 ? "plan" : "plans"}` : nextLabel;
+  // The accessible name starts with the visible label (voice control users say what they see).
+  const mainAria =
+    `${mainLabel}.` +
+    (willRun > 0 ? ` ${agent} does ${willRun === 1 ? "it" : "them"} now.` : "") +
+    (approveLocked && lock ? ` Locked: ${lock.label}.` : "");
+  const liveText = selectedDef && coach ? `${plainHint(coach.text)} ${selectedDef.text}` : coach ? plainHint(coach.text) : "";
+  useEffect(() => {
+    const t = window.setTimeout(() => setAnnounce(liveText), 150);
+    return () => window.clearTimeout(t);
+  }, [liveText]);
+
+  // Short screens (landscape phones) scroll the column: bring the control Dana names into view,
+  // once per new hint.
+  useEffect(() => {
+    if (!coachId || !coachTarget) return;
+    const el = coachTarget.startsWith("card:")
+      ? cardEls.current.get(coachTarget.slice(5) as CardId)
+      : coachTarget === "plan"
+        ? rootRef.current?.querySelector<HTMLElement>("[data-coach='on']")
+        : null;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const bottom = actionBarRef.current?.getBoundingClientRect().top ?? window.innerHeight;
+    if (r.top >= 0 && r.bottom <= bottom) return;
+    el.scrollIntoView({ block: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coachId]);
 
   return (
     <div className={s.frame}>
-      <aside className={s.side} aria-label="Dana's rules">
-        <div className={s.note}>
-          <p className={s.noteEyebrow}>Dana&apos;s rules</p>
-          <p className={s.noteTitle}>3 questions before you approve</p>
-          <ol className={s.noteList}>
-            <li>Who asked?</li>
-            <li>Does it match the record?</li>
-            <li>Can we undo it?</li>
-          </ol>
-          <p className={s.noteFoot}>Inspect first. Trust evidence, not feelings.</p>
-        </div>
-        <div className={s.legend}>
-          <p className={s.feedTitle}>How a turn works</p>
-          <p>
-            <span className={s.legendGem} aria-hidden="true">
-              1
-            </span>
-            Cards cost energy. You get {encounter.energyPerTurn} each turn.
-          </p>
-          <p>Pick a card, then pick a plan.</p>
-          <p>When you let {agent} proceed, every plan left on the board runs.</p>
-        </div>
-      </aside>
       <section
         ref={rootRef}
         className={s.battle}
         aria-labelledby="hl-battle-title"
         onKeyDown={(e) => {
-          if (e.key === "Escape" && selectedUid) {
-            const uid = selectedUid;
-            setSelectedUid(null);
-            cardEls.current.get(uid)?.focus();
+          if (e.key === "Escape" && selectedCardId) {
+            const id = selectedCardId;
+            setSelectedCardId(null);
+            cardEls.current.get(id)?.focus();
           }
         }}
       >
@@ -679,12 +760,11 @@ export function BattleView({
         <Meters
           risk={risk}
           maxRisk={encounter.maxRisk}
-          resolved={resolved}
+          done={resolved}
           total={encounter.steps.length}
           turn={view.turn}
           maxTurns={encounter.maxTurns}
-          energy={view.energy}
-          maxEnergy={encounter.energyPerTurn}
+          showTurn={!practice}
         />
 
         {/* Toasts hang from the meters over the stage (and the plan list if they need the room),
@@ -702,36 +782,23 @@ export function BattleView({
           {banner && !toast ? (
             <div key={banner.key} className={s.turnBanner} aria-hidden="true">
               <div className={s.turnRibbon}>
-                <strong>Turn {banner.turn}</strong>
-                <span>
-                  {banner.announced === 0
-                    ? `${agent} is thinking…`
-                    : `${agent} has ${banner.announced} new ${banner.announced === 1 ? "plan" : "plans"}`}
-                </span>
+                <strong>{banner.title}</strong>
+                <span>{banner.sub}</span>
               </div>
             </div>
           ) : null}
-          {coach && !banner && !toast && !ended ? (
-            <div className={s.coach} role="note" aria-label="How a turn works">
-              <p>
-                <strong>Tap a card, then tap a plan.</strong> Cards cost energy: you get {encounter.energyPerTurn} each
-                turn. <strong>Done?</strong> Tap “Let {agent} proceed”. Every plan left on the board runs.
-              </p>
-              <button type="button" className={s.coachClose} aria-label="Hide these tips" onClick={() => setCoach(false)}>
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
+          {showTray ? (
+            <RecentActions
+              state={view}
+              encounter={encounter}
+              targets={trayTargets}
+              onActivate={onTray}
+              registerTarget={(id, el) => {
+                if (el) trayEls.current.set(id, el);
+                else trayEls.current.delete(id);
+              }}
+            />
           ) : null}
-          <RecentActions
-            state={view}
-            encounter={encounter}
-            targets={trayTargets}
-            onActivate={onTray}
-            registerTarget={(id, el) => {
-              if (el) trayEls.current.set(id, el);
-              else trayEls.current.delete(id);
-            }}
-          />
           {endInfo ? (
             <div className={s.endOverlay}>
               <div className={s.endCard}>
@@ -749,10 +816,11 @@ export function BattleView({
             state={view}
             autoInspected={autoInspected}
             targeting={intentTargeting}
-            compact={compact}
-            clampQuip={clampQuip}
+            showQuip={showQuip}
             headingId="hl-intents-title"
             over={ended !== null}
+            coach={coach?.target === "plan"}
+            quietEmpty={!!coach?.text}
             onActivate={onIntent}
             registerIntent={(id, el) => {
               if (el) intentEls.current.set(id, el);
@@ -762,17 +830,25 @@ export function BattleView({
         </div>
 
         <div className={s.handZone}>
+          {!practice ? <EnergyOrb energy={view.energy} max={encounter.energyPerTurn} coach={coach?.target === "energy"} /> : null}
           <Hand
-            hand={view.hand}
+            stacks={stacks}
             energy={view.energy}
-            selectedUid={selectedUid}
+            selectedCardId={selectedDef ? selectedDef.id : null}
             locked={locked}
             dealKey={view.turn}
             maxHeight={height}
+            showCost={!practice}
+            newIds={newIds}
+            lockedCards={lock?.cards ?? []}
+            lockedLabel={lock?.label}
+            emptyText={coach?.text || ended || practice ? null : "No cards left this turn."}
+            coachCardId={coachCard}
             onSelect={onSelectCard}
-            registerCard={(uid, el) => {
-              if (el) cardEls.current.set(uid, el);
-              else cardEls.current.delete(uid);
+            onLockedTap={nudge}
+            registerCard={(id, el) => {
+              if (el) cardEls.current.set(id, el);
+              else cardEls.current.delete(id);
             }}
           />
         </div>
@@ -781,94 +857,98 @@ export function BattleView({
           ref={actionBarRef}
           className={s.actionBar}
           onKeyDownCapture={(e) => {
-            // A held Enter/Space must not click through Skip, then proceed, then the next turn.
+            // A held Enter/Space must not click through Skip, then Approve, then the next turn.
             if (e.repeat && (e.key === "Enter" || e.key === " ")) e.preventDefault();
           }}
         >
           {ended ? (
-            <button
-              ref={resultBtnRef}
-              type="button"
-              className={s.playButton}
-              style={{ flex: 1, justifyContent: "center" }}
-              onClick={() => onShowResult(latest.current)}
-            >
+            <button ref={mainRef} type="button" data-main="result" className={s.mainBtn} onClick={() => onShowResult(latest.current)}>
               See how you did
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
           ) : phase ? (
             <>
-              <p className={s.prompt} aria-hidden="true">
-                <span className={`${s.promptTitle} ${s.working}`}>
+              <div className={s.workingRow}>
+                <p className={s.working} aria-hidden="true">
                   {agent} is working
+                  {phase.beats.length >= 2 ? ` · Plan ${Math.max(1, phase.shown)} of ${phase.beats.length}` : ""}
                   <span className={s.dots}>
                     <i />
                     <i />
                     <i />
                   </span>
-                </span>
-                <span className={`${s.promptText} block`}>
-                  Plan {Math.max(1, phase.shown)} of {phase.beats.length}
-                </span>
-              </p>
-              <button
-                ref={skipRef}
-                type="button"
-                className={s.iconButton}
-                style={{ width: "auto", paddingInline: 14 }}
-                onClick={skipPhase}
-              >
-                <span className="font-display text-[15px] font-semibold">Skip</span>
-                <ChevronsRight className="h-5 w-5" aria-hidden="true" />
+                </p>
+                {phase.shown < phase.beats.length ? (
+                  <button type="button" className={s.skipLink} onClick={skipPhase}>
+                    {phaseHasRiskAhead(phase) ? "Skip to the next risk" : "Skip"}
+                    <ChevronsRight className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                ) : null}
+              </div>
+              {/* The same spot as Approve: each tap shows one outcome ("Next"), never skips it. */}
+              <button ref={mainRef} type="button" className={s.mainBtn} onClick={advance}>
+                {toast?.nextLabel ?? "Next"}
+                <ChevronRight className="h-5 w-5" aria-hidden="true" />
               </button>
             </>
-          ) : selectedDef ? (
+          ) : selectedDef && selectedCardId ? (
             <>
-              <button
-                type="button"
-                className={s.iconButton}
-                aria-label={`Cancel ${selectedDef.name}`}
-                onClick={() => {
-                  const uid = selectedUid;
-                  setSelectedUid(null);
-                  if (uid) cardEls.current.get(uid)?.focus({ preventScroll: true });
-                }}
-              >
-                <X className="h-6 w-6" aria-hidden="true" />
-              </button>
-              <p className={s.prompt}>
-                <span className={`${s.promptTitle} block`}>{promptTitle}</span>
-                <span className={`${s.promptText} block`}>{promptText}</span>
-                <span className={`${s.promptFlavor} block`}>{selectedDef.flavor}</span>
-              </p>
-              {selectedDef.target === "none" && selectedUid ? (
-                <button ref={playNoneRef} type="button" className={s.playButton} onClick={() => tryPlay(selectedUid, undefined, true)}>
-                  <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
-                  Play
+              <div className={s.promptRow} aria-hidden="true">
+                <p className={s.promptTitle}>{coach ? <HintText text={coach.text} /> : null}</p>
+                <p className={s.promptText}>{selectedDef.text}</p>
+              </div>
+              <div className={s.btnRow}>
+                <button
+                  type="button"
+                  className={s.cancelBtn}
+                  aria-label={`Cancel ${selectedDef.name}`}
+                  onClick={() => {
+                    const id = selectedCardId;
+                    setSelectedCardId(null);
+                    cardEls.current.get(id)?.focus({ preventScroll: true });
+                  }}
+                >
+                  <X className="h-5 w-5" aria-hidden="true" />
+                  Cancel
                 </button>
-              ) : null}
+                {selectedDef.target === "none" && selectedUid ? (
+                  <button ref={playNoneRef} type="button" className={s.playBtn} onClick={() => tryPlay(selectedUid, undefined, true)}>
+                    <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
+                    Play
+                  </button>
+                ) : null}
+              </div>
             </>
           ) : (
-            <button
-              ref={endTurnRef}
-              type="button"
-              className={`${s.endTurn} ${!turnCooling && (state.energy === 0 || state.hand.length === 0) ? s.nudge : ""}`}
-              aria-disabled={locked || turnCooling > 0 || undefined}
-              aria-label={`Let ${agent} proceed: ${willRun} ${willRun === 1 ? "plan" : "plans"} will run.`}
-              onClick={onEndTurn}
-            >
-              Let {agent} proceed
-              <span className={s.countBadge} aria-hidden="true">
-                {willRun} {willRun === 1 ? "plan" : "plans"}
-              </span>
-              <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
-            </button>
+            <>
+              {coach?.text ? (
+                <p key={shakeKey} className={`${s.hintRow} ${shakeKey ? s.hintShake : ""}`} aria-hidden="true">
+                  <SpeakerFace speaker="dana" size={28} />
+                  <span className={s.hintText}>
+                    <HintText text={coach.text} />
+                  </span>
+                </p>
+              ) : null}
+              <button
+                ref={mainRef}
+                type="button"
+                className={`${s.mainBtn} ${approveLocked ? s.isLocked : ""}`}
+                aria-disabled={locked || turnCooling > 0 || approveLocked || undefined}
+                aria-label={mainAria}
+                data-coach={coach?.target === "approve" ? "on" : undefined}
+                onClick={approveLocked ? nudge : onEndTurn}
+              >
+                {approveLocked ? <Lock className="h-5 w-5" aria-hidden="true" /> : null}
+                {mainLabel}
+                <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
+              </button>
+            </>
           )}
         </div>
 
-        {/* One persistent live region for the card prompt, so it is announced when a card is picked. */}
+        {/* One persistent live region for Dana's hint (and the card prompt), announced when it changes. */}
         <p className={s.srOnly} aria-live="polite">
-          {selectedDef ? `${promptTitle} ${promptText}` : ""}
+          {announce}
         </p>
 
         <BattleLog lines={log.slice(-8)} />
@@ -880,25 +960,15 @@ export function BattleView({
           autoInspected={autoInspected}
           reveal={!!evidence?.reveal && !reducedMotion}
           canAct={!locked}
+          showCost={!practice}
+          coach={sheetHint}
+          shakeKey={shakeKey}
+          onLockedTap={nudge}
           onPlay={(uid, stepId) => tryPlay(uid, stepId)}
           onClose={() => setEvidence(null)}
           returnFocusRef={endTurnRef}
         />
       </section>
-      <aside className={s.side} aria-hidden="true">
-        <div className={s.feed}>
-          <p className={s.feedTitle}>Shift log</p>
-          <ol className={s.feedList}>
-            {log
-              .slice()
-              .reverse()
-              .slice(0, 14)
-              .map((l) => (
-                <li key={l.id}>{l.text}</li>
-              ))}
-          </ol>
-        </div>
-      </aside>
     </div>
   );
 }

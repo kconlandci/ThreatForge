@@ -16,15 +16,21 @@
   height: 100%;
   min-height: 0;
   width: 100%;
-  max-width: 540px;
+  max-width: 560px;
   background: var(--hl-paper);
+}
+
+@media (min-width: 1600px) {
+  .battle {
+    max-width: 600px;
+  }
 }
 
 .stageWrap {
   position: relative;
   flex: 1 1 0;
   min-height: 128px;
-  max-height: 40%;
+  max-height: 34%;
   overflow: hidden;
   background: #f6f9f9;
   border-block: 2px solid var(--hl-ink);
@@ -46,16 +52,20 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 16px 12px 10px;
+  /* 16px sides: room for the coach ring and its arrow. */
+  padding: 16px 16px 10px;
   scrollbar-width: thin;
 }
 
 .handZone {
   position: relative;
   flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
   /* Spare height (short plan lists) collects above the hand, so the hand stays at the bottom. */
   margin-top: auto;
-  padding: 22px 0 14px;
+  padding: 22px 10px 12px;
   z-index: 5;
 }
 
@@ -63,10 +73,11 @@
   position: relative;
   flex: none;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
-  min-height: 64px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  min-height: 72px;
+  padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
   border-top: 2px solid var(--hl-line);
   background: var(--hl-paper);
   z-index: 6;
@@ -86,206 +97,86 @@
   }
 }
 
-/* Desktop: the column sits between Dana's rules and the shift log. */
+/* Every width: one centered column, with the dotted page on both sides. */
 .frame {
   display: flex;
   justify-content: center;
-  gap: 28px;
   height: 100%;
   padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
-}
-
-.side {
-  display: none;
-}
-
-@media (min-width: 1100px) {
-  .side {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    width: 250px;
-    flex: none;
-    padding-top: 30px;
-  }
-}
-
-.note {
-  position: relative;
-  padding: 22px 18px 16px;
-  border: 2px solid var(--hl-ink);
-  border-radius: 6px 6px 18px 6px;
-  background: #fff4c7;
-  box-shadow: 0 4px 0 0 var(--hl-ink);
-  rotate: -2deg;
-}
-
-.note::before {
-  content: "";
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  width: 84px;
-  height: 22px;
-  margin-left: -42px;
-  background: rgb(15 106 97 / 0.35);
-  border: 1px solid rgb(15 106 97 / 0.4);
-  rotate: 3deg;
-}
-
-.noteEyebrow {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--hl-teal-dark);
-}
-
-.noteTitle {
-  margin-top: 4px;
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--hl-ink);
-}
-
-.noteList {
-  margin: 10px 0 0;
-  padding-left: 22px;
-  list-style: decimal;
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--hl-ink);
-}
-
-.noteFoot {
-  margin-top: 10px;
-  font-size: 14.5px;
-  font-style: italic;
-  color: var(--hl-ink-soft);
-}
-
-.legend {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
-  border: 2px solid var(--hl-line);
-  border-radius: 16px;
-  background: var(--hl-paper);
-  font-size: 15px;
-  line-height: 1.4;
-  color: var(--hl-ink-soft);
-}
-
-.legendGem {
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
-  vertical-align: -3px;
-  border-radius: 999px;
-  border: 2px solid var(--hl-ink);
-  background: var(--hl-orange);
-  color: var(--hl-ink);
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.feed {
-  min-height: 0;
-  max-height: calc(100% - 40px);
-  padding: 14px 16px;
-  border: 2px solid var(--hl-ink);
-  border-radius: 16px;
-  background: #13201f;
-  color: #d9f2ec;
-  box-shadow: 0 4px 0 0 var(--hl-ink);
-  overflow: hidden;
-}
-
-.feedTitle {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: inherit;
-  opacity: 0.85;
-  margin-bottom: 4px;
-}
-
-.legend .feedTitle {
-  color: var(--hl-teal);
-  opacity: 1;
-}
-
-.feedList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12.5px;
-  line-height: 1.45;
-}
-
-.feedList li {
-  padding-left: 12px;
-  border-left: 2px solid rgb(122 216 196 / 0.35);
-}
-
-.feedList li:first-child {
-  color: #fff;
-  border-left-color: #7ad8c4;
 }
 
 /* ------------------------------------------------------------------ */
 /* Meters                                                              */
 /* ------------------------------------------------------------------ */
 
-.meters {
+.hud {
   flex: none;
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 6px 12px;
-  align-items: end;
-  padding: 8px 12px 9px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 12px;
   background: var(--hl-paper);
 }
 
-.meter {
+.riskRow {
+  position: relative;
+  flex: 1;
   min-width: 0;
-}
-
-.meterHead {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--hl-ink);
-  line-height: 1.1;
-  margin-bottom: 4px;
+  align-items: center;
+  gap: 8px;
 }
 
-.meterValue {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+.riskLabel {
+  font-family: var(--font-display), system-ui, sans-serif;
   font-size: 14px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+.riskRow .meterTrack {
+  flex: 1;
+  min-width: 48px;
+}
+
+
+.hudRight {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.turnPill,
+.doneChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.turnPill {
+  background: var(--hl-ink);
+  color: #fff;
+}
+
+.doneChip {
+  border: 2px solid var(--hl-teal);
+  color: var(--hl-teal-dark);
+  background: var(--hl-teal-tint);
 }
 
 .meterTrack {
   position: relative;
-  height: 12px;
+  height: 14px;
   border: 2px solid var(--hl-ink);
   border-radius: 999px;
   background: var(--hl-paper-soft);
@@ -315,17 +206,11 @@
   background: var(--hl-danger);
 }
 
-.riskDanger .meterValue {
-  color: var(--hl-danger);
-}
 
-.progressFill {
-  background: var(--hl-teal);
-}
 
 .delta {
   position: absolute;
-  right: 44px;
+  right: 4px;
   top: -3px;
   padding: 1px 7px;
   border-radius: 999px;
@@ -367,28 +252,6 @@
   }
 }
 
-.meterSide {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
-}
-
-.turnChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: var(--hl-ink);
-  color: #fff;
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 12.5px;
-  font-weight: 600;
-  white-space: nowrap;
-  line-height: 1.5;
-}
-
 .shake {
   animation: shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
@@ -413,38 +276,44 @@
   }
 }
 
-/* Energy orbs */
-.orbs {
-  display: inline-flex;
+/* Energy: one orb at the left edge of the hand */
+.energy {
+  flex: none;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  align-self: center;
+  margin-right: 4px;
+  border-radius: 999px;
 }
 
-.orb {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  border: 2px solid var(--hl-ink);
-  background: var(--hl-paper);
+.energyOrb {
   display: grid;
   place-items: center;
-  transition: background-color 200ms, transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.orbFull {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 2px solid var(--hl-ink);
   background: var(--hl-orange);
-  box-shadow: inset 0 -3px 0 rgb(17 20 24 / 0.18), inset 0 2px 0 rgb(255 255 255 / 0.45);
+  color: var(--hl-ink);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 3px 0 0 var(--hl-ink), inset 0 -4px 0 rgb(17 20 24 / 0.16), inset 0 3px 0 rgb(255 255 255 / 0.4);
 }
 
-.orbSpent {
+.energyEmpty {
   background: var(--hl-paper-soft);
   border-style: dashed;
-  border-color: #8a949d;
-  transform: scale(0.86);
+  box-shadow: none;
 }
 
-.orbBonus {
-  background: var(--hl-orange);
+.energyLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hl-ink-soft);
 }
 
 /* ------------------------------------------------------------------ */
@@ -473,6 +342,7 @@
 
 .intentItem {
   position: relative;
+  border-radius: 16px;
 }
 
 .intentEnter {
@@ -494,10 +364,11 @@
 .intent {
   position: relative;
   display: flex;
+  align-items: center;
   gap: 10px;
   width: 100%;
-  min-height: 44px;
-  padding: 10px 12px 10px 10px;
+  min-height: 56px;
+  padding: 12px 12px 12px 14px;
   text-align: left;
   color: var(--hl-ink);
   background: var(--hl-paper);
@@ -577,30 +448,6 @@
   flex: 1;
 }
 
-.ticketRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  min-height: 20px;
-}
-
-.ticket {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12.5px;
-  color: var(--hl-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-
-.chips {
-  display: inline-flex;
-  flex: none;
-  gap: 4px;
-}
-
 .chip {
   display: inline-flex;
   align-items: center;
@@ -614,61 +461,59 @@
   white-space: nowrap;
 }
 
-.chipInspected {
-  background: var(--hl-teal-tint);
-  color: var(--hl-teal-dark);
-}
-
-.chipPolicy {
-  background: var(--hl-orange-tint);
-  color: var(--hl-orange-text);
-}
-
-.chipUnchecked {
-  color: var(--hl-muted);
-  box-shadow: inset 0 0 0 1.5px var(--hl-line);
+.chipChecked {
+  background: var(--hl-teal);
+  color: #fff;
 }
 
 .intentText {
-  display: block;
-  margin-top: 1px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  line-height: 1.22;
+  line-height: 1.25;
   letter-spacing: -0.005em;
 }
 
 .quip {
   display: block;
-  margin-top: 3px;
-  font-size: 14px;
+  margin-top: 4px;
+  font-size: 15px;
   font-style: italic;
   line-height: 1.35;
   color: var(--hl-ink-soft);
 }
 
-.intentCompact {
-  padding: 6px 10px;
+@media (min-width: 1100px) {
+  .intentText {
+    font-size: 18px;
+  }
 }
 
-.intentCompact .cat {
-  display: none;
+/* Plan status: not checked (dashed ring + magnifier), checked (teal disc + check or scroll). */
+.statusIcon {
+  flex: none;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
 }
 
-.intentCompact .intentText {
-  font-size: 15px;
+.statusOpen {
+  border: 2px dashed #8a949d;
+  color: var(--hl-muted);
+  background: var(--hl-paper);
 }
 
-.intentCompact .quip {
-  margin-top: 1px;
-}
-
-.quipClamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.statusDone {
+  border: 2px solid var(--hl-teal-dark);
+  background: var(--hl-teal);
+  color: #fff;
 }
 
 .targetable {
@@ -774,6 +619,8 @@
 /* ------------------------------------------------------------------ */
 
 .hand {
+  flex: 1;
+  min-width: 0;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -862,9 +709,9 @@
 }
 
 .card[aria-pressed="true"] {
-  translate: 0 -16px;
+  translate: 0 -18px;
   rotate: 0deg;
-  scale: 1.07;
+  scale: 1.12;
   box-shadow: 0 4px 0 0 var(--hl-ink), 0 0 0 4px var(--hl-teal), 0 24px 30px -12px rgb(17 20 24 / 0.5);
 }
 
@@ -910,13 +757,6 @@
 
 .covered .oneUse {
   right: calc(var(--ov, 0px) + 3px);
-}
-
-/* The card right under the lifted (selected) card: show a plain edge, not slivers of shifted text. */
-.buried .cardBand,
-.buried .cardRules,
-.buried .cardArt > * {
-  visibility: hidden;
 }
 
 .gem {
@@ -1003,103 +843,209 @@
   opacity: 0.7;
 }
 
+/* No rules text (4+ stacks): the art fills the card. */
+.cardNoRules .cardArt {
+  flex: 1;
+  border-bottom: 0;
+  border-radius: 0 0 calc(var(--cw, 96px) * 0.1) calc(var(--cw, 96px) * 0.1);
+}
+
+.cardNoRules .cardArt svg {
+  width: calc(var(--cw, 96px) * 0.4);
+  height: calc(var(--cw, 96px) * 0.4);
+}
+
+/* Without a cost gem the name band needs no room for it. */
+.cardBandNoGem {
+  padding-top: 2px;
+}
+
+/* A stack of copies: an offset card edge behind, and a ×n badge. */
+.stackEdge {
+  position: absolute;
+  inset: 0;
+  width: var(--cw, 96px);
+  height: calc(var(--cw, 96px) * 1.42);
+  border: 2px solid var(--hl-ink);
+  border-radius: calc(var(--cw, 96px) * 0.12);
+  background: var(--hl-teal-tint);
+  translate: 5px calc(var(--arc, 0px) - 5px);
+  rotate: calc(var(--rot, 0deg) + 3deg);
+  pointer-events: none;
+}
+
+.stackCount {
+  position: absolute;
+  right: calc(var(--cw, 96px) * -0.08);
+  bottom: calc(var(--cw, 96px) * -0.08);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 26px;
+  padding-inline: 6px;
+  border-radius: 999px;
+  border: 2px solid var(--hl-paper);
+  background: var(--hl-ink);
+  color: #fff;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.newRibbon {
+  position: absolute;
+  top: -22px;
+  right: calc(var(--cw, 96px) * -0.04);
+  z-index: 3;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 2px solid var(--hl-ink);
+  background: var(--hl-orange);
+  color: var(--hl-ink);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  rotate: 6deg;
+}
+
+/* Locked by the practice coach (focusable, names its reason). */
+.cardLocked {
+  cursor: not-allowed;
+}
+
+.cardLocked > :not(.lockGlyph) {
+  opacity: 0.45;
+}
+
+.cardLocked .cardArt {
+  opacity: 1;
+}
+
+.cardLocked .cardArt > svg {
+  opacity: 0.45;
+}
+
+.lockGlyph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.lockGlyph svg {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 6px;
+  border-radius: 999px;
+  border: 2px solid var(--hl-ink);
+  background: #fff;
+  color: var(--hl-ink);
+  filter: none !important;
+}
+
 /* ------------------------------------------------------------------ */
 /* Action bar                                                          */
 /* ------------------------------------------------------------------ */
 
-.endTurn {
-  flex: 1;
+/* Row 2: the one main button (ink, full width). */
+.mainBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 50px;
+  width: 100%;
+  min-height: 56px;
   padding: 6px 16px;
   border: 2px solid var(--hl-ink);
   border-radius: 14px;
   background: var(--hl-ink);
   color: #fff;
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   box-shadow: 0 4px 0 0 var(--hl-teal);
-  transition: transform 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms, opacity 150ms;
 }
 
-.endTurn:hover:not([aria-disabled="true"]) {
+@media (min-width: 1100px) {
+  .mainBtn {
+    min-height: 52px;
+  }
+}
+
+.mainBtn:hover:not([aria-disabled="true"]) {
   transform: translateY(-1px);
   box-shadow: 0 5px 0 0 var(--hl-teal);
   background: #1d2228;
 }
 
-.endTurn:active:not([aria-disabled="true"]) {
+.mainBtn:active:not([aria-disabled="true"]) {
   transform: translateY(3px);
   box-shadow: 0 1px 0 0 var(--hl-teal);
 }
 
-.endTurn[aria-disabled="true"] {
+.mainBtn[aria-disabled="true"] {
   cursor: default;
   background: var(--hl-ink-soft);
   box-shadow: 0 4px 0 0 var(--hl-line);
 }
 
-/* "3 plans": a neutral pill, so it never reads like an orange energy cost. */
-.countBadge {
-  display: inline-grid;
-  place-items: center;
-  height: 26px;
-  padding-inline: 8px;
-  border-radius: 999px;
-  border: 2px solid #fff;
-  background: #fff;
-  color: var(--hl-ink);
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
+
+
+/* Practice locks: dimmed with a lock, still focusable (aria-disabled, never disabled). */
+.isLocked,
+.mainBtn.isLocked[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.nudge {
-  animation: nudge 1.8s ease-in-out 1.2s infinite;
-}
-
-@keyframes nudge {
-  0%,
-  70%,
-  100% {
-    transform: none;
-  }
-  80% {
-    transform: translateY(-3px);
-  }
-  90% {
-    transform: translateY(1px);
-  }
-}
-
-.iconButton {
-  flex: none;
-  display: inline-flex;
+/* Row 1: Dana's hint line. */
+.hintRow {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: 48px;
-  height: 48px;
-  border: 2px solid var(--hl-ink);
-  border-radius: 14px;
-  background: var(--hl-paper);
+  gap: 8px;
+  min-height: 32px;
+  font-size: 15px;
+  line-height: 1.3;
   color: var(--hl-ink);
-  box-shadow: 0 3px 0 0 var(--hl-ink);
 }
 
-.iconButton:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 0 var(--hl-ink);
+.hintRow .face {
+  width: 28px;
+  height: 28px;
 }
 
-.prompt {
-  flex: 1;
+.hintText {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   min-width: 0;
-  line-height: 1.25;
+}
+
+.hintRow strong,
+.sheetHint strong,
+.promptTitle strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+}
+
+/* Room for the coach arrow between the hint and the button. */
+.hintRow + .mainBtn {
+  margin-top: 6px;
+}
+
+.hintShake {
+  animation: shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* A card is selected: what to do with it, then Cancel / Play. */
+.promptRow {
+  min-width: 0;
+  line-height: 1.3;
 }
 
 .promptTitle {
@@ -1110,35 +1056,43 @@
 }
 
 .promptText {
-  font-size: 14.5px;
+  font-size: 14px;
   color: var(--hl-ink-soft);
 }
 
-.promptFlavor {
-  font-size: 13px;
-  font-style: italic;
-  line-height: 1.25;
-  color: var(--hl-muted);
+.btnRow {
+  display: flex;
+  gap: 8px;
 }
 
-.playButton {
-  flex: none;
+.cancelBtn,
+.playBtn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  min-height: 48px;
+  min-height: 52px;
   padding: 6px 16px;
   border: 2px solid var(--hl-ink);
   border-radius: 14px;
-  background: var(--hl-orange);
-  color: var(--hl-ink);
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
+  color: var(--hl-ink);
   box-shadow: 0 4px 0 0 var(--hl-ink);
 }
 
-.playButton:active {
+.cancelBtn {
+  background: var(--hl-paper);
+}
+
+.playBtn {
+  background: var(--hl-orange);
+}
+
+.cancelBtn:active,
+.playBtn:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 0 var(--hl-ink);
 }
@@ -1147,6 +1101,38 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  font-size: 15px;
+  color: var(--hl-ink);
+}
+
+/* Agent turn, row 1: "ResetBot is working" and a small Skip link (row 2 is the Next button). */
+.workingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.skipLink {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hl-ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.skipLink:hover {
+  background: var(--hl-paper-soft);
+  color: var(--hl-ink);
 }
 
 .dots {
@@ -1234,18 +1220,6 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@media (max-width: 420px) {
-  .toastHasNext {
-    flex-wrap: wrap;
-  }
-  .toastHasNext .toastBody {
-    flex: 1 1 calc(100% - 46px);
-  }
-  .toastHasNext .toastBtnStrong {
-    margin-left: auto;
   }
 }
 
@@ -1363,14 +1337,6 @@
   font-size: 14px;
   font-weight: 700;
   color: inherit;
-}
-
-.toastBtnStrong {
-  border: 2px solid var(--hl-ink);
-  background: var(--hl-orange);
-  color: var(--hl-ink);
-  box-shadow: 0 3px 0 0 var(--hl-ink);
-  padding: 0 10px;
 }
 
 .toastTimer {
@@ -1716,7 +1682,7 @@
 
 .sheetFooter {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
   border-top: 2px solid var(--hl-line);
@@ -1744,8 +1710,8 @@
 
 .evTicket {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 13px;
-  color: var(--hl-muted);
+  font-size: 13.5px;
+  color: var(--hl-ink-soft);
 }
 
 .evTitle {
@@ -1941,26 +1907,42 @@
 .lockedMsg {
   position: absolute;
   inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+
+.lockedCard {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.96);
+  border: 2px solid var(--hl-ink);
+  box-shadow: 0 3px 0 0 var(--hl-ink);
   text-align: center;
+}
+
+.lockedText {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 15px;
   font-weight: 600;
   color: var(--hl-ink);
 }
 
-.lockedMsg > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: rgb(255 255 255 / 0.95);
-  border: 2px solid var(--hl-ink);
-  box-shadow: 0 3px 0 0 var(--hl-ink);
+.lockedSub {
+  font-size: 14px;
+  color: var(--hl-ink-soft);
+}
+
+.inspectBig {
+  min-width: 180px;
+  min-height: 52px;
+  font-size: 17px;
 }
 
 .actionBtn {
@@ -2001,17 +1983,6 @@
   color: #fff;
 }
 
-/* Inspect, already used: keeps its slot so the other buttons never move. */
-.actionDone,
-.actionDone[aria-disabled="true"] {
-  opacity: 1;
-  cursor: default;
-  background: var(--hl-teal-tint);
-  color: var(--hl-teal-dark);
-  box-shadow: none;
-  border-style: dashed;
-}
-
 .costPip {
   display: inline-grid;
   place-items: center;
@@ -2025,8 +1996,60 @@
   font-weight: 800;
 }
 
-.actionPrimary .costPip {
+.actionPrimary .costPip,
+.costPipLight {
   background: #fff;
+}
+
+/* Sheet footer: [Block] [Looks OK], equal width; Escalate as a text button below. */
+.footRow {
+  display: flex;
+  gap: 8px;
+}
+
+.footRow > .actionBtn {
+  flex: 1 1 0;
+}
+
+.escalateLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--hl-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.escalateLink:hover {
+  background: rgb(17 20 24 / 0.05);
+}
+
+.escalateLink[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Practice: Dana's hint inside the sheet, above its buttons. */
+.sheetHint {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--hl-ink);
+}
+
+.sheetHint .face {
+  width: 28px;
+  height: 28px;
 }
 
 .footNote {
@@ -2074,12 +2097,6 @@
 /* ------------------------------------------------------------------ */
 
 @media (max-height: 800px) {
-  .meters {
-    padding: 6px 12px 7px;
-  }
-  .meterHead {
-    margin-bottom: 3px;
-  }
   .stageWrap {
     min-height: 108px;
   }
@@ -2093,16 +2110,9 @@
     padding: 20px 0 11px;
   }
   .actionBar {
-    min-height: 58px;
+    gap: 6px;
     padding-top: 6px;
-    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-  }
-  .endTurn,
-  .playButton {
-    min-height: 46px;
-  }
-  .iconButton {
-    height: 46px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -2137,68 +2147,14 @@
     position: sticky;
     bottom: 0;
   }
-  .coach {
-    display: none;
+  /* Scrolled into view for Dana's hint: stop above the sticky action bar, not under it. */
+  .card,
+  .intentItem {
+    scroll-margin-block: 24px 140px;
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* First-shift coach (phones and tablets have no side panels)          */
-/* ------------------------------------------------------------------ */
-
-.coach {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  right: 10px;
-  z-index: 15;
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  max-width: 470px;
-  margin-inline: auto;
-  padding: 8px 4px 8px 12px;
-  border: 2px solid var(--hl-ink);
-  border-radius: 14px;
-  background: #fff4c7;
-  box-shadow: 0 3px 0 0 var(--hl-ink);
-  font-size: 14px;
-  line-height: 1.35;
-  color: var(--hl-ink);
-}
-
-.coach p {
-  flex: 1;
-  min-width: 0;
-}
-
-.coach strong {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 700;
-}
-
-.coachClose {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  margin: -4px 0;
-  border-radius: 10px;
-  color: var(--hl-ink);
-}
-
-.coachClose:hover {
-  background: rgb(17 20 24 / 0.08);
-}
-
-@media (min-width: 1100px) {
-  .coach {
-    display: none;
-  }
-}
-
-/* The 3 questions in the evidence sheet, where the side note is hidden (under 1100px). */
+/* The 3 questions in the evidence sheet (real shift, every width). */
 .evAsk {
   margin: 4px 0 12px;
   padding: 7px 10px;
@@ -2213,8 +2169,29 @@
   font-family: var(--font-display), system-ui, sans-serif;
 }
 
-@media (min-width: 1100px) {
-  .evAsk {
-    display: none;
+
+/* ------------------------------------------------------------------ */
+/* Tall laptop and desktop screens: the column grows with the screen   */
+/* height, and the extra room goes to bigger text, not blank page.     */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 1100px) and (min-height: 900px) {
+  .battle {
+    max-width: clamp(560px, 62vh, 720px);
+  }
+  .intentText {
+    font-size: clamp(18px, 1.9vh, 21px);
+  }
+  .quip {
+    font-size: clamp(15px, 1.6vh, 17px);
+  }
+  .hintRow,
+  .working {
+    font-size: clamp(15px, 1.65vh, 18px);
+  }
+  .riskLabel,
+  .turnPill,
+  .doneChip {
+    font-size: clamp(14px, 1.5vh, 16px);
   }
 }

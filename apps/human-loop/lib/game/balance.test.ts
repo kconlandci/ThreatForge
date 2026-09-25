@@ -15,7 +15,7 @@
 import { describe, expect, it } from "vitest";
 import { createBattle, endTurn, playCard, scoreBattle, validTargets } from "./engine";
 import { nextInt, seedState } from "./rng";
-import { HELP_DESK_ENCOUNTER } from "./content";
+import { HELP_DESK_ENCOUNTER, HELP_DESK_PRACTICE } from "./content";
 import type { AgentStep, BattleState, CardId, Encounter } from "./types";
 
 const SEEDS = 200;
@@ -243,5 +243,31 @@ describe(`balance: ${HELP_DESK_ENCOUNTER.id} over ${SEEDS} seeds`, () => {
     expect(results.careful.stars[3] / SEEDS).toBeGreaterThanOrEqual(0.4);
     expect(results.random.stars[3] / SEEDS).toBeLessThanOrEqual(0.05);
     expect(results.random.won / SEEDS).toBeLessThanOrEqual(0.5);
+  });
+});
+
+describe(`balance: ${HELP_DESK_PRACTICE.id} (practice) over ${SEEDS} seeds`, () => {
+  const enc = HELP_DESK_PRACTICE;
+  const results = {
+    yes: simulate(enc, () => yesBot),
+    "block-everything": simulate(enc, () => blockEverything),
+    careful: simulate(enc, () => careful),
+    perfect: simulate(enc, () => perfect),
+    gut: simulate(enc, () => gut),
+    random: simulate(enc, randomBot),
+  };
+
+  it("never ends in a breach, whatever the player does", () => {
+    for (const [name, r] of Object.entries(results)) expect(r.breach, name).toBe(0);
+  });
+
+  it("approving everything and the careful player always win", () => {
+    expect(results.yes.won).toBe(SEEDS);
+    expect(results.careful.won).toBe(SEEDS);
+    expect(results.perfect.won).toBe(SEEDS);
+  });
+
+  it("blocking everything never wins (blocked good work comes back)", () => {
+    expect(results["block-everything"].won).toBe(0);
   });
 });

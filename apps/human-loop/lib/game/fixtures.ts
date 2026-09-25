@@ -6,12 +6,36 @@
  * dev-only `?fixture=` switch on /play/help-desk (see components/game/GameShell.tsx).
  */
 import { CARDS } from "./cards";
-import { HELP_DESK_ENCOUNTER } from "./content";
+import { HELP_DESK_ENCOUNTER, HELP_DESK_PRACTICE } from "./content";
 import { createBattle, endTurn, playCard, validTargets } from "./engine";
 import type { BattleState, CardId, Encounter } from "./types";
 
-export type FixtureName = "start" | "mid" | "rollback" | "won" | "lost" | "timeout";
-export const FIXTURE_NAMES: FixtureName[] = ["start", "mid", "rollback", "won", "lost", "timeout"];
+export type FixtureName =
+  | "start"
+  | "mid"
+  | "rollback"
+  | "won"
+  | "lost"
+  | "timeout"
+  | "practice"
+  | "practice-t2"
+  | "practice-won";
+export const FIXTURE_NAMES: FixtureName[] = [
+  "start",
+  "mid",
+  "rollback",
+  "won",
+  "lost",
+  "timeout",
+  "practice",
+  "practice-t2",
+  "practice-won",
+];
+
+/** The encounter a fixture belongs to (the practice fixtures use the practice shift). */
+export function fixtureEncounter(name: FixtureName): Encounter {
+  return name.startsWith("practice") ? HELP_DESK_PRACTICE : HELP_DESK_ENCOUNTER;
+}
 
 type Policy = (s: BattleState, e: Encounter) => BattleState;
 
@@ -86,15 +110,22 @@ export function fixtureBattle(name: FixtureName, encounter: Encounter = HELP_DES
       return createBattle(e, 11);
     }
     case "rollback": {
-      // Something reversible and risky has executed, and Roll Back is in hand when possible.
+      // Turn 4 (Roll Back unlocks): something risky and reversible has executed, and Roll Back is in hand.
       for (let seed = 1; seed < 200; seed++) {
         let s = createBattle(e, seed);
-        s = endTurn(s, e);
-        s = endTurn(s, e);
-        if (s.status === "playing" && s.hand.some((c) => c.cardId === "rollback")) return s;
+        for (let i = 0; i < 3 && s.status === "playing"; i++) s = endTurn(s, e);
+        if (s.status === "playing" && s.turn >= 4 && s.hand.some((c) => c.cardId === "rollback")) return s;
       }
       return fixtureBattle("mid", e);
     }
+    case "practice":
+      return createBattle(HELP_DESK_PRACTICE, 1);
+    case "practice-t2": {
+      // Ticket 1 approved: ticket 2 (the phishing request) is on the board.
+      return endTurn(createBattle(HELP_DESK_PRACTICE, 1), HELP_DESK_PRACTICE);
+    }
+    case "practice-won":
+      return run(1, perfectTurn, HELP_DESK_PRACTICE);
     case "won":
       return search("won", perfectTurn, e);
     case "lost":

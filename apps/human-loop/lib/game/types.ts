@@ -107,7 +107,20 @@ export interface Encounter {
   actionsPerTurn: number[];
   steps: AgentStep[];
   starterDeck: CardId[];
-  outro: { win: DialogueLine[]; breach: DialogueLine[]; timeout: DialogueLine[] };
+  /**
+   * Cards added to the player's deck during the battle: on the start of `turn`, each listed card
+   * goes into the hand as a bonus (after the normal draw) and then stays in the deck.
+   */
+  unlocks?: { turn: number; cards: CardId[] }[];
+  /** A practice shift (read by the UI only): no stars, no stats, energy hidden. */
+  practice?: boolean;
+  outro: {
+    win: DialogueLine[];
+    breach: DialogueLine[];
+    timeout: DialogueLine[];
+    /** Optional: a win where risky plans got through (the practice result uses it). */
+    winWithMisses?: DialogueLine[];
+  };
   debrief: { skillTag: string; takeaway: string; careerInsight: string };
 }
 
@@ -145,6 +158,7 @@ export type BattleEvent =
   | { t: "rolled-back"; stepId: string; riskRemoved: number; progressRemoved: number }
   | { t: "power"; power: "callbackPolicy" }
   | { t: "draw"; count: number }
+  | { t: "unlock"; cardIds: CardId[] }
   | { t: "energy"; amount: number }
   | { t: "end"; status: BattleStatus };
 
@@ -214,6 +228,8 @@ export interface PathwayProgress {
   best: { stars: number; completedAt: string } | null;
   attempts: number;
   wins: number;
+  /** The practice shift was finished or skipped (see lib/client/save.ts practiceDone()). */
+  practiceDone?: boolean;
   history: {
     encounterId: string;
     status: BattleStatus;

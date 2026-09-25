@@ -12,28 +12,16 @@
   "setting": "You just joined the help desk at Fenwick IT Solutions. Fenwick runs IT support for small businesses like Harlow & Cole Wealth Partners and Bramwell Logistics. ResetBot 3000 works the ticket queue. It can reset, unlock, close, and email on its own. Your job: stay in the loop. Check what it plans to do, and stop the bad calls.",
   "intro": [
     {
-      "speaker": "narrator",
-      "text": "Fenwick IT Solutions. The ticket queue is already blinking."
-    },
-    {
       "speaker": "dana",
-      "text": "Morning. I'm Dana, the help desk manager. This is ResetBot. It works fast. You make sure it works right."
+      "text": "Practice is over. The real queue: ten plans, up to three at a time, six turns."
     },
     {
       "speaker": "agent",
-      "text": "HELLO, NEW HUMAN! Four tickets, ten brilliant plans, zero doubts. Let's get this reset started!"
+      "text": "And NEW CARDS! I'll hand them over one at a time. Like presents. Presents you have to read."
     },
     {
       "speaker": "dana",
-      "text": "Before it acts, it shows you its plan. Inspect the evidence. Block what's wrong. Not sure? Escalate it to me."
-    },
-    {
-      "speaker": "dana",
-      "text": "Tap a card, then tap a plan. When you let ResetBot proceed, every plan you didn't stop runs. Blocked good work goes back in line."
-    },
-    {
-      "speaker": "agent",
-      "text": "Also, the coffee machine is out of order. I reset it. It was running slow. Now it doesn't run at all. Very efficient!"
+      "text": "Same job. Inspect first. Block what's wrong. Approve the rest."
     }
   ],
   "maxRisk": 10,
@@ -412,12 +400,33 @@
     "inspect",
     "block",
     "block",
-    "block",
-    "escalate",
-    "escalate",
-    "rollback",
-    "policy-callback",
-    "coffee"
+    "block"
+  ],
+  "unlocks": [
+    {
+      "turn": 2,
+      "cards": [
+        "policy-callback"
+      ]
+    },
+    {
+      "turn": 3,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 4,
+      "cards": [
+        "rollback"
+      ]
+    },
+    {
+      "turn": 5,
+      "cards": [
+        "coffee"
+      ]
+    }
   ],
   "outro": {
     "win": [

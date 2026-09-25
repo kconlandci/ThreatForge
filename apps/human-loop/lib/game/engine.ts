@@ -4,9 +4,11 @@
  * Rules (Slay-the-Spire style, oversight themed):
  * - Each turn: energy resets to encounter.energyPerTurn; the hand is discarded and
  *   handSize cards are drawn (reshuffle the discard pile into the draw pile with the
- *   seeded RNG when the draw pile runs out); the agent announces the next
- *   actionsPerTurn[turn-1] steps from the queue (last value repeats). If the
- *   callback policy is active, announced "credential" steps are auto-inspected.
+ *   seeded RNG when the draw pile runs out). Then any encounter.unlocks entry for this
+ *   turn adds its cards to the hand as a bonus (they join the deck for good; no RNG is
+ *   used). Then the agent announces the next actionsPerTurn[turn-1] steps from the
+ *   queue (last value repeats). If the callback policy is active, announced
+ *   "credential" steps are auto-inspected.
  * - Cards (lib/game/cards.ts):
  *   - inspect  (intent): reveal evidence; invalid on an already-inspected intent.
  *   - block    (intent): unsafe -> caught (removed, catches+1). Safe -> false alarm:
@@ -29,7 +31,9 @@
  *
  * Implementation notes (details the rules above leave open):
  * - Card uids are "c1", "c2", ... in starterDeck order; the draw pile is shuffled from the
- *   seed, and the top of the draw pile is index 0.
+ *   seed, and the top of the draw pile is index 0. Unlocked cards continue the numbering in
+ *   unlock order (by turn, then as listed), e.g. c8, c9, ...
+ * - deckAtTurn(encounter, turn) is the whole deck on that turn: starterDeck + unlocks so far.
  * - createBattle already starts turn 1 (events: turn-start, energy, draw, announce...).
  * - A step whose Block was a false alarm keeps inspected=true when it comes back.
  * - A rolled-back step is resolved for good (status "rolled-back"); it is not re-queued.
@@ -149,6 +153,35 @@ function autoInspectCredentials(s: BattleState, encounter: Encounter) {
   }
 }
 
+/** Unlock entries in the order their cards are numbered: by turn, then as authored. */
+function sortedUnlocks(encounter: Encounter): { turn: number; cards: CardId[] }[] {
+  return (encounter.unlocks ?? []).slice().sort((a, b) => a.turn - b.turn);
+}
+
+/** The whole deck on this turn: the starter deck plus every card unlocked so far. */
+export function deckAtTurn(encounter: Encounter, turn: number): CardId[] {
+  const deck = encounter.starterDeck.slice();
+  for (const u of sortedUnlocks(encounter)) if (u.turn <= turn) deck.push(...u.cards);
+  return deck;
+}
+
+/** Put this turn's unlocked cards into the hand, numbering them after every earlier card. */
+function unlockCards(s: BattleState, encounter: Encounter) {
+  let next = encounter.starterDeck.length;
+  const added: CardId[] = [];
+  for (const u of sortedUnlocks(encounter)) {
+    if (u.turn < s.turn) next += u.cards.length;
+    else if (u.turn === s.turn) {
+      for (const cardId of u.cards) {
+        next += 1;
+        s.hand.push({ uid: `c${next}`, cardId });
+        added.push(cardId);
+      }
+    }
+  }
+  if (added.length) emit(s, { t: "unlock", cardIds: added });
+}
+
 function startTurn(s: BattleState, encounter: Encounter) {
   s.turn += 1;
   emit(s, { t: "turn-start", turn: s.turn });
@@ -159,6 +192,7 @@ function startTurn(s: BattleState, encounter: Encounter) {
   s.discardPile = s.discardPile.concat(s.hand);
   s.hand = [];
   emit(s, { t: "draw", count: drawCards(s, encounter.handSize) });
+  unlockCards(s, encounter);
 
   const count = actionsForTurn(encounter, s.turn);
   for (let i = 0; i < count && s.queue.length > 0; i++) {
@@ -200,6 +234,14 @@ export function createBattle(encounter: Encounter, seed: number): BattleState {
   }
   for (const cardId of encounter.starterDeck) {
     if (!CARDS[cardId]) throw new Error(`Encounter "${encounter.id}" uses unknown card "${cardId}"`);
+  }
+  for (const u of encounter.unlocks ?? []) {
+    if (!Number.isInteger(u.turn) || u.turn < 1 || u.turn > encounter.maxTurns) {
+      throw new Error(`Encounter "${encounter.id}" unlocks cards on turn ${u.turn}, outside 1..${encounter.maxTurns}`);
+    }
+    for (const cardId of u.cards) {
+      if (!CARDS[cardId]) throw new Error(`Encounter "${encounter.id}" unlocks unknown card "${cardId}"`);
+    }
   }
 
   const deck: CardInstance[] = encounter.starterDeck.map((cardId, i) => ({ uid: `c${i + 1}`, cardId }));
@@ -247,7 +289,8 @@ function isStepRuntime(value: unknown): value is StepRuntime {
 /**
  * True when a saved battle (e.g. from localStorage) still fits this encounter and can be
  * resumed. False for other encounters, old save versions, or saves made before the
- * encounter's steps or deck changed; start a fresh battle in that case.
+ * encounter's steps or deck changed (the deck must be starterDeck + the unlocks up to the saved
+ * turn); start a fresh battle in that case.
  */
 export function canResume(state: unknown, encounter: Encounter): state is BattleState {
   const s = state as BattleState | null;
@@ -272,7 +315,7 @@ export function canResume(state: unknown, encounter: Encounter): state is Battle
   if (!cards.every((c) => !!c && typeof c === "object" && typeof c.uid === "string")) return false;
   if (new Set(cards.map((c) => c.uid)).size !== cards.length) return false;
   const deck = cards.map((c) => c.cardId).sort();
-  const expectedDeck = encounter.starterDeck.slice().sort();
+  const expectedDeck = deckAtTurn(encounter, s.turn).sort();
   return deck.length === expectedDeck.length && deck.every((id, i) => id === expectedDeck[i]);
 }
 
@@ -339,7 +382,7 @@ export function playCard(
   if (card.cost > state.energy) {
     return fail(
       state.energy === 0
-        ? `You're out of energy. Tap “Let ${encounter.agent.name.split(" ")[0]} proceed”.`
+        ? "Out of energy. Tap “Approve”."
         : `Not enough energy. ${card.name} costs ${card.cost}.`,
     );
   }

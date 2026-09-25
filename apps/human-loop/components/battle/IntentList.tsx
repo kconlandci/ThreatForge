@@ -23,12 +23,15 @@ export interface IntentListProps {
   autoInspected: Set<string>;
   /** When a card that targets intents is selected. */
   targeting: { valid: Set<string>; verb: string } | null;
-  compact: boolean;
-  /** Clamp quips to two lines (three plans on a short screen). */
-  clampQuip?: boolean;
+  /** Show quips on the cards (one plan, or a roomy laptop screen). */
+  showQuip: boolean;
   headingId: string;
   /** The shift is over (changes the empty-list message). */
   over?: boolean;
+  /** The coach points at the plans. */
+  coach?: boolean;
+  /** Dana's hint line already says what to do: no empty-board sentence (one instruction per screen). */
+  quietEmpty?: boolean;
   onActivate: (stepId: string, viaKeyboard: boolean) => void;
   registerIntent: (stepId: string, el: HTMLButtonElement | null) => void;
 }
@@ -40,14 +43,17 @@ export function IntentList({
   state,
   autoInspected,
   targeting,
-  compact,
-  clampQuip = false,
+  showQuip,
   headingId,
   over = false,
+  coach = false,
+  quietEmpty = false,
   onActivate,
   registerIntent,
 }: IntentListProps) {
   const agent = encounter.agent.name;
+  const live = items.filter((i) => !i.leaving).length;
+  const next = encounter.practice ? "Next ticket" : "Next turn";
   let order = 0;
   let enter = 0;
   return (
@@ -56,14 +62,18 @@ export function IntentList({
         {agent}&apos;s plans this turn
       </h2>
       {items.length === 0 ? (
-        <p className={s.intentEmpty}>
-          <Coffee aria-hidden="true" className="h-5 w-5 flex-none text-teal" />
-          <span>
-            {over
-              ? "The shift is over. No more plans today."
-              : `${agent} has nothing planned right now. Tap “Let ${encounter.agent.name.split(" ")[0]} proceed” to see what it does next.`}
-          </span>
-        </p>
+        quietEmpty && !over ? null : (
+          <p className={s.intentEmpty}>
+            <Coffee aria-hidden="true" className="h-5 w-5 flex-none text-teal" />
+            <span>
+              {over
+                ? encounter.practice
+                  ? "Practice is over."
+                  : "The shift is over. No more plans today."
+                : `${agent.split(" ")[0]} has nothing planned right now. Tap “${next}”.`}
+            </span>
+          </p>
+        )
       ) : (
         <ul className={s.intentList} aria-labelledby={headingId}>
           {items.map((item, i) => {
@@ -72,24 +82,24 @@ export function IntentList({
             const rt = state.steps[item.stepId];
             if (!item.leaving) order += 1;
             const targetingState = targeting && !item.leaving ? (targeting.valid.has(item.stepId) ? "valid" : "invalid") : null;
+            const status = !rt?.inspected ? "unchecked" : autoInspected.has(item.stepId) ? "policy" : "checked";
             return (
               <IntentCard
                 key={`${item.stepId}-${item.keySuffix ?? ""}`}
                 ref={(el) => registerIntent(item.stepId, el)}
                 step={step}
-                order={item.leaving ? i + 1 : order}
-                inspected={!!rt?.inspected}
-                byPolicy={autoInspected.has(item.stepId)}
+                order={live >= 2 ? (item.leaving ? i + 1 : order) : null}
+                status={status}
+                showQuip={showQuip}
                 targeting={targetingState}
                 verb={targeting?.verb}
                 tail={i === 0}
-                compact={compact}
-                clampQuip={clampQuip}
                 running={item.running}
                 stamp={item.stamp}
                 leaving={item.leaving}
                 animateIn={item.animateIn}
                 enterIndex={item.animateIn ? enter++ : 0}
+                coach={coach && !item.leaving && (!targeting || targetingState === "valid")}
                 onActivate={(kb) => onActivate(item.stepId, kb)}
               />
             );

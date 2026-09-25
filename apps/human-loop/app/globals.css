@@ -328,3 +328,123 @@ section[id] {
     -webkit-appearance: auto;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Coach ring (components/battle): Dana's hint line names a control;   */
+/* that control gets data-coach="on". Decorative: the hint text itself  */
+/* is announced. #C2410C keeps 3:1 against white. Reduced motion (the  */
+/* media query above, or the game's .hl-rm) leaves a static ring.      */
+/* ------------------------------------------------------------------ */
+
+/* Dashed, so it never looks like the (solid) keyboard focus ring. */
+[data-coach="on"] {
+  position: relative;
+  outline: 3px dashed #c2410c;
+  outline-offset: 4px;
+  animation: hl-coach-glow 1.4s ease-in-out infinite;
+}
+
+/* A focused coached control keeps a visible focus style: a solid ink ring inside the coach ring. */
+[data-coach="on"]:focus-visible {
+  outline: 3px solid var(--hl-ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #fff, 0 0 0 8px #c2410c;
+}
+
+[data-coach="on"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 11px solid #c2410c;
+  translate: -50% 0;
+  pointer-events: none;
+  z-index: 50;
+  animation: hl-coach-arrow 1s ease-in-out infinite;
+}
+
+/* Plans: the arrow points in from the left edge. */
+[data-coach="on"][data-coach-arrow="side"]::after {
+  left: -4px;
+  top: 50%;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 11px solid #c2410c;
+  border-right: 0;
+  translate: -100% -50%;
+  animation-name: hl-coach-arrow-side;
+}
+
+/* A locked control was tapped: the ring pulses once more (the name alternates to restart it). */
+[data-nudge="a"] [data-coach="on"] {
+  animation: hl-coach-nudge-a 520ms ease-out, hl-coach-glow 1.4s ease-in-out 520ms infinite;
+}
+[data-nudge="b"] [data-coach="on"] {
+  animation: hl-coach-nudge-b 520ms ease-out, hl-coach-glow 1.4s ease-in-out 520ms infinite;
+}
+
+@keyframes hl-coach-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgb(242 107 29 / 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgb(242 107 29 / 0.75));
+  }
+}
+
+@keyframes hl-coach-arrow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes hl-coach-arrow-side {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes hl-coach-nudge-a {
+  0%,
+  100% {
+    outline-offset: 4px;
+  }
+  40% {
+    outline-offset: 10px;
+  }
+}
+
+@keyframes hl-coach-nudge-b {
+  0%,
+  100% {
+    outline-offset: 4px;
+  }
+  40% {
+    outline-offset: 10px;
+  }
+}
+
+.hl-rm [data-coach="on"],
+.hl-rm [data-coach="on"]::after {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-coach="on"],
+  [data-coach="on"]::after {
+    animation: none !important;
+  }
+}

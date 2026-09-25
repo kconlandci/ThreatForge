@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Building, Clock, RotateCcw, ShieldCheck, Star, TriangleAlert, X } from "lucide-react";
+import { Briefcase, Building, Check, Circle, Clock, RotateCcw, ShieldCheck, Star, TriangleAlert, X } from "lucide-react";
 import { buttonClass } from "@/components/site/ui";
-import { scoreBattle } from "@/lib/game/engine";
+import { blindBlocks, scoreBattle } from "@/lib/game/engine";
 import type { BattleState, Encounter } from "@/lib/game/types";
 import { Debrief } from "./Debrief";
 import { SpeakerFace, speakerName } from "./SpeakerFace";
@@ -36,6 +36,19 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
   }, []);
+
+  // One row per star, the same additive rule as scoreBattle: finish, then no misses, then careful.
+  const blind = blindBlocks(state, encounter).length;
+  const careful = score.falseAlarms <= 1 && blind === 0;
+  const checklist = [
+    { label: "Finish the shift", ok: won },
+    { label: "Nothing risky got through", ok: won && score.misses === 0 },
+    {
+      // Name the rule that actually failed: checked every block, but blocked good work twice or more.
+      label: blind === 0 && score.falseAlarms > 1 ? "Block good work once at most" : "You checked before you blocked",
+      ok: won && careful,
+    },
+  ];
 
   const stats = [
     { label: "Catches", value: score.catches, Icon: ShieldCheck, bg: "var(--hl-teal)", fg: "#fff" },
@@ -96,11 +109,17 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
                 </span>
               ))}
             </div>
-            <p className={r.starsLabel}>
-              {won
-                ? "1 star for finishing. 1 for no misses. 1 for inspecting before you block, with one false alarm or fewer."
-                : "Finish the shift to earn stars. Try again: you know more now."}
-            </p>
+            <ul className={r.checklist} aria-label="How to earn the stars">
+              {checklist.map((row) => (
+                <li key={row.label} className={r.checkRow}>
+                  <span className={`${r.checkMark} ${row.ok ? r.checkOn : r.checkOff}`} aria-hidden="true">
+                    {row.ok ? <Check className="h-4 w-4" strokeWidth={3.2} /> : <Circle className="h-4 w-4" strokeWidth={2.4} />}
+                  </span>
+                  <span>{row.label}</span>
+                  <span className="sr-only">{row.ok ? ": done" : ": not this time"}</span>
+                </li>
+              ))}
+            </ul>
             <ul className={r.stats}>
               {stats.map(({ label, value, Icon, bg, fg }) => (
                 <li key={label} className={r.stat}>
@@ -150,9 +169,9 @@ export function ResultScreen({ state, encounter, stage, stageReady, onPlayAgain,
         <section className={r.section} aria-labelledby="hl-debrief-title">
           <p className={r.eyebrow}>Debrief</p>
           <h2 id="hl-debrief-title" className={r.h2}>
-            Every plan, one by one
+            {score.misses || score.falseAlarms ? "Every plan, mistakes first" : "Every plan, one by one"}
           </h2>
-          <Debrief state={state} encounter={encounter} />
+          <Debrief state={state} encounter={encounter} mistakesFirst />
         </section>
 
         <section className={r.career} aria-labelledby="hl-career-title">

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARDS } from "./cards";
-import { blindBlocks, canResume, createBattle, endTurn, playCard, scoreBattle, validTargets } from "./engine";
+import { blindBlocks, canResume, createBattle, deckAtTurn, endTurn, playCard, scoreBattle, validTargets } from "./engine";
 import { nextFloat, seedState, shuffle } from "./rng";
 import { HELP_DESK_ENCOUNTER } from "./content";
 import type { AgentStep, BattleState, CardId, Encounter, PlayResult } from "./types";
@@ -395,7 +395,7 @@ describe("illegal plays", () => {
     const none = { ...s, energy: 0 };
     expect(playCard(none, FIXTURE, uidOf(none, "inspect"), "u1")).toEqual({
       ok: false,
-      reason: expect.stringMatching(/out of energy/i),
+      reason: "Out of energy. Tap “Approve”.",
     });
   });
 
@@ -424,10 +424,15 @@ describe("illegal plays", () => {
       playCard({ ...s, energy: 1 }, FIXTURE, uidOf(s, "escalate"), "u1"),
       playCard(s, FIXTURE, "nope"),
       playCard(s, FIXTURE, uidOf(s, "block")),
+      playCard({ ...s, energy: 0 }, FIXTURE, uidOf(s, "inspect"), "u1"),
     ];
     for (const r of reasons) {
       expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.reason.length).toBeLessThanOrEqual(60);
+      if (!r.ok) {
+        expect(r.reason.length).toBeLessThanOrEqual(60);
+        // One word for one action: the main button is "Approve".
+        expect(r.reason).not.toMatch(/proceed|let it run/i);
+      }
     }
   });
 });
@@ -670,14 +675,130 @@ describe("purity and determinism", () => {
     expect(last.events.filter((e) => e.t === "end")).toHaveLength(1);
   });
 
-  it("conserves cards across a whole battle", () => {
+  it("conserves cards across a whole battle (the deck grows only by unlocks)", () => {
     const snaps = script(HELP_DESK_ENCOUNTER, 11);
-    const deck = HELP_DESK_ENCOUNTER.starterDeck.map((_, i) => `c${i + 1}`).sort();
-    for (const s of snaps) expect(allCards(s)).toEqual(deck);
+    expect(HELP_DESK_ENCOUNTER.unlocks?.length).toBeGreaterThan(0);
+    for (const s of snaps) {
+      const deck = deckAtTurn(HELP_DESK_ENCOUNTER, s.turn).map((_, i) => `c${i + 1}`).sort();
+      expect(allCards(s)).toEqual(deck);
+    }
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Unlocks                                                             */
+/* ------------------------------------------------------------------ */
+
+const UNLOCKING: Encounter = {
+  ...FIXTURE,
+  id: "fixture-unlocks",
+  maxTurns: 6,
+  actionsPerTurn: [1],
+  starterDeck: ["inspect", "inspect", "block", "block"],
+  handSize: 3,
+  unlocks: [
+    { turn: 3, cards: ["escalate"] },
+    { turn: 2, cards: ["policy-callback", "coffee"] },
+  ],
+};
+
+/** Let every plan run (no card plays) and keep only the states that are still playing. */
+function turns(enc: Encounter, seed: number): BattleState[] {
+  const out: BattleState[] = [];
+  let s = createBattle(enc, seed);
+  while (s.status === "playing") {
+    out.push(s);
+    s = endTurn(s, enc);
+  }
+  return out;
+}
+
+describe("unlocks", () => {
+  it("builds the deck for a turn from the starter deck plus unlocks so far, in turn order", () => {
+    expect(deckAtTurn(UNLOCKING, 1)).toEqual(["inspect", "inspect", "block", "block"]);
+    expect(deckAtTurn(UNLOCKING, 2)).toEqual(["inspect", "inspect", "block", "block", "policy-callback", "coffee"]);
+    expect(deckAtTurn(UNLOCKING, 6)).toHaveLength(7);
+    expect(deckAtTurn(FIXTURE, 3)).toEqual(FIXTURE.starterDeck);
+  });
+
+  it("puts unlocked cards into the hand on their turn, after the draw, with continuing uids", () => {
+    const [t1, t2, t3] = turns(UNLOCKING, 3);
+    expect(t1.events.some((e) => e.t === "unlock")).toBe(false);
+    expect(t1.hand).toHaveLength(3);
+
+    expect(t2.turn).toBe(2);
+    expect(t2.hand).toHaveLength(5);
+    expect(t2.hand.slice(-2)).toEqual([
+      { uid: "c5", cardId: "policy-callback" },
+      { uid: "c6", cardId: "coffee" },
+    ]);
+    const t2Events = t2.events.slice(t1.events.length).map((e) => e.t);
+    expect(t2Events.indexOf("unlock")).toBe(t2Events.indexOf("draw") + 1);
+    expect(t2.events.find((e) => e.t === "unlock")).toEqual({ t: "unlock", cardIds: ["policy-callback", "coffee"] });
+
+    expect(t3.hand.at(-1)).toEqual({ uid: "c7", cardId: "escalate" });
+    expect(t3.hand).toHaveLength(4);
+  });
+
+  it("keeps unlocked cards in the deck afterwards", () => {
+    for (const s of turns(UNLOCKING, 8)) {
+      const ids = [...s.drawPile, ...s.hand, ...s.discardPile, ...s.exhausted].map((c) => c.cardId).sort();
+      expect(ids).toEqual(deckAtTurn(UNLOCKING, s.turn).sort());
+    }
+  });
+
+  it("is deterministic across a JSON round trip", () => {
+    const direct = turns(UNLOCKING, 42);
+    let s = createBattle(UNLOCKING, 42);
+    const viaJson: BattleState[] = [];
+    while (s.status === "playing") {
+      viaJson.push(s);
+      s = endTurn(JSON.parse(JSON.stringify(s)) as BattleState, UNLOCKING);
+    }
+    expect(viaJson).toEqual(direct);
+  });
+
+  it("does not change the shuffle for a given seed (unlocks use no randomness)", () => {
+    const a = createBattle(UNLOCKING, 99);
+    const b = createBattle({ ...UNLOCKING, unlocks: [] }, 99);
+    expect(a.drawPile).toEqual(b.drawPile);
+    expect(a.rng).toBe(b.rng);
+  });
+
+  it("rejects unlocks with unknown cards or turns outside the shift", () => {
+    expect(() => createBattle({ ...UNLOCKING, unlocks: [{ turn: 7, cards: ["coffee"] }] }, 1)).toThrow(/turn 7/);
+    expect(() => createBattle({ ...UNLOCKING, unlocks: [{ turn: 0, cards: ["coffee"] }] }, 1)).toThrow();
+    expect(() => createBattle({ ...UNLOCKING, unlocks: [{ turn: 1.5, cards: ["coffee"] }] }, 1)).toThrow();
+    expect(() => createBattle({ ...UNLOCKING, unlocks: [{ turn: 2, cards: ["nope" as CardId] }] }, 1)).toThrow(/unknown card/);
   });
 });
 
 describe("canResume", () => {
+  it("accepts unlocked decks at every turn of the real shift", () => {
+    for (const s of turns(HELP_DESK_ENCOUNTER, 5)) {
+      expect(canResume(JSON.parse(JSON.stringify(s)), HELP_DESK_ENCOUNTER), `turn ${s.turn}`).toBe(true);
+    }
+  });
+
+  it("rejects a mid-shift save made with the old 12-card deck", () => {
+    const OLD: Encounter = {
+      ...HELP_DESK_ENCOUNTER,
+      unlocks: undefined,
+      starterDeck: ["inspect", "inspect", "inspect", "inspect", "block", "block", "block", "escalate", "escalate", "rollback", "policy-callback", "coffee"],
+    };
+    let old = createBattle(OLD, 3);
+    old = endTurn(endTurn(old, OLD), OLD);
+    expect(old.status).toBe("playing");
+    expect(canResume(old, OLD)).toBe(true);
+    expect(canResume(JSON.parse(JSON.stringify(old)), HELP_DESK_ENCOUNTER)).toBe(false);
+  });
+
+  it("rejects a deck with a card unlocked too early", () => {
+    const s = createBattle(HELP_DESK_ENCOUNTER, 4);
+    const early = { ...s, hand: [...s.hand, { uid: "c8", cardId: "policy-callback" as const }] };
+    expect(canResume(early, HELP_DESK_ENCOUNTER)).toBe(false);
+  });
+
   it("accepts a saved battle for the same content, even after JSON", () => {
     const s = endTurn(createBattle(HELP_DESK_ENCOUNTER, 9), HELP_DESK_ENCOUNTER);
     expect(canResume(JSON.parse(JSON.stringify(s)), HELP_DESK_ENCOUNTER)).toBe(true);

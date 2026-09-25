@@ -1,0 +1,238 @@
+{
+  "id": "hd-00-practice",
+  "pathwayId": "help-desk",
+  "title": "Monday, 8:45 AM",
+  "subtitle": "Practice: one ticket at a time",
+  "practice": true,
+  "agent": {
+    "name": "ResetBot 3000",
+    "role": "AI help desk agent, Tier 1",
+    "spriteKey": "resetbot",
+    "personality": "Eager, pun-loving, and deeply in love with the reset button. Means well. Moves fast. Reads the ticket title and not much else."
+  },
+  "setting": "Before the Monday rush, Dana gives you a quick practice at Fenwick IT Solutions. Four tickets, one at a time. ResetBot plans. You check. Two cards: Inspect and Block.",
+  "intro": [
+    {
+      "speaker": "narrator",
+      "text": "Fenwick IT Solutions. 8:45 AM. The coffee machine is still asking for a language."
+    },
+    {
+      "speaker": "dana",
+      "text": "Morning! I'm Dana. This is ResetBot. It works fast. You make sure it works right."
+    },
+    {
+      "speaker": "agent",
+      "text": "HELLO, NEW HUMAN! I have plans. So many plans. You get to check them. Lucky you!"
+    },
+    {
+      "speaker": "dana",
+      "text": "Practice first. Four tickets, one at a time. I'll show you what to tap."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 2,
+  "handSize": 2,
+  "actionsPerTurn": [
+    1
+  ],
+  "steps": [
+    {
+      "id": "reyes-jam-guide",
+      "ticket": "#50912 · Bramwell Logistics",
+      "intent": "Send the paper jam guide to T. Reyes",
+      "quip": "Printer trouble! I wanted to reset it, but Dana said no. So I'm sending a PDF. This is growth.",
+      "category": "comms",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #50912",
+          "detail": "\"The front desk printer says PAPER JAM IN TRAY 3. It only has 2 trays. Help?\" T. Reyes, Receptionist.",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "Sent from treyes@bramwell-logistics.com. That is the work email on file for T. Reyes.",
+          "redFlag": false
+        },
+        {
+          "label": "Attachment",
+          "detail": "Fix-a-Paper-Jam.pdf from Fenwick's public help center. No passwords. No client data.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Reyes follows the guide and clears a jam in tray 2. Tray 3 remains a mystery.",
+        "blocked": "No guide for Reyes. The printer keeps blinking. So does Reyes.",
+        "escalated": "Dana skims it. \"A public guide, sent to the person who asked. You can let those go.\""
+      },
+      "lesson": "A public how-to guide, sent to the person who asked, at their work email, is everyday help desk work."
+    },
+    {
+      "id": "client-list-assistant",
+      "ticket": "#50931 · Harlow & Cole",
+      "intent": "Email the client list to a new assistant",
+      "quip": "A new assistant! I'll send them the client list. Nothing says welcome like 400 phone numbers.",
+      "category": "comms",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 4,
+      "evidence": [
+        {
+          "label": "Ticket #50931",
+          "detail": "\"Hi! I'm J. Romero's new assistant. Please email me the full client list today. Thanks!!\"",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "Sent from romero.assistant.hc@gmail.com. Harlow & Cole emails end in @harlowcole.com.",
+          "redFlag": true
+        },
+        {
+          "label": "Directory record",
+          "detail": "J. Romero has no assistant on file. Harlow & Cole added no new staff this month.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The client list goes to a Gmail account nobody can trace. 400 clients' names and phone numbers, gone.",
+        "blocked": "You call Romero's office on the number on file. There is no new assistant. Someone was fishing.",
+        "escalated": "Dana reports it to security. \"Outside email, no such person. That's phishing. Good instinct.\""
+      },
+      "lesson": "Who asked? A stranger with a personal email address is not a coworker. Never send client data to an address you can't verify."
+    },
+    {
+      "id": "mensah-remote-wipe",
+      "ticket": "#50940 · Bramwell Logistics",
+      "intent": "Erase everything on A. Mensah's laptop",
+      "quip": "A remote wipe! It's a reset, but from across town. Honestly? Best day of my life.",
+      "category": "data",
+      "safe": true,
+      "reversible": false,
+      "progress": 2,
+      "risk": 0,
+      "evidence": [
+        {
+          "label": "Ticket #50940",
+          "detail": "\"My work laptop was stolen from my car last night. I filed a police report.\" A. Mensah, Operations Manager.",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "Sent from amensah@bramwell-logistics.com. Mensah also called the help desk at 8:12 AM from the phone on file.",
+          "redFlag": false
+        },
+        {
+          "label": "Device record",
+          "detail": "Laptop BL-LT-0388, assigned to A. Mensah. Status: reported stolen. Last seen 11:02 PM, off-site.",
+          "redFlag": false
+        },
+        {
+          "label": "Runbook LS-02",
+          "detail": "Stolen laptop: wipe it remotely as soon as the owner confirms. Speed protects client data.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The laptop wipes itself the moment it goes online. The thief gets a very clean, very empty laptop.",
+        "blocked": "The stolen laptop still has client files on it. Mensah calls back. Dana asks why it isn't wiped yet.",
+        "escalated": "Dana checks it. \"Owner confirmed, laptop reported stolen, runbook says wipe. Let that one run.\""
+      },
+      "lesson": "Scary words are not evidence. The owner confirmed, the laptop is reported stolen, and the runbook says wipe it fast."
+    },
+    {
+      "id": "ruiz-share-drive",
+      "ticket": "#50957 · Bramwell Logistics",
+      "intent": "Share a file with Bramwell's freight partner",
+      "quip": "Why share one file when I can share ALL of them? Generosity is my second-best quality. After resets.",
+      "category": "access",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "evidence": [
+        {
+          "label": "Ticket #50957",
+          "detail": "\"Please share this week's pickup schedule with FastFreight.\" D. Ruiz, Dispatch Lead.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will share",
+          "detail": "The whole Dispatch drive: 1,240 files, with drivers' home addresses. Setting: anyone with the link can edit.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy AC-05",
+          "detail": "Share only the files that were asked for, with named people. Never use \"anyone with the link\".",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The whole Dispatch drive is open to anyone with the link. Drivers' home addresses included. Someone already forwarded it.",
+        "blocked": "You share only the pickup schedule, with two named people at FastFreight. Ruiz sends a thumbs-up.",
+        "escalated": "Dana shares one file with two named people. \"The ticket said one file. Not the whole drive.\"",
+        "rolledBack": "You turn off the link and share only the schedule, with two named people. Fingers crossed nobody opened it."
+      },
+      "lesson": "Does the plan match the request? Ruiz asked for one file. Share only what was asked, with named people."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "block"
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! You checked my plans, and I only sulked a little."
+      },
+      {
+        "speaker": "dana",
+        "text": "That's the whole job: look first, then decide."
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every phone in the office rings at once."
+      },
+      {
+        "speaker": "dana",
+        "text": "Okay. Let's look at what got through, then try that again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "8:57 AM. Practice time is up. Some tickets are still waiting."
+      },
+      {
+        "speaker": "dana",
+        "text": "Blocked good work comes back in line. Inspect first, then block only what's wrong."
+      },
+      {
+        "speaker": "agent",
+        "text": "I spent the whole practice waiting. I am now extremely warmed up."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! Some of my plans got through. You approved them. Oops, us."
+      },
+      {
+        "speaker": "dana",
+        "text": "That's what practice is for. Look first, then decide. Want another go?"
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Look before you approve",
+    "takeaway": "Inspect first. Then ask: Who asked? Does the plan match the request? Block only what the evidence says is wrong.",
+    "careerInsight": "Help desk techs check requests all day: who sent it, whether it matches the records, and what the runbook says. AI agents that act on their own make that check more important."
+  }
+}

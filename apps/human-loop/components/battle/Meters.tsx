@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { EnergyOrbs } from "./EnergyOrbs";
+import { Check } from "lucide-react";
 import s from "./battle.module.css";
 
 export interface MetersProps {
   risk: number;
   maxRisk: number;
-  resolved: number;
+  /** Plans handled for good. */
+  done: number;
   total: number;
   turn: number;
   maxTurns: number;
-  energy: number;
-  maxEnergy: number;
+  /** The turn pill (hidden in practice). */
+  showTurn: boolean;
 }
 
 /** Remembers the last value and shows a "+n" / "−n" bubble when it changes. */
@@ -30,8 +31,11 @@ function useDelta(value: number) {
   return delta;
 }
 
-/** Top HUD: Risk (orange, red near the limit), Progress (teal), turn, energy. */
-export function Meters({ risk, maxRisk, resolved, total, turn, maxTurns, energy, maxEnergy }: MetersProps) {
+/**
+ * Top HUD, one row: the Risk bar on the left (ticks, no number, so it never mirrors the Done
+ * count); the turn pill and "Done n/total" on the right.
+ */
+export function Meters({ risk, maxRisk, done, total, turn, maxTurns, showTurn }: MetersProps) {
   const riskDelta = useDelta(risk);
   const riskRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -53,17 +57,13 @@ export function Meters({ risk, maxRisk, resolved, total, turn, maxTurns, energy,
   }, [riskDelta]);
   const danger = risk >= Math.ceil(maxRisk * 0.7);
   const riskPct = Math.min(100, (risk / maxRisk) * 100);
-  const progPct = Math.min(100, (resolved / Math.max(1, total)) * 100);
 
   return (
-    <div className={s.meters}>
-      <div ref={riskRef} className={`${s.meter} ${danger ? s.riskDanger : ""}`} style={{ position: "relative" }}>
-        <div className={s.meterHead}>
-          <span id="hl-risk-label">Risk</span>
-          <span className={s.meterValue}>
-            {risk}/{maxRisk}
-          </span>
-        </div>
+    <div className={s.hud}>
+      <div ref={riskRef} className={`${s.riskRow} ${danger ? s.riskDanger : ""}`}>
+        <span id="hl-risk-label" className={s.riskLabel}>
+          Risk
+        </span>
         <div
           className={s.meterTrack}
           role="meter"
@@ -83,32 +83,26 @@ export function Meters({ risk, maxRisk, resolved, total, turn, maxTurns, energy,
         ) : null}
       </div>
 
-      <div className={s.meter}>
-        <div className={s.meterHead}>
-          <span id="hl-progress-label">Progress</span>
-          <span className={s.meterValue}>
-            {resolved}/{total}
+      <div className={s.hudRight}>
+        {showTurn ? (
+          <span className={s.turnPill}>
+            <span aria-hidden="true">
+              Turn {turn}/{maxTurns}
+            </span>
+            <span className={s.srOnly}>
+              Turn {turn} of {maxTurns}
+            </span>
           </span>
-        </div>
-        <div
-          className={s.meterTrack}
-          role="meter"
-          aria-labelledby="hl-progress-label"
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-valuenow={resolved}
-          aria-valuetext={`${resolved} of ${total} plans handled`}
-        >
-          <div className={`${s.meterFill} ${s.progressFill}`} style={{ width: `${progPct}%` }} />
-          <div className={s.meterTicks} style={{ "--ticks": total } as CSSProperties} />
-        </div>
-      </div>
-
-      <div className={s.meterSide}>
-        <span className={s.turnChip}>
-          Turn {turn} of {maxTurns}
+        ) : null}
+        <span className={s.doneChip}>
+          <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" />
+          <span aria-hidden="true">
+            Done {done}/{total}
+          </span>
+          <span className={s.srOnly}>
+            {done} of {total} plans done
+          </span>
         </span>
-        <EnergyOrbs energy={energy} max={maxEnergy} />
       </div>
     </div>
   );

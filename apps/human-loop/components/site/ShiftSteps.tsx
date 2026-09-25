@@ -94,7 +94,7 @@ function DecideArt() {
       </div>
       <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-teal px-3.5 py-1.5 font-display text-xs font-semibold text-paper shadow-[0_3px_0_0_var(--hl-ink)]">
         <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
-        Or let it proceed
+        Or approve it
       </span>
     </div>
   );
@@ -112,8 +112,8 @@ const STEPS = [
     Art: InspectArt,
   },
   {
-    title: "Let it proceed, block, or escalate",
-    body: "Good plan? Let it run. Bad plan? Block it. Not sure? Escalate to Dana, your manager. Stop the bad calls without stalling the good work.",
+    title: "Approve, block, or escalate",
+    body: "Good plan? Approve it. Bad plan? Block it. Not sure? Escalate to Dana, your manager. Stop the bad calls without stalling the good work.",
     Art: DecideArt,
   },
 ];

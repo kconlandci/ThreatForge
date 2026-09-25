@@ -14,10 +14,13 @@ export function IntroSequence({
   encounter,
   reducedMotion,
   onDone,
+  onSkipPractice,
 }: {
   encounter: Encounter;
   reducedMotion: boolean;
   onDone: () => void;
+  /** Practice comes next: the last screen offers "Skip practice" (for presenters). */
+  onSkipPractice?: () => void;
 }) {
   const lines = encounter.intro;
   const [i, setI] = useState(0);
@@ -26,6 +29,13 @@ export function IntroSequence({
   const nextRef = useRef<HTMLButtonElement>(null);
   const sceneBtnRef = useRef<HTMLButtonElement>(null);
   const next = () => (last ? onDone() : setI(i + 1));
+  const lastLabel = encounter.practice ? "Start practice" : "Let's go";
+  const skip =
+    last && onSkipPractice ? (
+      <button type="button" className={h.skip} onClick={onSkipPractice}>
+        Skip practice
+      </button>
+    ) : null;
 
   useEffect(() => {
     const t = window.setTimeout(() => (line?.speaker === "narrator" ? sceneBtnRef.current : nextRef.current)?.focus(), 40);
@@ -61,9 +71,10 @@ export function IntroSequence({
             className="mt-4 inline-flex min-h-12 items-center gap-1.5 rounded-xl border-2 border-ink bg-orange px-5 font-display text-base font-bold text-ink shadow-[0_4px_0_0_var(--hl-ink)] active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--hl-ink)]"
             onClick={next}
           >
-            {last ? "Let's go" : "Next"}
+            {last ? lastLabel : "Next"}
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
+          {skip}
           <div className={h.dots} aria-hidden="true">
             {lines.map((_, n) => (
               <span key={n} className={`${h.dot} ${n === i ? h.dotOn : ""}`} />
@@ -100,14 +111,15 @@ export function IntroSequence({
             agentName={encounter.agent.name}
             reducedMotion={reducedMotion}
             focusRef={nextRef}
-            nextLabel={last ? "Let's go" : "Next"}
+            nextLabel={last ? lastLabel : "Next"}
             onNext={next}
             secondary={
-              i > 0 ? (
+              skip ??
+              (i > 0 ? (
                 <button type="button" className={h.skip} onClick={() => setI(i - 1)}>
                   Back
                 </button>
-              ) : null
+              ) : null)
             }
           />
         </>

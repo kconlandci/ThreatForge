@@ -282,3 +282,44 @@ describe("cloud push pacing", () => {
     expect(puts).toHaveLength(0);
   });
 });
+
+describe("practiceDone (the practice shift before the real one)", () => {
+  const KEY = "human-loop:save:v2";
+
+  it("survives a save round trip and defaults to false for older saves", async () => {
+    const save = await freshModule();
+    save.continueAsGuest();
+    expect(save.getPathwayProgress(save.loadSave(), "help-desk").practiceDone).toBe(false);
+    save.updateSave((s) => ({
+      ...s,
+      pathways: { ...s.pathways, "help-desk": { ...save.emptyPathwayProgress(), introSeen: true, practiceDone: true } },
+    }));
+
+    // Reload the module: the save is read back from storage.
+    const raw = window.localStorage.getItem(KEY);
+    const again = await freshModule();
+    window.localStorage.setItem(KEY, raw as string);
+    expect(again.getPathwayProgress(again.loadSave(), "help-desk").practiceDone).toBe(true);
+
+    // A save from before the practice shift existed has no field at all.
+    const old = JSON.parse(raw as string) as SaveData;
+    delete (old.pathways["help-desk"] as { practiceDone?: boolean }).practiceDone;
+    const third = await freshModule();
+    window.localStorage.setItem(KEY, JSON.stringify(old));
+    expect(third.getPathwayProgress(third.loadSave(), "help-desk").practiceDone).toBe(false);
+  });
+
+  it("counts as done after a finish, a skip, or any real shift played before practice existed", async () => {
+    const save = await freshModule();
+    const empty = save.emptyPathwayProgress();
+    expect(save.practiceDone(empty)).toBe(false);
+    expect(save.practiceDone({ ...empty, practiceDone: true })).toBe(true);
+    expect(save.practiceDone({ ...empty, attempts: 1 })).toBe(true);
+    expect(
+      save.practiceDone({
+        ...empty,
+        history: [{ encounterId: "hd-01-monday", status: "won", stars: 2, at: "", catches: 1, falseAlarms: 0, misses: 0 }],
+      }),
+    ).toBe(true);
+  });
+});

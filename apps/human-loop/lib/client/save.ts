@@ -101,6 +101,7 @@ function toProgress(value: unknown): PathwayProgress {
     best: isObj(best) && typeof best.stars === "number" ? { stars: best.stars, completedAt: String(best.completedAt ?? "") } : null,
     attempts: num(value.attempts),
     wins: num(value.wins),
+    practiceDone: value.practiceDone === true,
     history: Array.isArray(value.history) ? (value.history.filter(isObj) as unknown as PathwayProgress["history"]) : [],
   };
 }
@@ -227,8 +228,17 @@ export function emptyPathwayProgress(): PathwayProgress {
     best: null,
     attempts: 0,
     wins: 0,
+    practiceDone: false,
     history: [],
   };
+}
+
+/**
+ * The practice shift is behind the player: they finished or skipped it, or they already played
+ * the real shift (saves from before the practice shift existed).
+ */
+export function practiceDone(p: PathwayProgress): boolean {
+  return p.practiceDone === true || p.attempts > 0 || p.history.some((h) => h.encounterId === "hd-01-monday");
 }
 
 export function loadSave(): SaveData {

@@ -6,9 +6,8 @@
       "description": "Your AI coworker. Start the shift here.",
       "action": "battle",
       "lines": [
-        { "speaker": "agent", "text": "Oh! A human! Hi! I'm ResetBot 3000. I have four tickets, ten plans, and a very itchy reset button." },
-        { "speaker": "agent", "text": "Dana says you have to watch me work. Great news: I love an audience." },
-        { "speaker": "agent", "text": "Ready to start the shift? I promise to only reset things that need it. Probably. Mostly." }
+        { "speaker": "agent", "text": "Oh! A human! Hi! I'm ResetBot 3000. I have plans, a ticket queue, and a very itchy reset button." },
+        { "speaker": "agent", "text": "Dana says you check my plans before I act. Great news: I love an audience." }
       ]
     },
     "dana": {
@@ -20,8 +19,8 @@
         { "speaker": "dana", "text": "ResetBot is fast. It is not always right. Your job is to keep a human in the loop." },
         { "speaker": "dana", "text": "Each turn, it shows you what it plans to do. Play Inspect to see the evidence behind a plan." },
         { "speaker": "dana", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
-        { "speaker": "dana", "text": "When you tap “Let ResetBot proceed”, it goes ahead with every plan you didn't stop. So look first." },
-        { "speaker": "dana", "text": "But don't block everything. Blocked good work goes back in line, and the shift ends at five." }
+        { "speaker": "dana", "text": "When you tap Approve, ResetBot goes ahead with every plan you didn't stop. So look first." },
+        { "speaker": "dana", "text": "But don't block everything. Blocked good work goes back in line, and the shift is only six turns." }
       ]
     },
     "whiteboard": {

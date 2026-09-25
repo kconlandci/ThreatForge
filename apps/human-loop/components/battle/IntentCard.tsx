@@ -1,70 +1,80 @@
 "use client";
 
 import { forwardRef, type CSSProperties } from "react";
-import { ChevronRight, ScrollText, Search } from "lucide-react";
+import { Check, ScrollText, Search } from "lucide-react";
 import type { AgentStep } from "@/lib/game/types";
-import { CATEGORY_ICON } from "./icons";
 import s from "./battle.module.css";
 
 export type IntentStamp = { label: string; tone: "good" | "bad" | "warn" };
 
+export type PlanStatus = "unchecked" | "checked" | "policy";
+
+const STATUS_WORDS: Record<PlanStatus, string> = {
+  unchecked: "Not checked",
+  checked: "Checked",
+  policy: "Checked by policy",
+};
+
 export interface IntentCardProps {
   step: AgentStep;
-  /** 1-based position in the execution order. */
-  order: number;
-  inspected: boolean;
-  byPolicy: boolean;
+  /** 1-based position in the execution order; null hides the badge (one plan on the board). */
+  order: number | null;
+  status: PlanStatus;
+  /** Show ResetBot's quip on the card (otherwise it is in the evidence sheet). */
+  showQuip: boolean;
   /** A card is selected: "valid" = can target this, "invalid" = can't, null = not targeting. */
   targeting: "valid" | "invalid" | null;
   /** Verb for the tap hint, e.g. "Block". */
   verb?: string;
   tail?: boolean;
-  /** Tighter padding, no category icon (tight phone layouts with several intents). */
-  compact?: boolean;
-  /** Clamp the quip to two lines (three plans on a short screen). */
-  clampQuip?: boolean;
   /** The agent is executing this one right now. */
   running?: boolean;
   stamp?: IntentStamp | null;
   leaving?: boolean;
   enterIndex?: number;
   animateIn?: boolean;
+  /** The coach points at this plan. */
+  coach?: boolean;
   onActivate: (viaKeyboard: boolean) => void;
 }
 
-/** One announced intent: a speech bubble from the agent with the plan, its ticket, and its quip. */
+/** One announced plan: a speech bubble from the agent with the plan, a status icon and (room permitting) its quip. */
 export const IntentCard = forwardRef<HTMLButtonElement, IntentCardProps>(function IntentCard(
   {
     step,
     order,
-    inspected,
-    byPolicy,
+    status,
+    showQuip,
     targeting,
     verb,
     tail,
-    compact,
-    clampQuip,
     running,
     stamp,
     leaving,
     enterIndex = 0,
     animateIn,
+    coach,
     onActivate,
   },
   ref,
 ) {
-  const Icon = CATEGORY_ICON[step.category];
   const quipId = `quip-${step.id}`;
-  const state = inspected ? (byPolicy ? "Inspected by policy." : "Inspected.") : "Not inspected yet.";
+  const words = STATUS_WORDS[status];
   const label =
     targeting === "valid"
-      ? `${verb ?? "Target"}: ${step.intent}. ${step.ticket}. ${state}`
-      : `Plan ${order}: ${step.intent}. ${step.ticket}. ${state} ${inspected ? "Show evidence." : "Show details."}`;
+      ? `${verb ?? "Target"}: ${step.intent}. ${words}.`
+      : `${order ? `Plan ${order}: ` : "Plan: "}${step.intent}. ${words}. Open details.`;
 
   return (
     <li
       className={`${s.intentItem} ${animateIn ? s.intentEnter : ""} ${leaving ? s.leaving : ""}`}
       style={{ "--i": enterIndex } as CSSProperties}
+      data-coach={coach ? "on" : undefined}
+      data-coach-arrow={coach ? "side" : undefined}
+      // A leaving plan is on its way out: hidden from assistive tech and focus, so a closing sheet
+      // returns focus to the main button instead of to a card that is about to disappear.
+      aria-hidden={leaving || undefined}
+      inert={leaving || undefined}
     >
       <button
         ref={ref}
@@ -75,10 +85,9 @@ export const IntentCard = forwardRef<HTMLButtonElement, IntentCardProps>(functio
           targeting === "valid" ? s.targetable : "",
           targeting === "invalid" ? s.notTarget : "",
           running ? s.running : "",
-          compact ? s.intentCompact : "",
         ].join(" ")}
         aria-label={label}
-        aria-describedby={quipId}
+        aria-describedby={showQuip ? quipId : undefined}
         aria-disabled={leaving || undefined}
         data-step={step.id}
         data-target={targeting === "valid" ? "valid" : undefined}
@@ -87,39 +96,33 @@ export const IntentCard = forwardRef<HTMLButtonElement, IntentCardProps>(functio
           onActivate(e.detail === 0);
         }}
       >
-        <span className={s.order} aria-hidden="true">
-          {order}
-        </span>
-        <span className={s.cat} aria-hidden="true">
-          <Icon className="h-5 w-5" strokeWidth={2.2} />
-        </span>
+        {order ? (
+          <span className={s.order} aria-hidden="true">
+            {order}
+          </span>
+        ) : null}
         <span className={s.intentBody}>
-          <span className={s.ticketRow}>
-            <span className={s.ticket}>{step.ticket}</span>
-            <span className={s.chips} aria-hidden="true">
-              {inspected ? (
-                <span className={`${s.chip} ${s.chipInspected}`}>
-                  <Search className="h-3 w-3" strokeWidth={3} />
-                  Inspected
-                </span>
-              ) : (
-                <span className={`${s.chip} ${s.chipUnchecked}`}>Unchecked</span>
-              )}
-              {byPolicy ? (
-                <span className={`${s.chip} ${s.chipPolicy}`}>
-                  <ScrollText className="h-3 w-3" strokeWidth={3} />
-                  Policy
-                </span>
-              ) : null}
-            </span>
-          </span>
           <span className={s.intentText}>{step.intent}</span>
-          <span id={quipId} className={`${s.quip} ${clampQuip ? s.quipClamp : ""}`}>
-            “{step.quip}”
-          </span>
+          {showQuip ? (
+            <span id={quipId} className={s.quip}>
+              “{step.quip}”
+            </span>
+          ) : null}
         </span>
-        {targeting === null && !stamp ? (
-          <ChevronRight aria-hidden="true" className="h-5 w-5 flex-none self-center text-muted" />
+        {!stamp ? (
+          <span
+            className={`${s.statusIcon} ${status === "unchecked" ? s.statusOpen : s.statusDone}`}
+            aria-hidden="true"
+            title={words}
+          >
+            {status === "unchecked" ? (
+              <Search className="h-4 w-4" strokeWidth={2.6} />
+            ) : status === "policy" ? (
+              <ScrollText className="h-4 w-4" strokeWidth={2.6} />
+            ) : (
+              <Check className="h-5 w-5" strokeWidth={3.2} />
+            )}
+          </span>
         ) : null}
         {targeting === "valid" && verb ? (
           <span className={s.tapHint} aria-hidden="true">

@@ -2,7 +2,7 @@
 
 A free browser game by DCI Resources that teaches AI agentic oversight: supervising AI agents at work.
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
-evidence, let safe work proceed, and block, escalate or roll back the risky stuff. Help Desk
+evidence, approve safe work, and block, escalate or roll back the risky stuff. Help Desk
 (with "ResetBot 3000") is playable now; the other pathways say "Coming soon".
 
 Stack: Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Phaser 4,
@@ -296,6 +296,23 @@ needs the `psql` command-line tool:
 createdb hl_test
 HL_TEST_PG_URL=postgresql://USER:PASSWORD@localhost:5432/hl_test npx vitest run lib/server
 ```
+
+## How a first visit plays
+
+1. **Practice** (`content/help-desk/practice.json`, about 90 seconds): four tickets, one at a time,
+   with only Inspect and Block. Dana's hint line above the main button says what to tap
+   (`lib/game/coach.ts`, a pure function of the battle state; it never reads which plans are
+   safe). It can't end in a breach, and it never counts toward attempts, wins, best or history.
+   Presenters can tap **Skip practice** (on the intro and in the office).
+2. **The real shift** (`content/help-desk/encounter-01.json`): starts with Inspect and Block, then
+   adds one new card per turn (the encounter's `unlocks` list: Policy on turn 2, Escalate on 3,
+   Roll Back on 4, Coffee on 5). On the first shift, the hint line adds one tip per new card, at
+   the start of that turn, only while the card can be played; "Out of energy" and "No Inspect
+   left" always win over a tip.
+
+The main button is always **Approve** ("Approve 2 plans"): ResetBot does every plan you didn't
+stop. While ResetBot works, the same button reads **Next** and shows one outcome per tap; the small
+**Skip** link above it skips only the plain "Done." outcomes and stops at the next risky one. A saved battle made before the content changed fails `canResume` and starts fresh.
 
 ## Project layout
 
