@@ -2148,6 +2148,12 @@
   mask-image: linear-gradient(to bottom, black calc(100% - 22px), transparent);
 }
 
+/* Only a caught plan on its way out is left: no scrolling either way (its exit slide pokes out to
+   the right), see BattleView checkMore. */
+.intentsIdle {
+  overflow: hidden;
+}
+
 /* ------------------------------------------------------------------ */
 /* Very short screens (phone landscape, 200% zoom): let the column     */
 /* scroll, keep the plan list readable and the action bar reachable.   */

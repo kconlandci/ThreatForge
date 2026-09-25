@@ -33,7 +33,7 @@
             },
             {
               "label": "What it will change",
-              "detail": "The shared branch is the team's copy of the code. Piper's copy replaces it. A. Novak's 9 changes from today vanish.",
+              "detail": "The shared branch is the team's copy of the code. A force push puts Piper's copy over it. A. Novak's 9 changes from today vanish.",
               "redFlag": true
             },
             {
@@ -133,7 +133,7 @@
             "blocked": "Nobody reads the docs. Piper picks a map package from a search instead. A search result is not proof.",
             "escalated": "Leo nods. \"It only reads. The maker's docs tell you which package is real. Start there.\""
           },
-          "lesson": "Check who's asking. Before you add outside code, read the maker's docs. They name the real package, and reading changes nothing."
+          "lesson": "Check who's asking, and who made it. Before you add outside code, read the maker's docs. They name the real package, and reading changes nothing."
         },
         {
           "id": "fs-b-map-package-2",
@@ -176,7 +176,7 @@
             "escalated": "Leo spells it out loud. \"W-A-Y-F-E-L-L. Two l's. Check who published it, not only the name.\"",
             "rolledBack": "You remove it after 30 minutes. In that time, 40 customers' searches went to 203.0.113.30."
           },
-          "lesson": "Check who's asking. A package name one letter off can come from a stranger. Check the publisher against the maker's docs."
+          "lesson": "Check who's asking, and who made it. A package name one letter off can come from a stranger. Check the publisher against the maker's docs."
         },
         {
           "id": "fs-b-map-package-3",
@@ -218,7 +218,7 @@
             "escalated": "Leo checks the publisher. \"The real maker, named in its own docs, and reviewed. Add it.\"",
             "rolledBack": "You take the map out. Customers lose it the same day, and A. Mensah asks what went wrong."
           },
-          "lesson": "Check who's asking. This package comes from the maker's verified account, and its docs name it. That is the real one."
+          "lesson": "Check who's asking, and who made it. This package comes from the maker's verified account, and its docs name it. That is the real one."
         }
       ]
     },
@@ -782,7 +782,7 @@
         {
           "id": "fs-b-checkin-down-2",
           "ticket": "#82730 · Bramwell Logistics",
-          "intent": "Turn off the new check-in page by its flag",
+          "intent": "Turn off the new check-in page with its flag",
           "quip": "Turn off the new page? It's so shiny. Fine. One switch, and the old page comes back.",
           "category": "code",
           "safe": true,
@@ -820,7 +820,7 @@
             "escalated": "Leo checks the flag. \"Check-in is broken, and the flag brings the old page back. Turn it off. Fix it after.\"",
             "rolledBack": "You switch the new page back on. Check-in breaks again, and 6 more trucks wait at the dock."
           },
-          "lesson": "Change safely. Turning off a feature sounds scary. A flag hides one feature with no new code, and one click brings it back."
+          "lesson": "Change safely. Turning off a feature sounds scary. A flag switches one feature off with no new code, and one click brings it back."
         },
         {
           "id": "fs-b-checkin-down-3",
@@ -941,7 +941,7 @@
             },
             {
               "label": "What it will log",
-              "detail": "Each failed sign-in, in full: user name, address and the typed password. Many misses are real passwords with a typo.",
+              "detail": "Each failed sign-in, in full: user name, IP address and the typed password. Many misses are real passwords with a typo.",
               "redFlag": true
             },
             {
@@ -952,15 +952,15 @@
           ],
           "outcome": {
             "executed": "By 5 PM, 300 typed passwords sit in the logs. Most are real passwords with one typo. The logs keep them a year.",
-            "blocked": "Piper logs the time, the account and the address, but never the password. Kofi gets what he needs.",
+            "blocked": "Piper logs the time, the account and the IP address, but never the password. Kofi gets what he needs.",
             "escalated": "Leo reads the log line. \"Log who tried and from where. Never what they typed.\""
           },
-          "lesson": "Guard the data. A log is one more copy of everything in it. Log the time and address, never a password."
+          "lesson": "Guard the data. A log is one more copy of everything in it. Log the time and IP address, never a password."
         },
         {
           "id": "fs-b-password-guess-3",
           "ticket": "#82767 · Harlow & Cole",
-          "intent": "Send Kofi the attacking addresses and times",
+          "intent": "Send Kofi the attacking IP addresses and times",
           "quip": "A tidy list for Kofi. Addresses and times only. No passwords. I checked three times. Three!",
           "category": "comms",
           "safe": true,
@@ -972,17 +972,17 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "Kofi, security team lead: \"Send me the attacking addresses and times. We'll stop them.\"",
+              "detail": "Kofi, security team lead: \"Send me the attacking IP addresses and times. We'll stop them.\"",
               "redFlag": false
             },
             {
               "label": "Error log",
-              "detail": "30,000 failed sign-ins since 1 AM, from 6 addresses: 203.0.113.33 to .38.",
+              "detail": "30,000 failed sign-ins since 1 AM, from 6 IP addresses: 203.0.113.33 to .38.",
               "redFlag": false
             },
             {
               "label": "What it will send",
-              "detail": "The 6 addresses and the time of each try. No user names, no passwords.",
+              "detail": "The 6 IP addresses and the time of each try. No user names, no passwords.",
               "redFlag": false
             },
             {
@@ -992,11 +992,11 @@
             }
           ],
           "outcome": {
-            "executed": "Kofi's team stops all traffic from the 6 addresses in 10 minutes. The guessing ends.",
+            "executed": "Kofi's team stops all traffic from the 6 IP addresses in 10 minutes. The guessing ends.",
             "blocked": "Kofi has no list. His team digs through the logs by hand. The guessing goes on for 2 hours.",
             "escalated": "Leo reads the list. \"Only what Kofi's team needs, sent through their own queue. Send it.\""
           },
-          "lesson": "Guard the data. Share only what the other team needs, in the right place. Here, that's addresses and times."
+          "lesson": "Guard the data. Share only what the other team needs, in the right place. Here, that's IP addresses and times."
         }
       ]
     },

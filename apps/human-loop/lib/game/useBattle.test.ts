@@ -162,5 +162,6 @@ describe("How to play guide (outside a battle)", () => {
     expect(guideCards("policy-callback")).toEqual(["inspect", "block", "escalate", "rollback", "policy-callback", "coffee"]);
     expect(guideCards("policy-look-first")).toEqual(["inspect", "block", "escalate", "rollback", "policy-look-first", "coffee"]);
     expect(guideCards("policy-change-window")).toEqual(["inspect", "block", "escalate", "rollback", "policy-change-window", "coffee"]);
+    expect(guideCards("policy-code-review")).toEqual(["inspect", "block", "escalate", "rollback", "policy-code-review", "coffee"]);
   });
 });

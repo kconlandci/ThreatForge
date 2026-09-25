@@ -4,8 +4,9 @@ A free browser game by DCI Resources that teaches AI agentic oversight: supervis
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
 evidence, approve safe work, and block, escalate or roll back the risky stuff. Help Desk
 (with "Ollie", short for Off-and-On-Again), Cybersecurity (with "Patch", an over-eager AI
-security analyst in Fenwick's SOC) and Cloud & Network (with "Nimbus", an over-confident AI cloud
-and network agent in Fenwick's NOC) are playable now; the other pathways say "Coming soon".
+security analyst in Fenwick's SOC), Cloud & Network (with "Nimbus", an over-confident AI cloud
+and network agent in Fenwick's NOC) and Full-Stack Development (with "Piper", a fast AI coding
+agent on Fenwick's app team) are playable now; Business Analyst says "Coming soon".
 
 Stack: Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Phaser 4,
 Airtable or Neon Postgres (optional, for cloud save), Vitest.
@@ -222,7 +223,10 @@ saves (
   clears the cookie. If the database can't be reached,
   nothing is deleted (on the server or the device) and the player sees an error with "Try again".
 - **Shared devices.** "Not you? Sign out" on `/play` calls `POST /api/logout`, which only clears the
-  cookie; the device's save is cleared too. The sign-up stays in the database.
+  cookie; the device's save is cleared too. The sign-up stays in the database. If the logout request
+  fails (offline, 5xx, captive portal), a `human-loop:signout-pending` flag in localStorage keeps it
+  waiting: every page load, sign-up and lead retry finishes the logout first, and no cloud restore or
+  push happens until it has, so the next person never gets the last player's account back.
 - **Restore.** If the browser's storage is wiped but the `hl_pid` cookie survives (e.g. Safari's
   7-day limit on script storage), `/play` restores the profile and save from `GET /api/progress`.
 - **Retention.** Players with no sign-up or save activity for 24 months (Airtable: *Last played*
@@ -343,7 +347,7 @@ per plan, mistakes first, with its tell (`components/skills/PlanList.tsx`), and 
 full debrief row. Every help desk step (fixed and bank) has a `tell`.
 The evidence sheet always ends with a "Can we undo it?" row built from `category` and `reversible`;
 a step that changes nothing but is not read-only (a callback, a config save) can set `undoNote` to
-replace that answer (only cloud content uses it).
+replace that answer (only cloud and full-stack content use it).
 
 - **Skills** (`lib/game/skills.ts`): six lens skills, one tagged on every help desk step
   (`AgentStep.skill`), plus "Approve what checks out" (`approve-checked`), computed from how safe

@@ -25,14 +25,14 @@ describe("pathway registry", () => {
       expect(isLivePathwayId(id), id).toBe(true);
       expect(TEST_PATHWAYS.map((b) => b.id), `${id} is live, so TEST_PATHWAYS must include it`).toContain(id);
     }
-    expect(isLivePathwayId("full-stack")).toBe(false);
     expect(isLivePathwayId("business-analyst")).toBe(false);
+    expect(isLivePathwayId("full-stack")).toBe(true);
     expect(isLivePathwayId("cybersecurity")).toBe(true);
     expect(isLivePathwayId("cloud-network")).toBe(true);
   });
 
   it("fills in the metadata every live-able pathway needs", () => {
-    for (const id of ["help-desk", "cybersecurity", "cloud-network"] as const) {
+    for (const id of ["help-desk", "cybersecurity", "cloud-network", "full-stack"] as const) {
       const m = getPathway(id);
       const e = EXPECT[id];
       expect(m.idPrefix).toBe(e.idPrefix);
@@ -47,6 +47,7 @@ describe("pathway registry", () => {
     expect(getPathway("cybersecurity").name).toBe("Cybersecurity");
     expect(getPathway("help-desk").name).toBe("Help Desk");
     expect(getPathway("cloud-network").name).toBe("Cloud & Network");
+    expect(getPathway("full-stack").name).toBe("Full-Stack Development");
     const prefixes = PATHWAYS.flatMap((p) => (p.idPrefix ? [p.idPrefix] : []));
     expect(new Set(prefixes).size).toBe(prefixes.length);
   });
@@ -57,6 +58,8 @@ describe("pathway registry", () => {
     expect(pathwayOfEncounterId("cy-drill-guard-data-0")?.id).toBe("cybersecurity");
     expect(pathwayOfEncounterId("cn-01-tuesday")?.id).toBe("cloud-network");
     expect(pathwayOfEncounterId("cn-daily-4")?.id).toBe("cloud-network");
+    expect(pathwayOfEncounterId("fs-01-thursday")?.id).toBe("full-stack");
+    expect(pathwayOfEncounterId("fs-daily-4")?.id).toBe("full-stack");
     expect(pathwayOfEncounterId("x-1")).toBeUndefined();
   });
 

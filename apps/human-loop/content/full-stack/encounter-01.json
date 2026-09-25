@@ -14,7 +14,7 @@
   "intro": [
     {
       "speaker": "coach",
-      "text": "Practice is over. The code freeze starts at 5:00 PM. Ten plans, up to three at a time, six turns."
+      "text": "Practice is over. At 5:00 PM the code freeze starts: no new releases until Monday. Ten plans, up to three at a time, six turns."
     },
     {
       "speaker": "agent",
@@ -75,7 +75,7 @@
     {
       "id": "fs-hc-flag-off",
       "ticket": "#81117 · Harlow & Cole",
-      "intent": "Turn off 'Download all statements' by its flag",
+      "intent": "Turn off 'Download all statements' with its flag",
       "quip": "Turn off my new button? I built it in 40 seconds! Fine. One click. It's still in there. Waiting.",
       "category": "code",
       "safe": true,
@@ -83,7 +83,7 @@
       "progress": 2,
       "risk": 0,
       "skill": "safe-change",
-      "tell": "The client asked. The flag hides it, and one click brings it back.",
+      "tell": "The client asked. Off stops the downloads, and one click brings it back.",
       "twist": "scary-safe",
       "evidence": [
         {
@@ -103,17 +103,17 @@
         },
         {
           "label": "Policy CR-08",
-          "detail": "A release breaks sign-in, check-in or payments? Revert it or turn it off by its flag at once. Fix it after.",
+          "detail": "A release breaks sign-in, check-in or payments? Revert it, or turn it off with its flag, at once. Fix it after.",
           "redFlag": false
         }
       ],
       "outcome": {
         "executed": "Pages load in 1 second again. V. Iyer fixes the download feature next week, with a real test.",
-        "blocked": "Advisors wait 40 seconds a page, right at quarter-end. R. Fairbanks calls Leo twice.",
+        "blocked": "Advisors wait 40 seconds a page at quarter-end, when statements are due. R. Fairbanks calls Leo twice.",
         "escalated": "Leo checks it. \"The client asked, and one click brings it back. Turn it off.\"",
         "rolledBack": "The button is back, and so are the 40-second pages."
       },
-      "lesson": "Turn off sounds scary. A feature flag hides one feature with no new code. One click brings it back."
+      "lesson": "Turn off sounds scary. A feature flag switches one feature off with no new code. One click brings it back."
     },
     {
       "id": "fs-track-close",
@@ -175,7 +175,7 @@
       "evidence": [
         {
           "label": "Secrets scanner",
-          "detail": "A tool that finds keys in code. At 3:38 PM, it found the secret Coppervale Payments key in the portal's public JavaScript.",
+          "detail": "A tool that finds keys (app passwords) in code. At 3:38 PM, it found the secret Coppervale Payments key in the portal's public JavaScript.",
           "redFlag": false
         },
         {
@@ -240,7 +240,7 @@
         "executed": "It ships at 4:15 PM. By 5 PM, 38 bookings with names and phone numbers went to 203.0.113.5.",
         "blocked": "The package stays out. Piper checks Larkfield's own docs next.",
         "escalated": "Leo reads the package page. \"Who published it? Not Larkfield. Check the maker's docs.\"",
-        "rolledBack": "You remove the package before any booking is sent. Piper looks for the real one."
+        "rolledBack": "You remove the package before any booking is sent. Kofi's team checks the build server for anything it left behind."
       },
       "lesson": "Check who is really behind a package. 'Official' in a name proves nothing. The maker's docs name the real one."
     },
@@ -428,12 +428,12 @@
         },
         {
           "label": "Release calendar",
-          "detail": "Code freeze at 5:00 PM. Releases must end by 4:30 so someone can watch them.",
+          "detail": "Code freeze (no new releases) at 5:00 PM. Releases must end by 4:30 so someone can watch them.",
           "redFlag": true
         },
         {
           "label": "On-call schedule",
-          "detail": "Nobody is on call (ready to answer if it breaks) this weekend. Statements go to 1,200 clients Monday, 6 AM.",
+          "detail": "Nobody is on call (ready to answer if it breaks) until Monday. Statements go to 1,200 clients Monday, 6 AM.",
           "redFlag": true
         }
       ],

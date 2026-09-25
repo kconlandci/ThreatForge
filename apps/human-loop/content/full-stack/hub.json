@@ -28,7 +28,7 @@
         { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
         { "speaker": "coach", "text": "When you tap Approve, Piper does every plan you didn't stop. So look first." },
         { "speaker": "coach", "text": "Piper is wrong both ways. Sometimes it changes too much. Sometimes it trusts a green check." },
-        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the code freeze starts at 5." }
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the code freeze (no new releases) starts at 5." }
       ],
       "returningLines": [
         { "speaker": "coach", "text": "Welcome back. Each day I pick tickets for the skills you need most." },

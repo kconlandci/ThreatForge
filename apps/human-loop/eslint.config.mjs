@@ -23,6 +23,8 @@ const PATHWAY_CONTENT = {
     "@/lib/pathways/cybersecurity/*",
     "@/lib/pathways/cloud-network",
     "@/lib/pathways/cloud-network/*",
+    "@/lib/pathways/full-stack",
+    "@/lib/pathways/full-stack/*",
     "@/lib/game/content",
     "./content",
     "../content",

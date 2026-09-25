@@ -57,7 +57,8 @@ export function PathwayPicker({
           Coming soon
         </span>
       </h2>
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
+      {/* Two columns from sm up; a single card keeps the full width instead of leaving half a row empty. */}
+      <ul className={`mt-4 grid gap-3 sm:gap-4 ${soon.length > 1 ? "sm:grid-cols-2" : ""}`}>
         {soon.map((p, i) => (
           <li key={p.id}>
             <ComingSoonCard pathway={p} number={live.length + i + 1} disabledGroup />

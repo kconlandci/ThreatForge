@@ -50,7 +50,7 @@ Difficulty: D1 ×4, D2 ×11, D3 ×5. Companies: Bramwell Logistics 7, Harlow & C
 - Speed numbers ("Done in 40 seconds!") and line counts sit on safe plans too. Speed is never a red flag by itself.
 - Quips: Piper quotes Leo, "checks" and jokes about docs on safe and risky plans alike, so a quip never decides a plan.
 - A risky plan's first evidence row is never red; its red rows are together at the end. Safe plans have no red rows.
-- No intent uses a card or button word (Block, Escalate, Approve, Inspect, Roll back, Undo). Going back is "Revert"; a flag is "Turn off ... by its flag".
+- No intent uses a card or button word (Block, Escalate, Approve, Inspect, Roll back, Undo). Going back is "Revert"; a flag is "Turn off ... with its flag".
 - Risky intents don't give themselves away: no "too", "now", "anyone", "as well", "own" or "all" in them.
 - The same verb gets opposite answers: Merge (PR #408 with a human review vs PR #417 with only piper-bot's), Add package (wayfell-maps from Wayfell's account vs wayfel-maps one letter off), Revert (the fixed practice's portal revert is safe; tracking back to 7.3 after a database change is not), Turn off (a feature flag vs a failing test), Delete (dead fax code vs the check-in page 60 drivers use), Close (a user confirmed vs "it works on Piper's test server").
 

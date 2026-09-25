@@ -67,12 +67,12 @@
         },
         {
           "label": "Code diff",
-          "detail": "1 file, 4 lines: phone-field.js. The field now takes dashes and spaces. Nothing else changes.",
+          "detail": "The diff shows what changed: 1 file, 4 lines in phone-field.js. The field now takes dashes and spaces. Nothing else changes.",
           "redFlag": false
         },
         {
           "label": "Code review",
-          "detail": "A code review is a human check. V. Iyer, a senior developer, approved this exact version at 2:50 PM. 6 of 6 tests passed.",
+          "detail": "A code review is a human check. V. Iyer, a senior developer, approved this exact version at 2:50 PM. All 290 tests passed.",
           "redFlag": false
         }
       ],
@@ -163,7 +163,7 @@
         "escalated": "Leo checks it. \"It broke sign-in, the old one is known good, and no data changed. Revert first. Fix after.\"",
         "rolledBack": "The broken version is back, and so are the failed sign-ins on phones."
       },
-      "lesson": "Revert sounds scary. This one goes back to a known-good version, with no data change. Fix sign-in first, then the bug."
+      "lesson": "Revert sounds scary. This one goes back to a known-good version, with no data change. Get sign-in working first, then fix the new version."
     },
     {
       "id": "fs-form-log",
@@ -204,7 +204,7 @@
       "outcome": {
         "executed": "By 5 PM, 40 patients' health histories sit in logs that 11 people can read. They're copied to 3 backups.",
         "blocked": "Piper logs only the error and a form number. In 20 minutes, the bug shows: insurance card photos over 5 MB fail.",
-        "escalated": "Leo narrows it. \"Log what broke, not who it broke for. A form number is enough.\""
+        "escalated": "Leo changes the plan. \"Log what broke, not who it broke for. A form number is enough.\""
       },
       "lesson": "Guard the data. Log the error and a form number, never the patient's name or health details."
     }

@@ -33,6 +33,48 @@ import type {
 
 const KEY = "human-loop:save:v2";
 /**
+ * Set while a sign-out has not reached the server yet (offline): the httpOnly "hl_pid" cookie may
+ * still name the old player. Kept apart from KEY so clearing the save keeps it. No personal data.
+ */
+const SIGNOUT_KEY = "human-loop:signout-pending";
+let signOutPendingMem = false;
+
+function signOutPending(): boolean {
+  if (signOutPendingMem) return true;
+  try {
+    return window.localStorage.getItem(SIGNOUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setSignOutPending(on: boolean) {
+  signOutPendingMem = on;
+  try {
+    if (on) window.localStorage.setItem(SIGNOUT_KEY, "1");
+    else window.localStorage.removeItem(SIGNOUT_KEY);
+  } catch {
+    // Storage blocked: the in-memory flag covers this tab.
+  }
+}
+
+/**
+ * Finish a sign-out that could not reach the server before (POST /api/logout clears the cookie).
+ * True when no sign-out is waiting. Runs before any cloud check or sign-up, so a shared device
+ * never gets the last player's save back.
+ */
+export async function finishPendingSignOut(): Promise<boolean> {
+  if (typeof window === "undefined" || !signOutPending()) return true;
+  try {
+    const res = await fetch("/api/logout", { method: "POST", cache: "no-store" });
+    if (!res.ok) return false;
+  } catch {
+    return false;
+  }
+  setSignOutPending(false);
+  return true;
+}
+/**
  * Cloud push pacing, per tab: at most one routine push a minute (trailing, so the newest save
  * always goes out). Airtable allows 5 requests per second per base (with a 30 s penalty when
  * exceeded) and counts calls against a monthly cap, and each push costs 1-4 calls. Finished
@@ -300,7 +342,7 @@ function schedulePushRetry(afterSec = 0) {
 
 function sendPush() {
   const latest = memory;
-  if (!latest?.profile || latest.profile.guest || !cloudAvailable) return;
+  if (!latest?.profile || latest.profile.guest || !cloudAvailable || signOutPending()) return;
   lastPushAt = Date.now();
   const body = JSON.stringify({ save: latest });
   fetch("/api/progress", {
@@ -344,7 +386,7 @@ function listen() {
     if (e.key === KEY || e.key === null) memory = null;
   });
   window.addEventListener("online", () => {
-    void retryPendingLead();
+    void finishPendingSignOut().then(() => retryPendingLead());
   });
 }
 
@@ -513,7 +555,11 @@ export async function signUp(input: {
   email: string;
   marketingOptIn: boolean;
 }): Promise<{ stored: boolean; save: SaveData }> {
+  // A waiting sign-out goes first, so it can never clear the new player's cookie afterwards.
+  await finishPendingSignOut();
   const r = await postLead(input);
+  // The server answered with a new cookie: the old player is signed out either way.
+  if (r.playerId) setSignOutPending(false);
   cloudAvailable = r.stored;
   const consentAt = new Date().toISOString();
   const profile: SaveProfile = {
@@ -541,6 +587,10 @@ export function retryPendingLead(): Promise<SaveData | null> {
   const pending = loadSave().pendingLead;
   if (!pending) return Promise.resolve(null);
   leadInFlight = (async () => {
+    if (!(await finishPendingSignOut())) {
+      scheduleLeadRetry(60);
+      return null;
+    }
     const r = await postLead({ name: pending.name, email: pending.email, marketingOptIn: pending.marketingOptIn });
     if (r.retry) {
       scheduleLeadRetry(r.retryAfterSec);
@@ -575,6 +625,8 @@ export function continueAsGuest(): SaveData {
  */
 export async function syncFromCloud(opts: { adopt?: boolean } = {}): Promise<{ save: SaveData; restored: boolean }> {
   const adopt = opts.adopt ?? true;
+  // Never ask for (or restore) a cloud save while a sign-out on this device is still waiting.
+  if (!(await finishPendingSignOut())) return { save: loadSave(), restored: false };
   try {
     const res = await fetch("/api/progress", { cache: "no-store" });
     if (!res.ok) {
@@ -657,13 +709,13 @@ export async function resetSave(): Promise<{ save: SaveData; serverDeleted: bool
  * Sign out on this device (a shared classroom or library computer): forget the local save and
  * the player cookie. The server copy and the sign-up are left alone.
  */
-export async function signOut(): Promise<SaveData> {
-  try {
-    await fetch("/api/logout", { method: "POST" });
-  } catch {
-    // Offline: the cookie stays, but this device no longer shows the profile.
-  }
-  return clearLocal();
+export async function signOut(): Promise<{ save: SaveData; finished: boolean }> {
+  // Flag first and clear the device right away: if the request fails (offline) or the tab closes,
+  // the next load of any page finishes the sign-out before it asks the server for a save.
+  setSignOutPending(true);
+  const save = clearLocal();
+  const finished = await finishPendingSignOut();
+  return { save, finished };
 }
 
 export type { SaveData, SaveProfile };

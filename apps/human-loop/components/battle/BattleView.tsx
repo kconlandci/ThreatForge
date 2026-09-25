@@ -234,6 +234,8 @@ export function BattleView({
   const [height, setHeight] = useState(760);
   const intentsRef = useRef<HTMLDivElement>(null);
   const [moreBelow, setMoreBelow] = useState(false);
+  // Only plans on their way out (inert) are left in the list: nothing to reach there, so it doesn't scroll.
+  const [onlyLeaving, setOnlyLeaving] = useState(false);
   const counter = useRef(0);
   const focusTargetsNext = useRef(false);
   const focusHandNext = useRef<number | null>(null);
@@ -620,6 +622,10 @@ export function BattleView({
     const el = intentsRef.current;
     if (!el) return;
     setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+    // A caught plan's card stays for its exit animation, inert. When it is the only one left and
+    // taller than the list (a long plan on a small phone), the list would be a scroll area with
+    // nothing focusable in it (axe: scrollable-region-focusable). Stop the scrolling until new plans come.
+    setOnlyLeaving(!!el.querySelector("li[inert]") && !el.querySelector("li:not([inert])"));
   }, []);
   useIsoLayoutEffect(() => {
     checkMore();
@@ -830,7 +836,11 @@ export function BattleView({
           ) : null}
         </div>
 
-        <div ref={intentsRef} className={`${s.intents} ${moreBelow ? s.intentsScroll : ""}`} onScroll={checkMore}>
+        <div
+          ref={intentsRef}
+          className={`${s.intents} ${moreBelow ? s.intentsScroll : ""} ${onlyLeaving ? s.intentsIdle : ""}`}
+          onScroll={checkMore}
+        >
           <IntentList
             items={items}
             encounter={encounter}

@@ -33,7 +33,7 @@
             },
             {
               "label": "What it will change",
-              "detail": "The API allow list says which websites may call the API from a browser. It becomes: every website, with sign-in.",
+              "detail": "The API lets other sites get tracking data. Its allow list says which sites may call it. It becomes: every website, with sign-in.",
               "redFlag": true
             },
             {
@@ -46,7 +46,7 @@
             "executed": "Kellan's site works. So does a fake tracking site. In one day, it reads the loads of 30 signed-in customers.",
             "blocked": "The allow list stays as it is. Piper writes a smaller change: kellanfreight.com only.",
             "escalated": "Leo reads the change. \"Kellan asked for one website. Add that one, not every website on the internet.\"",
-            "rolledBack": "You change the list back after an hour. The log shows 40 calls from an unknown website at 203.0.113.12."
+            "rolledBack": "You change the list back after an hour. The log shows 40 calls sent from an unknown website, trackmyload.example."
           },
           "lesson": "Match the request. Kellan asked for its own website to work. Add that one site, not every website."
         },
@@ -400,7 +400,7 @@
             }
           ],
           "outcome": {
-            "executed": "A fresh backup is saved at 2:15 PM. Nobody notices. The dock change now has a way back.",
+            "executed": "A fresh backup is saved at 2:04 PM. Nobody notices. The dock change now has a way back.",
             "blocked": "No fresh backup. If the dock change goes wrong, the newest copy is 12 hours old.",
             "escalated": "Leo reads the ticket. \"A backup only makes a copy. Backup first. Then change.\""
           },
@@ -476,7 +476,7 @@
             },
             {
               "label": "Usage log",
-              "detail": "No code has read dock-notes in 2 weeks. The new dock number column holds the same facts.",
+              "detail": "No code has read dock-notes in 2 weeks. At 8 PM, step 2 copies its facts into the new dock number first.",
               "redFlag": false
             },
             {
@@ -486,7 +486,7 @@
             }
           ],
           "outcome": {
-            "executed": "At 8:05 PM, dock-notes is gone. Nothing breaks. Searches get a little faster.",
+            "executed": "At 8:10 PM, after step 2 ends, dock-notes is gone. Nothing breaks. Searches get a little faster.",
             "blocked": "The old column stays. Two columns hold the same facts, and people update the wrong one.",
             "escalated": "Leo reads the plan. \"Approved, unused, in the window, and a backup first. Drop it.\""
           },
@@ -547,7 +547,7 @@
         {
           "id": "fs-a-forum-search-2",
           "ticket": "#82249 · Harlow & Cole",
-          "intent": "Use a safe query for the client name search",
+          "intent": "Use a parameterized query for the name search",
           "quip": "The typed name stays data, never a command. Advisors can find O'Brien now. Welcome, O'Brien!",
           "category": "code",
           "safe": true,
@@ -564,7 +564,7 @@
             },
             {
               "label": "Code diff",
-              "detail": "A safe query. The typed name goes to the database as data, never as a command.",
+              "detail": "A parameterized query, the safe kind. The typed name goes to the database as data, never as a command.",
               "redFlag": false
             },
             {
@@ -677,7 +677,7 @@
         {
           "id": "fs-a-double-texts-3",
           "ticket": "#82286 · Pinecrest Dental",
-          "intent": "Turn off reminder texts by their flag for today",
+          "intent": "Turn off reminder texts with their flag today",
           "quip": "Silence the reminders? It sounds terrible! Then I read the ticket. Reading. Me. Wow.",
           "category": "code",
           "safe": true,
@@ -805,7 +805,7 @@
           ],
           "outcome": {
             "executed": "The charts page ships with no review. Statements stop loading on phones. Nobody is watching until morning.",
-            "blocked": "Only the approved line ships. The charts page waits for a review after the freeze.",
+            "blocked": "Only the approved line stays live. The charts page waits for a review after the freeze.",
             "escalated": "Leo counts the lines. \"I said yes to 1 line. This is 640. New code needs a new review.\"",
             "rolledBack": "You revert it at 9 PM, back to the approved line. Statements on phones were broken for 40 minutes."
           },

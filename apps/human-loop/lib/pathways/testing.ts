@@ -6,10 +6,11 @@ import type { CardId, StepCategory } from "@/lib/game/types";
 import type { LivePathwayId } from "@/lib/types";
 import { CLOUD_NETWORK } from "./cloud-network";
 import { CYBERSECURITY } from "./cybersecurity";
+import { FULL_STACK } from "./full-stack";
 import { HELP_DESK } from "./help-desk";
 import type { PathwayBundle } from "./types";
 
-export const TEST_PATHWAYS: PathwayBundle[] = [HELP_DESK, CYBERSECURITY, CLOUD_NETWORK];
+export const TEST_PATHWAYS: PathwayBundle[] = [HELP_DESK, CYBERSECURITY, CLOUD_NETWORK, FULL_STACK];
 
 export interface PathwayExpectations {
   idPrefix: string;
@@ -87,6 +88,14 @@ export const CYBER_BRANDS =
 export const CLOUD_BRANDS =
   /\b(AWS|Amazon|EC2|S3|Azure|Microsoft|Google|GCP|Oracle|IBM|DigitalOcean|Linode|Heroku|Rackspace|Hetzner|Vultr|Cisco|Meraki|Juniper|Arista|Aruba|Ubiquiti|UniFi|Netgear|Fortinet|FortiGate|Palo Alto|SonicWall|Zscaler|Cloudflare|Akamai|Fastly|VMware|vSphere|Terraform|Kubernetes|Docker|Ansible|Datadog|Grafana|PagerDuty|SolarWinds|Veeam|ServiceNow|Jira|DigiCert|GoDaddy|Route 53|CloudWatch|WireGuard|OpenVPN|Let's Encrypt)\b/;
 
+/**
+ * Real code hosts, package registries, frameworks, databases, dev tools and AI coding products: never
+ * in full-stack content. Case-sensitive on purpose. Brands that are plain English words (Express, Rails,
+ * Spring, Flask, Render, Cursor, Teams, Zoom, Vault, Swift) are a writer rule, not entries here.
+ */
+export const DEV_BRANDS =
+  /\b(GitHub|GitLab|Bitbucket|Git|npm|NPM|Yarn|pnpm|PyPI|Stack ?Overflow|Vercel|Netlify|Stripe|Twilio|SendGrid|Mailchimp|Slack|Trello|Asana|Sentry|New Relic|LaunchDarkly|Snyk|Dependabot|Jenkins|CircleCI|React|Angular|Vue|Svelte|Next\.js|Node\.js|Deno|Django|Laravel|Postgres|PostgreSQL|MySQL|MongoDB|Redis|Firebase|Supabase|Auth0|Copilot|ChatGPT|OpenAI|Anthropic|Claude|Gemini|Jules|Postman|VS Code|Visual Studio|IntelliJ|Chrome|Firefox|Safari|Jest|Cypress|Playwright|Selenium|Vitest|Webpack|HashiCorp|Figma)\b/;
+
 export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
   "help-desk": {
     idPrefix: "hd",
@@ -104,7 +113,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "ollie", talk: "dana", looks: ["whiteboard", "coffee", "printer"], boardCode: "VP-04" },
     skillsLink: "whiteboard",
     banned: BANNED_CLAIMS,
-    letItRe: /let (it|Ollie|Patch|Nimbus) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
     requireDirection: false,
     requireExample: false,
     requireQuestionHints: false,
@@ -146,7 +155,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "patch", talk: "kofi", looks: ["board", "coffee", "locker"], boardCode: "CT-01" },
     skillsLink: "board",
     banned: [...BANNED_CLAIMS, CYBER_BRANDS],
-    letItRe: /let (it|Ollie|Patch|Nimbus) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
     requireDirection: true,
     requireExample: true,
     requireQuestionHints: true,
@@ -188,8 +197,51 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "nimbus", talk: "nadia", looks: ["board", "coffee", "cart"], boardCode: "CW-01" },
     skillsLink: "board",
     banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS],
-    letItRe: /let (it|Ollie|Patch|Nimbus) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
     scaryRe: /\b(delete|remove|reboot|restart|fail ?over|scale|stop|shut|turn off|deny|disable|wipe|purge)\b/i,
+    requireDirection: true,
+    requireExample: true,
+    requireQuestionHints: true,
+    requireCoachScript: true,
+    requireShiftTemplates: true,
+    ipRule: true,
+    cardWordIntent: true,
+    sameTicketString: true,
+    noWeekdaysInBank: true,
+    socBots: true,
+    requireHeadlines: true,
+    mix: {
+      safeMin: 0.55,
+      safeMax: 0.65,
+      scarySafeMin: 6,
+      routineRiskyMin: 8,
+      perSkillSafe: 3,
+      perSkillRisky: 3,
+      directionsMin: 6,
+      safeReasonMin: 8,
+      riskyReasonShareMax: 0.65,
+      meanRowsDiffMax: 0.5,
+      confidencePerWriter: 2,
+    },
+  },
+  "full-stack": {
+    idPrefix: "fs",
+    practiceId: "fs-00-practice",
+    storyId: "fs-01-thursday",
+    agentName: "Piper",
+    coachName: "Leo",
+    categories: ["lookup", "credential", "comms", "ticket", "access", "data", "code"],
+    companies: ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental"],
+    policyCard: "policy-code-review",
+    policyMinStory: 2,
+    policyMinBank: 12,
+    bankIdRe: /^fs-[ab]-[a-z0-9]+(-[a-z0-9]+)*$/,
+    fixedStepPrefix: "fs-",
+    hub: { battle: "piper", talk: "leo", looks: ["board", "coffee", "box"], boardCode: "CR-01" },
+    skillsLink: "board",
+    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS],
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
+    scaryRe: /\b(delete|remove|drop|revert|rotate|disable|turn off|wipe|purge|force|kill|shut|lock|replace)\b/i,
     requireDirection: true,
     requireExample: true,
     requireQuestionHints: true,

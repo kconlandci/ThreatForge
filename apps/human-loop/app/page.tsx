@@ -9,7 +9,7 @@ import { ShiftSteps } from "@/components/site/ShiftSteps";
 import { Wordmark } from "@/components/site/Wordmark";
 import { buttonClass, container } from "@/components/site/ui";
 import { openNowSentence } from "@/lib/site/pathways";
-import { livePathways } from "@/lib/types";
+import { PATHWAYS, livePathways } from "@/lib/types";
 
 const QUESTIONS = ["Who asked?", "Does it match the record?", "Can we undo it?"];
 
@@ -117,7 +117,8 @@ export default function Home() {
               </h2>
               <p className="mt-3 text-lg leading-relaxed text-ink-soft">
                 Each DCI career pathway gets its own office and its own overeager AI coworker.{" "}
-                {openNowSentence(livePathways())} The rest are on the way.
+                {openNowSentence(livePathways())}{" "}
+                {PATHWAYS.length - livePathways().length === 1 ? "The last one is on the way." : "The rest are on the way."}
               </p>
             </div>
             <div className="mt-10 sm:mt-12">

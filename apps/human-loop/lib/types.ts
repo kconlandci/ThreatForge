@@ -6,7 +6,7 @@ export type PathwayId =
   | "business-analyst";
 
 /** Pathways with (or getting) playable content: each has a bundle in lib/pathways/<id>. */
-export type LivePathwayId = "help-desk" | "cybersecurity" | "cloud-network";
+export type LivePathwayId = "help-desk" | "cybersecurity" | "cloud-network" | "full-stack";
 
 export type PathwayMeta = {
   id: PathwayId;
@@ -84,8 +84,17 @@ export const PATHWAYS: PathwayMeta[] = [
     id: "full-stack",
     name: "Full-Stack Development",
     agentName: "Piper",
-    tagline: "Supervise an AI that ships fast and reads docs never.",
-    status: "soon",
+    tagline: "Supervise an AI that ships fast and never reads the docs.",
+    status: "live",
+    idPrefix: "fs",
+    agentSprite: "piper",
+    firstShift: "Your first shift: Thursday afternoon on Fenwick's app team. One code freeze. One very fast robot.",
+    practiceId: "fs-00-practice",
+    storyId: "fs-01-thursday",
+    storyTitle: "Thursday, 3:45 PM",
+    pageTitle: "Full-Stack Development shift",
+    pageDescription:
+      "Supervise Piper, a fast AI coding agent. Read its plans, inspect the evidence, and stop the bad changes before they ship.",
   },
   {
     id: "business-analyst",
@@ -107,7 +116,7 @@ export function livePathways(): PathwayMeta[] {
   return PATHWAYS.filter((p) => p.status === "live");
 }
 
-const LIVE_IDS: readonly string[] = ["help-desk", "cybersecurity", "cloud-network"] satisfies LivePathwayId[];
+const LIVE_IDS: readonly string[] = ["help-desk", "cybersecurity", "cloud-network", "full-stack"] satisfies LivePathwayId[];
 
 /** A pathway id that has (or is getting) a content bundle. Says nothing about its status. */
 export function isLivePathwayId(value: unknown): value is LivePathwayId {

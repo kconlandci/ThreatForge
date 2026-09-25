@@ -109,6 +109,33 @@ export const SPRITES = {
   "wall-sign-window": { key: "wall-sign-window", file: `${S}wall-sign-window.svg`, w: 40, h: 44, originX: 0.5, originY: 0.5, kind: "decor" },
   "wall-poster-undo": { key: "wall-poster-undo", file: `${S}wall-poster-undo.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
 
+  // Full-Stack Development (app team) cast. Piper has Ollie's, Patch's and Nimbus's exact size and origin,
+  // so the exclaim marker and hop work unchanged. It rolls on one ball: the ball's floor point is the origin.
+  piper: { key: "piper", file: `${S}piper.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92, kind: "character", tone: "agent" },
+  leo: { key: "leo", file: `${S}leo.svg`, w: 40, h: 74, originX: 0.5, originY: 0.94, kind: "character", tone: "coach" },
+
+  // Piper battle portraits (same 220 x 220 framing as the other agents, floor at y 209, so they swap in place).
+  "piper-idle": { key: "piper-idle", file: `${S}piper-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "piper-eager": { key: "piper-eager", file: `${S}piper-eager.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "piper-busted": { key: "piper-busted", file: `${S}piper-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "piper-sad": { key: "piper-sad", file: `${S}piper-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "piper-celebrate": { key: "piper-celebrate", file: `${S}piper-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+
+  // App team props (iso, lit from the upper left; the anchor is the floor point under the footprint's middle).
+  // Piper's desk is a standing desk: taller than the other desks (84 x 92), same desk top and footprint.
+  "desk-piper": { key: "desk-piper", file: `${S}desk-piper.svg`, w: 84, h: 92, originX: 0.5, originY: 0.83, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "desk-dev": { key: "desk-dev", file: `${S}desk-dev.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "sprint-board": { key: "sprint-board", file: `${S}sprint-board.svg`, w: 80, h: 84, originX: 0.5, originY: 0.9, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "ship-box": { key: "ship-box", file: `${S}ship-box.svg`, w: 52, h: 60, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  beanbag: { key: "beanbag", file: `${S}beanbag.svg`, w: 44, h: 40, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+
+  // App team wall decor. Right wall: deploy board, DAYS SINCE A BROKEN BUILD sign. Left wall: CODE FREEZE
+  // calendar and the "Does it match?" poster.
+  "wall-deploy-board": { key: "wall-deploy-board", file: `${S}wall-deploy-board.svg`, w: 112, h: 106, originX: 0.491, originY: 0.5, kind: "decor" },
+  "wall-sign-days": { key: "wall-sign-days", file: `${S}wall-sign-days.svg`, w: 40, h: 50, originX: 0.5, originY: 0.5, kind: "decor" },
+  "wall-calendar-freeze": { key: "wall-calendar-freeze", file: `${S}wall-calendar-freeze.svg`, w: 40, h: 50, originX: 0.5, originY: 0.5, kind: "decor" },
+  "wall-poster-match": { key: "wall-poster-match", file: `${S}wall-poster-match.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
+
   // Small UI markers used in the stage.
   "marker-exclaim": { key: "marker-exclaim", file: `${S}marker-exclaim.svg`, w: 24, h: 30, originX: 0.5, originY: 1, kind: "marker" },
   "tap-ring": { key: "tap-ring", file: `${S}tap-ring.svg`, w: 48, h: 24, originX: 0.5, originY: 0.5, kind: "marker" },

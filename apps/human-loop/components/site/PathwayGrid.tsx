@@ -11,8 +11,10 @@ export function PathwayGrid() {
   const live = PATHWAYS.filter((p) => p.status === "live");
   const soon = PATHWAYS.filter((p) => p.status !== "live");
   // Desktop: the "Coming soon" cards share one row. 3 or 4 of them: narrow stacked cards in 4
-  // columns; 1 or 2: 2 wide columns, so the row never ends in empty space.
+  // columns; 1 or 2: 2 wide columns, so the row never ends in empty space. A single one spans the
+  // whole row (from 2 columns up), for the same reason.
   const wide = soon.length <= 2;
+  const alone = soon.length === 1;
   return (
     <ul className={`grid gap-3 sm:grid-cols-2 sm:gap-4 lg:gap-5 ${wide ? "lg:grid-cols-2" : "lg:grid-cols-4"}`}>
       {live.map((p, i) => {
@@ -54,9 +56,10 @@ export function PathwayGrid() {
                   <p className="mt-2 max-w-xl text-[16px] leading-relaxed text-teal-tint">{p.firstShift}</p>
                 ) : null}
                 <div className="mt-6">
-                  <Link href="/play" className={buttonClass("primary", "lg", "w-full sm:w-auto sm:px-8")}>
-                    Play {p.name}
-                    <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                  <Link href="/play" className={buttonClass("primary", "lg", "w-full py-2.5 sm:w-auto sm:px-8")}>
+                    {/* Long names ("Full-Stack Development") wrap on a phone: keep both lines centred. */}
+                    <span className="min-w-0 text-center leading-tight">Play {p.name}</span>
+                    <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
                   </Link>
                 </div>
               </div>
@@ -76,7 +79,7 @@ export function PathwayGrid() {
         );
       })}
       {soon.map((p, i) => (
-        <li key={p.id} className="hl-reveal">
+        <li key={p.id} className={`hl-reveal ${alone ? "sm:col-span-2" : ""}`}>
           <ComingSoonCard pathway={p} number={live.length + i + 1} stackAtLg={!wide} />
         </li>
       ))}

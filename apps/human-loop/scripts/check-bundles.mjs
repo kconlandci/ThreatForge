@@ -3,10 +3,11 @@
  * After `next build`: each pathway's route ships only its own content.
  *
  * Reads the app build manifest and checks the JS chunks each /play/<pathway> page loads:
- * - /play/help-desk never contains the Cybersecurity marker ("When in doubt, lock it out") or the
- *   Cloud & Network marker ("Relax. I have root.").
- * - /play/cybersecurity never contains the Help Desk or the Cloud & Network marker.
- * - /play/cloud-network never contains the Help Desk or the Cybersecurity marker.
+ * - /play/help-desk never contains the Cybersecurity marker ("When in doubt, lock it out"), the
+ *   Cloud & Network marker ("Relax. I have root.") or the Full-Stack marker ("read the docs later.").
+ * - /play/cybersecurity never contains the Help Desk, Cloud & Network or Full-Stack marker.
+ * - /play/cloud-network never contains the Help Desk, Cybersecurity or Full-Stack marker.
+ * - /play/full-stack never contains the Help Desk, Cybersecurity or Cloud & Network marker.
  * - /play and / carry none of them.
  * - Each game route does contain its own marker (so the check is really looking at the content).
  *
@@ -19,13 +20,17 @@ const dist = process.env.NEXT_DIST_DIR || ".next";
 const HD = "Off-and-On-Again";
 const CY = "When in doubt, lock it out";
 const CN = "Relax. I have root.";
+// No apostrophe: the build escapes ' as \' inside JSON.parse('...'), so Piper's "I'll read the docs
+// later." would never match as written.
+const FS = "read the docs later.";
 const ROUTES = [
-  { page: "/play/help-desk/page", own: HD, others: [CY, CN], required: true },
-  { page: "/play/cybersecurity/page", own: CY, others: [HD, CN], required: true },
-  { page: "/play/cloud-network/page", own: CN, others: [HD, CY], required: true },
+  { page: "/play/help-desk/page", own: HD, others: [CY, CN, FS], required: true },
+  { page: "/play/cybersecurity/page", own: CY, others: [HD, CN, FS], required: true },
+  { page: "/play/cloud-network/page", own: CN, others: [HD, CY, FS], required: true },
+  { page: "/play/full-stack/page", own: FS, others: [HD, CY, CN], required: true },
   // The picker and the landing page carry no game content at all.
-  { page: "/play/page", own: null, others: [HD, CY, CN], required: true },
-  { page: "/page", own: null, others: [HD, CY, CN], required: true },
+  { page: "/play/page", own: null, others: [HD, CY, CN, FS], required: true },
+  { page: "/page", own: null, others: [HD, CY, CN, FS], required: true },
 ];
 
 const manifestPath = join(dist, "app-build-manifest.json");

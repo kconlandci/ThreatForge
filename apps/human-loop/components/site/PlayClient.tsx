@@ -341,10 +341,14 @@ export function PlayClient() {
   }, []);
 
   const handleSignOut = useCallback(async () => {
-    const fresh = await signOut();
+    const { save: fresh, finished } = await signOut();
     moveFocus.current = true;
     setNotice(null);
-    setDoneNotice("You're signed out on this device. The next person can sign up or play as a guest.");
+    setDoneNotice(
+      finished
+        ? "You're signed out on this device. The next person can sign up or play as a guest."
+        : "You're signed out on this device. We're offline, so we'll finish when the internet is back. The next person won't see your progress.",
+    );
     setSave(fresh);
   }, []);
 
