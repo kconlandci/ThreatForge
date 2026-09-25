@@ -248,7 +248,7 @@ function capture() {
   }
 
   const skills = Object.fromEntries(MASTERY_SKILLS.map((id) => [id, { ...H.skill(id), drill: [0, 1, 2, 3].map((l) => H.drillCoach(id, l as 0)) }]));
-  const cards = Object.fromEntries(HAND_ORDER.filter((id) => id !== ("policy-look-first" as CardId)).map((id) => [id, H.card(id)]));
+  const cards = Object.fromEntries(HAND_ORDER.filter((id) => id !== ("policy-look-first" as CardId) && id !== ("policy-change-window" as CardId)).map((id) => [id, H.card(id)]));
   const reasons = ["Lucky guess", "Dana did the check", "Caught it late", "Dana didn't need this one", "Fixed it later", "Caught"].map(H.reason);
 
   return {

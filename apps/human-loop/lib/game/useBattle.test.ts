@@ -161,5 +161,6 @@ describe("How to play guide (outside a battle)", () => {
     // The exact pre-refactor Help Desk list (commit 6605f27 HAND_ORDER).
     expect(guideCards("policy-callback")).toEqual(["inspect", "block", "escalate", "rollback", "policy-callback", "coffee"]);
     expect(guideCards("policy-look-first")).toEqual(["inspect", "block", "escalate", "rollback", "policy-look-first", "coffee"]);
+    expect(guideCards("policy-change-window")).toEqual(["inspect", "block", "escalate", "rollback", "policy-change-window", "coffee"]);
   });
 });

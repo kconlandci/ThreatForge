@@ -247,6 +247,8 @@ export function unlockTip(id: CardId, enc: Encounter): string {
       return "New card: **Policy: Callback**. It inspects every MFA, password and unlock plan.";
     case "policy-look-first":
       return "New card: **Policy: Look First**. It inspects every device and network plan.";
+    case "policy-change-window":
+      return "New card: **Policy: Change Window**. It inspects every network and cloud plan.";
     case "escalate":
       return `New card: **Escalate**. Not sure? Send the plan to ${coachName(enc)}.`;
     case "rollback":

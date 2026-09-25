@@ -82,6 +82,33 @@ export const SPRITES = {
   "wall-sign-lockout": { key: "wall-sign-lockout", file: `${S}wall-sign-lockout.svg`, w: 40, h: 50, originX: 0.5, originY: 0.5, kind: "decor" },
   "wall-poster-check": { key: "wall-poster-check", file: `${S}wall-poster-check.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
 
+  // Cloud & Network (NOC) cast. Nimbus has Ollie's and Patch's exact size and origin, so the exclaim
+  // marker and hop work unchanged. It floats: the floor shadow sits at the origin, the cloud above it.
+  nimbus: { key: "nimbus", file: `${S}nimbus.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92, kind: "character", tone: "agent" },
+  nadia: { key: "nadia", file: `${S}nadia.svg`, w: 40, h: 74, originX: 0.5, originY: 0.94, kind: "character", tone: "coach" },
+
+  // Nimbus battle portraits (same 220 x 220 framing as Ollie's and Patch's, floor at y 209, so they swap in place).
+  "nimbus-idle": { key: "nimbus-idle", file: `${S}nimbus-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "nimbus-eager": { key: "nimbus-eager", file: `${S}nimbus-eager.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "nimbus-busted": { key: "nimbus-busted", file: `${S}nimbus-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "nimbus-sad": { key: "nimbus-sad", file: `${S}nimbus-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "nimbus-celebrate": { key: "nimbus-celebrate", file: `${S}nimbus-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+
+  // NOC props (iso, lit from the upper left; the anchor is the floor point under the footprint's middle).
+  "desk-nimbus": { key: "desk-nimbus", file: `${S}desk-nimbus.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "desk-noc": { key: "desk-noc", file: `${S}desk-noc.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  // Same box as server-rack (front on the SW face: right wall), so the two stand side by side.
+  "network-rack": { key: "network-rack", file: `${S}network-rack.svg`, w: 44, h: 96, originX: 0.5, originY: 0.92, footprint: { w: 1, h: 1 }, kind: "prop" },
+  // Left wall only: its front is the SE face.
+  "cooling-unit": { key: "cooling-unit", file: `${S}cooling-unit.svg`, w: 40, h: 82, originX: 0.5, originY: 0.88, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "cleanup-cart": { key: "cleanup-cart", file: `${S}cleanup-cart.svg`, w: 52, h: 60, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "change-board": { key: "change-board", file: `${S}change-board.svg`, w: 80, h: 84, originX: 0.5, originY: 0.9, footprint: { w: 1, h: 1 }, kind: "prop" },
+
+  // NOC wall decor. Right wall: status wall, CHANGE WINDOW sign. Left wall: "Can we undo it?" poster.
+  "wall-status-wall": { key: "wall-status-wall", file: `${S}wall-status-wall.svg`, w: 112, h: 106, originX: 0.491, originY: 0.5, kind: "decor" },
+  "wall-sign-window": { key: "wall-sign-window", file: `${S}wall-sign-window.svg`, w: 40, h: 44, originX: 0.5, originY: 0.5, kind: "decor" },
+  "wall-poster-undo": { key: "wall-poster-undo", file: `${S}wall-poster-undo.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
+
   // Small UI markers used in the stage.
   "marker-exclaim": { key: "marker-exclaim", file: `${S}marker-exclaim.svg`, w: 24, h: 30, originX: 0.5, originY: 1, kind: "marker" },
   "tap-ring": { key: "tap-ring", file: `${S}tap-ring.svg`, w: 48, h: 24, originX: 0.5, originY: 0.5, kind: "marker" },

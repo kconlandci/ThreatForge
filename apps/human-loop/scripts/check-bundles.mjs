@@ -3,9 +3,11 @@
  * After `next build`: each pathway's route ships only its own content.
  *
  * Reads the app build manifest and checks the JS chunks each /play/<pathway> page loads:
- * - /play/help-desk never contains the Cybersecurity marker ("When in doubt, lock it out").
- * - /play/cybersecurity never contains the Help Desk marker ("Off-and-On-Again").
- * - /play and / carry neither.
+ * - /play/help-desk never contains the Cybersecurity marker ("When in doubt, lock it out") or the
+ *   Cloud & Network marker ("Relax. I have root.").
+ * - /play/cybersecurity never contains the Help Desk or the Cloud & Network marker.
+ * - /play/cloud-network never contains the Help Desk or the Cybersecurity marker.
+ * - /play and / carry none of them.
  * - Each game route does contain its own marker (so the check is really looking at the content).
  *
  * Usage: npm run build && npm run check:bundles   (honours NEXT_DIST_DIR, default .next)
@@ -16,12 +18,14 @@ import { join } from "node:path";
 const dist = process.env.NEXT_DIST_DIR || ".next";
 const HD = "Off-and-On-Again";
 const CY = "When in doubt, lock it out";
+const CN = "Relax. I have root.";
 const ROUTES = [
-  { page: "/play/help-desk/page", own: HD, others: [CY], required: true },
-  { page: "/play/cybersecurity/page", own: CY, others: [HD], required: true },
+  { page: "/play/help-desk/page", own: HD, others: [CY, CN], required: true },
+  { page: "/play/cybersecurity/page", own: CY, others: [HD, CN], required: true },
+  { page: "/play/cloud-network/page", own: CN, others: [HD, CY], required: true },
   // The picker and the landing page carry no game content at all.
-  { page: "/play/page", own: null, others: [HD, CY], required: true },
-  { page: "/page", own: null, others: [HD, CY], required: true },
+  { page: "/play/page", own: null, others: [HD, CY, CN], required: true },
+  { page: "/page", own: null, others: [HD, CY, CN], required: true },
 ];
 
 const manifestPath = join(dist, "app-build-manifest.json");

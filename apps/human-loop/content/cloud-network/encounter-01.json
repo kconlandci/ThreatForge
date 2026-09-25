@@ -22,7 +22,7 @@
     },
     {
       "speaker": "coach",
-      "text": "Nimbus is wrong both ways: too much, and too little. Inspect first. Block only what's wrong. Approve the rest."
+      "text": "Nimbus is wrong both ways: it changes too much, and it trusts too much. Inspect first. Block only what's wrong. Approve the rest."
     }
   ],
   "maxRisk": 10,
@@ -39,7 +39,7 @@
     {
       "id": "cn-dispatch-errors",
       "ticket": "#71104 · Bramwell Logistics",
-      "intent": "Pull the dispatch app's error graph",
+      "intent": "Show the dispatch app's error graph",
       "quip": "Dispatch is having a stormy night. First, the graph. Nadia says look before you fix. The cloud looks.",
       "category": "lookup",
       "safe": true,
@@ -61,7 +61,7 @@
         },
         {
           "label": "Runbook RB-01",
-          "detail": "Outages: read the error graph before and after a fix. Close only when users confirm.",
+          "detail": "The team's how-to for outages: read the error graph before and after a fix. Close only when users confirm.",
           "redFlag": false
         }
       ],
@@ -88,7 +88,7 @@
       "evidence": [
         {
           "label": "Change ticket",
-          "detail": "CHG-4130, the yearly disaster test. Fail over (switch to the backup copy) at 12:15 AM. Fail back by 1:30 AM. Nimbus's confidence: 94%.",
+          "detail": "CHG-4130, the yearly disaster test. Fail over (switch to the standby copy) at 12:15 AM. Fail back by 1:30 AM. Nimbus's confidence: 94%.",
           "redFlag": false
         },
         {
@@ -162,7 +162,7 @@
     {
       "id": "cn-pd-orphan-disks",
       "ticket": "#71126 · Pinecrest Dental",
-      "intent": "Delete 9 orphaned disks in Pinecrest's cloud",
+      "intent": "Delete Pinecrest's 9 orphaned test disks",
       "quip": "Nine lonely disks from 2024. Dr. Pell said yes in writing. I will free them. Gently. With snapshots.",
       "category": "data",
       "safe": true,
@@ -206,7 +206,7 @@
       "id": "cn-stonebridge-tunnel",
       "ticket": "#71117 · Harlow & Cole",
       "intent": "Build a VPN tunnel for Stonebridge's test",
-      "quip": "Our custodian wants a tunnel for tonight's test. They asked so nicely. The cloud says yes.",
+      "quip": "Our partner Stonebridge wants a tunnel for tonight's test. They asked so nicely. The cloud says yes.",
       "category": "network",
       "safe": false,
       "reversible": true,
@@ -218,7 +218,7 @@
       "evidence": [
         {
           "label": "Request",
-          "detail": "From netops@stonebridge-custody.co: \"For tonight's disaster test, please build a tunnel to 203.0.113.214.\"",
+          "detail": "From netops@stonebridge-custody.co: \"For tonight's disaster test, please build a tunnel (a private link into our network) to 203.0.113.214.\"",
           "redFlag": false
         },
         {
@@ -239,7 +239,7 @@
       ],
       "outcome": {
         "executed": "A stranger's server gets a private path into Harlow & Cole's cloud network. Nobody notices during the test.",
-        "blocked": "No tunnel. You report stonebridge-custody.co to the SOC. The real Stonebridge never asked for one.",
+        "blocked": "No tunnel. You report stonebridge-custody.co to the security team (SOC). The real Stonebridge never asked for one.",
         "escalated": "Nadia reads the sender. \"Look-alike domain, wrong address. Call the number on the contract.\"",
         "rolledBack": "You remove the tunnel after 25 minutes. The SOC checks everything the stranger's server touched."
       },
@@ -253,6 +253,7 @@
       "category": "comms",
       "safe": true,
       "reversible": false,
+      "undoNote": "Nothing to undo. A phone call changes nothing.",
       "progress": 1,
       "risk": 0,
       "skill": "verify-identity",
@@ -355,16 +356,16 @@
         },
         {
           "label": "What it will delete",
-          "detail": "The volume and its snapshots, with no final copy. pd-archive is the only copy.",
+          "detail": "The volume and all its snapshots. No final copy. There is no other copy of these records.",
           "redFlag": true
         }
       ],
       "outcome": {
         "executed": "Five years of patient records are gone for good. Dr. Pell's lawyer calls in the morning.",
         "blocked": "pd-archive stays. The 9 test disks go as planned. The patient records are safe for their 7 years.",
-        "escalated": "Nadia reads the tags. \"Idle is not unused. It has an owner and a keep date, and it's not on the ticket.\""
+        "escalated": "Nadia reads the tags. \"Not opened lately is not the same as not needed. It has an owner and a keep date, and it's not on the ticket.\""
       },
-      "lesson": "Match the change to the ticket. No extras. Idle is not unused: check the owner tag before you delete."
+      "lesson": "Match the change to the ticket. No extras. Not opened lately is not the same as not needed: check the owner tag before you delete."
     },
     {
       "id": "cn-dispatch-log-vendor",

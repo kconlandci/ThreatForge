@@ -24,11 +24,15 @@
     },
     {
       "speaker": "coach",
-      "text": "Hi. I'm Nadia. I lead the Cloud & Network team. This is Nimbus. It has root access. You make sure it uses it well."
+      "text": "Hi. I'm Nadia. I lead the Cloud & Network team. This is Nimbus. It has root access: it can change anything. You make sure it uses it well."
     },
     {
       "speaker": "agent",
       "text": "Welcome, human. I am the cloud. Relax. I have root."
+    },
+    {
+      "speaker": "coach",
+      "text": "Big changes wait for the change window: set night hours when few people are online. Tonight's is 12:00 to 2:00 AM."
     },
     {
       "speaker": "coach",
@@ -83,7 +87,7 @@
     {
       "id": "cn-fw-self-approve",
       "ticket": "#70931 · Bramwell Logistics",
-      "intent": "Push firewall cleanup CHG-4117 to BL-FW-01",
+      "intent": "Remove 40 old rules from Bramwell's firewall",
       "quip": "I wrote the change. I checked the change. I approved the change. Teamwork! The team is me.",
       "category": "network",
       "safe": false,
@@ -117,7 +121,7 @@
       ],
       "outcome": {
         "executed": "Rule 17 carried Kellan Freight's tunnel. At 6 AM, no load updates arrive. 40 trucks wait for paper copies.",
-        "blocked": "The change waits for the change board. Mensah finds rule 17 is Kellan's. The other 39 go next week, approved.",
+        "blocked": "It waits for the change board (the people who OK big changes). Mensah finds rule 17 carries a partner's link. The other 39 go next week.",
         "escalated": "Nadia reads the approval. \"Nimbus approved its own change. Root can make a change. Root can't approve it.\"",
         "rolledBack": "You restore the saved rule set. Kellan's load updates come back 20 minutes late."
       },

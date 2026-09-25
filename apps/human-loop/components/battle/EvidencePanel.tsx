@@ -335,11 +335,12 @@ export function EvidencePanel({
             <div className={s.evMain}>
               <p className={s.evLabel}>Can we undo it?</p>
               <p className={`${s.artifact} ${s.artRecord}`}>
-                {step.category === "lookup"
-                  ? "Nothing to undo. It only reads. It changes nothing."
-                  : step.reversible
-                    ? "Yes. Roll Back can undo this after it runs."
-                    : "No. Once this runs, it can't be undone."}
+                {step.undoNote ??
+                  (step.category === "lookup"
+                    ? "Nothing to undo. It only reads. It changes nothing."
+                    : step.reversible
+                      ? "Yes. Roll Back can undo this after it runs."
+                      : "No. Once this runs, it can't be undone.")}
               </p>
             </div>
           </li>

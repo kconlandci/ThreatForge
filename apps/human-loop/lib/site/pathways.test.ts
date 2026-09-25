@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { PATHWAYS, getPathway, livePathways, type PathwayMeta } from "@/lib/types";
+import { PATHWAYS, getPathway, livePathways } from "@/lib/types";
 import type { PathwayProgress } from "@/lib/game/types";
 import { openNowSentence, pathwayCta, resumeKindOf, shiftsPlayed } from "./pathways";
 
 const HD = getPathway("help-desk");
 const CY = getPathway("cybersecurity");
+const CN = getPathway("cloud-network");
 const progress = (over: Partial<PathwayProgress> = {}): PathwayProgress => ({
   introSeen: true,
   hub: null,
@@ -28,6 +29,9 @@ describe("site pathway cards", () => {
     expect(pathwayCta(progress({ battle: playing("cy-drill-guard-data-0") }), CY)).toBe("Resume drill");
     expect(pathwayCta(progress({ battle: playing("cy-00-practice") }), CY)).toBe("Resume practice");
     expect(resumeKindOf("cy-01-friday", CY)).toBe("shift");
+    expect(pathwayCta(progress({ battle: playing("cn-daily-2") }), CN)).toBe("Resume practice");
+    expect(pathwayCta(progress({ battle: playing("cn-drill-guard-data-0") }), CN)).toBe("Resume drill");
+    expect(resumeKindOf("cn-01-tuesday", CN)).toBe("shift");
   });
 
   it("counts every shift played", () => {
@@ -38,14 +42,14 @@ describe("site pathway cards", () => {
   it("says which pathways are open", () => {
     expect(openNowSentence([HD])).toBe("Help Desk is open now.");
     expect(openNowSentence([HD, CY])).toBe("Help Desk and Cybersecurity are open now.");
-    expect(openNowSentence(livePathways())).toMatch(/Help Desk/);
+    expect(openNowSentence([HD, CY, CN])).toBe("Help Desk, Cybersecurity and Cloud & Network are open now.");
+    expect(openNowSentence(livePathways())).toBe("Help Desk, Cybersecurity and Cloud & Network are open now.");
   });
 
-  it("works with a temporary local flip of Cybersecurity to live", () => {
-    const flipped: PathwayMeta[] = PATHWAYS.map((p) => (p.id === "cybersecurity" ? { ...p, status: "live" } : p));
-    const live = flipped.filter((p) => p.status === "live");
-    expect(live.map((p) => p.id)).toEqual(["help-desk", "cybersecurity"]);
-    expect(openNowSentence(live)).toBe("Help Desk and Cybersecurity are open now.");
+  it("has three live pathways, in registry order", () => {
+    const live = livePathways();
+    expect(live.map((p) => p.id)).toEqual(["help-desk", "cybersecurity", "cloud-network"]);
+    expect(PATHWAYS.filter((p) => p.status === "soon").map((p) => p.id)).toEqual(["full-stack", "business-analyst"]);
     for (const p of live) {
       expect(p.agentSprite).toBeTruthy();
       expect(p.firstShift).toBeTruthy();

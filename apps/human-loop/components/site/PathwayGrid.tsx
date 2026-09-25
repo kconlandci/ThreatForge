@@ -10,14 +10,17 @@ import { buttonClass } from "./ui";
 export function PathwayGrid() {
   const live = PATHWAYS.filter((p) => p.status === "live");
   const soon = PATHWAYS.filter((p) => p.status !== "live");
+  // Desktop: the "Coming soon" cards share one row. 3 or 4 of them: narrow stacked cards in 4
+  // columns; 1 or 2: 2 wide columns, so the row never ends in empty space.
+  const wide = soon.length <= 2;
   return (
-    <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+    <ul className={`grid gap-3 sm:grid-cols-2 sm:gap-4 lg:gap-5 ${wide ? "lg:grid-cols-2" : "lg:grid-cols-4"}`}>
       {live.map((p, i) => {
         const Icon = PATHWAY_ICONS[p.id];
         return (
           <li
             key={p.id}
-            className="hl-reveal relative overflow-hidden rounded-3xl border-2 border-ink bg-teal text-paper shadow-[0_6px_0_0_var(--hl-ink)] sm:col-span-2 lg:col-span-4"
+            className={`hl-reveal relative overflow-hidden rounded-3xl border-2 border-ink bg-teal text-paper shadow-[0_6px_0_0_var(--hl-ink)] sm:col-span-2 ${wide ? "lg:col-span-2" : "lg:col-span-4"}`}
           >
             <div
               aria-hidden="true"
@@ -74,7 +77,7 @@ export function PathwayGrid() {
       })}
       {soon.map((p, i) => (
         <li key={p.id} className="hl-reveal">
-          <ComingSoonCard pathway={p} number={live.length + i + 1} stackAtLg />
+          <ComingSoonCard pathway={p} number={live.length + i + 1} stackAtLg={!wide} />
         </li>
       ))}
     </ul>

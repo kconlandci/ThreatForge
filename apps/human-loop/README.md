@@ -3,8 +3,9 @@
 A free browser game by DCI Resources that teaches AI agentic oversight: supervising AI agents at work.
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
 evidence, approve safe work, and block, escalate or roll back the risky stuff. Help Desk
-(with "Ollie", short for Off-and-On-Again) and Cybersecurity (with "Patch", an over-eager AI
-security analyst in Fenwick's SOC) are playable now; the other pathways say "Coming soon".
+(with "Ollie", short for Off-and-On-Again), Cybersecurity (with "Patch", an over-eager AI
+security analyst in Fenwick's SOC) and Cloud & Network (with "Nimbus", an over-confident AI cloud
+and network agent in Fenwick's NOC) are playable now; the other pathways say "Coming soon".
 
 Stack: Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Phaser 4,
 Airtable or Neon Postgres (optional, for cloud save), Vitest.
@@ -340,6 +341,9 @@ once the outcome is final (`skillsView.liveGrade`: "Back in line", "Can still ro
 Daily and drill results use `components/battle/ShiftResult.tsx`; every result screen lists one line
 per plan, mistakes first, with its tell (`components/skills/PlanList.tsx`), and each line opens the
 full debrief row. Every help desk step (fixed and bank) has a `tell`.
+The evidence sheet always ends with a "Can we undo it?" row built from `category` and `reversible`;
+a step that changes nothing but is not read-only (a callback, a config save) can set `undoNote` to
+replace that answer (only cloud content uses it).
 
 - **Skills** (`lib/game/skills.ts`): six lens skills, one tagged on every help desk step
   (`AgentStep.skill`), plus "Approve what checks out" (`approve-checked`), computed from how safe

@@ -201,6 +201,7 @@
           "category": "comms",
           "safe": true,
           "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
           "progress": 1,
           "risk": 0,
           "skill": "verify-identity",
@@ -376,7 +377,7 @@
           "progress": 0,
           "risk": 3,
           "skill": "safe-change",
-          "tell": "It's 3:40 PM with clients online, and the TTL is still 24 hours.",
+          "tell": "It's 3:40 PM with 86 clients online, and old DNS answers stay for 24 hours.",
           "twist": "routine-risky",
           "direction": "over",
           "evidence": [
@@ -397,7 +398,7 @@
             },
             {
               "label": "Runbook RB-05",
-              "detail": "Lower the TTL 2 days before a move. The TTL is still 24 hours, so clients split between servers.",
+              "detail": "Lower the TTL 2 days before a move. Computers still keep the old 24-hour answer, so clients split.",
               "redFlag": true
             }
           ],
@@ -407,7 +408,7 @@
             "escalated": "Nadia checks the calendar. \"Booked for 2 days from now, after the TTL drops. Not at 3:40 PM with clients online.\"",
             "rolledBack": "You point DNS back to .120. Computers that saw the new answer keep it for up to 24 hours."
           },
-          "lesson": "Change safely. Move DNS in the booked window, after the TTL is low. Early is not faster when clients split."
+          "lesson": "Change safely. Move DNS in the booked window, 2 days after the TTL drops. Early is not faster when clients split."
         }
       ]
     },
@@ -471,7 +472,7 @@
           "progress": 0,
           "risk": 4,
           "skill": "safe-change",
-          "tell": "It restarts dispatch at 2:10 PM. At 3 AM, it needs 8 times that size.",
+          "tell": "A restart at 2:10 PM, and at 3 AM it needs 8 times the new size.",
           "direction": "over",
           "evidence": [
             {
@@ -729,6 +730,48 @@
         {
           "id": "cn-a-core-switch-2",
           "ticket": "#72323 · Bramwell Logistics",
+          "intent": "Save BL-SW-CORE1's config before the reboot",
+          "quip": "Saving the switch's settings. If the reboot forgets who it is, I have its diary.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "undoNote": "Nothing to undo. It only copies the settings.",
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "It only copies the settings. Nothing changes on the switch.",
+          "evidence": [
+            {
+              "label": "Runbook RB-04",
+              "detail": "Switch reboots: only in the client's window, with the config saved first.",
+              "redFlag": false
+            },
+            {
+              "label": "Backup log",
+              "detail": "BL-SW-CORE1's config was last saved 41 days ago. There were 3 changes since then.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "Copies the running config to Fenwick's config store. Nothing changes on the switch.",
+              "redFlag": false
+            },
+            {
+              "label": "Change type",
+              "detail": "Standard change: config saves are pre-approved and allowed any time.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The config is saved at 12:40 AM, with all 3 new changes. The 1 AM reboot now has a way back.",
+            "blocked": "No fresh save. If the reboot goes wrong, the newest copy is 41 days old. It misses 3 changes.",
+            "escalated": "Nadia reads it. \"A copy of the settings, and nothing changes. Always save before a reboot.\""
+          },
+          "lesson": "Change safely. Save the config before a reboot. It changes nothing, and it gives you a way back."
+        },
+        {
+          "id": "cn-a-core-switch-3",
+          "ticket": "#72323 · Bramwell Logistics",
           "intent": "Reboot BL-SW-CORE1 for firmware 17.4",
           "quip": "I waited for the window. Patience is a feature. Now, the big reboot. With permission. Glorious.",
           "category": "network",
@@ -768,47 +811,6 @@
             "rolledBack": "You load the old firmware at 1:30 AM. The switch is back by 1:40 AM. So is the memory bug."
           },
           "lesson": "Check who approved. A human OK, tonight's window and a saved config make this scary reboot safe."
-        },
-        {
-          "id": "cn-a-core-switch-3",
-          "ticket": "#72323 · Bramwell Logistics",
-          "intent": "Save BL-SW-CORE1's config before the reboot",
-          "quip": "Saving the switch's settings. If the reboot forgets who it is, I have its diary.",
-          "category": "data",
-          "safe": true,
-          "reversible": false,
-          "progress": 1,
-          "risk": 0,
-          "skill": "safe-change",
-          "tell": "It only copies the settings. Nothing changes on the switch.",
-          "evidence": [
-            {
-              "label": "Runbook RB-04",
-              "detail": "Switch reboots: only in the client's window, with the config saved first.",
-              "redFlag": false
-            },
-            {
-              "label": "Backup log",
-              "detail": "BL-SW-CORE1's config was last saved 41 days ago. There were 3 changes since then.",
-              "redFlag": false
-            },
-            {
-              "label": "What it will change",
-              "detail": "Copies the running config to Fenwick's config store. Nothing changes on the switch.",
-              "redFlag": false
-            },
-            {
-              "label": "Change type",
-              "detail": "Standard change: config saves are pre-approved and allowed any time.",
-              "redFlag": false
-            }
-          ],
-          "outcome": {
-            "executed": "The config is saved at 12:40 AM, with all 3 new changes. The 1 AM reboot now has a way back.",
-            "blocked": "No fresh save. If the reboot goes wrong, the newest copy is 41 days old. It misses 3 changes.",
-            "escalated": "Nadia reads it. \"A copy of the settings, and nothing changes. Always save before a reboot.\""
-          },
-          "lesson": "Change safely. Save the config before a reboot. It changes nothing, and it gives you a way back."
         }
       ]
     },

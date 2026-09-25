@@ -11,6 +11,7 @@ export type CardId =
   | "rollback"
   | "policy-callback"
   | "policy-look-first"
+  | "policy-change-window"
   | "coffee";
 
 /** What a card is played on. */
@@ -54,7 +55,7 @@ export interface CardDef {
 /* ------------------------------------------------------------------ */
 
 /** Per pathway, content/<id>/pathway.json "categories" lists the ones its content may use. */
-export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data" | "endpoint" | "network";
+export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data" | "endpoint" | "network" | "cloud";
 
 /** Lens skills: each help desk step is tagged with the one skill it tests (authored). */
 export type SkillId =
@@ -102,6 +103,12 @@ export interface AgentStep {
   safe: boolean;
   /** Can Rollback undo it after it executed? (An email that was sent cannot be unsent.) */
   reversible: boolean;
+  /**
+   * Optional text for the evidence sheet's "Can we undo it?" row, shown instead of the default
+   * answer. For plans that change nothing (a phone call, a config copy), where "No, it can't be
+   * undone" would read like a red flag. Only cloud content sets it today.
+   */
+  undoNote?: string;
   /** Work credit when a safe step gets done (executed or escalated). */
   progress: number;
   /** Risk added when an unsafe step executes. */

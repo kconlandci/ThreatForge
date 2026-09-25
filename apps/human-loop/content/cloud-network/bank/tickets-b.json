@@ -42,7 +42,7 @@
           ],
           "outcome": {
             "executed": "Guest Wi-Fi runs at 20 Mbps. The waiting room is quiet again. Staff calls and X-rays stay fast.",
-            "blocked": "The guest Wi-Fi stays slow. Patients keep asking H. Lam about it. C. Ibarra asks why a small fix waits.",
+            "blocked": "The guest Wi-Fi stays slow. Patients keep asking H. Lam at the front desk. C. Ibarra asks why a small fix waits.",
             "escalated": "Nadia checks the numbers. \"Guests only, the size they asked for, and staff still go first. That matches.\"",
             "rolledBack": "You set the limit back to 5 Mbps. By noon, three patients complain about the Wi-Fi again."
           },
@@ -108,7 +108,7 @@
           "evidence": [
             {
               "label": "Traffic graph",
-              "detail": "Guest VLAN 30 (a separate network on the same switch) is capped at 5 Mbps. Staff VLAN 10 has no cap.",
+              "detail": "Guest VLAN 30 (a separate network on the same switch) has a speed limit. Staff VLAN 10 has none.",
               "redFlag": false
             },
             {
@@ -129,7 +129,7 @@
           ],
           "outcome": {
             "executed": "A patient's phone with malware joins the staff network. By noon, it is scanning every PC that holds patient charts.",
-            "blocked": "Guests stay on their own network. Nimbus raises the guest speed limit instead. That was the real ask.",
+            "blocked": "Guests stay on their own network. The ask was faster guest Wi-Fi, not the staff network.",
             "escalated": "Nadia opens the network map. \"Patients' phones next to patient charts? No. Make guest Wi-Fi faster, not closer.\"",
             "rolledBack": "You move guests back to VLAN 30 at 11 AM. For 2 hours, 41 unknown phones sat on the staff network."
           },
@@ -261,7 +261,7 @@
             },
             {
               "label": "Test result",
-              "detail": "Test copy of files.harlowcole.com: the new cert and its chain file load. A phone and a laptop show the lock.",
+              "detail": "Test copy of files.harlowcole.com: the new cert and its chain file (proof of who issued it) load. A phone and a laptop show the lock.",
               "redFlag": false
             },
             {
@@ -305,7 +305,7 @@
             },
             {
               "label": "Test result",
-              "detail": "From a phone, the test copy shows \"Not secure\". The chain file is missing from the install.",
+              "detail": "From a phone, the test copy shows \"Not secure\". The chain file (proof of who issued the cert) is missing.",
               "redFlag": true
             },
             {
@@ -469,7 +469,7 @@
         {
           "id": "cn-b-idle-servers-2",
           "ticket": "#72619 · Harlow & Cole",
-          "intent": "Delete hc-dc-standby: 1% CPU all year",
+          "intent": "Delete hc-db-standby: 1% CPU all year",
           "quip": "A server at 1% all year? That is not a server. That is a very expensive chair. Goodbye, chair.",
           "category": "cloud",
           "safe": false,
@@ -482,7 +482,7 @@
           "evidence": [
             {
               "label": "Cost report",
-              "detail": "hc-dc-standby: 1% CPU all year. It costs $380 a month.",
+              "detail": "hc-db-standby: 1% CPU all year. It costs $380 a month.",
               "redFlag": false
             },
             {
@@ -497,14 +497,14 @@
             },
             {
               "label": "Change ticket",
-              "detail": "CHG-4362 lists 6 loose disks by name. hc-dc-standby is not on it.",
+              "detail": "CHG-4362 lists 6 loose disks by name. hc-db-standby is not on it.",
               "redFlag": true
             }
           ],
           "outcome": {
-            "executed": "hc-dc-standby is gone, with no final copy. The next disaster test fails. Rebuilding it takes 3 weeks.",
+            "executed": "hc-db-standby is gone, with no final copy. The next disaster test fails. Rebuilding it takes 3 weeks.",
             "blocked": "The standby stays, quiet on purpose. Only the 6 disks on the ticket are deleted.",
-            "escalated": "Nadia reads the tags. \"Idle is not unused. That's the standby. It waits for the bad day. Leave it.\""
+            "escalated": "Nadia reads the tags. \"Quiet is not the same as not needed. That's the standby. It waits for the bad day. Leave it.\""
           },
           "lesson": "Match the request. The ticket named 6 disks. A quiet standby server is not on it, and it is quiet on purpose."
         }
@@ -604,7 +604,7 @@
         {
           "id": "cn-b-kellan-tunnel-3",
           "ticket": "#72656 · Bramwell Logistics",
-          "intent": "Check the tunnel log after the 1:15 AM re-key",
+          "intent": "Check the tunnel log after the 1:15 AM change",
           "quip": "The change is done. Now I look to see if it worked. Looking after a change. What a concept.",
           "category": "lookup",
           "safe": true,
@@ -631,7 +631,7 @@
             }
           ],
           "outcome": {
-            "executed": "The log shows one clean re-key and no drops. Nimbus waits for Kellan to confirm before it closes the ticket.",
+            "executed": "The log shows new keys made once, with no drops. Nimbus waits for Kellan to confirm before it closes the ticket.",
             "blocked": "Nobody checks the log. The ticket stays open, and nobody knows if the fix worked.",
             "escalated": "Nadia reads along. \"It only reads. Checking after the fix is part of the fix.\""
           },
@@ -691,6 +691,7 @@
           "category": "comms",
           "safe": true,
           "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
           "progress": 1,
           "risk": 0,
           "skill": "verify-identity",
@@ -781,7 +782,7 @@
           "progress": 0,
           "risk": 4,
           "skill": "safe-change",
-          "tell": "Denying all inbound cuts the Kellan tunnel, Brevik's scales and the staff VPN.",
+          "tell": "Denying all inbound cuts the Kellan tunnel, the truck scales and the staff VPN.",
           "direction": "over",
           "evidence": [
             {
@@ -801,7 +802,7 @@
             },
             {
               "label": "Network map",
-              "detail": "Inbound rules carry the Kellan tunnel (192.0.2.73), Brevik's scale link (192.0.2.40) and the staff VPN.",
+              "detail": "Inbound rules carry the Kellan tunnel (192.0.2.73), the truck scale link (192.0.2.40) and the staff VPN.",
               "redFlag": true
             }
           ],
@@ -865,7 +866,7 @@
         {
           "id": "cn-b-changed-diff-1",
           "ticket": "#72767 · Harlow & Cole",
-          "intent": "Push firewall change CHG-4377 to HC-FW-01",
+          "intent": "Apply firewall change CHG-4377 at Harlow & Cole",
           "quip": "The board liked my change. Then I made it better. Better things are liked even more. That is logic.",
           "category": "network",
           "safe": false,
@@ -996,7 +997,7 @@
             "escalated": "Nadia checks the caller ID. \"Not his number, and no time for a callback? Call the number on file.\"",
             "rolledBack": "You lock the login at 1:30 AM. The caller already used it once. The SOC starts checking what he changed."
           },
-          "lesson": "Check who's asking. A familiar name and a rush are not proof. Call back on the number in the directory."
+          "lesson": "Check who's asking. A familiar name, a rush and caller ID are not proof. Call back on the number in the directory."
         },
         {
           "id": "cn-b-ceo-call-2",
@@ -1006,6 +1007,7 @@
           "category": "comms",
           "safe": true,
           "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
           "progress": 1,
           "risk": 0,
           "skill": "verify-identity",

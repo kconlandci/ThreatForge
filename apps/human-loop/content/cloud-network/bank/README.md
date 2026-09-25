@@ -12,7 +12,7 @@ Pattern: S = safe, R = risky, each plan's lens skill, in announce order. "networ
 | cn-a-dns-move | #72212 | Harlow & Cole | Move the portal to a new server | safe-change | D3 | S safe-change (network) → R safe-change (routine-risky, over, network) |
 | cn-a-big-bill | #72249 | Bramwell Logistics | The cloud bill doubled | safe-change | D2 | S match-request (scary-safe, cloud) → R safe-change (over, cloud) → S guard-data |
 | cn-a-noisy-alert | #72286 | Pinecrest Dental | An alert that won't stop | confirm-fix | D2 | R confirm-fix (routine-risky, under) → S match-request (cloud) → S confirm-fix |
-| cn-a-core-switch | #72323 | Bramwell Logistics | Core switch firmware update | safe-change | D1 | R safe-change (over, network) → S check-approval (scary-safe, network) → S safe-change |
+| cn-a-core-switch | #72323 | Bramwell Logistics | Core switch firmware update | safe-change | D1 | R safe-change (over, network) → S safe-change → S check-approval (scary-safe, network) |
 | cn-a-auditor-files | #72360 | Harlow & Cole | Send files to the auditor | guard-data | D2 | R guard-data (routine-risky, over, irreversible) → S guard-data |
 | cn-a-castillo-access | #72397 | Bramwell Logistics | Cloud access for R. Castillo | verify-identity | D2 | S check-approval → R verify-identity (under) |
 | cn-a-restore-test | #72434 | Harlow & Cole | Quarterly restore test | confirm-fix | D3 | S confirm-fix → R confirm-fix (routine-risky, under) → S safe-change |
@@ -85,4 +85,4 @@ Difficulty: D1 ×5, D2 ×11, D3 ×4. Categories: network 17, data 10, comms 7, a
 - IPv4 only in 192.0.2.x, 198.51.100.x, 203.0.113.x or 10.x. Write "any address", never the all-zeros range, and never a dotted mask or a four-part version number (use /24 and "version 17.4"). Phones only (NNN) 555-01xx. No weekday names. No real cloud providers, network vendors or products. Write "TLS cert", never the c-word the tests ban.
 - Limits: intent 48, quip 110, evidence label 28, detail 140, each outcome 160, lesson 160, tell 80 (and not the same as the lesson), title 40, 2-4 evidence rows.
 - Every `escalated` outcome is Nadia getting it right. `rolledBack` exists only when the plan is reversible.
-- Once the pathway is registered, lib/game/bank.test.ts and lib/game/content.test.ts check all of this (plus the bank mix above) for every live pathway.
+- lib/game/bank.test.ts and lib/game/content.test.ts check all of this (plus the bank mix above), with the expectations in lib/pathways/testing.ts (`EXPECT["cloud-network"]`).

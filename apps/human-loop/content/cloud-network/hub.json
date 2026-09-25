@@ -32,7 +32,7 @@
       ],
       "returningLines": [
         { "speaker": "coach", "text": "Welcome back. Each day I pick change tickets for the skills you need most." },
-        { "speaker": "coach", "text": "Your skills shows your level for each check. They're the same checks the help desk and the SOC use." },
+        { "speaker": "coach", "text": "Your skills shows your level for each check. They're the same checks the help desk and the security team use." },
         { "speaker": "coach", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, helps you remember." },
         { "speaker": "coach", "text": "Same job as Tuesday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
       ]
@@ -46,8 +46,9 @@
       "lines": [
         { "speaker": "narrator", "text": "A whiteboard marked CHANGE CALENDAR. Across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
         { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
-        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk and the SOC. — Nadia\"" },
-        { "speaker": "narrator", "text": "Circled in orange: POLICY CW-01. No ticket, no human OK, no way back? No change." },
+        { "speaker": "narrator", "text": "A note under them: \"Same 3 questions as the help desk and the security team. — Nadia\"" },
+        { "speaker": "narrator", "text": "Circled in orange: POLICY CW-01. No ticket or no human OK? No change. No way back? Check it twice." },
+        { "speaker": "narrator", "text": "Tonight's change window: 12:00 to 2:00 AM. Big changes happen only then. Standard changes can go any time." },
         { "speaker": "narrator", "text": "A sticky note in robot print: \"Reboot the core switch at 10 AM? Quick one. — Nimbus\" Under it, Nadia wrote: \"No.\"" }
       ]
     },
@@ -72,7 +73,7 @@
         { "speaker": "narrator", "text": "A wire cart by Nimbus's desk. Everything on it has an orange tag: UNUSED?" },
         { "speaker": "narrator", "text": "A LOGS box. A BACKUP drive. A binder. Each one also has a label with an owner and a keep-until date." },
         { "speaker": "narrator", "text": "The BACKUP drive's label, in Nadia's writing: \"Pinecrest records. Keep 7 years. Yes, even if nobody opens it.\"" },
-        { "speaker": "narrator", "text": "Nadia's rule, taped to the handle: \"Idle is not unused. Check the owner tag.\"" },
+        { "speaker": "narrator", "text": "Nadia's rule, taped to the handle: \"Not opened lately is not the same as not needed. Check the owner tag.\"" },
         { "speaker": "narrator", "text": "In robot print: \"They looked so lonely. I only wanted to free them. — Nimbus\"" }
       ]
     }

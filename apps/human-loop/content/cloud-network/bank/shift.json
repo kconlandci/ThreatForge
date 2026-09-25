@@ -18,11 +18,11 @@
       { "speaker": "agent", "text": "My savings counter is at $4,112. Nadia says it should also count outages. Rude." }
     ],
     [
-      { "speaker": "coach", "text": "No ticket, no window, no change. That's the rule for every plan today." },
+      { "speaker": "coach", "text": "No ticket, no window, no change. Standard changes are pre-approved for any time." },
       { "speaker": "agent", "text": "I polished my crown for today. And my DEPLOY button. The safety cover is still open." }
     ],
     [
-      { "speaker": "coach", "text": "Nimbus will be wrong both ways today: too much, and too little. Watch for both." },
+      { "speaker": "coach", "text": "Nimbus will be wrong both ways today: changing too much, and trusting too much. Watch for both." },
       { "speaker": "agent", "text": "Two ways to be wrong? I prefer to call it two ways to be bold." }
     ],
     [
@@ -30,7 +30,7 @@
       { "speaker": "agent", "text": "Everything on my dashboard is green. Nadia asked what green means. I said happy. She sighed." }
     ],
     [
-      { "speaker": "coach", "text": "Three things on every plan: the ticket, the window, the way back." },
+      { "speaker": "coach", "text": "Three things on every plan: the ticket, the window, the way back. No way back? Look twice." },
       { "speaker": "agent", "text": "I found 14 things marked unused. Nadia says I may look at them. Only look." }
     ]
   ],
@@ -102,7 +102,7 @@
       ],
       [
         { "speaker": "agent", "text": "Done! Some of my plans went live. I changed too much, or trusted too much. Maybe both!" },
-        { "speaker": "coach", "text": "Both, yes. Too much and too little both hurt. Read the tells below." }
+        { "speaker": "coach", "text": "Both, yes. Changing too much and trusting too much both hurt. Read the tells below." }
       ],
       [
         { "speaker": "agent", "text": "You approved lots of my plans! My savings counter loves you. My outage counter does not." },

@@ -5,6 +5,7 @@
 import {
   ArrowUpRight,
   BookOpen,
+  Cloud,
   Coffee,
   Contact,
   Database,
@@ -48,6 +49,7 @@ export const CATEGORY_ICON: Record<StepCategory, LucideIcon> = {
   data: Database,
   endpoint: Laptop,
   network: Network,
+  cloud: Cloud,
 };
 
 export const CATEGORY_LABEL: Record<StepCategory, string> = {
@@ -59,6 +61,7 @@ export const CATEGORY_LABEL: Record<StepCategory, string> = {
   data: "Data",
   endpoint: "Device",
   network: "Network",
+  cloud: "Cloud",
 };
 
 /** How an evidence row is drawn: like a terminal, a message, a policy page, or a record. */

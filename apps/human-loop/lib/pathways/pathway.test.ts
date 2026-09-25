@@ -58,12 +58,14 @@ const careful: Bot = (start, enc) => {
 };
 
 const SCARY = /isolate|disable|wipe|deny|purge|quarantine|uninstall/i;
-/** Blocks plans whose intent sounds scary, without looking. */
-const scaryVerb: Bot = (start, enc) => {
-  let s = start;
-  for (const id of s.announced.slice()) if (SCARY.test(enc.steps.find((x) => x.id === id)!.intent)) s = play(s, enc, "block", id) ?? s;
-  return s;
-};
+/** Blocks plans whose intent sounds scary (by the pathway's own scary words), without looking. */
+const scaryVerbBot =
+  (scary: RegExp): Bot =>
+  (start, enc) => {
+    let s = start;
+    for (const id of s.announced.slice()) if (scary.test(enc.steps.find((x) => x.id === id)!.intent)) s = play(s, enc, "block", id) ?? s;
+    return s;
+  };
 /** Blocks every Close / Mute, without looking. */
 const closeBot: Bot = (start, enc) => {
   let s = start;
@@ -75,6 +77,7 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s generated shifts
   const E = EXPECT[P.id];
   const policy = E.policyCard;
   const covers = CARDS[policy].autoInspect ?? [];
+  const scaryVerb = scaryVerbBot(E.scaryRe ?? SCARY);
 
   it("announces its own policy card when the player turns it on", () => {
     const on = CARDS[policy].policyOn;
