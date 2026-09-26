@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { ArrowUpRight, Check, Hand, Lock, ScrollText, Search, Undo2 } from "lucide-react";
-import { coachName, type CoachHint } from "@/lib/game/coach";
+import { coachName, noBlockOptions, type CoachHint } from "@/lib/game/coach";
 import { CARDS } from "@/lib/game/cards";
 import { stepById } from "@/lib/game/useBattle";
 import type { BattleState, CardId, CardInstance, Encounter, PlayResult } from "@/lib/game/types";
@@ -135,17 +135,20 @@ export function EvidencePanel({
   const byPolicy = rt.inspected && autoInspected.has(step.id);
   // Real shifts, drills and dailies: with no Block in hand, say what can stop a wrong plan, and show
   // Escalate as a button where Block would be (a "Not sure?" link doesn't read as a stop button).
+  // The note only names cards that can be played now (the same check as the shift hint).
   const noBlock = playing && announced && !encounter.practice && !block;
-  const coffee = noBlock ? firstOf(state.hand, "coffee") : undefined;
-  const noBlockNote = !noBlock
+  const can = noBlock ? noBlockOptions(state) : null;
+  const noBlockNote = !can
     ? null
-    : escalate && coffee
+    : can.escalate && can.coffee
       ? `No Block card in your hand. Escalate it to ${coachName(encounter)}, or play Coffee to draw 2 cards.`
-      : escalate
+      : can.escalate
         ? `No Block card in your hand. Escalate it to ${coachName(encounter)}.`
-        : coffee
+        : can.coffee
           ? "No Block card in your hand. Play Coffee to draw 2 cards."
-          : "No Block card in your hand.";
+          : state.energy === 0
+            ? "No Block card in your hand. Out of energy."
+            : "No Block card in your hand.";
 
   const doPlay = (uid: string) => {
     if (performance.now() < armedAt.current) return;

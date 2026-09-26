@@ -317,6 +317,15 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
 }
 
 /**
+ * With no Block in hand, what can still help: Escalate when it is affordable, and Coffee only with
+ * energy left to play what it draws. Shared by the shift hint and the evidence sheet so they agree.
+ */
+export function noBlockOptions(state: BattleState): { escalate: boolean; coffee: boolean } {
+  const has = (id: CardId) => state.hand.some((c) => c.cardId === id);
+  return { escalate: has("escalate") && state.energy >= CARDS.escalate.cost, coffee: has("coffee") && state.energy > 0 };
+}
+
+/**
  * Hints for anyone (tired or returning players too). Only engine state, never the answers.
  * With no Block in hand, they name what can still stop a plan (Escalate, Coffee).
  */
@@ -335,31 +344,30 @@ export function genericHint(state: BattleState): CoachHint {
     };
   }
   const missingBlock = !state.hand.some((c) => c.cardId === "block");
-  const hasEscalate = state.hand.some((c) => c.cardId === "escalate");
+  const can = noBlockOptions(state);
   if (unchecked > 0) {
     if (missingBlock) {
-      return {
-        id: "g-no-inspect",
-        text: hasEscalate ? "No Inspect left. **Escalate** or **Approve**." : "No Inspect left. Tap **Approve**.",
-        target: null,
-      };
+      const text = can.escalate
+        ? "No Inspect left. **Escalate** or **Approve**."
+        : can.coffee
+          ? "No Inspect left. Play **Coffee** or tap **Approve**."
+          : "No Inspect left. Tap **Approve**.";
+      return { id: "g-no-inspect", text, target: null };
     }
     return {
       id: "g-no-inspect",
-      text: hasEscalate ? "No Inspect left. **Block**, **Escalate**, or **Approve**." : "No Inspect left. **Block** or **Approve**.",
+      text: can.escalate ? "No Inspect left. **Block**, **Escalate**, or **Approve**." : "No Inspect left. **Block** or **Approve**.",
       target: null,
     };
   }
   if (missingBlock) {
     // No Block to stop a wrong plan: say what can (a learner new to card games looks for Block and stops).
-    const canEscalate = hasEscalate && state.energy >= CARDS.escalate.cost;
-    const coffee = state.hand.some((c) => c.cardId === "coffee");
     const text =
-      canEscalate && coffee
+      can.escalate && can.coffee
         ? "All checked. No **Block** left: **Escalate** anything wrong, or play **Coffee**."
-        : canEscalate
+        : can.escalate
           ? "All checked. No **Block** left: **Escalate** anything wrong, then tap **Approve**."
-          : coffee
+          : can.coffee
             ? "All checked. No **Block** left: play **Coffee** to draw 2 cards."
             : "All checked. No **Block** left. Tap **Approve**.";
     return { id: "g-no-block", text, target: null };

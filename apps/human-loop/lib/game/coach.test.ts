@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardPrompt, coachHint, coachName, drillCoach, unlockTip, hintParts, plainHint, practiceCoach, sheetCoach, shiftCoach, type CoachUi } from "./coach";
+import { cardPrompt, coachHint, coachName, drillCoach, unlockTip, hintParts, noBlockOptions, plainHint, practiceCoach, sheetCoach, shiftCoach, type CoachUi } from "./coach";
 import { HELP_DESK_BANK, HELP_DESK_ENCOUNTER as E, HELP_DESK_PRACTICE as P } from "./content";
 import { createBattle, endTurn } from "./engine";
 import { tryPlay } from "./fixtures";
@@ -334,6 +334,22 @@ describe("shiftCoach: first-shift tips", () => {
     const unchecked = { ...s, hand: [card("escalate", 1)] };
     expect(shiftCoach(unchecked, E, g).text).toBe("No Inspect left. **Escalate** or **Approve**.");
     expect(shiftCoach({ ...s, hand: [] }, E, g).text).toBe("No Inspect left. Tap **Approve**.");
+    // Escalate costs 2: at 1 energy only playable cards are named, with or without Block.
+    const low = (hand: BattleState["hand"]) => shiftCoach({ ...s, hand, energy: 1 }, E, g).text;
+    expect(low([card("escalate", 1)])).toBe("No Inspect left. Tap **Approve**.");
+    expect(low([card("escalate", 1), card("coffee", 1)])).toBe("No Inspect left. Play **Coffee** or tap **Approve**.");
+    expect(low([card("block", 1), card("escalate", 1)])).toBe("No Inspect left. **Block** or **Approve**.");
+  });
+
+  it("noBlockOptions names only cards that can help now", () => {
+    const s = createBattle(E, 21);
+    const card = (cardId: CardId) => ({ uid: `x-${cardId}`, cardId });
+    const hand = [card("escalate"), card("coffee")];
+    expect(noBlockOptions({ ...s, hand, energy: 2 })).toEqual({ escalate: true, coffee: true });
+    expect(noBlockOptions({ ...s, hand, energy: 1 })).toEqual({ escalate: false, coffee: true });
+    // Coffee costs 0, but with no energy left the cards it draws can't be played.
+    expect(noBlockOptions({ ...s, hand, energy: 0 })).toEqual({ escalate: false, coffee: false });
+    expect(noBlockOptions({ ...s, hand: [], energy: 3 })).toEqual({ escalate: false, coffee: false });
   });
 });
 
