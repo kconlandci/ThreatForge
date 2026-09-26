@@ -293,7 +293,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "quill", talk: "marisol", looks: ["board", "coffee", "cabinet"], boardCode: "SC-01" },
     skillsLink: "board",
     // "quill-bot" would spell a real AI writing app.
-    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS, BA_BRANDS, /quill-?bot/i, /castle fo+(ds|rs)|glimmer(line|net)/i],
+    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS, BA_BRANDS, /quill-?bot/i, /castle fl?oo(d|r)s|glimmer(line|net)/i],
     letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     scaryRe: /\b(delete|remove|merge|unpublish|archive|turn off|stop|pause|drop|cancel|wipe|purge|take down)\b/i,
     requireDirection: true,
