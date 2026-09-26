@@ -419,12 +419,12 @@
             },
             {
               "label": "Sender address",
-              "detail": "kbrandt@harlowcole.com, Brandt's work email. The directory lists him as Achebe's manager.",
+              "detail": "kbrandt@harlowcolewp.com, Brandt's work email. The directory lists him as Achebe's manager.",
               "redFlag": false
             },
             {
               "label": "Reply text",
-              "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcole.com.\" No reason and no dates.",
+              "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcolewp.com.\" No reason and no dates.",
               "redFlag": false
             },
             {
@@ -457,7 +457,7 @@
           "evidence": [
             {
               "label": "Sender address",
-              "detail": "kbrandt@harlowcole.com, Brandt's real work email. The directory lists him as Achebe's manager.",
+              "detail": "kbrandt@harlowcolewp.com, Brandt's real work email. The directory lists him as Achebe's manager.",
               "redFlag": false
             },
             {

@@ -196,7 +196,7 @@
         {
           "id": "cn-a-xray-visit-1",
           "ticket": "#72175 · Pinecrest Dental",
-          "intent": "Call OrbiSight at the number on file",
+          "intent": "Call Ostrivue at the number on file",
           "quip": "Before I open any doors, I make a phone call. How old-fashioned. How wise. Mostly Nadia's idea.",
           "category": "comms",
           "safe": true,
@@ -209,12 +209,12 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "Email from OrbiSight support: \"Our tech connects to PD-PC-XR1 at 10 AM for booking #62011.\"",
+              "detail": "Email from Ostrivue support: \"Our tech connects to PD-PC-XR1 at 10 AM for booking #62011.\"",
               "redFlag": false
             },
             {
               "label": "Vendor contract",
-              "detail": "OrbiSight support: (413) 555-0168. Remote visits only when booked and approved by Dr. Pell.",
+              "detail": "Ostrivue support: (413) 555-0168. Remote visits only when booked and approved by Dr. Pell.",
               "redFlag": false
             },
             {
@@ -224,7 +224,7 @@
             }
           ],
           "outcome": {
-            "executed": "OrbiSight confirms booking #62011: one tech, 10 to 11 AM, from 192.0.2.85. Now you know it's really them.",
+            "executed": "Ostrivue confirms booking #62011: one tech, 10 to 11 AM, from 192.0.2.85. Now you know it's really them.",
             "blocked": "Nobody calls. At 10 AM, the tech waits, and nobody knows if the email was real. The X-ray PC stays broken.",
             "escalated": "Nadia dials the number herself. \"The number from the contract, not the email. That's how we check.\""
           },
@@ -233,7 +233,7 @@
         {
           "id": "cn-a-xray-visit-2",
           "ticket": "#72175 · Pinecrest Dental",
-          "intent": "Allow OrbiSight to PD-PC-XR1 until 11 AM",
+          "intent": "Allow Ostrivue to PD-PC-XR1 until 11 AM",
           "quip": "A vendor inside the dental office network! It sounds wild. But it's booked, confirmed and on a timer.",
           "category": "network",
           "safe": true,
@@ -246,7 +246,7 @@
           "evidence": [
             {
               "label": "Booking",
-              "detail": "#62011: OrbiSight remote visit, 10 to 11 AM today, to fix the X-ray PC. Approved by Dr. N. Pell.",
+              "detail": "#62011: Ostrivue remote visit, 10 to 11 AM today, to fix the X-ray PC. Approved by Dr. N. Pell.",
               "redFlag": false
             },
             {
@@ -256,7 +256,7 @@
             },
             {
               "label": "Callback",
-              "detail": "OrbiSight confirmed booking #62011 on (413) 555-0168, the number on the contract.",
+              "detail": "Ostrivue confirmed booking #62011 on (413) 555-0168, the number on the contract.",
               "redFlag": false
             },
             {
@@ -276,7 +276,7 @@
         {
           "id": "cn-a-xray-visit-3",
           "ticket": "#72175 · Pinecrest Dental",
-          "intent": "Give OrbiSight its own admin login",
+          "intent": "Give Ostrivue its own admin login",
           "quip": "They asked so nicely. A login of their own saves everyone a phone call. The cloud loves saving time.",
           "category": "access",
           "safe": false,
@@ -289,12 +289,12 @@
           "evidence": [
             {
               "label": "Access request",
-              "detail": "OrbiSight tech, 10:45 AM: \"Can we get our own admin login? It's easier for next time.\"",
+              "detail": "Ostrivue tech, 10:45 AM: \"Can we get our own admin login? It's easier for next time.\"",
               "redFlag": false
             },
             {
               "label": "Directory record",
-              "detail": "OrbiSight is a vendor, not staff. It has no login at Pinecrest today.",
+              "detail": "Ostrivue is a vendor, not staff. It has no login at Pinecrest today.",
               "redFlag": false
             },
             {
@@ -309,10 +309,10 @@
             }
           ],
           "outcome": {
-            "executed": "OrbiSight gets an admin login with no end date. Months later, a stolen vendor password opens Pinecrest's network.",
-            "blocked": "No login is made. Next time, OrbiSight books a visit again, and Dr. Pell says yes again.",
+            "executed": "Ostrivue gets an admin login with no end date. Months later, a stolen vendor password opens Pinecrest's network.",
+            "blocked": "No login is made. Next time, Ostrivue books a visit again, and Dr. Pell says yes again.",
             "escalated": "Nadia reads the contract. \"One booking is one visit. A login forever needs Dr. Pell's OK. She hasn't given it.\"",
-            "rolledBack": "You delete the login the next day. It was used once, at 9 PM, from an address OrbiSight doesn't know."
+            "rolledBack": "You delete the login the next day. It was used once, at 9 PM, from an address Ostrivue doesn't know."
           },
           "lesson": "Check who approved. Dr. Pell approved one visit, not a login forever. A nice ask is not an approval."
         }
@@ -339,7 +339,7 @@
           "evidence": [
             {
               "label": "Change ticket",
-              "detail": "CHG-4214: move portal.harlowcole.com to a new server at 12:30 AM in 2 days. Step 1: lower the TTL now.",
+              "detail": "CHG-4214: move portal.harlowcolewp.com to a new server at 12:30 AM in 2 days. Step 1: lower the TTL now.",
               "redFlag": false
             },
             {
@@ -383,7 +383,7 @@
           "evidence": [
             {
               "label": "DNS record",
-              "detail": "portal.harlowcole.com points to 198.51.100.120. The new server, 198.51.100.122, passed its tests.",
+              "detail": "portal.harlowcolewp.com points to 198.51.100.120. The new server, 198.51.100.122, passed its tests.",
               "redFlag": false
             },
             {

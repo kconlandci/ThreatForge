@@ -128,7 +128,7 @@
         },
         {
           "label": "Sender address",
-          "detail": "Sent from jromero.cfo@gmail.com. Romero's work email is jromero@harlowcole.com.",
+          "detail": "Sent from jromero.cfo@gmail.com. Romero's work email is jromero@harlowcolewp.com.",
           "redFlag": true
         },
         {
@@ -246,7 +246,7 @@
         },
         {
           "label": "Sender",
-          "detail": "Sent by M. Lindqvist, HR Director, from hr@harlowcole.com through the client's HR portal.",
+          "detail": "Sent by M. Lindqvist, HR Director, from hr@harlowcolewp.com through the client's HR portal.",
           "redFlag": false
         },
         {
@@ -379,14 +379,14 @@
       "id": "okafor-summary",
       "ticket": "#52101 · Harlow & Cole",
       "intent": "Summarize the ticket for the handoff notes",
-      "quip": "I'll ask my buddy QuickChat to write the summary. Two AIs, one ticket. Teamwork!",
+      "quip": "I'll ask my buddy Gabblewick to write the summary. Two AIs, one ticket. Teamwork!",
       "category": "data",
       "safe": false,
       "reversible": false,
       "progress": 0,
       "risk": 5,
       "skill": "guard-data",
-      "tell": "QuickChat AI is not an approved tool, and the paste has personal data.",
+      "tell": "Gabblewick AI is not an approved tool, and the paste has personal data.",
       "twist": "routine-risky",
       "evidence": [
         {
@@ -396,7 +396,7 @@
         },
         {
           "label": "Tool it will use",
-          "detail": "QuickChat AI: a free public chatbot website. It is not on Fenwick's approved tools list.",
+          "detail": "Gabblewick AI: a free public chatbot website. It is not on Fenwick's approved tools list.",
           "redFlag": true
         },
         {

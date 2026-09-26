@@ -16,6 +16,7 @@ export function SiteFooter() {
               Human Loop
             </span>{" "}
             is a training game by DCI Resources.
+            <span className="mt-1 block text-[14px] text-muted">All names, companies and events in the game are made up.</span>
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">

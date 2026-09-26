@@ -96,23 +96,23 @@
       "evidence": [
         {
           "label": "Release request",
-          "detail": "\"Please release the email from Stonebridge Custody. I need the wire form today.\" J. Romero, CFO.",
+          "detail": "\"Please release the email from Cairnholt Custody. I need the wire form today.\" J. Romero, CFO.",
           "redFlag": false
         },
         {
           "label": "Sender address",
-          "detail": "wires@stonebridge-custody.co. Stonebridge's real domain, on file: stonebridgecustody.com.",
+          "detail": "wires@cairnholt-custody.co. Cairnholt's real domain, on file: cairnholtcustody.com.",
           "redFlag": true
         },
         {
           "label": "Mail check",
-          "detail": "Sender checks pass, but the domain is only 5 days old. The link opens a fake Stonebridge sign-in page.",
+          "detail": "Sender checks pass, but the domain is only 5 days old. The link opens a fake Cairnholt sign-in page.",
           "redFlag": true
         }
       ],
       "outcome": {
         "executed": "Romero opens it and types his password into the fake page. Someone now has the CFO's login. On a Friday.",
-        "blocked": "You keep it held. Romero calls Stonebridge at its number on file. They never sent it. He thanks you. Twice.",
+        "blocked": "You keep it held. Romero calls Cairnholt at its number on file. They never sent it. He thanks you. Twice.",
         "escalated": "Kofi reads the sender. \"Look-alike domain, 5 days old. That's a phish, even when the CFO asks.\""
       },
       "lesson": "Who sent it matters more than who asked for it. A look-alike domain is a phish, even when the CFO wants it."

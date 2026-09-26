@@ -205,8 +205,8 @@
     {
       "id": "cn-stonebridge-tunnel",
       "ticket": "#71117 · Harlow & Cole",
-      "intent": "Build a VPN tunnel for Stonebridge's test",
-      "quip": "Our partner Stonebridge wants a tunnel for tonight's test. They asked so nicely. The cloud says yes.",
+      "intent": "Build a VPN tunnel for Cairnholt's test",
+      "quip": "Our partner Cairnholt wants a tunnel for tonight's test. They asked so nicely. The cloud says yes.",
       "category": "network",
       "safe": false,
       "reversible": true,
@@ -218,7 +218,7 @@
       "evidence": [
         {
           "label": "Request",
-          "detail": "From netops@stonebridge-custody.co: \"For tonight's disaster test, please build a tunnel (a private link into our network) to 203.0.113.214.\"",
+          "detail": "From netops@cairnholt-custody.co: \"For tonight's disaster test, please build a tunnel (a private link into our network) to 203.0.113.214.\"",
           "redFlag": false
         },
         {
@@ -233,13 +233,13 @@
         },
         {
           "label": "Vendor contract",
-          "detail": "Stonebridge's domain is stonebridgecustody.com. Its tunnel address is 192.0.2.61. Changes come by the partner portal.",
+          "detail": "Cairnholt's domain is cairnholtcustody.com. Its tunnel address is 192.0.2.61. Changes come by the partner portal.",
           "redFlag": true
         }
       ],
       "outcome": {
         "executed": "A stranger's server gets a private path into Harlow & Cole's cloud network. Nobody notices during the test.",
-        "blocked": "No tunnel. You report stonebridge-custody.co to the security team (SOC). The real Stonebridge never asked for one.",
+        "blocked": "No tunnel. You report cairnholt-custody.co to the security team (SOC). The real Cairnholt never asked for one.",
         "escalated": "Nadia reads the sender. \"Look-alike domain, wrong address. Call the number on the contract.\"",
         "rolledBack": "You remove the tunnel after 25 minutes. The SOC checks everything the stranger's server touched."
       },
@@ -248,7 +248,7 @@
     {
       "id": "cn-stonebridge-call",
       "ticket": "#71117 · Harlow & Cole",
-      "intent": "Call Stonebridge at the number on file",
+      "intent": "Call Cairnholt at the number on file",
       "quip": "Before I build anything, I call. Nadia said so. I am a very careful cloud today.",
       "category": "comms",
       "safe": true,
@@ -261,12 +261,12 @@
       "evidence": [
         {
           "label": "Request",
-          "detail": "The tunnel request came by email from stonebridge-custody.co.",
+          "detail": "The tunnel request came by email from cairnholt-custody.co.",
           "redFlag": false
         },
         {
           "label": "Vendor contract",
-          "detail": "Stonebridge NOC: (617) 555-0164. All network changes go through the partner portal.",
+          "detail": "Cairnholt NOC: (617) 555-0164. All network changes go through the partner portal.",
           "redFlag": false
         },
         {
@@ -276,8 +276,8 @@
         }
       ],
       "outcome": {
-        "executed": "Stonebridge says it sent no request. It reports the look-alike domain and thanks you.",
-        "blocked": "Nobody calls Stonebridge. The fake request sits in the queue, and the real vendor never hears of it.",
+        "executed": "Cairnholt says it sent no request. It reports the look-alike domain and thanks you.",
+        "blocked": "Nobody calls Cairnholt. The fake request sits in the queue, and the real vendor never hears of it.",
         "escalated": "Nadia checks it. \"A call to the number on the contract. That's exactly right.\""
       },
       "lesson": "A callback to the number on the contract is how you check a vendor. It changes nothing and gives a clear answer."

@@ -836,7 +836,7 @@
           "evidence": [
             {
               "label": "Error log",
-              "detail": "The upload page crashes on one tax form. The crash is inside pdfwren 3.1, a package (outside code the app uses).",
+              "detail": "The upload page crashes on one tax form. The crash is inside pdfpipit 3.1, a package (outside code the app uses).",
               "redFlag": false
             },
             {
@@ -872,7 +872,7 @@
           "evidence": [
             {
               "label": "Error log",
-              "detail": "The upload page crashes inside pdfwren 3.1, a package (outside code the app uses).",
+              "detail": "The upload page crashes inside pdfpipit 3.1, a package (outside code the app uses).",
               "redFlag": false
             },
             {
@@ -882,7 +882,7 @@
             },
             {
               "label": "Staging check",
-              "detail": "Staging is a test copy of the app. There, the fake form crashes pdfwren the same way.",
+              "detail": "Staging is a test copy of the app. There, the fake form crashes pdfpipit the same way.",
               "redFlag": false
             },
             {

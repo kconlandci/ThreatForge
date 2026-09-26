@@ -6,6 +6,8 @@
  * Intended changes so far:
  * - The no-Block hint (every pathway): with no Block in hand, the hint names Escalate or Coffee.
  *   One trace changed (hd-daily-1|1330687161|perfect), only in its "All checked" hint line.
+ * - Renamed made-up names that matched real ones (QuickChat, Kestrel, FastFreight, harlowcole.com).
+ *   Audited: with the old names swapped back in, the capture equals the previous golden exactly.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

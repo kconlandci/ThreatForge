@@ -55,7 +55,7 @@ function InspectArt() {
           </li>
           <li>
             <span className="block font-semibold text-ink">Work email</span>
-            <span className="font-mono text-[10px] text-ink-soft">jromero@harlowcole.com</span>
+            <span className="font-mono text-[10px] text-ink-soft">jromero@harlowcolewp.com</span>
           </li>
           <li className="flex items-start gap-1.5 rounded-lg bg-orange-tint px-1.5 py-1 text-orange-text">
             <TriangleAlert className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />

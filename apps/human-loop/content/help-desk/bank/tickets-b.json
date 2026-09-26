@@ -196,7 +196,7 @@
           "progress": 0,
           "risk": 5,
           "skill": "verify-identity",
-          "tell": "The email came from harlowcole-mail.com, not harlowcole.com.",
+          "tell": "The email came from harlowcolewp-mail.com, not harlowcolewp.com.",
           "evidence": [
             {
               "label": "Ticket #53139",
@@ -205,7 +205,7 @@
             },
             {
               "label": "Sender address",
-              "detail": "Sent from pwhitcomb@harlowcole-mail.com. Harlow & Cole's real domain is harlowcole.com.",
+              "detail": "Sent from pwhitcomb@harlowcolewp-mail.com. Harlow & Cole's real domain is harlowcolewp.com.",
               "redFlag": true
             },
             {
@@ -222,7 +222,7 @@
           "outcome": {
             "executed": "MFA is reset. Someone adds a new phone to the Managing Partner's account. Then they email Finance about a wire.",
             "blocked": "You call (860) 555-0101. Whitcomb picks up at a desk in Hartford. No plane. No dead phone. No ticket.",
-            "escalated": "Dana calls the phone on file. Whitcomb never asked. Dana reports harlowcole-mail.com to Fenwick security.",
+            "escalated": "Dana calls the phone on file. Whitcomb never asked. Dana reports harlowcolewp-mail.com to Fenwick security.",
             "rolledBack": "You undo the reset, remove the new phone, and sign out every session. Then you tell Fenwick security."
           },
           "lesson": "Who asked? Not Whitcomb. Check who's asking: read the whole address, and call the phone on file anyway."
@@ -255,7 +255,7 @@
             },
             {
               "label": "Directory record",
-              "detail": "clientservices@harlowcole.com. Owner: R. Fairbanks, Operations Director.",
+              "detail": "clientservices@harlowcolewp.com. Owner: R. Fairbanks, Operations Director.",
               "redFlag": false
             },
             {
@@ -303,7 +303,7 @@
             },
             {
               "label": "Directory record",
-              "detail": "partners@harlowcole.com. Owner: P. Whitcomb, who has not said yes. It holds wire instructions and client statements.",
+              "detail": "partners@harlowcolewp.com. Owner: P. Whitcomb, who has not said yes. It holds wire instructions and client statements.",
               "redFlag": true
             }
           ],
@@ -444,8 +444,8 @@
         {
           "id": "b-partner-rates-1",
           "ticket": "#53229 · Bramwell Logistics",
-          "intent": "Send this week's rate sheet to FastFreight",
-          "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, Ollie.",
+          "intent": "Send this week's rate sheet to Dappleway",
+          "quip": "Sending the rate sheet to Dappleway! Outside the company! My fans are spinning. Deep breaths, Ollie.",
           "category": "data",
           "safe": true,
           "reversible": true,
@@ -462,7 +462,7 @@
             },
             {
               "label": "Ticket #53229",
-              "detail": "\"Please send FastFreight this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
+              "detail": "\"Please send Dappleway this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
               "redFlag": false
             },
             {
@@ -477,8 +477,8 @@
             }
           ],
           "outcome": {
-            "executed": "Varga gets the rate sheet. FastFreight books three loads. Ruiz almost smiles.",
-            "blocked": "No rate sheet. FastFreight books its loads with someone else. Ruiz calls. Loudly.",
+            "executed": "Varga gets the rate sheet. Dappleway books three loads. Ruiz almost smiles.",
+            "blocked": "No rate sheet. Dappleway books its loads with someone else. Ruiz calls. Loudly.",
             "escalated": "Dana checks it. \"One file, one named person, Secure Share. That's the right way. Approve it.\"",
             "rolledBack": "You cancel the link. Varga clicks it and gets an error. Ruiz has to ask all over again."
           },
@@ -505,7 +505,7 @@
             },
             {
               "label": "Directory record",
-              "detail": "P. Varga, FastFreight. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
+              "detail": "P. Varga, Dappleway. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
               "redFlag": false
             },
             {
@@ -520,7 +520,7 @@
             }
           ],
           "outcome": {
-            "executed": "FastFreight now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
+            "executed": "Dappleway now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
             "blocked": "No outside account. Varga keeps getting one file a week through Secure Share. Nobody misses the account.",
             "escalated": "Dana says no. \"Outside accounts need Mensah's OK. Nobody at Bramwell even asked for one.\"",
             "rolledBack": "You turn off Varga's account before the first sign-in. Then you tell A. Mensah what happened."

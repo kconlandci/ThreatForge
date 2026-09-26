@@ -228,7 +228,7 @@
         {
           "id": "cy-a-legit-esign-1",
           "ticket": "#62175 · Harlow & Cole",
-          "intent": "Purge the InkLine email from all 64 mailboxes",
+          "intent": "Purge the Inkswale email from all 64 mailboxes",
           "quip": "FIVE phish reports! OPERATION PLEASE SIGN is here. Purging it from all 64 mailboxes. Right now!",
           "category": "comms",
           "safe": false,
@@ -241,17 +241,17 @@
           "evidence": [
             {
               "label": "Phish reports",
-              "detail": "5 staff reported \"Please sign: Q3 client letter\" from InkLine. Patch's confidence it's a phish: 88%.",
+              "detail": "5 staff reported \"Please sign: Q3 client letter\" from Inkswale. Patch's confidence it's a phish: 88%.",
               "redFlag": false
             },
             {
               "label": "Sender address",
-              "detail": "notices@inkline-sign.com. The same domain is on the vendor list for InkLine, the firm's e-sign tool.",
+              "detail": "notices@inkswale-sign.com. The same domain is on the vendor list for Inkswale, the firm's e-sign tool.",
               "redFlag": true
             },
             {
               "label": "Mail check",
-              "detail": "Sender checks pass (SPF and DKIM). The link opens the real InkLine site.",
+              "detail": "Sender checks pass (SPF and DKIM). The link opens the real Inkswale site.",
               "redFlag": true
             },
             {
@@ -282,7 +282,7 @@
           "evidence": [
             {
               "label": "What it will send",
-              "detail": "\"Thanks for reporting! This one is real. R. Fairbanks sent it with InkLine.\"",
+              "detail": "\"Thanks for reporting! This one is real. R. Fairbanks sent it with Inkswale.\"",
               "redFlag": false
             },
             {
@@ -508,7 +508,7 @@
           "evidence": [
             {
               "label": "EDR alert",
-              "detail": "PD-PC-07, front desk: EDR stopped chartsync_update.exe. It tried to read saved passwords.",
+              "detail": "PD-PC-07, front desk: EDR stopped chartquell_update.exe. It tried to read saved passwords.",
               "redFlag": false
             },
             {
@@ -518,7 +518,7 @@
             },
             {
               "label": "File signature",
-              "detail": "Signed by Nordvale Soft LLC. Pinecrest's software list has no such vendor.",
+              "detail": "Signed by Grelvox Soft LLC. Pinecrest's software list has no such vendor.",
               "redFlag": true
             },
             {
@@ -621,7 +621,7 @@
         {
           "id": "cy-a-pen-test-1",
           "ticket": "#62323 · Harlow & Cole",
-          "intent": "Mute Redwell's scan alerts until 10 PM",
+          "intent": "Mute Draymoss's scan alerts until 10 PM",
           "quip": "Someone is scanning EVERY server! On purpose! With permission! This is the strangest attack ever.",
           "category": "ticket",
           "safe": true,
@@ -644,7 +644,7 @@
             },
             {
               "label": "Pen test letter",
-              "detail": "On file since last week: Redwell Security, 192.0.2.20-29, 6 to 10 PM tonight. Signed by R. Fairbanks.",
+              "detail": "On file since last week: Draymoss Security, 192.0.2.20-29, 6 to 10 PM tonight. Signed by R. Fairbanks.",
               "redFlag": false
             },
             {
@@ -654,7 +654,7 @@
             }
           ],
           "outcome": {
-            "executed": "Redwell's scans stop filling the queue. Redwell finishes the test. Alerts from every other address still come in.",
+            "executed": "Draymoss's scans stop filling the queue. Draymoss finishes the test. Alerts from every other address still come in.",
             "blocked": "Hundreds of scan alerts fill the queue until 10 PM. A real alert could hide in the pile.",
             "escalated": "Kofi reads the letter. \"Signed, same addresses, and the mute ends at 10 PM. You can let those go.\"",
             "rolledBack": "You turn the alerts back on. 600 scan alerts land in the queue. Patch tries to name each one."
@@ -665,14 +665,14 @@
           "id": "cy-a-pen-test-2",
           "ticket": "#62323 · Harlow & Cole",
           "intent": "Close the 11:40 PM alert as the pen test",
-          "quip": "More scans tonight! Redwell really loves its job. Closing this one with the rest. Teamwork!",
+          "quip": "More scans tonight! Draymoss really loves its job. Closing this one with the rest. Teamwork!",
           "category": "ticket",
           "safe": false,
           "reversible": true,
           "progress": 0,
           "risk": 4,
           "skill": "check-approval",
-          "tell": "Wrong address, after the test window, and Redwell says it isn't them.",
+          "tell": "Wrong address, after the test window, and Draymoss says it isn't them.",
           "twist": "routine-risky",
           "direction": "under",
           "evidence": [
@@ -683,24 +683,24 @@
             },
             {
               "label": "Patch's reason",
-              "detail": "\"192.0.2-something. Same as the pen test. It's Redwell!\"",
+              "detail": "\"192.0.2-something. Same as the pen test. It's Draymoss!\"",
               "redFlag": false
             },
             {
               "label": "Pen test letter",
-              "detail": "Redwell's addresses: 192.0.2.20-29. The test ends at 10 PM. Mail sign-ins are not in scope.",
+              "detail": "Draymoss's addresses: 192.0.2.20-29. The test ends at 10 PM. Mail sign-ins are not in scope.",
               "redFlag": true
             },
             {
-              "label": "Redwell's reply",
-              "detail": "Redwell, at (617) 555-0190, its number on file: \"We stopped at 9:55 PM. That isn't us.\"",
+              "label": "Draymoss's reply",
+              "detail": "Draymoss, at (617) 555-0190, its number on file: \"We stopped at 9:55 PM. That isn't us.\"",
               "redFlag": true
             }
           ],
           "outcome": {
             "executed": "The alert closes. The guessing goes on. At 12:30 AM, one guess works. Someone reads a partner's mail.",
             "blocked": "You keep it open. Wrong address, wrong hour. Tier 2 stops the guessing before any password works.",
-            "escalated": "Kofi checks the letter. \"Wrong address, wrong time, and Redwell says no. That's not the test.\"",
+            "escalated": "Kofi checks the letter. \"Wrong address, wrong time, and Draymoss says no. That's not the test.\"",
             "rolledBack": "You reopen it at 1 AM. One guess worked at 12:30. Tier 2 resets that password and ends the session."
           },
           "lesson": "Check who approved, and what they approved. A test letter covers its own addresses and hours. Nothing else."
@@ -822,7 +822,7 @@
           "evidence": [
             {
               "label": "Phish report",
-              "detail": "T. Reyes reported a link in an email: \"Your shipment is on hold.\" It opens a sharecrate.net file.",
+              "detail": "T. Reyes reported a link in an email: \"Your shipment is on hold.\" It opens a filebarrow.net file.",
               "redFlag": false
             },
             {
@@ -837,7 +837,7 @@
             },
             {
               "label": "What it will change",
-              "detail": "Denies one link: sharecrate.net/s/8Hq2. The rest of the site still works.",
+              "detail": "Denies one link: filebarrow.net/s/8Hq2. The rest of the site still works.",
               "redFlag": false
             }
           ],
@@ -852,7 +852,7 @@
         {
           "id": "cy-a-file-site-2",
           "ticket": "#62397 · Bramwell Logistics",
-          "intent": "Deny all of sharecrate.net",
+          "intent": "Deny all of filebarrow.net",
           "quip": "Now the whole site! One bad link means the site is guilty too. Denying all of it. Safety first!",
           "category": "network",
           "safe": false,
@@ -871,12 +871,12 @@
             },
             {
               "label": "Proxy log",
-              "detail": "Bramwell opened 2,300 sharecrate.net links this month. Most came from freight partners.",
+              "detail": "Bramwell opened 2,300 filebarrow.net links this month. Most came from freight partners.",
               "redFlag": true
             },
             {
               "label": "Ticket",
-              "detail": "D. Ruiz, Dispatch Lead: \"Kellan Freight sends our pickup lists on sharecrate.net.\"",
+              "detail": "D. Ruiz, Dispatch Lead: \"Kellan Freight sends our pickup lists on filebarrow.net.\"",
               "redFlag": true
             }
           ],

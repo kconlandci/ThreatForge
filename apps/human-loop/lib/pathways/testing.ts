@@ -81,6 +81,13 @@ export interface PathwayExpectations {
 /** Copy rules for every pathway. */
 const BANNED_CLAIMS = [/placement rate/i, /\bISO\b/, /\bWIOA\b/, /guarantee/i, /certif/i, /\bhired\b/i];
 
+/**
+ * Made-up names retired because they matched real businesses, products or live domains (name
+ * check, Sept 2026). Case-sensitive on purpose: internal step ids such as "cn-stonebridge-call" stay.
+ */
+const RETIRED_NAMES =
+  /QuickChat|Kestrel|FastFreight|ChartSync|sharecrate|OrbiSight|Stonebridge|stonebridge-?custody|Redwell|Ledgerwell|InkLine|inkline-sign|Nordvale|Birchfield|pdfwren|harlowcole(-mail)?\.com|quill-?bot|[Cc]astle [Ff]l?oo[dr]s|[Gg]limmer(line|net)/;
+
 /** Real security vendors, products, threat groups and malware: never in cyber content. */
 export const CYBER_BRANDS =
   /\b(CrowdStrike|SentinelOne|Okta|Duo|Microsoft|Defender|Azure|Entra|Google|Gmail|VirusTotal|MITRE|Splunk|Palo Alto|Cisco|Cloudflare|Akamai|Fortinet|Proofpoint|Mimecast|LockBit|Conti|REvil|Emotet|Cobalt Strike|Kitewire|Kiteworks)\b|\bAPT ?\d+/;
@@ -122,7 +129,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     fixedStepPrefix: null,
     hub: { battle: "ollie", talk: "dana", looks: ["whiteboard", "coffee", "printer"], boardCode: "VP-04" },
     skillsLink: "whiteboard",
-    banned: BANNED_CLAIMS,
+    banned: [...BANNED_CLAIMS, RETIRED_NAMES],
     letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     requireDirection: false,
     requireExample: false,
@@ -164,7 +171,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     fixedStepPrefix: "cy-",
     hub: { battle: "patch", talk: "kofi", looks: ["board", "coffee", "locker"], boardCode: "CT-01" },
     skillsLink: "board",
-    banned: [...BANNED_CLAIMS, CYBER_BRANDS],
+    banned: [...BANNED_CLAIMS, RETIRED_NAMES, CYBER_BRANDS],
     letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     requireDirection: true,
     requireExample: true,
@@ -206,7 +213,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     fixedStepPrefix: "cn-",
     hub: { battle: "nimbus", talk: "nadia", looks: ["board", "coffee", "cart"], boardCode: "CW-01" },
     skillsLink: "board",
-    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS],
+    banned: [...BANNED_CLAIMS, RETIRED_NAMES, CYBER_BRANDS, CLOUD_BRANDS],
     letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     scaryRe: /\b(delete|remove|reboot|restart|fail ?over|scale|stop|shut|turn off|deny|disable|wipe|purge)\b/i,
     requireDirection: true,
@@ -249,7 +256,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     fixedStepPrefix: "fs-",
     hub: { battle: "piper", talk: "leo", looks: ["board", "coffee", "box"], boardCode: "CR-01" },
     skillsLink: "board",
-    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS],
+    banned: [...BANNED_CLAIMS, RETIRED_NAMES, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS],
     letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     scaryRe: /\b(delete|remove|drop|revert|rotate|disable|turn off|wipe|purge|force|kill|shut|lock|replace)\b/i,
     requireDirection: true,
@@ -293,7 +300,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "quill", talk: "marisol", looks: ["board", "coffee", "cabinet"], boardCode: "SC-01" },
     skillsLink: "board",
     // "quill-bot" would spell a real AI writing app.
-    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS, BA_BRANDS, /quill-?bot/i, /castle fl?oo(d|r)s|glimmer(line|net)/i],
+    banned: [...BANNED_CLAIMS, RETIRED_NAMES, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS, BA_BRANDS],
     letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     scaryRe: /\b(delete|remove|merge|unpublish|archive|turn off|stop|pause|drop|cancel|wipe|purge|take down)\b/i,
     requireDirection: true,

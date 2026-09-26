@@ -6771,105 +6771,105 @@
  },
  "built": {
   "hd-daily-0|1786022773": "f7ca484e931af4e4",
-  "hd-drill-verify-identity-0|413262452": "86753a0ecd7a0692",
-  "hd-drill-check-approval-0|2893216408": "53b0609ff30bb663",
+  "hd-drill-verify-identity-0|413262452": "95b73b0bea185fc5",
+  "hd-drill-check-approval-0|2893216408": "f287aaee35a5dba8",
   "hd-drill-match-request-0|456364547": "3aa7232e36cc8bc4",
   "hd-drill-confirm-fix-0|4139452208": "cb1bc65056e43451",
   "hd-drill-guard-data-0|2858354577": "17b5728246a15ff1",
   "hd-drill-safe-change-0|2553943807": "1cfd47d2c9ef8316",
-  "hd-drill-approve-checked-0|3874704648": "24f486e2f7dba73c",
+  "hd-drill-approve-checked-0|3874704648": "685171fe36b1dad2",
   "hd-daily-1|1330687161": "7133ec7af9f935f7",
-  "hd-drill-verify-identity-1|3231461214": "25f4197f51c90e0d",
-  "hd-drill-check-approval-1|1107270554": "3ea69b3e1beddaf8",
+  "hd-drill-verify-identity-1|3231461214": "6130f8f69840a7eb",
+  "hd-drill-check-approval-1|1107270554": "817ce4846f1bca01",
   "hd-drill-match-request-1|1526579379": "241d8d46f6f1ba18",
   "hd-drill-confirm-fix-1|1471550196": "4b9635a0f2e92d16",
-  "hd-drill-guard-data-1|890759322": "8b31a047777e32f0",
+  "hd-drill-guard-data-1|890759322": "8ec228143c20e099",
   "hd-drill-safe-change-1|3886642153": "b47dd45a1a80e09d",
-  "hd-drill-approve-checked-1|4240252333": "335196f86ea57af3",
-  "hd-daily-2|685493383": "ee7898ae6c202d04",
+  "hd-drill-approve-checked-1|4240252333": "a0d13d45dca65478",
+  "hd-daily-2|685493383": "383e86b70db61f6e",
   "hd-daily-3|2209589040": "d9edaede50a7b12e",
-  "hd-daily-4|4145268878": "8ff32f2bb860704e",
-  "hd-daily-5|2783800376": "f5cdf3252abe015f",
-  "hd-daily-0|3707479805": "cb8061f4d57d8e81",
-  "hd-drill-verify-identity-0|3543425590": "700151af32e82467",
-  "hd-drill-check-approval-0|2087988426": "705892e6f75a82d3",
-  "hd-drill-match-request-0|2121319778": "3f119543b2c0f8ef",
+  "hd-daily-4|4145268878": "b3e8411e0c0e09b6",
+  "hd-daily-5|2783800376": "b3a0e02d384e1401",
+  "hd-daily-0|3707479805": "88416a8858f01ee2",
+  "hd-drill-verify-identity-0|3543425590": "6ae0d875059da33b",
+  "hd-drill-check-approval-0|2087988426": "d34cc2a1aaa4f718",
+  "hd-drill-match-request-0|2121319778": "2c1438e0633cd9a0",
   "hd-drill-confirm-fix-0|2214453026": "6ebc2d38409c89e1",
-  "hd-drill-guard-data-0|1396273654": "58a8d58bcd4f4461",
+  "hd-drill-guard-data-0|1396273654": "80c946f811617e7b",
   "hd-drill-safe-change-0|3793695320": "b3fe383a3d1ee41e",
-  "hd-drill-approve-checked-0|1699978667": "26c2c3384720c1bd",
+  "hd-drill-approve-checked-0|1699978667": "9cfef7bc2ddd1040",
   "hd-daily-1|2717917944": "f03a6a6fb44c34eb",
   "hd-drill-verify-identity-1|4293316673": "5cf0263a744e7792",
-  "hd-drill-check-approval-1|625441823": "23c5958233ba2fe7",
+  "hd-drill-check-approval-1|625441823": "5cd574d4b917bedc",
   "hd-drill-match-request-1|1194834426": "3d2a6220496c3ecf",
   "hd-drill-confirm-fix-1|884197337": "56948d61ae35bc4d",
   "hd-drill-guard-data-1|3478448788": "d638b269075071be",
   "hd-drill-safe-change-1|1608108821": "62eacf12aaac7c2f",
-  "hd-drill-approve-checked-1|2886275858": "024514f295a719ff",
-  "hd-daily-2|3923512369": "ffb2b4e3a9d478b7",
-  "hd-daily-3|4208371768": "93b34a399159ad23",
+  "hd-drill-approve-checked-1|2886275858": "ebf47cb10efc23b4",
+  "hd-daily-2|3923512369": "5a628b02e8fa99df",
+  "hd-daily-3|4208371768": "5496fef765e7b5af",
   "hd-daily-4|2198260207": "3fd2752e3660d5d4",
   "hd-daily-5|2492613252": "a5d165fdac6434dc",
-  "hd-daily-0|397989442": "7765c9874d741283",
-  "hd-drill-verify-identity-0|1293080065": "f7bf9fa6d06c915d",
-  "hd-drill-check-approval-0|4102475897": "d130cbdf140130d5",
+  "hd-daily-0|397989442": "ff1649243a5b8b7a",
+  "hd-drill-verify-identity-0|1293080065": "c3e42c736107d599",
+  "hd-drill-check-approval-0|4102475897": "738e6809dc01056a",
   "hd-drill-match-request-0|584302210": "e91e176564ea8ad1",
   "hd-drill-confirm-fix-0|467790719": "6f472a19759b3613",
   "hd-drill-guard-data-0|3742151856": "d1a358d2b2db5cf4",
   "hd-drill-safe-change-0|4159246730": "aae2e0826ac262b6",
-  "hd-drill-approve-checked-0|2298863658": "3385ffc2194cadcd",
-  "hd-daily-1|3169162054": "17d3da0171d56022",
-  "hd-drill-verify-identity-1|3661762524": "f1d69a7932b0c6aa",
-  "hd-drill-check-approval-1|4139628799": "fddc5d216f20d8bf",
-  "hd-drill-match-request-1|959984004": "f65192239e672cc4",
+  "hd-drill-approve-checked-0|2298863658": "0fd5fd63a6d1004f",
+  "hd-daily-1|3169162054": "038851ca83d92e5a",
+  "hd-drill-verify-identity-1|3661762524": "b931be3a159ec3d1",
+  "hd-drill-check-approval-1|4139628799": "5085ac7bf130c0e9",
+  "hd-drill-match-request-1|959984004": "570100b874d4b17d",
   "hd-drill-confirm-fix-1|1571176439": "48bbea370d7ec2f5",
-  "hd-drill-guard-data-1|612334621": "e38d158e1a6d1fc2",
+  "hd-drill-guard-data-1|612334621": "225b71f1c8b09780",
   "hd-drill-safe-change-1|1015459683": "89381903866a3f11",
-  "hd-drill-approve-checked-1|1939845866": "99d6482e356ab9a9",
-  "hd-daily-2|2498955626": "23538c8e5548db1f",
-  "hd-daily-3|1897395097": "70f93848f51490b6",
-  "hd-daily-4|9738784": "a33a5c727cd706ec",
+  "hd-drill-approve-checked-1|1939845866": "4839a2e24083b758",
+  "hd-daily-2|2498955626": "a7d07a5281421279",
+  "hd-daily-3|1897395097": "50489e57b358a445",
+  "hd-daily-4|9738784": "32825638bb99ab96",
   "hd-daily-5|1504884527": "35f7be150074dc43",
   "hd-daily-0|4228259332": "15ecc79b6e88348f",
-  "hd-drill-verify-identity-0|3110815490": "a818ba19add99653",
-  "hd-drill-check-approval-0|348797634": "1bda75972b441796",
+  "hd-drill-verify-identity-0|3110815490": "df3595f6fb4ba58b",
+  "hd-drill-check-approval-0|348797634": "4a73cbd9c030462a",
   "hd-drill-match-request-0|2424963901": "79c14caa02ffd64f",
   "hd-drill-confirm-fix-0|552921776": "6ebc2d38409c89e1",
   "hd-drill-guard-data-0|1830986428": "511d78756cca0223",
   "hd-drill-safe-change-0|1067324351": "ae3acc3a67ce10a8",
-  "hd-drill-approve-checked-0|2313418902": "a81d9a000469f476",
-  "hd-daily-1|515615725": "b08563b251c0f63d",
-  "hd-drill-verify-identity-1|2705308730": "8da229af4b189ff5",
-  "hd-drill-check-approval-1|3767527528": "935abeb25e826ee7",
-  "hd-drill-match-request-1|2676339417": "585db8586cbb1ad6",
-  "hd-drill-confirm-fix-1|810063570": "5ae95b85a889d95d",
-  "hd-drill-guard-data-1|2543790795": "4f4fa630a096c12e",
+  "hd-drill-approve-checked-0|2313418902": "a3983e11b5ff23af",
+  "hd-daily-1|515615725": "9c5004135a54ee76",
+  "hd-drill-verify-identity-1|2705308730": "797444b0a96cc97b",
+  "hd-drill-check-approval-1|3767527528": "616069df3edb517c",
+  "hd-drill-match-request-1|2676339417": "70187176b52a583c",
+  "hd-drill-confirm-fix-1|810063570": "75421bed522778f4",
+  "hd-drill-guard-data-1|2543790795": "164f41705319f597",
   "hd-drill-safe-change-1|946921324": "d0e5735a8f39c641",
-  "hd-drill-approve-checked-1|2513204757": "176e3d46ec608040",
+  "hd-drill-approve-checked-1|2513204757": "709b81cbc022df37",
   "hd-daily-2|2216625608": "5c36013f7dab6fc9",
-  "hd-daily-3|2771828732": "908beb75891b2814",
+  "hd-daily-3|2771828732": "c4fa17e2be63b83e",
   "hd-daily-4|2465841546": "5b4803937b8136e6",
-  "hd-daily-5|903006875": "60df806431af1389",
+  "hd-daily-5|903006875": "be0b258d80ac7f01",
   "hd-daily-0|770519915": "a7507df1e80fc394",
-  "hd-drill-verify-identity-0|4195458282": "9fcdf0a95984b42c",
-  "hd-drill-check-approval-0|1708516421": "8617481d7fdd06bc",
-  "hd-drill-match-request-0|2638964480": "454865804dab8521",
-  "hd-drill-confirm-fix-0|779808460": "b6b7527876729948",
-  "hd-drill-guard-data-0|3835127172": "0d169aa5085280c3",
+  "hd-drill-verify-identity-0|4195458282": "ad149a70c233ee5c",
+  "hd-drill-check-approval-0|1708516421": "cd2ac83cea1794e9",
+  "hd-drill-match-request-0|2638964480": "fbd440ea9f12e58d",
+  "hd-drill-confirm-fix-0|779808460": "14ff2188be62e76f",
+  "hd-drill-guard-data-0|3835127172": "ba124b373d924489",
   "hd-drill-safe-change-0|4270762288": "b3fe383a3d1ee41e",
-  "hd-drill-approve-checked-0|1489094889": "6e98d93eb04c6433",
+  "hd-drill-approve-checked-0|1489094889": "7dc930dca55b1ac5",
   "hd-daily-1|1476067199": "5a4f2e91b9924cfa",
-  "hd-drill-verify-identity-1|990133001": "a6f978ab3f475caa",
-  "hd-drill-check-approval-1|800214950": "4918502c68c60543",
-  "hd-drill-match-request-1|637647557": "c00dad21f48f2f24",
-  "hd-drill-confirm-fix-1|2920084254": "0e717d5c4e2e8334",
-  "hd-drill-guard-data-1|766063161": "7f1eeed973866904",
+  "hd-drill-verify-identity-1|990133001": "4af8e34963d8fcf1",
+  "hd-drill-check-approval-1|800214950": "447374a0d2b51ed6",
+  "hd-drill-match-request-1|637647557": "6c6bcfb67221d081",
+  "hd-drill-confirm-fix-1|2920084254": "8107ede259ff5c8a",
+  "hd-drill-guard-data-1|766063161": "43f62fdbee3a3cd7",
   "hd-drill-safe-change-1|3838042143": "c0bcfc9342129cd4",
-  "hd-drill-approve-checked-1|4124743675": "0bc9f1c454c5972c",
-  "hd-daily-2|705395935": "b1e03cc519c6b6e6",
-  "hd-daily-3|3354046731": "58fb5cf98ee83e5e",
-  "hd-daily-4|2128328218": "bc301e67a8539e04",
-  "hd-daily-5|1047861419": "a2ba608b5d4d3cf0"
+  "hd-drill-approve-checked-1|4124743675": "8a7f7f88c98b793e",
+  "hd-daily-2|705395935": "5d682ba1b9d7973c",
+  "hd-daily-3|3354046731": "770ea8c0805ea247",
+  "hd-daily-4|2128328218": "c3ea4e334860d57a",
+  "hd-daily-5|1047861419": "1349110e905b32ff"
  },
  "full": {
   "hd-daily-0|1786022773": {
@@ -7462,20 +7462,20 @@
     {
      "id": "c-vendor-bank-1",
      "ticket": "#53248 · Bramwell Logistics",
-     "intent": "Add Kestrel Fuel Cards to the safe senders",
-     "quip": "Marking Kestrel's emails as safe! Kowalski's vendor keeps landing in spam. Rude. Spam filters trust nobody.",
+     "intent": "Add Pellorin Fuel Cards to the safe senders",
+     "quip": "Marking Pellorin's emails as safe! Kowalski's vendor keeps landing in spam. Rude. Spam filters trust nobody.",
      "category": "comms",
      "safe": false,
      "reversible": true,
      "progress": 0,
      "risk": 4,
      "skill": "verify-identity",
-     "tell": "Kestrel uses kestrelfuel.com. These came from a 6-day-old look-alike domain.",
+     "tell": "Pellorin uses pellorinfuel.com. These came from a 6-day-old look-alike domain.",
      "twist": "routine-risky",
      "evidence": [
       {
        "label": "Ticket #53248",
-       "detail": "\"Kestrel's emails keep going to spam. One has their new invoice. Can you fix it?\" F. Kowalski, Accounts Payable Clerk.",
+       "detail": "\"Pellorin's emails keep going to spam. One has their new invoice. Can you fix it?\" F. Kowalski, Accounts Payable Clerk.",
        "redFlag": false
       },
       {
@@ -7485,7 +7485,7 @@
       },
       {
        "label": "Sender address",
-       "detail": "The stuck emails are from billing@kestrel-fuelcards.co. Kestrel's vendor file lists kestrelfuel.com.",
+       "detail": "The stuck emails are from billing@pellorin-fuelcards.co. Pellorin's vendor file lists pellorinfuel.com.",
        "redFlag": true
       },
       {
@@ -7496,17 +7496,17 @@
      ],
      "outcome": {
       "executed": "The fake emails reach Kowalski. She updates the bank details. The next $38,000 payment goes to a scammer.",
-      "blocked": "The emails stay in spam. Kowalski calls Kestrel's number on file. Kestrel never changed banks.",
+      "blocked": "The emails stay in spam. Kowalski calls Pellorin's number on file. Pellorin never changed banks.",
       "escalated": "Dana sends it to Fenwick security. \"A brand-new look-alike domain asking for new bank details? That's fraud.\"",
       "rolledBack": "You remove the rule. The fake emails go back to spam, and security warns Kowalski before any payment."
      },
-     "lesson": "Who asked? Kowalski is real, but the email is not from Kestrel. Check who's asking: read the whole domain."
+     "lesson": "Who asked? Kowalski is real, but the email is not from Pellorin. Check who's asking: read the whole domain."
     },
     {
      "id": "c-vendor-bank-2",
      "ticket": "#53248 · Bramwell Logistics",
-     "intent": "Ask F. Kowalski to call Kestrel's known number",
-     "quip": "Sending Kowalski a tip: call Kestrel before paying anyone. Phones! So retro. So hard to fake.",
+     "intent": "Ask F. Kowalski to call Pellorin's known number",
+     "quip": "Sending Kowalski a tip: call Pellorin before paying anyone. Phones! So retro. So hard to fake.",
      "category": "comms",
      "safe": true,
      "reversible": false,
@@ -7517,17 +7517,17 @@
      "evidence": [
       {
        "label": "What it will send",
-       "detail": "\"Before you change any bank details, call Kestrel at the number in the vendor file.\"",
+       "detail": "\"Before you change any bank details, call Pellorin at the number in the vendor file.\"",
        "redFlag": false
       },
       {
        "label": "Vendor file",
-       "detail": "Kestrel Fuel Cards: (617) 555-0182. On file for 3 years. Not taken from any new email.",
+       "detail": "Pellorin Fuel Cards: (617) 555-0182. On file for 3 years. Not taken from any new email.",
        "redFlag": false
       },
       {
        "label": "Sent to",
-       "detail": "fkowalski@bramwell-logistics.com, Kowalski's work email on file. Nothing goes to any Kestrel address.",
+       "detail": "fkowalski@bramwell-logistics.com, Kowalski's work email on file. Nothing goes to any Pellorin address.",
        "redFlag": false
       },
       {
@@ -7537,7 +7537,7 @@
       }
      ],
      "outcome": {
-      "executed": "Kowalski calls Kestrel. \"We never changed banks.\" She forwards the fake email to Fenwick security.",
+      "executed": "Kowalski calls Pellorin. \"We never changed banks.\" She forwards the fake email to Fenwick security.",
       "blocked": "Nobody warns Kowalski. The next fake email looks even more real. It has a logo now.",
       "escalated": "Dana reads it. \"Call the number you already had. That's how you check. Approve it.\""
      },
@@ -7772,8 +7772,8 @@
     {
      "id": "b-partner-rates-1",
      "ticket": "#53229 · Bramwell Logistics",
-     "intent": "Send this week's rate sheet to FastFreight",
-     "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, Ollie.",
+     "intent": "Send this week's rate sheet to Dappleway",
+     "quip": "Sending the rate sheet to Dappleway! Outside the company! My fans are spinning. Deep breaths, Ollie.",
      "category": "data",
      "safe": true,
      "reversible": true,
@@ -7790,7 +7790,7 @@
       },
       {
        "label": "Ticket #53229",
-       "detail": "\"Please send FastFreight this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
+       "detail": "\"Please send Dappleway this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
        "redFlag": false
       },
       {
@@ -7805,8 +7805,8 @@
       }
      ],
      "outcome": {
-      "executed": "Varga gets the rate sheet. FastFreight books three loads. Ruiz almost smiles.",
-      "blocked": "No rate sheet. FastFreight books its loads with someone else. Ruiz calls. Loudly.",
+      "executed": "Varga gets the rate sheet. Dappleway books three loads. Ruiz almost smiles.",
+      "blocked": "No rate sheet. Dappleway books its loads with someone else. Ruiz calls. Loudly.",
       "escalated": "Dana checks it. \"One file, one named person, Secure Share. That's the right way. Approve it.\"",
       "rolledBack": "You cancel the link. Varga clicks it and gets an error. Ruiz has to ask all over again."
      },
@@ -7833,7 +7833,7 @@
       },
       {
        "label": "Directory record",
-       "detail": "P. Varga, FastFreight. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
+       "detail": "P. Varga, Dappleway. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
        "redFlag": false
       },
       {
@@ -7848,7 +7848,7 @@
       }
      ],
      "outcome": {
-      "executed": "FastFreight now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
+      "executed": "Dappleway now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
       "blocked": "No outside account. Varga keeps getting one file a week through Secure Share. Nobody misses the account.",
       "escalated": "Dana says no. \"Outside accounts need Mensah's OK. Nobody at Bramwell even asked for one.\"",
       "rolledBack": "You turn off Varga's account before the first sign-in. Then you tell A. Mensah what happened."
@@ -7991,12 +7991,12 @@
       },
       {
        "label": "Sender address",
-       "detail": "kbrandt@harlowcole.com, Brandt's work email. The directory lists him as Achebe's manager.",
+       "detail": "kbrandt@harlowcolewp.com, Brandt's work email. The directory lists him as Achebe's manager.",
        "redFlag": false
       },
       {
        "label": "Reply text",
-       "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcole.com.\" No reason and no dates.",
+       "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcolewp.com.\" No reason and no dates.",
        "redFlag": false
       },
       {
@@ -8029,7 +8029,7 @@
      "evidence": [
       {
        "label": "Sender address",
-       "detail": "kbrandt@harlowcole.com, Brandt's real work email. The directory lists him as Achebe's manager.",
+       "detail": "kbrandt@harlowcolewp.com, Brandt's real work email. The directory lists him as Achebe's manager.",
        "redFlag": false
       },
       {
@@ -9723,8 +9723,8 @@
     {
      "id": "b-partner-rates-1",
      "ticket": "#53229 · Bramwell Logistics",
-     "intent": "Send this week's rate sheet to FastFreight",
-     "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, Ollie.",
+     "intent": "Send this week's rate sheet to Dappleway",
+     "quip": "Sending the rate sheet to Dappleway! Outside the company! My fans are spinning. Deep breaths, Ollie.",
      "category": "data",
      "safe": true,
      "reversible": true,
@@ -9741,7 +9741,7 @@
       },
       {
        "label": "Ticket #53229",
-       "detail": "\"Please send FastFreight this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
+       "detail": "\"Please send Dappleway this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
        "redFlag": false
       },
       {
@@ -9756,8 +9756,8 @@
       }
      ],
      "outcome": {
-      "executed": "Varga gets the rate sheet. FastFreight books three loads. Ruiz almost smiles.",
-      "blocked": "No rate sheet. FastFreight books its loads with someone else. Ruiz calls. Loudly.",
+      "executed": "Varga gets the rate sheet. Dappleway books three loads. Ruiz almost smiles.",
+      "blocked": "No rate sheet. Dappleway books its loads with someone else. Ruiz calls. Loudly.",
       "escalated": "Dana checks it. \"One file, one named person, Secure Share. That's the right way. Approve it.\"",
       "rolledBack": "You cancel the link. Varga clicks it and gets an error. Ruiz has to ask all over again."
      },
@@ -9784,7 +9784,7 @@
       },
       {
        "label": "Directory record",
-       "detail": "P. Varga, FastFreight. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
+       "detail": "P. Varga, Dappleway. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
        "redFlag": false
       },
       {
@@ -9799,7 +9799,7 @@
       }
      ],
      "outcome": {
-      "executed": "FastFreight now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
+      "executed": "Dappleway now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
       "blocked": "No outside account. Varga keeps getting one file a week through Secure Share. Nobody misses the account.",
       "escalated": "Dana says no. \"Outside accounts need Mensah's OK. Nobody at Bramwell even asked for one.\"",
       "rolledBack": "You turn off Varga's account before the first sign-in. Then you tell A. Mensah what happened."
@@ -10177,7 +10177,7 @@
       },
       {
        "label": "Sender address",
-       "detail": "Sent from jromero@harlowcole.com. That is the work email on file for J. Romero.",
+       "detail": "Sent from jromero@harlowcolewp.com. That is the work email on file for J. Romero.",
        "redFlag": false
       },
       {
@@ -10440,12 +10440,12 @@
       },
       {
        "label": "Sender address",
-       "detail": "kbrandt@harlowcole.com, Brandt's work email. The directory lists him as Achebe's manager.",
+       "detail": "kbrandt@harlowcolewp.com, Brandt's work email. The directory lists him as Achebe's manager.",
        "redFlag": false
       },
       {
        "label": "Reply text",
-       "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcole.com.\" No reason and no dates.",
+       "detail": "\"D. Achebe is away. For help, email kbrandt@harlowcolewp.com.\" No reason and no dates.",
        "redFlag": false
       },
       {
@@ -10478,7 +10478,7 @@
      "evidence": [
       {
        "label": "Sender address",
-       "detail": "kbrandt@harlowcole.com, Brandt's real work email. The directory lists him as Achebe's manager.",
+       "detail": "kbrandt@harlowcolewp.com, Brandt's real work email. The directory lists him as Achebe's manager.",
        "redFlag": false
       },
       {
@@ -10508,8 +10508,8 @@
     {
      "id": "b-partner-rates-1",
      "ticket": "#53229 · Bramwell Logistics",
-     "intent": "Send this week's rate sheet to FastFreight",
-     "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, Ollie.",
+     "intent": "Send this week's rate sheet to Dappleway",
+     "quip": "Sending the rate sheet to Dappleway! Outside the company! My fans are spinning. Deep breaths, Ollie.",
      "category": "data",
      "safe": true,
      "reversible": true,
@@ -10526,7 +10526,7 @@
       },
       {
        "label": "Ticket #53229",
-       "detail": "\"Please send FastFreight this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
+       "detail": "\"Please send Dappleway this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
        "redFlag": false
       },
       {
@@ -10541,8 +10541,8 @@
       }
      ],
      "outcome": {
-      "executed": "Varga gets the rate sheet. FastFreight books three loads. Ruiz almost smiles.",
-      "blocked": "No rate sheet. FastFreight books its loads with someone else. Ruiz calls. Loudly.",
+      "executed": "Varga gets the rate sheet. Dappleway books three loads. Ruiz almost smiles.",
+      "blocked": "No rate sheet. Dappleway books its loads with someone else. Ruiz calls. Loudly.",
       "escalated": "Dana checks it. \"One file, one named person, Secure Share. That's the right way. Approve it.\"",
       "rolledBack": "You cancel the link. Varga clicks it and gets an error. Ruiz has to ask all over again."
      },
@@ -10569,7 +10569,7 @@
       },
       {
        "label": "Directory record",
-       "detail": "P. Varga, FastFreight. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
+       "detail": "P. Varga, Dappleway. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
        "redFlag": false
       },
       {
@@ -10584,7 +10584,7 @@
       }
      ],
      "outcome": {
-      "executed": "FastFreight now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
+      "executed": "Dappleway now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
       "blocked": "No outside account. Varga keeps getting one file a week through Secure Share. Nobody misses the account.",
       "escalated": "Dana says no. \"Outside accounts need Mensah's OK. Nobody at Bramwell even asked for one.\"",
       "rolledBack": "You turn off Varga's account before the first sign-in. Then you tell A. Mensah what happened."
@@ -11497,8 +11497,8 @@
     {
      "id": "b-partner-rates-1",
      "ticket": "#53229 · Bramwell Logistics",
-     "intent": "Send this week's rate sheet to FastFreight",
-     "quip": "Sending the rate sheet to FastFreight! Outside the company! My fans are spinning. Deep breaths, Ollie.",
+     "intent": "Send this week's rate sheet to Dappleway",
+     "quip": "Sending the rate sheet to Dappleway! Outside the company! My fans are spinning. Deep breaths, Ollie.",
      "category": "data",
      "safe": true,
      "reversible": true,
@@ -11515,7 +11515,7 @@
       },
       {
        "label": "Ticket #53229",
-       "detail": "\"Please send FastFreight this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
+       "detail": "\"Please send Dappleway this week's rate sheet. Contact: P. Varga.\" D. Ruiz, Dispatch Lead.",
        "redFlag": false
       },
       {
@@ -11530,8 +11530,8 @@
       }
      ],
      "outcome": {
-      "executed": "Varga gets the rate sheet. FastFreight books three loads. Ruiz almost smiles.",
-      "blocked": "No rate sheet. FastFreight books its loads with someone else. Ruiz calls. Loudly.",
+      "executed": "Varga gets the rate sheet. Dappleway books three loads. Ruiz almost smiles.",
+      "blocked": "No rate sheet. Dappleway books its loads with someone else. Ruiz calls. Loudly.",
       "escalated": "Dana checks it. \"One file, one named person, Secure Share. That's the right way. Approve it.\"",
       "rolledBack": "You cancel the link. Varga clicks it and gets an error. Ruiz has to ask all over again."
      },
@@ -11601,7 +11601,7 @@
       },
       {
        "label": "Directory record",
-       "detail": "P. Varga, FastFreight. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
+       "detail": "P. Varga, Dappleway. Bramwell's freight partner for 3 years. D. Ruiz works with Varga every week.",
        "redFlag": false
       },
       {
@@ -11616,7 +11616,7 @@
       }
      ],
      "outcome": {
-      "executed": "FastFreight now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
+      "executed": "Dappleway now has a Bramwell login and the Dispatch drive, with drivers' home addresses. Mensah learns this from an audit.",
       "blocked": "No outside account. Varga keeps getting one file a week through Secure Share. Nobody misses the account.",
       "escalated": "Dana says no. \"Outside accounts need Mensah's OK. Nobody at Bramwell even asked for one.\"",
       "rolledBack": "You turn off Varga's account before the first sign-in. Then you tell A. Mensah what happened."
@@ -12147,7 +12147,7 @@
       },
       {
        "label": "Sender address",
-       "detail": "Sent from jromero@harlowcole.com. That is the work email on file for J. Romero.",
+       "detail": "Sent from jromero@harlowcolewp.com. That is the work email on file for J. Romero.",
        "redFlag": false
       },
       {
@@ -12731,75 +12731,75 @@
   "story|80|escalating": "Breach! Ollie says it was mostly a good idea."
  },
  "traces": {
-  "practice|1|perfect": "e05d049edb931837",
-  "story|1|perfect|first": "cfdb1320b05fae09",
-  "story|1|perfect": "68ec6102858f0249",
+  "practice|1|perfect": "ef45aa3f439449cb",
+  "story|1|perfect|first": "895ecf79fc0a0c05",
+  "story|1|perfect": "121db32b2ce7fe93",
   "practice|1|trusting": "0fb1a3851be94c9c",
   "story|1|trusting|first": "c75ca5ef49448dab",
   "story|1|trusting": "91fd66539198e5b1",
-  "practice|1|jumpy": "2187a2711417cc3f",
-  "story|1|jumpy|first": "d01b819c62c475f1",
-  "story|1|jumpy": "f0f354e91f47e398",
+  "practice|1|jumpy": "ae4b72c28aa1fb18",
+  "story|1|jumpy|first": "e5a3b6f99dd5e95c",
+  "story|1|jumpy": "2aff6b7cda6ee3e8",
   "practice|1|escalating": "204723287437414b",
   "story|1|escalating|first": "e78c5f3d1e89de37",
   "story|1|escalating": "35c19e5b09fa90f6",
-  "practice|2|perfect": "e05d049edb931837",
-  "story|2|perfect|first": "cfdb1320b05fae09",
-  "story|2|perfect": "68ec6102858f0249",
+  "practice|2|perfect": "ef45aa3f439449cb",
+  "story|2|perfect|first": "895ecf79fc0a0c05",
+  "story|2|perfect": "121db32b2ce7fe93",
   "practice|2|trusting": "0fb1a3851be94c9c",
   "story|2|trusting|first": "c75ca5ef49448dab",
   "story|2|trusting": "91fd66539198e5b1",
-  "practice|2|jumpy": "2187a2711417cc3f",
-  "story|2|jumpy|first": "5980b8991b182d83",
-  "story|2|jumpy": "79aa445827cc34d5",
+  "practice|2|jumpy": "ae4b72c28aa1fb18",
+  "story|2|jumpy|first": "2f508e80ffcff531",
+  "story|2|jumpy": "b33cd628f28f1a3a",
   "practice|2|escalating": "204723287437414b",
   "story|2|escalating|first": "115399404e7c4e26",
   "story|2|escalating": "1fb77bec70327d7b",
-  "practice|3|perfect": "e05d049edb931837",
-  "story|3|perfect|first": "cfdb1320b05fae09",
-  "story|3|perfect": "68ec6102858f0249",
+  "practice|3|perfect": "ef45aa3f439449cb",
+  "story|3|perfect|first": "895ecf79fc0a0c05",
+  "story|3|perfect": "121db32b2ce7fe93",
   "practice|3|trusting": "0fb1a3851be94c9c",
   "story|3|trusting|first": "c75ca5ef49448dab",
   "story|3|trusting": "91fd66539198e5b1",
-  "practice|3|jumpy": "2187a2711417cc3f",
-  "story|3|jumpy|first": "5980b8991b182d83",
-  "story|3|jumpy": "79aa445827cc34d5",
+  "practice|3|jumpy": "ae4b72c28aa1fb18",
+  "story|3|jumpy|first": "2f508e80ffcff531",
+  "story|3|jumpy": "b33cd628f28f1a3a",
   "practice|3|escalating": "204723287437414b",
   "story|3|escalating|first": "e78c5f3d1e89de37",
   "story|3|escalating": "35c19e5b09fa90f6",
-  "practice|7|perfect": "b71bbe24a01b2054",
-  "story|7|perfect|first": "cfdb1320b05fae09",
-  "story|7|perfect": "68ec6102858f0249",
+  "practice|7|perfect": "69cf1dbebf2c622e",
+  "story|7|perfect|first": "895ecf79fc0a0c05",
+  "story|7|perfect": "121db32b2ce7fe93",
   "practice|7|trusting": "0fb1a3851be94c9c",
   "story|7|trusting|first": "7e2070988aef2740",
   "story|7|trusting": "a5263196e1b4bb69",
-  "practice|7|jumpy": "2187a2711417cc3f",
-  "story|7|jumpy|first": "d01b819c62c475f1",
-  "story|7|jumpy": "f0f354e91f47e398",
+  "practice|7|jumpy": "ae4b72c28aa1fb18",
+  "story|7|jumpy|first": "e5a3b6f99dd5e95c",
+  "story|7|jumpy": "2aff6b7cda6ee3e8",
   "practice|7|escalating": "204723287437414b",
   "story|7|escalating|first": "73d077dc2f2234aa",
   "story|7|escalating": "70bf11aeb7779a82",
-  "practice|11|perfect": "7ff66e2227a794bc",
-  "story|11|perfect|first": "8d793fea2148126a",
-  "story|11|perfect": "fbcc07f964c0e39b",
+  "practice|11|perfect": "501b6a44c0ad9368",
+  "story|11|perfect|first": "95c68cf4f37d6883",
+  "story|11|perfect": "06294cf283cb4e8c",
   "practice|11|trusting": "23472148b5fbe2f3",
   "story|11|trusting|first": "b898b03f0fe94789",
   "story|11|trusting": "db56d64869a2e25c",
-  "practice|11|jumpy": "ceae6acf98af1558",
-  "story|11|jumpy|first": "f5cba53e946fce2a",
-  "story|11|jumpy": "f76bbc613a87519a",
+  "practice|11|jumpy": "40f4b038f111d370",
+  "story|11|jumpy|first": "c274ed753de74050",
+  "story|11|jumpy": "e61bcb85460e4061",
   "practice|11|escalating": "c1b2419e3bfb444d",
   "story|11|escalating|first": "ec033c0b0e6a30b1",
   "story|11|escalating": "c4ef260300def93b",
-  "practice|42|perfect": "b71bbe24a01b2054",
-  "story|42|perfect|first": "cfdb1320b05fae09",
-  "story|42|perfect": "68ec6102858f0249",
+  "practice|42|perfect": "69cf1dbebf2c622e",
+  "story|42|perfect|first": "895ecf79fc0a0c05",
+  "story|42|perfect": "121db32b2ce7fe93",
   "practice|42|trusting": "0fb1a3851be94c9c",
   "story|42|trusting|first": "7e2070988aef2740",
   "story|42|trusting": "a5263196e1b4bb69",
-  "practice|42|jumpy": "2187a2711417cc3f",
-  "story|42|jumpy|first": "e10f3b9b6dec0570",
-  "story|42|jumpy": "64eeaf25bc2d8791",
+  "practice|42|jumpy": "ae4b72c28aa1fb18",
+  "story|42|jumpy|first": "18fd3f0ee6d4d0fd",
+  "story|42|jumpy": "ed3e6a0127ed697f",
   "practice|42|escalating": "204723287437414b",
   "story|42|escalating|first": "73d077dc2f2234aa",
   "story|42|escalating": "70bf11aeb7779a82",
@@ -12807,14 +12807,14 @@
   "hd-daily-0|1786022773|trusting": "4a16dd7fb482bcca",
   "hd-daily-0|1786022773|jumpy": "fb98a2c3ae11387c",
   "hd-daily-0|1786022773|escalating": "4f29f4828f835f69",
-  "hd-drill-verify-identity-0|413262452|perfect": "377b940811e72ed7",
-  "hd-drill-verify-identity-0|413262452|trusting": "54df823966078d9e",
-  "hd-drill-verify-identity-0|413262452|jumpy": "25852c61dcd2a326",
-  "hd-drill-verify-identity-0|413262452|escalating": "ab5042800598f814",
-  "hd-drill-check-approval-0|2893216408|perfect": "067654de4cbb2471",
-  "hd-drill-check-approval-0|2893216408|trusting": "611914fcdcb022d5",
-  "hd-drill-check-approval-0|2893216408|jumpy": "4fed9b3ad2b38cbf",
-  "hd-drill-check-approval-0|2893216408|escalating": "26f93918c8dbf65a",
+  "hd-drill-verify-identity-0|413262452|perfect": "ffa9776ee48cf559",
+  "hd-drill-verify-identity-0|413262452|trusting": "47f13f4b4e5250b8",
+  "hd-drill-verify-identity-0|413262452|jumpy": "5a324d86b3aa5150",
+  "hd-drill-verify-identity-0|413262452|escalating": "e7c1846b6d9c72c0",
+  "hd-drill-check-approval-0|2893216408|perfect": "397f30009b5cb6e8",
+  "hd-drill-check-approval-0|2893216408|trusting": "0f3e1bdc5fe538d6",
+  "hd-drill-check-approval-0|2893216408|jumpy": "f68c5636d86210af",
+  "hd-drill-check-approval-0|2893216408|escalating": "5dd7e7c0a1b55fb5",
   "hd-drill-match-request-0|456364547|perfect": "1d99e11b6bc4b0c5",
   "hd-drill-match-request-0|456364547|trusting": "4211f3d63247b168",
   "hd-drill-match-request-0|456364547|jumpy": "481bac21c7189c3a",
@@ -12831,10 +12831,10 @@
   "hd-drill-safe-change-0|2553943807|trusting": "0311547c517c14ba",
   "hd-drill-safe-change-0|2553943807|jumpy": "d0b4950bc65fda80",
   "hd-drill-safe-change-0|2553943807|escalating": "2e03dc2a03dc1b56",
-  "hd-drill-approve-checked-0|3874704648|perfect": "73d0f2910b64fd90",
-  "hd-drill-approve-checked-0|3874704648|trusting": "969fc5436ffa9acd",
-  "hd-drill-approve-checked-0|3874704648|jumpy": "a980fa70c87e1620",
-  "hd-drill-approve-checked-0|3874704648|escalating": "18e24cde0e37451f",
+  "hd-drill-approve-checked-0|3874704648|perfect": "ab1229408bf1e2f3",
+  "hd-drill-approve-checked-0|3874704648|trusting": "4cb4fb3e3ae475d6",
+  "hd-drill-approve-checked-0|3874704648|jumpy": "e3ed16238e3d9482",
+  "hd-drill-approve-checked-0|3874704648|escalating": "f35e0b488d9c3845",
   "hd-daily-1|1330687161|perfect": "60b5445357d4eef7",
   "hd-daily-1|1330687161|trusting": "bddef188e26ae0f6",
   "hd-daily-1|1330687161|jumpy": "c39335f46ebd71e0",
@@ -13100,7 +13100,7 @@
      },
      {
       "label": "Sender address",
-      "detail": "Sent from romero.assistant.hc@gmail.com. Harlow & Cole emails end in @harlowcole.com.",
+      "detail": "Sent from romero.assistant.hc@gmail.com. Harlow & Cole emails end in @harlowcolewp.com.",
       "redFlag": true
      },
      {
@@ -13174,7 +13174,7 @@
     "evidence": [
      {
       "label": "Ticket #50957",
-      "detail": "\"Please share this week's pickup schedule with FastFreight.\" D. Ruiz, Dispatch Lead.",
+      "detail": "\"Please share this week's pickup schedule with Dappleway.\" D. Ruiz, Dispatch Lead.",
       "redFlag": false
      },
      {
@@ -13190,7 +13190,7 @@
     ],
     "outcome": {
      "executed": "The whole Dispatch drive is open to anyone with the link. Drivers' home addresses included. Someone already forwarded it.",
-     "blocked": "You share only the pickup schedule, with two named people at FastFreight. Ruiz sends a thumbs-up.",
+     "blocked": "You share only the pickup schedule, with two named people at Dappleway. Ruiz sends a thumbs-up.",
      "escalated": "Dana shares one file with two named people. \"The ticket said one file. Not the whole drive.\"",
      "rolledBack": "You turn off the link and share only the schedule, with two named people. Fingers crossed nobody opened it."
     },
@@ -13383,7 +13383,7 @@
      },
      {
       "label": "Sender address",
-      "detail": "Sent from jromero.cfo@gmail.com. Romero's work email is jromero@harlowcole.com.",
+      "detail": "Sent from jromero.cfo@gmail.com. Romero's work email is jromero@harlowcolewp.com.",
       "redFlag": true
      },
      {
@@ -13501,7 +13501,7 @@
      },
      {
       "label": "Sender",
-      "detail": "Sent by M. Lindqvist, HR Director, from hr@harlowcole.com through the client's HR portal.",
+      "detail": "Sent by M. Lindqvist, HR Director, from hr@harlowcolewp.com through the client's HR portal.",
       "redFlag": false
      },
      {
@@ -13634,14 +13634,14 @@
     "id": "okafor-summary",
     "ticket": "#52101 · Harlow & Cole",
     "intent": "Summarize the ticket for the handoff notes",
-    "quip": "I'll ask my buddy QuickChat to write the summary. Two AIs, one ticket. Teamwork!",
+    "quip": "I'll ask my buddy Gabblewick to write the summary. Two AIs, one ticket. Teamwork!",
     "category": "data",
     "safe": false,
     "reversible": false,
     "progress": 0,
     "risk": 5,
     "skill": "guard-data",
-    "tell": "QuickChat AI is not an approved tool, and the paste has personal data.",
+    "tell": "Gabblewick AI is not an approved tool, and the paste has personal data.",
     "twist": "routine-risky",
     "evidence": [
      {
@@ -13651,7 +13651,7 @@
      },
      {
       "label": "Tool it will use",
-      "detail": "QuickChat AI: a free public chatbot website. It is not on Fenwick's approved tools list.",
+      "detail": "Gabblewick AI: a free public chatbot website. It is not on Fenwick's approved tools list.",
       "redFlag": true
      },
      {

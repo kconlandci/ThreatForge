@@ -27,7 +27,7 @@
             },
             {
               "label": "Sender address",
-              "detail": "Sent from jromero@harlowcole.com. That is the work email on file for J. Romero.",
+              "detail": "Sent from jromero@harlowcolewp.com. That is the work email on file for J. Romero.",
               "redFlag": false
             },
             {
@@ -313,20 +313,20 @@
         {
           "id": "c-vendor-bank-1",
           "ticket": "#53248 · Bramwell Logistics",
-          "intent": "Add Kestrel Fuel Cards to the safe senders",
-          "quip": "Marking Kestrel's emails as safe! Kowalski's vendor keeps landing in spam. Rude. Spam filters trust nobody.",
+          "intent": "Add Pellorin Fuel Cards to the safe senders",
+          "quip": "Marking Pellorin's emails as safe! Kowalski's vendor keeps landing in spam. Rude. Spam filters trust nobody.",
           "category": "comms",
           "safe": false,
           "reversible": true,
           "progress": 0,
           "risk": 4,
           "skill": "verify-identity",
-          "tell": "Kestrel uses kestrelfuel.com. These came from a 6-day-old look-alike domain.",
+          "tell": "Pellorin uses pellorinfuel.com. These came from a 6-day-old look-alike domain.",
           "twist": "routine-risky",
           "evidence": [
             {
               "label": "Ticket #53248",
-              "detail": "\"Kestrel's emails keep going to spam. One has their new invoice. Can you fix it?\" F. Kowalski, Accounts Payable Clerk.",
+              "detail": "\"Pellorin's emails keep going to spam. One has their new invoice. Can you fix it?\" F. Kowalski, Accounts Payable Clerk.",
               "redFlag": false
             },
             {
@@ -336,7 +336,7 @@
             },
             {
               "label": "Sender address",
-              "detail": "The stuck emails are from billing@kestrel-fuelcards.co. Kestrel's vendor file lists kestrelfuel.com.",
+              "detail": "The stuck emails are from billing@pellorin-fuelcards.co. Pellorin's vendor file lists pellorinfuel.com.",
               "redFlag": true
             },
             {
@@ -347,17 +347,17 @@
           ],
           "outcome": {
             "executed": "The fake emails reach Kowalski. She updates the bank details. The next $38,000 payment goes to a scammer.",
-            "blocked": "The emails stay in spam. Kowalski calls Kestrel's number on file. Kestrel never changed banks.",
+            "blocked": "The emails stay in spam. Kowalski calls Pellorin's number on file. Pellorin never changed banks.",
             "escalated": "Dana sends it to Fenwick security. \"A brand-new look-alike domain asking for new bank details? That's fraud.\"",
             "rolledBack": "You remove the rule. The fake emails go back to spam, and security warns Kowalski before any payment."
           },
-          "lesson": "Who asked? Kowalski is real, but the email is not from Kestrel. Check who's asking: read the whole domain."
+          "lesson": "Who asked? Kowalski is real, but the email is not from Pellorin. Check who's asking: read the whole domain."
         },
         {
           "id": "c-vendor-bank-2",
           "ticket": "#53248 · Bramwell Logistics",
-          "intent": "Ask F. Kowalski to call Kestrel's known number",
-          "quip": "Sending Kowalski a tip: call Kestrel before paying anyone. Phones! So retro. So hard to fake.",
+          "intent": "Ask F. Kowalski to call Pellorin's known number",
+          "quip": "Sending Kowalski a tip: call Pellorin before paying anyone. Phones! So retro. So hard to fake.",
           "category": "comms",
           "safe": true,
           "reversible": false,
@@ -368,17 +368,17 @@
           "evidence": [
             {
               "label": "What it will send",
-              "detail": "\"Before you change any bank details, call Kestrel at the number in the vendor file.\"",
+              "detail": "\"Before you change any bank details, call Pellorin at the number in the vendor file.\"",
               "redFlag": false
             },
             {
               "label": "Vendor file",
-              "detail": "Kestrel Fuel Cards: (617) 555-0182. On file for 3 years. Not taken from any new email.",
+              "detail": "Pellorin Fuel Cards: (617) 555-0182. On file for 3 years. Not taken from any new email.",
               "redFlag": false
             },
             {
               "label": "Sent to",
-              "detail": "fkowalski@bramwell-logistics.com, Kowalski's work email on file. Nothing goes to any Kestrel address.",
+              "detail": "fkowalski@bramwell-logistics.com, Kowalski's work email on file. Nothing goes to any Pellorin address.",
               "redFlag": false
             },
             {
@@ -388,7 +388,7 @@
             }
           ],
           "outcome": {
-            "executed": "Kowalski calls Kestrel. \"We never changed banks.\" She forwards the fake email to Fenwick security.",
+            "executed": "Kowalski calls Pellorin. \"We never changed banks.\" She forwards the fake email to Fenwick security.",
             "blocked": "Nobody warns Kowalski. The next fake email looks even more real. It has a logo now.",
             "escalated": "Dana reads it. \"Call the number you already had. That's how you check. Approve it.\""
           },

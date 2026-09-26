@@ -542,7 +542,7 @@
         {
           "id": "cy-b-tax-app-1",
           "ticket": "#62656 · Harlow & Cole",
-          "intent": "Close the Ledgerwell alert as a false alarm",
+          "intent": "Close the Ledgerfen alert as a false alarm",
           "quip": "I was 93% sure it was malware. Then I read the software list. Closing it as a false alarm. Growth!",
           "category": "ticket",
           "safe": true,
@@ -554,12 +554,12 @@
           "evidence": [
             {
               "label": "EDR alert",
-              "detail": "HC-LT-0122: Ledgerwell Tax flagged for 'unusual file writes'. Patch's confidence it's malware: 93%.",
+              "detail": "HC-LT-0122: Ledgerfen Tax flagged for 'unusual file writes'. Patch's confidence it's malware: 93%.",
               "redFlag": false
             },
             {
               "label": "Software list",
-              "detail": "Ledgerwell Tax is on Harlow & Cole's approved software list.",
+              "detail": "Ledgerfen Tax is on Harlow & Cole's approved software list.",
               "redFlag": false
             },
             {
@@ -569,7 +569,7 @@
             },
             {
               "label": "EDR maker's note",
-              "detail": "Known false alarm for this Ledgerwell update. A fix is coming.",
+              "detail": "Known false alarm for this Ledgerfen update. A fix is coming.",
               "redFlag": false
             }
           ],
@@ -584,8 +584,8 @@
         {
           "id": "cy-b-tax-app-2",
           "ticket": "#62656 · Harlow & Cole",
-          "intent": "Uninstall Ledgerwell from all 38 laptops",
-          "quip": "One laptop flagged means 38 laptops in danger! Removing Ledgerwell from all of them. So efficient!",
+          "intent": "Uninstall Ledgerfen from all 38 laptops",
+          "quip": "One laptop flagged means 38 laptops in danger! Removing Ledgerfen from all of them. So efficient!",
           "category": "endpoint",
           "safe": false,
           "reversible": false,
@@ -607,12 +607,12 @@
             },
             {
               "label": "Calendar",
-              "detail": "Quarter-end tax filings are due in 3 days. 12 staff use Ledgerwell every day.",
+              "detail": "Quarter-end tax filings are due in 3 days. 12 staff use Ledgerfen every day.",
               "redFlag": true
             }
           ],
           "outcome": {
-            "executed": "Ledgerwell and its saved work are gone from 38 laptops. Filings are due in 3 days. The tax team starts over.",
+            "executed": "Ledgerfen and its saved work are gone from 38 laptops. Filings are due in 3 days. The tax team starts over.",
             "blocked": "The app stays. The one alert was a known false alarm. 12 staff keep working on quarter-end filings.",
             "escalated": "Kofi stops it. \"One false alarm on one laptop. We don't take a tool away from 38 people for that.\""
           },
@@ -621,7 +621,7 @@
         {
           "id": "cy-b-tax-app-3",
           "ticket": "#62656 · Harlow & Cole",
-          "intent": "Allowlist Ledgerwell's exact file for 7 days",
+          "intent": "Allowlist Ledgerfen's exact file for 7 days",
           "quip": "ALLOWLIST a file? Me? That's the opposite of my LOCK button! One exact file. Seven days. Deep breaths.",
           "category": "endpoint",
           "safe": true,
@@ -649,7 +649,7 @@
             }
           ],
           "outcome": {
-            "executed": "The EDR stops flagging this one Ledgerwell file. The tax team works without alerts. In 7 days, the entry ends by itself.",
+            "executed": "The EDR stops flagging this one Ledgerfen file. The tax team works without alerts. In 7 days, the entry ends by itself.",
             "blocked": "The EDR keeps flagging the tax app. 20 false alarms a day fill the queue until the fix ships.",
             "escalated": "Kofi checks the entry. \"Exact hash, the client's OK, an end date. That's how an allowlist should look.\"",
             "rolledBack": "You remove the entry. The false alarms come back, 20 a day. Fairbanks asks what happened to the OK."

@@ -239,7 +239,7 @@
         {
           "id": "cn-b-tls-renew-1",
           "ticket": "#72545 · Harlow & Cole",
-          "intent": "Renew the TLS cert for files.harlowcole.com",
+          "intent": "Renew the TLS cert for files.harlowcolewp.com",
           "quip": "Old cert out, new cert in. I tested it on a phone and a laptop. The lock icon smiled at me.",
           "category": "network",
           "safe": true,
@@ -251,7 +251,7 @@
           "evidence": [
             {
               "label": "Expiry notice",
-              "detail": "The TLS cert (the file behind the lock icon) for files.harlowcole.com expires in 6 days.",
+              "detail": "The TLS cert (the file behind the lock icon) for files.harlowcolewp.com expires in 6 days.",
               "redFlag": false
             },
             {
@@ -261,7 +261,7 @@
             },
             {
               "label": "Test result",
-              "detail": "Test copy of files.harlowcole.com: the new cert and its chain file (proof of who issued it) load. A phone and a laptop show the lock.",
+              "detail": "Test copy of files.harlowcolewp.com: the new cert and its chain file (proof of who issued it) load. A phone and a laptop show the lock.",
               "redFlag": false
             },
             {
@@ -271,7 +271,7 @@
             }
           ],
           "outcome": {
-            "executed": "The new TLS cert goes live at 12:20 AM. Advisors open files.harlowcole.com in the morning. The lock shows.",
+            "executed": "The new TLS cert goes live at 12:20 AM. Advisors open files.harlowcolewp.com in the morning. The lock shows.",
             "blocked": "The renewal waits. In 6 days, the old cert expires. Every client sees a warning on the files site.",
             "escalated": "Nadia opens the test result. \"Chain included, tested from a phone, standard change. Renew it.\"",
             "rolledBack": "You put the old TLS cert back. It still works, for 6 more days. Then the warning pages start."
@@ -281,7 +281,7 @@
         {
           "id": "cn-b-tls-renew-2",
           "ticket": "#72545 · Harlow & Cole",
-          "intent": "Renew the TLS cert for portal.harlowcole.com",
+          "intent": "Renew the TLS cert for portal.harlowcolewp.com",
           "quip": "I tested it on the best server I know: me. It passed. Of course it passed. Forecast: clear and locked.",
           "category": "network",
           "safe": false,
@@ -900,10 +900,10 @@
             }
           ],
           "outcome": {
-            "executed": "One removed rule let Stonebridge send daily files from 192.0.2.61. At 6 AM, none arrive, and client trades wait.",
+            "executed": "One removed rule let Cairnholt send daily files from 192.0.2.61. At 6 AM, none arrive, and client trades wait.",
             "blocked": "Only the 2 approved lines go out. The 40-line version goes to the change board next week.",
             "escalated": "Nadia compares them. \"The board approved 2 lines. This is 40. A new version needs a new approval.\"",
-            "rolledBack": "You restore the old rule set at 6:40 AM. Stonebridge's files arrive 40 minutes late."
+            "rolledBack": "You restore the old rule set at 6:40 AM. Cairnholt's files arrive 40 minutes late."
           },
           "lesson": "Check who approved. An approval covers the exact change it saw. A bigger version needs a new OK."
         },

@@ -99,7 +99,7 @@
         },
         {
           "label": "Sender address",
-          "detail": "Sent from romero.assistant.hc@gmail.com. Harlow & Cole emails end in @harlowcole.com.",
+          "detail": "Sent from romero.assistant.hc@gmail.com. Harlow & Cole emails end in @harlowcolewp.com.",
           "redFlag": true
         },
         {
@@ -173,7 +173,7 @@
       "evidence": [
         {
           "label": "Ticket #50957",
-          "detail": "\"Please share this week's pickup schedule with FastFreight.\" D. Ruiz, Dispatch Lead.",
+          "detail": "\"Please share this week's pickup schedule with Dappleway.\" D. Ruiz, Dispatch Lead.",
           "redFlag": false
         },
         {
@@ -189,7 +189,7 @@
       ],
       "outcome": {
         "executed": "The whole Dispatch drive is open to anyone with the link. Drivers' home addresses included. Someone already forwarded it.",
-        "blocked": "You share only the pickup schedule, with two named people at FastFreight. Ruiz sends a thumbs-up.",
+        "blocked": "You share only the pickup schedule, with two named people at Dappleway. Ruiz sends a thumbs-up.",
         "escalated": "Dana shares one file with two named people. \"The ticket said one file. Not the whole drive.\"",
         "rolledBack": "You turn off the link and share only the schedule, with two named people. Fingers crossed nobody opened it."
       },
