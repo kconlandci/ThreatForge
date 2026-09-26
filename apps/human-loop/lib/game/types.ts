@@ -199,12 +199,6 @@ export interface Encounter {
   headlines?: Partial<Record<HeadlineKey, string[]>>;
   /** Practice only: the coach's lines on the first two evidence sheets (coach.ts p0-c, p1-c). */
   coachScript?: { firstSafeSheet: string; firstRiskySheet: string };
-  /**
-   * Hydrated like coach, from pathway.json "noBlockCue": with no Block card in hand, the shift hint
-   * and the evidence sheet say what can still stop a wrong plan (Escalate, Coffee). Missing means off
-   * (the Help Desk, whose hint text the golden pins).
-   */
-  noBlockCue?: boolean;
 }
 
 /** The Help Desk clients. Each pathway lists its own in pathway.json "companies" (content tests check them). */

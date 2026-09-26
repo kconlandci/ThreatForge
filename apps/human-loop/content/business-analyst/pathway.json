@@ -4,7 +4,6 @@
   "companies": ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental", "Fenwick IT Solutions"],
   "categories": ["lookup", "comms", "ticket", "access", "data", "report"],
   "policyCard": "policy-source-check",
-  "noBlockCue": true,
   "copy": {
     "barTitle": "Business Analyst",
     "barSub": "· Fenwick Analytics",

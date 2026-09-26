@@ -309,17 +309,13 @@ describe("shiftCoach: first-shift tips", () => {
     );
   });
 
-  it("says what can still stop a plan when there is no Block in hand (pathways with noBlockCue)", () => {
+  it("says what can still stop a plan when there is no Block in hand", () => {
     const s = createBattle(E, 21);
     const g = { ...closed, firstShift: false };
     const checked = play(s, "inspect", E);
     const card = (cardId: CardId, n: number) => ({ uid: `x-${cardId}-${n}`, cardId });
     const noBlock = checked.hand.filter((c) => c.cardId !== "block" && c.cardId !== "escalate" && c.cardId !== "coffee");
-    // Without the flag (the Help Desk), nothing changes.
-    expect(shiftCoach({ ...checked, hand: noBlock }, E, g).id).toBe("g-checked");
-    expect(shiftCoach({ ...s, hand: [] }, E, g).text).toBe("No Inspect left. **Block** or **Approve**.");
-    const C: Encounter = { ...E, noBlockCue: true };
-    const withHand = (hand: BattleState["hand"], energy = 3) => shiftCoach({ ...checked, hand, energy }, C, g);
+    const withHand = (hand: BattleState["hand"], energy = 3) => shiftCoach({ ...checked, hand, energy }, E, g);
     expect(withHand([...noBlock, card("escalate", 1), card("coffee", 1)])).toMatchObject({
       id: "g-no-block",
       text: "All checked. No **Block** left: **Escalate** anything wrong, or play **Coffee**.",
@@ -336,8 +332,8 @@ describe("shiftCoach: first-shift tips", () => {
     expect(withHand([...noBlock, card("block", 1), card("coffee", 1)]).id).toBe("g-checked");
     // Unchecked plans and no Inspect: only name the cards in hand.
     const unchecked = { ...s, hand: [card("escalate", 1)] };
-    expect(shiftCoach(unchecked, C, g).text).toBe("No Inspect left. **Escalate** or **Approve**.");
-    expect(shiftCoach({ ...s, hand: [] }, C, g).text).toBe("No Inspect left. Tap **Approve**.");
+    expect(shiftCoach(unchecked, E, g).text).toBe("No Inspect left. **Escalate** or **Approve**.");
+    expect(shiftCoach({ ...s, hand: [] }, E, g).text).toBe("No Inspect left. Tap **Approve**.");
   });
 });
 

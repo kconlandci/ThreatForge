@@ -3,6 +3,9 @@
  * multi-pathway refactor (lib/game/__golden__/help-desk.json). The refactor must keep it
  * byte-identical. Re-capture ONLY for an intended Help Desk change:
  *   GOLDEN_WRITE=1 npx vitest run lib/game/golden.test.ts
+ * Intended changes so far:
+ * - The no-Block hint (every pathway): with no Block in hand, the hint names Escalate or Coffee.
+ *   One trace changed (hd-daily-1|1330687161|perfect), only in its "All checked" hint line.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

@@ -389,14 +389,14 @@ with every component through React context (`usePathway()`, `lib/pathways/contex
 (`lib/game/**`, `components/**`) never imports a pathway's content; ESLint enforces it
 (`no-restricted-imports` in `eslint.config.mjs`), and `npm run check:bundles` checks the built
 routes. Pure libraries get pathway facts from fields hydrated onto the `Encounter` (`coach`,
-`headlines`, `noBlockCue`), authored fields (`coachScript` in practice.json), `CARDS` (`autoInspect`) and explicit
+`headlines`), authored fields (`coachScript` in practice.json), `CARDS` (`autoInspect`) and explicit
 options (`BuildOptions`, the id prefix). When a field is missing, the Help Desk default applies
 (`lib/game/helpDeskDefaults.ts`, the only shared file allowed to name Dana or Ollie).
 
 | Piece | Where |
 | --- | --- |
 | Registry (name, agent, status, id prefix, story id/title, page title) | `lib/types.ts` `PATHWAYS` |
-| Coach, clients, step categories, policy card, UI copy, card wording, headlines, `noBlockCue` (with no Block in hand, the hint and the evidence sheet name Escalate and Coffee; Business Analyst only, the Help Desk golden pins its hints) | `content/<pathway>/pathway.json` |
+| Coach, clients, step categories, policy card, UI copy, card wording, headlines | `content/<pathway>/pathway.json` |
 | Skill copy (what it means, where to look, example, question hints) | `content/<pathway>/skills.json` |
 | Practice, story, hub, bank, shift shells | `content/<pathway>/*.json`, `bank/*.json` |
 | Room layout, cast, blink lights, room colours | `lib/pathways/<pathway>/hubMap.ts` |

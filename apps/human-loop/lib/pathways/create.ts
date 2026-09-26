@@ -20,7 +20,6 @@ export function createPathway(input: PathwayInput): PathwayBundle {
     ...enc,
     coach: { ...config.coach },
     ...(config.headlines ? { headlines: config.headlines } : {}),
-    ...(config.noBlockCue ? { noBlockCue: true } : {}),
   });
   const practice = hydrate(input.practice);
   const story = hydrate(input.story);
@@ -54,7 +53,6 @@ export function createPathway(input: PathwayInput): PathwayBundle {
         coach: config.coach,
         headlines: config.headlines,
         policyCard: config.policyCard,
-        noBlockCue: config.noBlockCue,
         skillCopy: skill,
       });
       if (built.size >= SHIFT_CACHE_MAX) built.delete(built.keys().next().value as string);

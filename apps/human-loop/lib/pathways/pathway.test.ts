@@ -25,16 +25,6 @@ const fresh = (over: Partial<PathwayProgress> = {}): PathwayProgress => ({
   ...over,
 });
 
-describe("no-Block cue", () => {
-  it("is on only where pathway.json asks (Business Analyst), in practice, story and daily", () => {
-    for (const b of TEST_PATHWAYS) {
-      const on = b.id === "business-analyst";
-      const daily = b.shiftEncounter(b.planDaily(fresh(), { playerId: "cue", today: TODAY }));
-      for (const enc of [b.practice, b.story, daily]) expect(!!enc.noBlockCue, `${b.id} ${enc.id}`).toBe(on);
-    }
-  });
-});
-
 function play(s: BattleState, enc: Encounter, id: CardId, target?: string): BattleState | null {
   const card = s.hand.find((c) => c.cardId === id);
   if (!card) return null;

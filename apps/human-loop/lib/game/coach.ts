@@ -318,9 +318,9 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
 
 /**
  * Hints for anyone (tired or returning players too). Only engine state, never the answers.
- * `noBlockCue` (Encounter.noBlockCue): with no Block in hand, name what can still stop a plan.
+ * With no Block in hand, they name what can still stop a plan (Escalate, Coffee).
  */
-export function genericHint(state: BattleState, noBlockCue = false): CoachHint {
+export function genericHint(state: BattleState): CoachHint {
   const board = state.announced;
   if (board.length === 0) return { id: "g-empty", text: "Nothing to check. Tap **Next turn**.", target: "approve" };
   if (state.energy === 0) return { id: "g-energy", text: "Out of energy. Tap **Approve**.", target: "approve" };
@@ -334,8 +334,7 @@ export function genericHint(state: BattleState, noBlockCue = false): CoachHint {
       target: "card:inspect",
     };
   }
-  // Pathways without the cue keep the old lines, which always name Block.
-  const missingBlock = noBlockCue && !state.hand.some((c) => c.cardId === "block");
+  const missingBlock = !state.hand.some((c) => c.cardId === "block");
   const hasEscalate = state.hand.some((c) => c.cardId === "escalate");
   if (unchecked > 0) {
     if (missingBlock) {
@@ -371,7 +370,7 @@ export function genericHint(state: BattleState, noBlockCue = false): CoachHint {
 export function shiftCoach(state: BattleState, enc: Encounter, ui: CoachUi & { firstShift: boolean }): CoachHint {
   if (state.status !== "playing") return { id: "end", text: "Tap **See how you did**.", target: null };
   if (ui.selectedCardId) return cardPrompt(state, enc, ui.selectedCardId);
-  const generic = genericHint(state, !!enc.noBlockCue);
+  const generic = genericHint(state);
   // "Out of energy" and "No Inspect left" are what to do now: they beat any tip.
   if (ui.firstShift && generic.id !== "g-energy" && generic.id !== "g-no-inspect") {
     const tip = firstShiftTip(state, enc);

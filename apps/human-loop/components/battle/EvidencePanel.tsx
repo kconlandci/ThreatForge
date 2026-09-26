@@ -135,7 +135,7 @@ export function EvidencePanel({
   const byPolicy = rt.inspected && autoInspected.has(step.id);
   // Real shifts, drills and dailies: with no Block in hand, say what can stop a wrong plan, and show
   // Escalate as a button where Block would be (a "Not sure?" link doesn't read as a stop button).
-  const noBlock = playing && announced && !!encounter.noBlockCue && !encounter.practice && !block;
+  const noBlock = playing && announced && !encounter.practice && !block;
   const coffee = noBlock ? firstOf(state.hand, "coffee") : undefined;
   const noBlockNote = !noBlock
     ? null

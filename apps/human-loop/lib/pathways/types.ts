@@ -54,8 +54,6 @@ export interface PathwayJson {
   cards?: Partial<Record<CardId, CardCopy>>;
   /** Result headline pools; a missing key uses the engine's default pool. */
   headlines?: Partial<Record<HeadlineKey, string[]>>;
-  /** Say what can stop a wrong plan when no Block is in hand (Encounter.noBlockCue). Off when missing. */
-  noBlockCue?: boolean;
 }
 
 /** content/<pathway>/skills.json */
