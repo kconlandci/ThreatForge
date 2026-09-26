@@ -14,6 +14,7 @@ import { PATHWAYS, livePathways } from "@/lib/types";
 const QUESTIONS = ["Who asked?", "Does it match the record?", "Can we undo it?"];
 
 export default function Home() {
+  const comingSoon = PATHWAYS.length - livePathways().length;
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
@@ -117,8 +118,14 @@ export default function Home() {
               </h2>
               <p className="mt-3 text-lg leading-relaxed text-ink-soft">
                 Each DCI career pathway gets its own office and its own overeager AI coworker.{" "}
-                {openNowSentence(livePathways())}{" "}
-                {PATHWAYS.length - livePathways().length === 1 ? "The last one is on the way." : "The rest are on the way."}
+                {comingSoon === 0 ? (
+                  "All five are open now."
+                ) : (
+                  <>
+                    {openNowSentence(livePathways())}{" "}
+                    {comingSoon === 1 ? "The last one is on the way." : "The rest are on the way."}
+                  </>
+                )}
               </p>
             </div>
             <div className="mt-10 sm:mt-12">
@@ -145,7 +152,8 @@ export default function Home() {
                     Why this matters
                   </h2>
                   <p className="mt-4 text-lg leading-relaxed text-[#E3E7EA] sm:text-xl">
-                    Employers are adding AI agents to help desks, security teams, dev teams, and cloud operations. These
+                    Employers are adding AI agents to help desks, security teams, cloud operations, dev teams, and
+                    analytics teams. These
                     agents can take real actions, fast. Someone has to check their work and keep a human in the loop.
                   </p>
                   <p className="mt-4 font-display text-xl font-semibold text-paper sm:text-2xl">

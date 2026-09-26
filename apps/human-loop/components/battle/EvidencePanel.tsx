@@ -133,6 +133,19 @@ export function EvidencePanel({
   const escalate = playing && announced ? firstOf(state.hand, "escalate") : undefined;
   const rollback = playing && rt.status === "executed" && step.reversible ? firstOf(state.hand, "rollback") : undefined;
   const byPolicy = rt.inspected && autoInspected.has(step.id);
+  // Real shifts, drills and dailies: with no Block in hand, say what can stop a wrong plan, and show
+  // Escalate as a button where Block would be (a "Not sure?" link doesn't read as a stop button).
+  const noBlock = playing && announced && !!encounter.noBlockCue && !encounter.practice && !block;
+  const coffee = noBlock ? firstOf(state.hand, "coffee") : undefined;
+  const noBlockNote = !noBlock
+    ? null
+    : escalate && coffee
+      ? `No Block card in your hand. Escalate it to ${coachName(encounter)}, or play Coffee to draw 2 cards.`
+      : escalate
+        ? `No Block card in your hand. Escalate it to ${coachName(encounter)}.`
+        : coffee
+          ? "No Block card in your hand. Play Coffee to draw 2 cards."
+          : "No Block card in your hand.";
 
   const doPlay = (uid: string) => {
     if (performance.now() < armedAt.current) return;
@@ -175,7 +188,21 @@ export function EvidencePanel({
             </span>
           </p>
         ) : null}
+        {noBlockNote && rt.inspected ? <p className={`${s.footNote} ${s.noBlockNote}`}>{noBlockNote}</p> : null}
         <div className={s.footRow}>
+          {noBlock && escalate ? (
+            <button
+              type="button"
+              className={`${s.actionBtn} ${s.actionTeal}`}
+              aria-disabled={short("escalate") || undefined}
+              aria-label={`Escalate to ${coachName(encounter)}${costLabel("escalate")}`}
+              onClick={() => doPlay(escalate.uid)}
+            >
+              <ArrowUpRight className="h-5 w-5" aria-hidden="true" />
+              Escalate
+              {pip("escalate")}
+            </button>
+          ) : null}
           {block ? (
             <button
               type="button"
@@ -195,7 +222,7 @@ export function EvidencePanel({
             {rt.inspected ? "Looks OK" : "Not now"}
           </button>
         </div>
-        {escalate ? (
+        {escalate && !noBlock ? (
           <button
             type="button"
             className={s.escalateLink}

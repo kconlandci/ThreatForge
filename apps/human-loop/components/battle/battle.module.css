@@ -2085,6 +2085,14 @@
   color: var(--hl-ink-soft);
 }
 
+/* No Block in hand: what can still stop a wrong plan, above the buttons. */
+.noBlockNote {
+  margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--hl-ink);
+}
+
 /* ------------------------------------------------------------------ */
 /* Speaker chip (shared with hub)                                      */
 /* ------------------------------------------------------------------ */

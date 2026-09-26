@@ -4,10 +4,10 @@
  *
  * Reads the app build manifest and checks the JS chunks each /play/<pathway> page loads:
  * - /play/help-desk never contains the Cybersecurity marker ("When in doubt, lock it out"), the
- *   Cloud & Network marker ("Relax. I have root.") or the Full-Stack marker ("read the docs later.").
- * - /play/cybersecurity never contains the Help Desk, Cloud & Network or Full-Stack marker.
- * - /play/cloud-network never contains the Help Desk, Cybersecurity or Full-Stack marker.
- * - /play/full-stack never contains the Help Desk, Cybersecurity or Cloud & Network marker.
+ *   Cloud & Network marker ("Relax. I have root."), the Full-Stack marker ("read the docs later.")
+ *   or the Business Analyst marker ("to the right, in bold").
+ * - Each other game route (/play/cybersecurity, /play/cloud-network, /play/full-stack,
+ *   /play/business-analyst) never contains any of the other four pathways' markers.
  * - /play and / carry none of them.
  * - Each game route does contain its own marker (so the check is really looking at the content).
  *
@@ -23,14 +23,17 @@ const CN = "Relax. I have root.";
 // No apostrophe: the build escapes ' as \' inside JSON.parse('...'), so Piper's "I'll read the docs
 // later." would never match as written.
 const FS = "read the docs later.";
+// Quill's "Up and to the right, in bold!" (no apostrophe in the marker either, for the same reason).
+const BA = "to the right, in bold";
 const ROUTES = [
-  { page: "/play/help-desk/page", own: HD, others: [CY, CN, FS], required: true },
-  { page: "/play/cybersecurity/page", own: CY, others: [HD, CN, FS], required: true },
-  { page: "/play/cloud-network/page", own: CN, others: [HD, CY, FS], required: true },
-  { page: "/play/full-stack/page", own: FS, others: [HD, CY, CN], required: true },
+  { page: "/play/help-desk/page", own: HD, others: [CY, CN, FS, BA], required: true },
+  { page: "/play/cybersecurity/page", own: CY, others: [HD, CN, FS, BA], required: true },
+  { page: "/play/cloud-network/page", own: CN, others: [HD, CY, FS, BA], required: true },
+  { page: "/play/full-stack/page", own: FS, others: [HD, CY, CN, BA], required: true },
+  { page: "/play/business-analyst/page", own: BA, others: [HD, CY, CN, FS], required: true },
   // The picker and the landing page carry no game content at all.
-  { page: "/play/page", own: null, others: [HD, CY, CN, FS], required: true },
-  { page: "/page", own: null, others: [HD, CY, CN, FS], required: true },
+  { page: "/play/page", own: null, others: [HD, CY, CN, FS, BA], required: true },
+  { page: "/page", own: null, others: [HD, CY, CN, FS, BA], required: true },
 ];
 
 const manifestPath = join(dist, "app-build-manifest.json");

@@ -13,7 +13,7 @@
       ],
       "returningLines": [
         { "speaker": "agent", "text": "You're back! While you were gone, I rounded 14 numbers. Up. Marisol un-rounded them." },
-        { "speaker": "agent", "text": "See my slide on the wall? UP 300%! The tiny star means forecast. Tiny stars are shy." },
+        { "speaker": "agent", "text": "See my slide on the wall? UP 300%! The tiny star means forecast: a guess. Tiny stars are shy." },
         { "speaker": "agent", "text": "My plans are ready. I have not sent anything. Look at me being patient." }
       ]
     },

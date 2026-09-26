@@ -528,6 +528,8 @@ export interface BuildOptions {
   headlines?: Partial<Record<HeadlineKey, string[]>>;
   /** Added to a daily's deck when some plan is in its autoInspect categories. Default "policy-callback". */
   policyCard?: CardId;
+  /** Hydrated onto the encounter when true (Encounter.noBlockCue). */
+  noBlockCue?: boolean;
   /** The pathway's skill copy (the debrief takeaway is the lead focus's oneLiner). */
   skillCopy: (id: MasterySkillId) => { oneLiner: string };
 }
@@ -592,6 +594,7 @@ export function buildShift(bank: BankTicket[], spec: ShiftSpec, text: ShiftText,
     },
     ...(opts.coach ? { coach: { ...opts.coach } } : {}),
     ...(opts.headlines ? { headlines: opts.headlines } : {}),
+    ...(opts.noBlockCue ? { noBlockCue: true } : {}),
   };
 
   if (spec.kind === "drill") {

@@ -7,6 +7,7 @@ const HD = getPathway("help-desk");
 const CY = getPathway("cybersecurity");
 const CN = getPathway("cloud-network");
 const FS = getPathway("full-stack");
+const BA = getPathway("business-analyst");
 const progress = (over: Partial<PathwayProgress> = {}): PathwayProgress => ({
   introSeen: true,
   hub: null,
@@ -36,6 +37,10 @@ describe("site pathway cards", () => {
     expect(pathwayCta(progress({ battle: playing("fs-daily-2") }), FS)).toBe("Resume practice");
     expect(pathwayCta(progress({ battle: playing("fs-drill-guard-data-0") }), FS)).toBe("Resume drill");
     expect(resumeKindOf("fs-01-thursday", FS)).toBe("shift");
+    expect(pathwayCta(progress({ battle: playing("ba-daily-2") }), BA)).toBe("Resume practice");
+    expect(pathwayCta(progress({ battle: playing("ba-drill-guard-data-0") }), BA)).toBe("Resume drill");
+    expect(pathwayCta(progress({ battle: playing("ba-00-practice") }), BA)).toBe("Resume practice");
+    expect(resumeKindOf("ba-01-wednesday", BA)).toBe("shift");
   });
 
   it("counts every shift played", () => {
@@ -48,14 +53,14 @@ describe("site pathway cards", () => {
     expect(openNowSentence([HD, CY])).toBe("Help Desk and Cybersecurity are open now.");
     expect(openNowSentence([HD, CY, CN])).toBe("Help Desk, Cybersecurity and Cloud & Network are open now.");
     expect(openNowSentence(livePathways())).toBe(
-      "Help Desk, Cybersecurity, Cloud & Network and Full-Stack Development are open now.",
+      "Help Desk, Cybersecurity, Cloud & Network, Full-Stack Development and Business Analyst are open now.",
     );
   });
 
-  it("has four live pathways, in registry order", () => {
+  it("has five live pathways, in registry order, and none coming soon", () => {
     const live = livePathways();
-    expect(live.map((p) => p.id)).toEqual(["help-desk", "cybersecurity", "cloud-network", "full-stack"]);
-    expect(PATHWAYS.filter((p) => p.status === "soon").map((p) => p.id)).toEqual(["business-analyst"]);
+    expect(live.map((p) => p.id)).toEqual(["help-desk", "cybersecurity", "cloud-network", "full-stack", "business-analyst"]);
+    expect(PATHWAYS.filter((p) => p.status === "soon").map((p) => p.id)).toEqual([]);
     for (const p of live) {
       expect(p.agentSprite).toBeTruthy();
       expect(p.firstShift).toBeTruthy();

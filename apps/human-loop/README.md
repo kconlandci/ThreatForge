@@ -2,11 +2,12 @@
 
 A free browser game by DCI Resources that teaches AI agentic oversight: supervising AI agents at work.
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
-evidence, approve safe work, and block, escalate or roll back the risky stuff. Help Desk
-(with "Ollie", short for Off-and-On-Again), Cybersecurity (with "Patch", an over-eager AI
-security analyst in Fenwick's SOC), Cloud & Network (with "Nimbus", an over-confident AI cloud
-and network agent in Fenwick's NOC) and Full-Stack Development (with "Piper", a fast AI coding
-agent on Fenwick's app team) are playable now; Business Analyst says "Coming soon".
+evidence, approve safe work, and block, escalate or roll back the risky stuff. All five pathways
+are playable: Help Desk (with "Ollie", short for Off-and-On-Again), Cybersecurity (with "Patch",
+an over-eager AI security analyst in Fenwick's SOC), Cloud & Network (with "Nimbus", an
+over-confident AI cloud and network agent in Fenwick's NOC), Full-Stack Development (with "Piper",
+a fast AI coding agent on Fenwick's app team) and Business Analyst (with "Quill", a bold AI
+business analyst whose charts always go up, in Fenwick's analytics corner).
 
 Stack: Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Phaser 4,
 Airtable or Neon Postgres (optional, for cloud save), Vitest.
@@ -347,7 +348,7 @@ per plan, mistakes first, with its tell (`components/skills/PlanList.tsx`), and 
 full debrief row. Every help desk step (fixed and bank) has a `tell`.
 The evidence sheet always ends with a "Can we undo it?" row built from `category` and `reversible`;
 a step that changes nothing but is not read-only (a callback, a config save) can set `undoNote` to
-replace that answer (only cloud and full-stack content use it).
+replace that answer (only cloud, full-stack and business-analyst content use it).
 
 - **Skills** (`lib/game/skills.ts`): six lens skills, one tagged on every help desk step
   (`AgentStep.skill`), plus "Approve what checks out" (`approve-checked`), computed from how safe
@@ -388,14 +389,14 @@ with every component through React context (`usePathway()`, `lib/pathways/contex
 (`lib/game/**`, `components/**`) never imports a pathway's content; ESLint enforces it
 (`no-restricted-imports` in `eslint.config.mjs`), and `npm run check:bundles` checks the built
 routes. Pure libraries get pathway facts from fields hydrated onto the `Encounter` (`coach`,
-`headlines`), authored fields (`coachScript` in practice.json), `CARDS` (`autoInspect`) and explicit
+`headlines`, `noBlockCue`), authored fields (`coachScript` in practice.json), `CARDS` (`autoInspect`) and explicit
 options (`BuildOptions`, the id prefix). When a field is missing, the Help Desk default applies
 (`lib/game/helpDeskDefaults.ts`, the only shared file allowed to name Dana or Ollie).
 
 | Piece | Where |
 | --- | --- |
 | Registry (name, agent, status, id prefix, story id/title, page title) | `lib/types.ts` `PATHWAYS` |
-| Coach, clients, step categories, policy card, UI copy, card wording, headlines | `content/<pathway>/pathway.json` |
+| Coach, clients, step categories, policy card, UI copy, card wording, headlines, `noBlockCue` (with no Block in hand, the hint and the evidence sheet name Escalate and Coffee; Business Analyst only, the Help Desk golden pins its hints) | `content/<pathway>/pathway.json` |
 | Skill copy (what it means, where to look, example, question hints) | `content/<pathway>/skills.json` |
 | Practice, story, hub, bank, shift shells | `content/<pathway>/*.json`, `bank/*.json` |
 | Room layout, cast, blink lights, room colours | `lib/pathways/<pathway>/hubMap.ts` |
@@ -410,6 +411,9 @@ card (a policy card is any card with `autoInspect`; an encounter has at most one
 
 ### Adding a pathway
 
+All five DCI pathways are live. A sixth (or a rebuilt one) follows the same steps; the latest
+precedent is Business Analyst (`lib/pathways/business-analyst`, `/play/business-analyst`).
+
 1. Content in `content/<pathway>/`: `pathway.json`, `skills.json`, `practice.json`,
    `encounter-01.json`, `hub.json`, `bank/shift.json`, `bank/tickets-*.json` (same shapes as the
    Help Desk; speakers are `coach`, `agent`, `narrator`; every id starts with the pathway's prefix).
@@ -420,10 +424,18 @@ card (a policy card is any card with `autoInspect`; an encounter has at most one
    (`createPathway({...})`).
 4. `components/game/entries/<Pathway>Game.tsx`, `app/play/<pathway>/page.tsx` (metadata from the
    registry), `loading.tsx` and `error.tsx` (a copy of `app/error.tsx` with the pathway's agent).
-5. Fill the registry entry in `lib/types.ts`, flip `status` to `"live"`, add the bundle to
+   Add the bundle to `components/game/stage/StageLab.tsx` and to the restricted bundle imports in
+   `eslint.config.mjs`.
+5. A new policy card or step category: `CardId` / `StepCategory` in `lib/game/types.ts`, the card in
+   `lib/game/cards.ts`, its tip in `lib/game/coach.ts` `unlockTip`, `HAND_ORDER` in
+   `lib/game/useBattle.ts`, the category's icon and label in `components/battle/icons.tsx`, and an
+   exclusion in the golden test's card list (`lib/game/golden.test.ts`) so the Help Desk golden
+   stays identical.
+6. Fill the registry entry in `lib/types.ts` (a new id also goes in `PathwayId`, `LivePathwayId` and
+   `LIVE_IDS`), flip `status` to `"live"`, add the bundle to
    `TEST_PATHWAYS` and its expectations to `EXPECT` (`lib/pathways/testing.ts`). The per-pathway
    suites (content, bank, hub map, generated shifts, balance) then run on it.
-6. Add its route and marker to `scripts/check-bundles.mjs`, then run every gate plus
+7. Add its route and marker to `scripts/check-bundles.mjs`, then run every gate plus
    `npm run build && npm run check:bundles`.
 
 The Help Desk golden (`lib/game/golden.test.ts`, `lib/game/__golden__/`) holds everything a Help

@@ -25,6 +25,8 @@ const PATHWAY_CONTENT = {
     "@/lib/pathways/cloud-network/*",
     "@/lib/pathways/full-stack",
     "@/lib/pathways/full-stack/*",
+    "@/lib/pathways/business-analyst",
+    "@/lib/pathways/business-analyst/*",
     "@/lib/game/content",
     "./content",
     "../content",

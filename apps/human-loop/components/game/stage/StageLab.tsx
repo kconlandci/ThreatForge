@@ -7,6 +7,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createBus, type AgentMood, type FromStage, type StageMode, type ToStage } from "@/lib/game/bus";
+import { BUSINESS_ANALYST } from "@/lib/pathways/business-analyst";
 import { CLOUD_NETWORK } from "@/lib/pathways/cloud-network";
 import { CYBERSECURITY } from "@/lib/pathways/cybersecurity";
 import { FULL_STACK } from "@/lib/pathways/full-stack";
@@ -14,12 +15,16 @@ import { HELP_DESK } from "@/lib/pathways/help-desk";
 import type { PathwayBundle } from "@/lib/pathways/types";
 import type { LivePathwayId } from "@/lib/types";
 
-/** Every room the lab can show (?pathway=cybersecurity, ?pathway=cloud-network, ?pathway=full-stack); the Help Desk office by default. */
+/**
+ * Every room the lab can show (?pathway=cybersecurity, ?pathway=cloud-network, ?pathway=full-stack,
+ * ?pathway=business-analyst); the Help Desk office by default.
+ */
 const LAB_PATHWAYS: Record<LivePathwayId, PathwayBundle> = {
   "help-desk": HELP_DESK,
   cybersecurity: CYBERSECURITY,
   "cloud-network": CLOUD_NETWORK,
   "full-stack": FULL_STACK,
+  "business-analyst": BUSINESS_ANALYST,
 };
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), {

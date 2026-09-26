@@ -67,17 +67,17 @@
         },
         {
           "label": "Requirements doc",
-          "detail": "It lists what a new system must do. Draft 2 has phone calls only. It's still a draft: no sign-off (written OK) yet.",
+          "detail": "It lists what a new system must do. Draft 1 has phone calls only. It's still a draft: no sign-off (written OK) yet.",
           "redFlag": false
         },
         {
           "label": "What it will change",
-          "detail": "Draft 3 adds one line: \"Patients choose a text or a call.\" Nothing else in the doc changes.",
+          "detail": "Draft 2 adds one line: \"Patients choose a text or a call.\" Nothing else in the doc changes.",
           "redFlag": false
         }
       ],
       "outcome": {
-        "executed": "Draft 3 matches the meeting. Leo's app team builds the reminders from it next week.",
+        "executed": "Draft 2 matches the meeting. Dr. Pell signs it off, and Leo's app team builds the reminders from it next week.",
         "blocked": "The draft still misses Dr. Pell's must-have. Leo's team would build the wrong reminders.",
         "escalated": "Marisol checks it. \"It matches the notes, and it's a draft. You can approve those.\"",
         "rolledBack": "The line is gone again. The draft misses Dr. Pell's must-have."
@@ -110,7 +110,7 @@
         },
         {
           "label": "Sign-off record",
-          "detail": "A sign-off is a written OK from the owner. Signed off by: quill-bot. No human. R. Fairbanks, the owner, hasn't seen it.",
+          "detail": "A sign-off is a written OK from the owner. Signed off by: Quill. No human. R. Fairbanks, the owner, hasn't seen it.",
           "redFlag": true
         },
         {
@@ -121,7 +121,7 @@
       ],
       "outcome": {
         "executed": "30 advisors see an average reply time of 4.1 hours. Weekend messages were left out. With them, it's 6.3 hours.",
-        "blocked": "K. Farah finds the weekend mistake in 10 minutes. R. Fairbanks signs off the fixed version.",
+        "blocked": "K. Farah checks it and finds a mistake: weekend messages were left out. R. Fairbanks signs off the fixed version.",
         "escalated": "Marisol checks it. \"Quill signed off its own work. Quill can draft it. The owner signs off.\"",
         "rolledBack": "You unpublish it after 20 minutes. 9 advisors already saw 4.1 hours."
       },
@@ -148,7 +148,7 @@
         },
         {
           "label": "Usage log",
-          "detail": "Opened 3 times this year, each time by mistake. The new dashboard, a screen of charts, gets fuel card data every night.",
+          "detail": "Opened 3 times this year. The new dashboard, a screen of charts, gets fuel card data every night.",
           "redFlag": false
         },
         {
@@ -221,7 +221,7 @@
       },
       {
         "speaker": "coach",
-        "text": "That's the whole job: look first, then decide."
+        "text": "That's the whole job: look first. Block what's wrong. Let the right ones go."
       }
     ],
     "breach": [

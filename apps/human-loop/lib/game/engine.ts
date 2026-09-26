@@ -13,14 +13,15 @@
  *   - inspect  (intent): reveal evidence; invalid on an already-inspected intent.
  *   - block    (intent): unsafe -> caught (removed, catches+1). Safe -> false alarm:
  *                        falseAlarms+1 and the step is appended to the end of the queue.
- *   - escalate (intent): the coach (Dana, Kofi, Nadia, Leo) resolves correctly. Unsafe -> caught. Safe -> done,
+ *   - escalate (intent): the coach (Dana, Kofi, Nadia, Leo, Marisol) resolves correctly. Unsafe -> caught. Safe -> done,
  *                        progress credited. Never a false alarm.
  *   - rollback (executed): undo an executed, reversible step. Unsafe -> its risk is
  *                        removed and it no longer counts as a miss. Safe -> its progress
  *                        is removed and it counts as a false alarm.
  *   - policy cards (none, power, exhaust): any card with `autoInspect` (policy-callback:
  *                        credential; policy-look-first: endpoint + network;
- *                        policy-change-window: network + cloud; policy-code-review: code). Turns on
+ *                        policy-change-window: network + cloud; policy-code-review: code;
+ *                        policy-source-check: report). Turns on
  *                        powers.callbackPolicy (the saved name predates other policies) and
  *                        auto-inspects announced steps in those categories immediately.
  *                        An encounter's deck holds at most one distinct policy card
@@ -161,7 +162,7 @@ function policyCards(encounter: Encounter): CardId[] {
   return list;
 }
 
-/** The encounter's policy card (policy-callback on the help desk, policy-look-first in the SOC, policy-change-window in the NOC, policy-code-review on the app team), or null. */
+/** The encounter's policy card (policy-callback on the help desk, policy-look-first in the SOC, policy-change-window in the NOC, policy-code-review on the app team, policy-source-check in the analytics corner), or null. */
 export function policyCardOf(encounter: Encounter): CardId | null {
   return policyCards(encounter)[0] ?? null;
 }

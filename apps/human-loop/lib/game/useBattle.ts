@@ -114,7 +114,7 @@ export function autoInspectedIds(state: BattleState): Set<string> {
 export { deckAtTurn };
 
 /** Fixed order of the hand's stacks: the core loop first, then the cards that unlock later. */
-export const HAND_ORDER: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "policy-look-first", "policy-change-window", "policy-code-review", "coffee"];
+export const HAND_ORDER: CardId[] = ["inspect", "block", "escalate", "rollback", "policy-callback", "policy-look-first", "policy-change-window", "policy-code-review", "policy-source-check", "coffee"];
 
 /**
  * Cards the full "How to play" guide lists outside a battle: every card in HAND_ORDER except the

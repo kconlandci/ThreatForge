@@ -1,7 +1,7 @@
 {
   "questionHints": {
     "who": "Who really asked? Do they own the data? Did the owner sign off on this version?",
-    "record": "Does it match the request? Does every number tie to fresh source data?",
+    "record": "Does it match the request? Does every number match fresh source data?",
     "undo": "If Quill is wrong, can we take it back? Did personal data get out?"
   },
   "skills": {
@@ -24,8 +24,8 @@
       "lookFor": ["Meeting notes", "Requirements doc"]
     },
     "confirm-fix": {
-      "oneLiner": "A number is right only if it ties to fresh source data. Check the rows, not the label.",
-      "whereToLook": "Source data, Query, Row count and Data refresh. Does it tie? Is the data fresh? Enough answers?",
+      "oneLiner": "A number is right only if it matches fresh source data. Check the rows, not the label.",
+      "whereToLook": "Source data, Query, Row count and Data refresh. Does it match? Is the data fresh? Enough answers?",
       "example": "The refresh says Success. It loaded 0 rows. The dashboard says 96%. The source says 88%.",
       "lookFor": ["Source data", "Data refresh"]
     },

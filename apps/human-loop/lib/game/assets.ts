@@ -136,6 +136,34 @@ export const SPRITES = {
   "wall-calendar-freeze": { key: "wall-calendar-freeze", file: `${S}wall-calendar-freeze.svg`, w: 40, h: 50, originX: 0.5, originY: 0.5, kind: "decor" },
   "wall-poster-match": { key: "wall-poster-match", file: `${S}wall-poster-match.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
 
+  // Business Analyst (analytics and business team) cast. Quill has Ollie's, Patch's, Nimbus's and Piper's
+  // exact size and origin, so the exclaim marker and hop work unchanged. It stands on two slim legs.
+  quill: { key: "quill", file: `${S}quill.svg`, w: 52, h: 66, originX: 0.5, originY: 0.92, kind: "character", tone: "agent" },
+  marisol: { key: "marisol", file: `${S}marisol.svg`, w: 40, h: 74, originX: 0.5, originY: 0.94, kind: "character", tone: "coach" },
+
+  // Quill battle portraits (same 220 x 220 framing as the other agents, floor at y 209, so they swap in place).
+  "quill-idle": { key: "quill-idle", file: `${S}quill-idle.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "quill-eager": { key: "quill-eager", file: `${S}quill-eager.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "quill-busted": { key: "quill-busted", file: `${S}quill-busted.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "quill-sad": { key: "quill-sad", file: `${S}quill-sad.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+  "quill-celebrate": { key: "quill-celebrate", file: `${S}quill-celebrate.svg`, w: 220, h: 220, originX: 0.5, originY: 0.95, kind: "portrait", tone: "agent" },
+
+  // Analytics room props (iso, lit from the upper left; the anchor is the floor point under the footprint's middle).
+  // The DATA cabinet's front is its SW face (right wall only). The meeting table is walk-around, the chairs reuse "chair".
+  "desk-quill": { key: "desk-quill", file: `${S}desk-quill.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "desk-analyst": { key: "desk-analyst", file: `${S}desk-analyst.svg`, w: 84, h: 78, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "requirements-board": { key: "requirements-board", file: `${S}requirements-board.svg`, w: 80, h: 84, originX: 0.5, originY: 0.9, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "data-cabinet": { key: "data-cabinet", file: `${S}data-cabinet.svg`, w: 48, h: 88, originX: 0.5, originY: 0.84, footprint: { w: 1, h: 1 }, kind: "prop" },
+  "meeting-table": { key: "meeting-table", file: `${S}meeting-table.svg`, w: 64, h: 60, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+  shredder: { key: "shredder", file: `${S}shredder.svg`, w: 40, h: 48, originX: 0.5, originY: 0.8, footprint: { w: 1, h: 1 }, kind: "prop" },
+
+  // Analytics room wall decor. Right wall: KPI board, PIE CHART sign. Left wall: projector screen with
+  // Quill's slide, and the "Who asked?" poster.
+  "wall-kpi-board": { key: "wall-kpi-board", file: `${S}wall-kpi-board.svg`, w: 112, h: 106, originX: 0.491, originY: 0.5, kind: "decor" },
+  "wall-sign-pie": { key: "wall-sign-pie", file: `${S}wall-sign-pie.svg`, w: 40, h: 50, originX: 0.5, originY: 0.5, kind: "decor" },
+  "wall-slide-screen": { key: "wall-slide-screen", file: `${S}wall-slide-screen.svg`, w: 44, h: 60, originX: 0.5, originY: 0.5, kind: "decor" },
+  "wall-poster-who": { key: "wall-poster-who", file: `${S}wall-poster-who.svg`, w: 44, h: 58, originX: 0.5, originY: 0.5, kind: "decor" },
+
   // Small UI markers used in the stage.
   "marker-exclaim": { key: "marker-exclaim", file: `${S}marker-exclaim.svg`, w: 24, h: 30, originX: 0.5, originY: 1, kind: "marker" },
   "tap-ring": { key: "tap-ring", file: `${S}tap-ring.svg`, w: 48, h: 24, originX: 0.5, originY: 0.5, kind: "marker" },

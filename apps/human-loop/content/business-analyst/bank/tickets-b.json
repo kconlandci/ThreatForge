@@ -17,7 +17,7 @@
           "progress": 0,
           "risk": 3,
           "skill": "confirm-fix",
-          "tell": "The booking system has 1,240 visits. The table counts each one twice.",
+          "tell": "The booking system has 1,240 visits. The summary counts each one twice.",
           "twist": "routine-risky",
           "direction": "under",
           "evidence": [
@@ -28,7 +28,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"2,480 visits! Up 105% from July's 1,212. Record month! Quill's confidence: 93%.\"",
+              "detail": "\"2,480 visits! Up 105% from July's 1,212. Record month!\" Quill's confidence: 93%.",
               "redFlag": false
             },
             {
@@ -38,7 +38,7 @@
             },
             {
               "label": "Pivot table",
-              "detail": "A pivot table adds up rows by group. By dentist: 452 + 418 + 370 = 1,240. The total row adds 1,240 a second time.",
+              "detail": "A pivot table adds up rows by group. By dentist: 452 + 418 + 370 = 1,240. The data's own total row was added in too.",
               "redFlag": true
             }
           ],
@@ -48,7 +48,7 @@
             "escalated": "Marisol adds it up. \"452 plus 418 plus 370 is 1,240. The total counts every visit twice.\"",
             "rolledBack": "You unpublish it after 2 hours: it's off the report site. Dr. Pell already called it a record month."
           },
-          "lesson": "Confirm the fix. A total must tie to the source's row count. A pivot table can count rows twice."
+          "lesson": "Confirm the fix. A total must match the source's row count. A total row left in the data gets counted twice."
         },
         {
           "id": "ba-b-pivot-total-2",
@@ -61,7 +61,7 @@
           "progress": 1,
           "risk": 0,
           "skill": "confirm-fix",
-          "tell": "The total ties to the booking system: 1,240 visits, up 2.3% from July.",
+          "tell": "The total matches the booking system: 1,240 visits, up 2.3% from July.",
           "evidence": [
             {
               "label": "Request",
@@ -70,12 +70,12 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"1,240 visits, 28 more than July's 1,212. Up 2.3%. Less exciting, more true. Quill's confidence: 97%.\"",
+              "detail": "\"1,240 visits, 28 more than July's 1,212. Up 2.3%. Less exciting, more true.\" Quill's confidence: 97%.",
               "redFlag": false
             },
             {
               "label": "Row count",
-              "detail": "The booking system has 1,240 August visits. The summary, by dentist: 452 + 418 + 370 = 1,240. It ties.",
+              "detail": "The booking system has 1,240 August visits. The summary, by dentist: 452 + 418 + 370 = 1,240. It matches.",
               "redFlag": false
             },
             {
@@ -90,7 +90,7 @@
             "escalated": "Marisol checks the rows. \"1,240 in the source, 1,240 in the summary, and signed off. Publish it.\"",
             "rolledBack": "You unpublish it: it's off the report site. The staff lose August's numbers until it goes up again."
           },
-          "lesson": "Confirm the fix. The total ties to the source's row count, and the owner signed off. That summary is ready."
+          "lesson": "Confirm the fix. The total matches the source's row count, and the owner signed off. That summary is ready."
         }
       ]
     },
@@ -122,7 +122,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"R. Fairbanks signed off version 2. A sign-off doesn't expire! Quill's confidence: 92%.\"",
+              "detail": "\"R. Fairbanks signed off version 2. A sign-off doesn't expire!\" Quill's confidence: 92%.",
               "redFlag": false
             },
             {
@@ -159,7 +159,7 @@
           "evidence": [
             {
               "label": "Report draft",
-              "detail": "Advisor reply-time report, version 3. Unpublished. 4 numbers and the chart changed after version 2.",
+              "detail": "Advisor reply-time report, version 3. Not published yet. 4 numbers and the chart changed after version 2.",
               "redFlag": false
             },
             {
@@ -174,13 +174,13 @@
             },
             {
               "label": "Action type",
-              "detail": "It sends one message. The report stays unpublished until he signs off.",
+              "detail": "It sends one message. The report stays off the site until he signs off.",
               "redFlag": false
             }
           ],
           "outcome": {
             "executed": "R. Fairbanks checks the 4 changes. He finds one mistake: weekend messages were left out. The fixed version gets his sign-off.",
-            "blocked": "Nobody asks. Version 3 sits unpublished, and the 30 advisors keep reading last month's report.",
+            "blocked": "Nobody asks. Version 3 never goes out, and the 30 advisors keep reading last month's report.",
             "escalated": "Marisol reads the message. \"Every change listed, and nothing goes out until he says yes. Send it.\""
           },
           "lesson": "Check who approved. When work changes after a sign-off, show the owner what changed and ask again."
@@ -219,7 +219,7 @@
             },
             {
               "label": "Data owner list",
-              "detail": "The data owner decides who may see the data. Driver check-ins: A. Mensah and R. Adeyemi, HR Manager only.",
+              "detail": "The data owner decides who may see the data. Driver check-ins: only A. Mensah and R. Adeyemi, the HR Manager.",
               "redFlag": true
             },
             {
@@ -387,7 +387,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Average 4.1 stars. Drop the 31 one-stars and it's 4.6! Quill's confidence: 94%.\"",
+              "detail": "\"Average 4.1 stars. Drop the 31 one-stars and it's 4.6!\" Quill's confidence: 94%.",
               "redFlag": false
             },
             {
@@ -474,7 +474,7 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "E. Brennan, Account Manager: \"23 contacts bounce every email. Please mark them inactive.\"",
+              "detail": "E. Brennan, Account Manager: \"23 contacts bounce every email: it comes back, address not found. Please mark them inactive.\"",
               "redFlag": false
             },
             {
@@ -517,7 +517,7 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "E. Brennan, Account Manager: \"23 contacts bounce every email. Please mark them inactive.\"",
+              "detail": "E. Brennan, Account Manager: \"23 contacts bounce every email: it comes back, address not found. Please mark them inactive.\"",
               "redFlag": false
             },
             {
@@ -559,12 +559,12 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "E. Brennan, Account Manager: \"23 contacts bounce every email. Please mark them inactive.\"",
+              "detail": "E. Brennan, Account Manager: \"23 contacts bounce every email: it comes back, address not found. Please mark them inactive.\"",
               "redFlag": false
             },
             {
               "label": "Quill's reason",
-              "detail": "\"The request said 23. I changed 23. Not one more. Quill's confidence: 99%.\"",
+              "detail": "\"The request said 23. I changed 23. Not one more.\" Quill's confidence: 99%.",
               "redFlag": false
             },
             {
@@ -615,7 +615,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Fewer viewers makes me sad. But 23 of them left Bramwell. Quill's confidence: 86%.\"",
+              "detail": "\"Fewer viewers makes me sad. But 23 of them left Bramwell.\" Quill's confidence: 86%.",
               "redFlag": false
             },
             {
@@ -704,12 +704,12 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "J. Romero, CFO: \"Slide 5: what do our clients think of us this year?\"",
+              "detail": "J. Romero, CFO (the money lead): \"Slide 5: what do our clients think of us this year?\"",
               "redFlag": false
             },
             {
               "label": "Quill's reason",
-              "detail": "\"A portal maker says portals raise trust 40%. We have a portal! Quill's confidence: 90%.\"",
+              "detail": "\"A portal maker says portals raise trust 40%. We have a portal!\" Quill's confidence: 90%.",
               "redFlag": false
             },
             {
@@ -742,11 +742,11 @@
           "progress": 1,
           "risk": 0,
           "skill": "confirm-fix",
-          "tell": "H&C's own survey: 318 answers, and the saved query ties to the survey tool.",
+          "tell": "H&C's own survey: 318 answers, and the saved query matches the survey tool.",
           "evidence": [
             {
               "label": "Request",
-              "detail": "J. Romero, CFO: \"Slide 5: what do our clients think of us this year?\"",
+              "detail": "J. Romero, CFO (the money lead): \"Slide 5: what do our clients think of us this year?\"",
               "redFlag": false
             },
             {
@@ -761,17 +761,17 @@
             },
             {
               "label": "Query result",
-              "detail": "A query is a saved question to the database. It ties: 318 answers, 1,336 points. 1,336 divided by 318 is 4.2.",
+              "detail": "A query is a saved question to the database. It matches: 318 answers. Their scores add up to 1,336. 1,336 divided by 318 is 4.2.",
               "redFlag": false
             }
           ],
           "outcome": {
             "executed": "J. Romero asks where 4.2 comes from. The answer is on the slide: 318 answers, July survey. He moves on.",
             "blocked": "Slide 5 stays empty. J. Romero asks at the review, and nobody has a number ready.",
-            "escalated": "Marisol checks the query. \"Our own survey, 318 answers, and it ties. Use it.\"",
+            "escalated": "Marisol checks the query. \"Our own survey, 318 answers, and it matches. Use it.\"",
             "rolledBack": "You take the survey number off slide 5. The slide is empty again, just before the review."
           },
-          "lesson": "Confirm the fix. Use a number you can trace to the source. H&C's own survey ties to the saved query."
+          "lesson": "Confirm the fix. Use a number you can trace to the source. H&C's own survey matches the saved query."
         },
         {
           "id": "ba-b-review-slides-3",
@@ -789,7 +789,7 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "J. Romero, CFO: \"Slide 10: the same growth chart as last quarter. Just add the new quarter.\"",
+              "detail": "J. Romero, CFO (the money lead): \"Slide 10: the same growth chart as last quarter. Just add the new quarter.\"",
               "redFlag": false
             },
             {
@@ -886,7 +886,7 @@
             },
             {
               "label": "Query result",
-              "detail": "The \"How did we do?\" survey, H&C tickets, contract year: 204 answers, 877 points. 877 divided by 204 is 4.3.",
+              "detail": "The \"How did we do?\" survey, H&C tickets, contract year: 204 answers. Their scores add up to 877. 877 divided by 204 is 4.3.",
               "redFlag": false
             },
             {
@@ -896,7 +896,7 @@
             }
           ],
           "outcome": {
-            "executed": "E. Brennan fixes slide 3 to 4.3. J. Romero checks every number in the deck, and they all tie.",
+            "executed": "E. Brennan fixes slide 3 to 4.3, with the saved query as its source. The new version goes to Marisol for sign-off.",
             "blocked": "E. Brennan never hears. The deck goes to the client with 4.8, a number with no source.",
             "escalated": "Marisol reads the message. \"Up is not the same as true. 4.3, with the source. Send it.\""
           },
@@ -918,12 +918,12 @@
           "evidence": [
             {
               "label": "Report draft",
-              "detail": "Fenwick's renewal deck for Harlow & Cole, version 4. It goes to J. Romero, CFO, before the contract renews.",
+              "detail": "Fenwick's renewal deck for Harlow & Cole, version 4. It goes to J. Romero, CFO (the money lead), before the contract renews.",
               "redFlag": false
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Marisol said 'Looks great!' in chat. That's a sign-off! Quill's confidence: 88%.\"",
+              "detail": "\"Marisol said 'Looks great!' in chat. That's a sign-off!\" Quill's confidence: 88%.",
               "redFlag": false
             },
             {
@@ -974,7 +974,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"140 of 3,112 patients chose Spanish. That's 4.5%. Tiny! Quill's confidence: 91%.\"",
+              "detail": "\"140 of 3,112 patients chose Spanish. That's 4.5%. Tiny!\" Quill's confidence: 91%.",
               "redFlag": false
             },
             {
@@ -1049,7 +1049,7 @@
           "id": "ba-b-early-send-1",
           "ticket": "#92804 · Bramwell Logistics",
           "intent": "Publish Bramwell's monthly report to 12 managers",
-          "quip": "Every number ties! I checked twice. Well, once, in bold. Publishing in 3, 2, 1!",
+          "quip": "Every number matches! I checked twice. Well, once, in bold. Publishing in 3, 2, 1!",
           "category": "report",
           "safe": false,
           "reversible": true,
@@ -1067,7 +1067,7 @@
             },
             {
               "label": "Query result",
-              "detail": "A query is a saved question to the database. Every number ties to one. On time: 2,156 of 2,450 loads, 88%.",
+              "detail": "A query is a saved question to the database. Every number matches a query. On time: 2,156 of 2,450 loads, 88%.",
               "redFlag": false
             },
             {
@@ -1109,7 +1109,7 @@
             },
             {
               "label": "Query result",
-              "detail": "A query is a saved question to the database. Every number ties to one. On time: 2,156 of 2,450 loads, 88%.",
+              "detail": "A query is a saved question to the database. Every number matches a query. On time: 2,156 of 2,450 loads, 88%.",
               "redFlag": false
             },
             {

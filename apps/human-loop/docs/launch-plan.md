@@ -30,7 +30,7 @@ Same Vercel project ("human-loop"), so environment variables (`AIRTABLE_TOKEN`),
    `kconlandci/human-loop`.
 2. **Owner:** Settings → Build and Deployment → Root Directory: clear it (the app is now the repo
    root). Production branch stays `main`.
-3. Claude triggers a deploy and checks it: landing page, both live pathways, a real sign-up that
+3. Claude triggers a deploy and checks it: landing page, all five live pathways, a real sign-up that
    lands in Airtable ("Human Loop — Players"), a finished shift that adds a Shift Results row.
 
 ## 3. Go public

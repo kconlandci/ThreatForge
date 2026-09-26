@@ -37,7 +37,7 @@
   "outros": {
     "win": [
       [
-        { "speaker": "agent", "text": "All done! Every number tied to its source. I even put the sources in bold." },
+        { "speaker": "agent", "text": "All done! Every number matched its source. I even put the sources in bold." },
         { "speaker": "coach", "text": "Good work. The wrong numbers stayed in, and the right reports went out." }
       ],
       [

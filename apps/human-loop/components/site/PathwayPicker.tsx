@@ -27,8 +27,8 @@ export function Stars({ count, size = "h-6 w-6" }: { count: number; size?: strin
 }
 
 /**
- * Pathway picker for /play: one card per live pathway (each links to /play/<id>), then the rest as
- * "Coming soon". `pathways` defaults to the registry (tests pass a local copy with a status flipped).
+ * Pathway picker for /play: one card per live pathway (each links to /play/<id>), then any others as
+ * "Coming soon" (none today: the section only shows while a pathway is not live yet). `pathways` defaults to the registry (tests pass a local copy with a status flipped).
  */
 export function PathwayPicker({
   progress,
@@ -51,20 +51,25 @@ export function PathwayPicker({
         ))}
       </ul>
 
-      <h2 className="mt-10 flex items-center gap-3 font-display text-xl font-bold text-ink">
-        More pathways
-        <span className="rounded-full bg-paper-soft px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted ring-1 ring-line">
-          Coming soon
-        </span>
-      </h2>
-      {/* Two columns from sm up; a single card keeps the full width instead of leaving half a row empty. */}
-      <ul className={`mt-4 grid gap-3 sm:gap-4 ${soon.length > 1 ? "sm:grid-cols-2" : ""}`}>
-        {soon.map((p, i) => (
-          <li key={p.id}>
-            <ComingSoonCard pathway={p} number={live.length + i + 1} disabledGroup />
-          </li>
-        ))}
-      </ul>
+      {/* Only while some pathway is still on the way (none today: all five are live). */}
+      {soon.length > 0 ? (
+        <>
+          <h2 className="mt-10 flex items-center gap-3 font-display text-xl font-bold text-ink">
+            More pathways
+            <span className="rounded-full bg-paper-soft px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted ring-1 ring-line">
+              Coming soon
+            </span>
+          </h2>
+          {/* Two columns from sm up; a single card keeps the full width instead of leaving half a row empty. */}
+          <ul className={`mt-4 grid gap-3 sm:gap-4 ${soon.length > 1 ? "sm:grid-cols-2" : ""}`}>
+            {soon.map((p, i) => (
+              <li key={p.id}>
+                <ComingSoonCard pathway={p} number={live.length + i + 1} disabledGroup />
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </div>
   );
 }

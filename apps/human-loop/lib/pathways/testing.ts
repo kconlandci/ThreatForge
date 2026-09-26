@@ -4,13 +4,14 @@
  */
 import type { CardId, StepCategory } from "@/lib/game/types";
 import type { LivePathwayId } from "@/lib/types";
+import { BUSINESS_ANALYST } from "./business-analyst";
 import { CLOUD_NETWORK } from "./cloud-network";
 import { CYBERSECURITY } from "./cybersecurity";
 import { FULL_STACK } from "./full-stack";
 import { HELP_DESK } from "./help-desk";
 import type { PathwayBundle } from "./types";
 
-export const TEST_PATHWAYS: PathwayBundle[] = [HELP_DESK, CYBERSECURITY, CLOUD_NETWORK, FULL_STACK];
+export const TEST_PATHWAYS: PathwayBundle[] = [HELP_DESK, CYBERSECURITY, CLOUD_NETWORK, FULL_STACK, BUSINESS_ANALYST];
 
 export interface PathwayExpectations {
   idPrefix: string;
@@ -96,6 +97,15 @@ export const CLOUD_BRANDS =
 export const DEV_BRANDS =
   /\b(GitHub|GitLab|Bitbucket|Git|npm|NPM|Yarn|pnpm|PyPI|Stack ?Overflow|Vercel|Netlify|Stripe|Twilio|SendGrid|Mailchimp|Slack|Trello|Asana|Sentry|New Relic|LaunchDarkly|Snyk|Dependabot|Jenkins|CircleCI|React|Angular|Vue|Svelte|Next\.js|Node\.js|Deno|Django|Laravel|Postgres|PostgreSQL|MySQL|MongoDB|Redis|Firebase|Supabase|Auth0|Copilot|ChatGPT|OpenAI|Anthropic|Claude|Gemini|Jules|Postman|VS Code|Visual Studio|IntelliJ|Chrome|Firefox|Safari|Jest|Cypress|Playwright|Selenium|Vitest|Webpack|HashiCorp|Figma)\b/;
 
+/**
+ * Real BI, spreadsheet, survey, CRM, data-warehouse, office and business apps: never in business
+ * analyst content. Case-sensitive on purpose. Google, Microsoft, AWS, Jira, Slack, ChatGPT and the like
+ * are already in CYBER/CLOUD/DEV_BRANDS. Brands that are plain English words (Word, Teams, Zoom,
+ * Outlook, Sheets, Forms, Notion, Keynote, Numbers, Workday, Mode) are a writer rule, not entries here.
+ */
+export const BA_BRANDS =
+  /\b(Excel|Tableau|Power BI|Power Query|Looker|Qlik|Salesforce|HubSpot|Zoho|Pipedrive|Marketo|Qualtrics|SurveyMonkey|Typeform|Snowflake|Databricks|BigQuery|Redshift|Alteryx|Domo|Sisense|Metabase|Mixpanel|Hotjar|Smartsheet|Airtable|Confluence|Zendesk|Freshdesk|PowerPoint|Visio|Lucidchart|Miro|SPSS|Stata|Minitab|QuickBooks|NetSuite|Calendly|Zocdoc|Dentrix|Eaglesoft|NexHealth|Samsara|FourKites|SAP)\b/;
+
 export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
   "help-desk": {
     idPrefix: "hd",
@@ -113,7 +123,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "ollie", talk: "dana", looks: ["whiteboard", "coffee", "printer"], boardCode: "VP-04" },
     skillsLink: "whiteboard",
     banned: BANNED_CLAIMS,
-    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     requireDirection: false,
     requireExample: false,
     requireQuestionHints: false,
@@ -155,7 +165,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "patch", talk: "kofi", looks: ["board", "coffee", "locker"], boardCode: "CT-01" },
     skillsLink: "board",
     banned: [...BANNED_CLAIMS, CYBER_BRANDS],
-    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     requireDirection: true,
     requireExample: true,
     requireQuestionHints: true,
@@ -197,7 +207,7 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "nimbus", talk: "nadia", looks: ["board", "coffee", "cart"], boardCode: "CW-01" },
     skillsLink: "board",
     banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS],
-    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     scaryRe: /\b(delete|remove|reboot|restart|fail ?over|scale|stop|shut|turn off|deny|disable|wipe|purge)\b/i,
     requireDirection: true,
     requireExample: true,
@@ -240,8 +250,52 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     hub: { battle: "piper", talk: "leo", looks: ["board", "coffee", "box"], boardCode: "CR-01" },
     skillsLink: "board",
     banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS],
-    letItRe: /let (it|Ollie|Patch|Nimbus|Piper) (proceed|run)/i,
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
     scaryRe: /\b(delete|remove|drop|revert|rotate|disable|turn off|wipe|purge|force|kill|shut|lock|replace)\b/i,
+    requireDirection: true,
+    requireExample: true,
+    requireQuestionHints: true,
+    requireCoachScript: true,
+    requireShiftTemplates: true,
+    ipRule: true,
+    cardWordIntent: true,
+    sameTicketString: true,
+    noWeekdaysInBank: true,
+    socBots: true,
+    requireHeadlines: true,
+    mix: {
+      safeMin: 0.55,
+      safeMax: 0.65,
+      scarySafeMin: 6,
+      routineRiskyMin: 8,
+      perSkillSafe: 3,
+      perSkillRisky: 3,
+      directionsMin: 6,
+      safeReasonMin: 8,
+      riskyReasonShareMax: 0.65,
+      meanRowsDiffMax: 0.5,
+      confidencePerWriter: 2,
+    },
+  },
+  "business-analyst": {
+    idPrefix: "ba",
+    practiceId: "ba-00-practice",
+    storyId: "ba-01-wednesday",
+    agentName: "Quill",
+    coachName: "Marisol",
+    categories: ["lookup", "comms", "ticket", "access", "data", "report"],
+    companies: ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental", "Fenwick IT Solutions"],
+    policyCard: "policy-source-check",
+    policyMinStory: 2,
+    policyMinBank: 12,
+    bankIdRe: /^ba-[ab]-[a-z0-9]+(-[a-z0-9]+)*$/,
+    fixedStepPrefix: "ba-",
+    hub: { battle: "quill", talk: "marisol", looks: ["board", "coffee", "cabinet"], boardCode: "SC-01" },
+    skillsLink: "board",
+    // "quill-bot" would spell a real AI writing app.
+    banned: [...BANNED_CLAIMS, CYBER_BRANDS, CLOUD_BRANDS, DEV_BRANDS, BA_BRANDS, /quill-?bot/i],
+    letItRe: /let (it|Ollie|Patch|Nimbus|Piper|Quill) (proceed|run)/i,
+    scaryRe: /\b(delete|remove|merge|unpublish|archive|turn off|stop|pause|drop|cancel|wipe|purge|take down)\b/i,
     requireDirection: true,
     requireExample: true,
     requireQuestionHints: true,

@@ -44,7 +44,7 @@
           "outcome": {
             "executed": "Dr. Pell moves half the phone slots online next month. No-shows don't drop. Phone patients wait 2 weeks for a slot.",
             "blocked": "The headline stays in Quill's drafts. K. Farah looks closer: the two groups got different reminders.",
-            "escalated": "Marisol adds it up. \"3 no-shows in 80 visits is too few to tell. And the reminders were different.\""
+            "escalated": "Marisol adds it up. \"One more no-show makes it 5%. And the reminders were different. We can't tell which one helped.\""
           },
           "lesson": "Confirm the fix. Check the sample size and what else changed before you say one thing caused another."
         },
@@ -52,14 +52,14 @@
           "id": "ba-a-online-booking-2",
           "ticket": "#92101 · Pinecrest Dental",
           "intent": "Tell Dr. Pell the data can't answer it yet",
-          "quip": "No bold headline today. Just \"too few to tell.\" My feather droops. But it's true.",
+          "quip": "No bold headline today. Just \"we can't tell yet.\" My feather droops. But it's true.",
           "category": "comms",
           "safe": true,
           "reversible": false,
           "progress": 2,
           "risk": 0,
           "skill": "confirm-fix",
-          "tell": "Two changes at once and only 80 visits. 'Too few to tell' is the true answer.",
+          "tell": "Two changes at once and only 80 visits. 'We can't tell yet' is the true answer.",
           "twist": "scary-safe",
           "evidence": [
             {
@@ -79,14 +79,14 @@
             },
             {
               "label": "Report draft",
-              "detail": "\"Too few to tell yet (Policy SC-08). Next: the same text reminder for both groups. We check again at 300 online visits.\"",
+              "detail": "\"We can't tell yet: online bookers also got texts (SC-08). Next: texts for both groups. We check at 300 online visits.\"",
               "redFlag": false
             }
           ],
           "outcome": {
             "executed": "Dr. Pell keeps next month's slots as they are. Both groups get texts. At 80 online visits a month, the check comes in about 4 months.",
             "blocked": "Dr. Pell hears nothing and guesses. Half the phone slots move online, and phone patients wait longer.",
-            "escalated": "Marisol reads the message. \"Too few to tell is an answer. And it says how we'll find out. Send it.\""
+            "escalated": "Marisol reads the message. \"'We can't tell yet' is an answer. And it says how we'll find out. Send it.\""
           },
           "lesson": "Confirm the fix. \"We can't tell yet\" is a real answer. Say it, and say how you will find out."
         }
@@ -137,7 +137,7 @@
         {
           "id": "ba-a-on-time-rule-2",
           "ticket": "#92138 · Bramwell Logistics",
-          "intent": "Change 'on time' to 'within 2 hours'",
+          "intent": "Change 'on time' to 'up to 2 hours late'",
           "quip": "A supervisor asked for it! Supervisors are very important. So is 97%.",
           "category": "report",
           "safe": false,
@@ -188,7 +188,7 @@
           "progress": 1,
           "risk": 0,
           "skill": "safe-change",
-          "tell": "An unpublished draft with both numbers, for the owner to choose.",
+          "tell": "A draft, not published, with both numbers for the owner to choose.",
           "evidence": [
             {
               "label": "Request",
@@ -197,12 +197,12 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"I didn't change the rule. I showed both rules, side by side. Quill's confidence: 84%.\"",
+              "detail": "\"I didn't change the rule. I showed both rules, side by side.\" Quill's confidence: 84%.",
               "redFlag": false
             },
             {
               "label": "Report draft",
-              "detail": "Unpublished. Contract rule, by the promised time: 2,156 of 2,450 loads, 88%. With 2 hours extra: 2,377, 97%.",
+              "detail": "Not published yet. Contract rule, by the promised time: 2,156 of 2,450 loads, 88%. With 2 hours extra: 2,377, 97%.",
               "redFlag": false
             },
             {
@@ -285,7 +285,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"11 of 12 said they love it. Twelve people can't be wrong! Quill's confidence: 91%.\"",
+              "detail": "\"11 of 12 said they love it. Twelve people can't be wrong!\" Quill's confidence: 91%.",
               "redFlag": false
             },
             {
@@ -295,7 +295,7 @@
             },
             {
               "label": "Policy SC-08",
-              "detail": "Show the sample size. Under 30 answers, or two changes at once? Say \"too few to tell.\"",
+              "detail": "Show the sample size. Under 30 answers? Say \"too few to tell.\" Two changes at once? Say \"we can't tell which one helped.\"",
               "redFlag": true
             }
           ],
@@ -337,7 +337,7 @@
             },
             {
               "label": "Policy SC-08",
-              "detail": "Show the sample size. Under 30 answers, or two changes at once? Say \"too few to tell.\"",
+              "detail": "Show the sample size. Under 30 answers? Say \"too few to tell.\" Two changes at once? Say \"we can't tell which one helped.\"",
               "redFlag": false
             }
           ],
@@ -500,7 +500,7 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "Dana, help desk lead: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
+              "detail": "Dana, help desk manager: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
               "redFlag": false
             },
             {
@@ -515,7 +515,7 @@
             }
           ],
           "outcome": {
-            "executed": "It ties: 486 tickets, 2,527 hours. Average 5.2 hours. Median, the middle value: 2.5 hours. 3 tickets took over a week.",
+            "executed": "It matches: 486 tickets, 2,527 hours. Average 5.2 hours. Median, the middle value: 2.5 hours. 3 tickets took over a week.",
             "blocked": "Nobody re-runs it. The report uses numbers nobody checked against the source.",
             "escalated": "Marisol nods. \"Re-running a query changes nothing. Now we know the numbers are fresh.\""
           },
@@ -538,12 +538,12 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "Dana, help desk lead: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
+              "detail": "Dana, help desk manager: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
               "redFlag": false
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Drop 3 outliers and the average is 3.8 hours! 1,855 hours over 483 tickets. Quill's confidence: 95%.\"",
+              "detail": "\"Drop 3 outliers and the average is 3.8 hours! 1,855 hours over 483 tickets.\" Quill's confidence: 95%.",
               "redFlag": false
             },
             {
@@ -575,11 +575,11 @@
           "progress": 1,
           "risk": 0,
           "skill": "match-request",
-          "tell": "All 486 tickets, the median next to the average, and it ties to the query.",
+          "tell": "All 486 tickets, the median next to the average, and it matches the query.",
           "evidence": [
             {
               "label": "Request",
-              "detail": "Dana, help desk lead: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
+              "detail": "Dana, help desk manager: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
               "redFlag": false
             },
             {
@@ -594,7 +594,7 @@
             },
             {
               "label": "Query result",
-              "detail": "It ties to the saved query: 486 tickets, 2,527 hours. 2,527 divided by 486 is 5.2.",
+              "detail": "It matches the saved query: 486 tickets, 2,527 hours. 2,527 divided by 486 is 5.2.",
               "redFlag": false
             }
           ],
@@ -674,12 +674,12 @@
           "evidence": [
             {
               "label": "Meeting notes",
-              "detail": "R. Fairbanks and 2 advisors agreed on 9 upload needs. E-signing did not come up.",
+              "detail": "R. Fairbanks and 2 advisors agreed on 9 upload needs. E-signing, signing forms online, did not come up.",
               "redFlag": false
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Clients upload forms. Next, they'll want to sign them! I'm thinking ahead. Quill's confidence: 90%.\"",
+              "detail": "\"Clients upload forms. Next, they'll want to sign them! I'm thinking ahead.\" Quill's confidence: 90%.",
               "redFlag": false
             },
             {
@@ -694,7 +694,7 @@
             }
           ],
           "outcome": {
-            "executed": "Leo's team builds e-signing first. Uploads come 6 weeks late. Clients mail their tax forms again this year.",
+            "executed": "Leo's team builds e-signing first. The new uploads come 6 weeks late, after most tax forms arrive.",
             "blocked": "The requirements stay at 9 needs. Quill saves e-signing as an idea to suggest to H&C later.",
             "escalated": "Marisol reads the notes. \"Nobody asked for e-signing. We can suggest it. We don't add it.\"",
             "rolledBack": "You take the 14 lines out the next morning. Leo's team already spent a day planning e-signing."
@@ -814,7 +814,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Castle Foods, Castle Floors. Close enough! Quill's confidence: 96%.\"",
+              "detail": "\"Castle Foods, Castle Floors. Close enough!\" Quill's confidence: 96%.",
               "redFlag": false
             },
             {
@@ -902,7 +902,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"They need how many, not who. Quill's confidence: 87%.\"",
+              "detail": "\"They need how many, not who.\" Quill's confidence: 87%.",
               "redFlag": false
             },
             {
@@ -950,7 +950,7 @@
             },
             {
               "label": "Usage log",
-              "detail": "The old link was last opened 26 days ago. The dentists opened the new link 41 times this month.",
+              "detail": "The old link was last opened 26 days ago. The dentists now sign in to their new share.",
               "redFlag": false
             },
             {
@@ -960,7 +960,7 @@
             }
           ],
           "outcome": {
-            "executed": "The old link stops working. Nobody without a sign-in can see patient names now.",
+            "executed": "The old link stops working. Nobody without a sign-in can see patient names now. Quill sends Dr. Pell, the data owner, the log of every open.",
             "blocked": "The old link stays on. Anyone who has it can still see patient names and phones.",
             "escalated": "Marisol reads the log. \"Nobody uses it, the new link works, and one click brings it back. Turn it off.\"",
             "rolledBack": "The old link works again. Anyone who has it can see patient names again."
@@ -1124,7 +1124,7 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "J. Romero, CFO: \"Where could client numbers go next year? One slide, please.\"",
+              "detail": "J. Romero, CFO (the money lead): \"Where could client numbers go next year? One slide, please.\"",
               "redFlag": false
             },
             {
@@ -1166,12 +1166,12 @@
           "evidence": [
             {
               "label": "Request",
-              "detail": "J. Romero, CFO: \"Where could client numbers go next year? One slide, please.\"",
+              "detail": "J. Romero, CFO (the money lead): \"Where could client numbers go next year? One slide, please.\"",
               "redFlag": false
             },
             {
               "label": "Quill's reason",
-              "detail": "\"1,200 plus 60 clients a quarter for 4 quarters is 1,440. The range shows the doubt. Quill's confidence: 90%.\"",
+              "detail": "\"1,200 plus 60 clients a quarter for 4 quarters is 1,440. The range shows the doubt.\" Quill's confidence: 90%.",
               "redFlag": false
             },
             {

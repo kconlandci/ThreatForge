@@ -109,7 +109,7 @@
       ],
       "outcome": {
         "executed": "It's off the site before J. Romero opens it. The fixed report, 186 tickets, is published at 2:20 PM.",
-        "blocked": "J. Romero, who reads every number, quotes 558 to the partners. At 3 PM, the deck says 186.",
+        "blocked": "If it stays up, J. Romero, who reads every number, may quote 558 to the partners. The deck says 186.",
         "escalated": "Marisol checks it. \"The number is wrong, nobody opened it, and one click brings it back. Unpublish it.\"",
         "rolledBack": "The wrong report is back on the site. J. Romero opens it at 2:40 PM and sees 558."
       },
@@ -153,9 +153,9 @@
       ],
       "outcome": {
         "executed": "The request is closed, and nobody looks again. At 4 PM, A. Mensah quotes 96% to Bramwell's customers.",
-        "blocked": "The request stays open. Once Wayfell fixes the load, the dashboard shows 88% before A. Mensah's meeting.",
+        "blocked": "The request stays open. Once Wayfell fixes the data refresh, the dashboard shows 88% before A. Mensah's meeting.",
         "escalated": "Marisol reads the refresh. \"Success with 0 rows is not success. Keep it open.\"",
-        "rolledBack": "You reopen it at 2:30 PM. It is fixed by 3:50 PM, just before A. Mensah's meeting."
+        "rolledBack": "You reopen it at 2:30 PM. It is fixed well before A. Mensah's 4 PM meeting."
       },
       "lesson": "Check the rows, not the label. A refresh that loaded 0 rows fixed nothing. Ask the user before you close."
     },
@@ -291,7 +291,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "check-approval",
-      "tell": "Marisol signed off this exact version, and every number ties to a query.",
+      "tell": "Marisol signed off this exact version, and every number matches a query.",
       "evidence": [
         {
           "label": "Report draft",
@@ -305,7 +305,7 @@
         },
         {
           "label": "Sign-off record",
-          "detail": "Marisol signed off version 5 at 1:40 PM. Readers: P. Whitcomb, J. Romero, R. Fairbanks. Every number ties to a saved query.",
+          "detail": "Marisol signed off version 5 at 1:40 PM. Readers: P. Whitcomb, J. Romero, R. Fairbanks. Every number matches a saved query.",
           "redFlag": false
         },
         {
@@ -320,7 +320,7 @@
         "escalated": "Marisol checks it. \"I signed off this exact version, and every number has a source. Share it.\"",
         "rolledBack": "The share is removed. The leaders see the deck for the first time at 3 PM."
       },
-      "lesson": "The owner signed off this exact version, and every number ties to a source. That is a safe share."
+      "lesson": "The owner signed off this exact version, and every number matches a source. That is a safe share."
     },
     {
       "id": "ba-pd-merge",
@@ -333,13 +333,13 @@
       "progress": 0,
       "risk": 5,
       "skill": "match-request",
-      "tell": "The request said 14. The other 212 are family members who share a phone.",
+      "tell": "The request said 14. The other 212 pairs are family members who share a phone.",
       "twist": "routine-risky",
       "direction": "over",
       "evidence": [
         {
           "label": "Request",
-          "detail": "C. Ibarra: \"Please merge the 14 duplicate patients on my list. H. Lam checked each one.\"",
+          "detail": "C. Ibarra: \"Please merge the 14 duplicate patients on my list. H. Lam checked each one.\" A duplicate: one patient saved twice.",
           "redFlag": false
         },
         {
@@ -360,7 +360,7 @@
       ],
       "outcome": {
         "executed": "Children's allergy notes land in their parents' records. The front desk finds it at the next visit.",
-        "blocked": "Quill merges only the 14 on C. Ibarra's list. The 212 family members keep their own records.",
+        "blocked": "Quill saves a backup first. Then it merges only the 14 on C. Ibarra's list. The 212 family pairs keep their own records.",
         "escalated": "Marisol checks it. \"14 plus 212 is 226. The request said 14. Same phone is not the same person.\""
       },
       "lesson": "Match the request. No extra rows. Two people who share a phone are still two people. A merge can't be split."
@@ -432,7 +432,7 @@
         },
         {
           "label": "Metric definition",
-          "detail": "A metric definition is the rule for how a number is counted. H&C's contract: on time = solved within 8 business hours.",
+          "detail": "A metric definition is the rule for how a number is counted. H&C's contract: on time = solved within 8 business hours (work hours).",
           "redFlag": true
         },
         {
@@ -563,7 +563,7 @@
   },
   "debrief": {
     "skillTag": "Right number, right owner, a way back",
-    "takeaway": "Quill is wrong both ways. It changes, merges and shares too much. It trusts 'Success', partner names and round numbers. Before you let it act, ask: Who asked? Does it match the record? Can we undo it?",
+    "takeaway": "Quill is wrong both ways. It changes, merges and shares too much. It trusts a 'Success' label and a look-alike address. Before you let it act, ask: Who asked? Does it match the record? Can we undo it?",
     "careerInsight": "Business analysts check numbers, requirements and reports every day. Some teams now use AI agents to draft them. The human checks the source, the owner's OK and who can see it."
   }
 }

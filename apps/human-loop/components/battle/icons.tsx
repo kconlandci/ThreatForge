@@ -10,6 +10,7 @@ import {
   Coffee,
   Contact,
   Database,
+  FileChartColumnIncreasing,
   Hand,
   KeyRound,
   Laptop,
@@ -52,6 +53,7 @@ export const CATEGORY_ICON: Record<StepCategory, LucideIcon> = {
   network: Network,
   cloud: Cloud,
   code: CodeXml,
+  report: FileChartColumnIncreasing,
 };
 
 export const CATEGORY_LABEL: Record<StepCategory, string> = {
@@ -65,6 +67,7 @@ export const CATEGORY_LABEL: Record<StepCategory, string> = {
   network: "Network",
   cloud: "Cloud",
   code: "Code",
+  report: "Report",
 };
 
 /** How an evidence row is drawn: like a terminal, a message, a policy page, or a record. */
@@ -72,6 +75,9 @@ export type ArtifactKind = "terminal" | "message" | "policy" | "record" | "email
 
 export function artifactKind(label: string, detail: string): ArtifactKind {
   const l = label.toLowerCase();
+  // Business analyst number rows ("Query", "Query result", "Data refresh", "Row count", "Pivot table") are
+  // spreadsheet and report records, not a shell prompt: learners must read their sums, and "$" reads as dollars.
+  if (/\bquery\b|refresh|row count|pivot/.test(l)) return "record";
   if (/\blog\b|script|result/.test(l)) return "terminal";
   // "EDR alert", and first uses that explain the term: "EDR alert (security app)", "Network alarm (IDS)".
   if (/^(edr|ids|dlp|mfa|sign-in|storage|data-leak) alert\b|^network alarm\b/.test(l) || /hash lookup|alert group/.test(l)) return "terminal";

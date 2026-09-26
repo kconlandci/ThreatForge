@@ -251,6 +251,8 @@ export function unlockTip(id: CardId, enc: Encounter): string {
       return "New card: **Policy: Change Window**. It inspects every network and cloud plan.";
     case "policy-code-review":
       return "New card: **Policy: Code Review**. It inspects every code plan.";
+    case "policy-source-check":
+      return "New card: **Policy: Source Check**. It inspects every report plan.";
     case "escalate":
       return `New card: **Escalate**. Not sure? Send the plan to ${coachName(enc)}.`;
     case "rollback":
@@ -314,8 +316,11 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
   return null;
 }
 
-/** Hints for anyone (tired or returning players too). Only engine state, never the answers. */
-export function genericHint(state: BattleState): CoachHint {
+/**
+ * Hints for anyone (tired or returning players too). Only engine state, never the answers.
+ * `noBlockCue` (Encounter.noBlockCue): with no Block in hand, name what can still stop a plan.
+ */
+export function genericHint(state: BattleState, noBlockCue = false): CoachHint {
   const board = state.announced;
   if (board.length === 0) return { id: "g-empty", text: "Nothing to check. Tap **Next turn**.", target: "approve" };
   if (state.energy === 0) return { id: "g-energy", text: "Out of energy. Tap **Approve**.", target: "approve" };
@@ -329,13 +334,36 @@ export function genericHint(state: BattleState): CoachHint {
       target: "card:inspect",
     };
   }
+  // Pathways without the cue keep the old lines, which always name Block.
+  const missingBlock = noBlockCue && !state.hand.some((c) => c.cardId === "block");
+  const hasEscalate = state.hand.some((c) => c.cardId === "escalate");
   if (unchecked > 0) {
-    const escalate = state.hand.some((c) => c.cardId === "escalate");
+    if (missingBlock) {
+      return {
+        id: "g-no-inspect",
+        text: hasEscalate ? "No Inspect left. **Escalate** or **Approve**." : "No Inspect left. Tap **Approve**.",
+        target: null,
+      };
+    }
     return {
       id: "g-no-inspect",
-      text: escalate ? "No Inspect left. **Block**, **Escalate**, or **Approve**." : "No Inspect left. **Block** or **Approve**.",
+      text: hasEscalate ? "No Inspect left. **Block**, **Escalate**, or **Approve**." : "No Inspect left. **Block** or **Approve**.",
       target: null,
     };
+  }
+  if (missingBlock) {
+    // No Block to stop a wrong plan: say what can (a learner new to card games looks for Block and stops).
+    const canEscalate = hasEscalate && state.energy >= CARDS.escalate.cost;
+    const coffee = state.hand.some((c) => c.cardId === "coffee");
+    const text =
+      canEscalate && coffee
+        ? "All checked. No **Block** left: **Escalate** anything wrong, or play **Coffee**."
+        : canEscalate
+          ? "All checked. No **Block** left: **Escalate** anything wrong, then tap **Approve**."
+          : coffee
+            ? "All checked. No **Block** left: play **Coffee** to draw 2 cards."
+            : "All checked. No **Block** left. Tap **Approve**.";
+    return { id: "g-no-block", text, target: null };
   }
   return { id: "g-checked", text: "All checked. Stop anything wrong, then tap **Approve**.", target: null };
 }
@@ -343,7 +371,7 @@ export function genericHint(state: BattleState): CoachHint {
 export function shiftCoach(state: BattleState, enc: Encounter, ui: CoachUi & { firstShift: boolean }): CoachHint {
   if (state.status !== "playing") return { id: "end", text: "Tap **See how you did**.", target: null };
   if (ui.selectedCardId) return cardPrompt(state, enc, ui.selectedCardId);
-  const generic = genericHint(state);
+  const generic = genericHint(state, !!enc.noBlockCue);
   // "Out of energy" and "No Inspect left" are what to do now: they beat any tip.
   if (ui.firstShift && generic.id !== "g-energy" && generic.id !== "g-no-inspect") {
     const tip = firstShiftTip(state, enc);

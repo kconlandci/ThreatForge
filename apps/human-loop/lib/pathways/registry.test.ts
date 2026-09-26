@@ -25,14 +25,15 @@ describe("pathway registry", () => {
       expect(isLivePathwayId(id), id).toBe(true);
       expect(TEST_PATHWAYS.map((b) => b.id), `${id} is live, so TEST_PATHWAYS must include it`).toContain(id);
     }
-    expect(isLivePathwayId("business-analyst")).toBe(false);
+    expect(isLivePathwayId("nope")).toBe(false);
+    expect(isLivePathwayId("business-analyst")).toBe(true);
     expect(isLivePathwayId("full-stack")).toBe(true);
     expect(isLivePathwayId("cybersecurity")).toBe(true);
     expect(isLivePathwayId("cloud-network")).toBe(true);
   });
 
   it("fills in the metadata every live-able pathway needs", () => {
-    for (const id of ["help-desk", "cybersecurity", "cloud-network", "full-stack"] as const) {
+    for (const id of ["help-desk", "cybersecurity", "cloud-network", "full-stack", "business-analyst"] as const) {
       const m = getPathway(id);
       const e = EXPECT[id];
       expect(m.idPrefix).toBe(e.idPrefix);
@@ -48,6 +49,7 @@ describe("pathway registry", () => {
     expect(getPathway("help-desk").name).toBe("Help Desk");
     expect(getPathway("cloud-network").name).toBe("Cloud & Network");
     expect(getPathway("full-stack").name).toBe("Full-Stack Development");
+    expect(getPathway("business-analyst").name).toBe("Business Analyst");
     const prefixes = PATHWAYS.flatMap((p) => (p.idPrefix ? [p.idPrefix] : []));
     expect(new Set(prefixes).size).toBe(prefixes.length);
   });
@@ -60,6 +62,8 @@ describe("pathway registry", () => {
     expect(pathwayOfEncounterId("cn-daily-4")?.id).toBe("cloud-network");
     expect(pathwayOfEncounterId("fs-01-thursday")?.id).toBe("full-stack");
     expect(pathwayOfEncounterId("fs-daily-4")?.id).toBe("full-stack");
+    expect(pathwayOfEncounterId("ba-01-wednesday")?.id).toBe("business-analyst");
+    expect(pathwayOfEncounterId("ba-daily-4")?.id).toBe("business-analyst");
     expect(pathwayOfEncounterId("x-1")).toBeUndefined();
   });
 

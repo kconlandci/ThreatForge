@@ -13,6 +13,7 @@ export type CardId =
   | "policy-look-first"
   | "policy-change-window"
   | "policy-code-review"
+  | "policy-source-check"
   | "coffee";
 
 /** What a card is played on. */
@@ -56,7 +57,7 @@ export interface CardDef {
 /* ------------------------------------------------------------------ */
 
 /** Per pathway, content/<id>/pathway.json "categories" lists the ones its content may use. */
-export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data" | "endpoint" | "network" | "cloud" | "code";
+export type StepCategory = "lookup" | "credential" | "comms" | "ticket" | "access" | "data" | "endpoint" | "network" | "cloud" | "code" | "report";
 
 /** Lens skills: each help desk step is tagged with the one skill it tests (authored). */
 export type SkillId =
@@ -107,7 +108,7 @@ export interface AgentStep {
   /**
    * Optional text for the evidence sheet's "Can we undo it?" row, shown instead of the default
    * answer. For plans that change nothing (a phone call, a config copy), where "No, it can't be
-   * undone" would read like a red flag. Only cloud and full-stack content set it today.
+   * undone" would read like a red flag. Only cloud, full-stack and business-analyst content set it.
    */
   undoNote?: string;
   /** Work credit when a safe step gets done (executed or escalated). */
@@ -198,6 +199,12 @@ export interface Encounter {
   headlines?: Partial<Record<HeadlineKey, string[]>>;
   /** Practice only: the coach's lines on the first two evidence sheets (coach.ts p0-c, p1-c). */
   coachScript?: { firstSafeSheet: string; firstRiskySheet: string };
+  /**
+   * Hydrated like coach, from pathway.json "noBlockCue": with no Block card in hand, the shift hint
+   * and the evidence sheet say what can still stop a wrong plan (Escalate, Coffee). Missing means off
+   * (the Help Desk, whose hint text the golden pins).
+   */
+  noBlockCue?: boolean;
 }
 
 /** The Help Desk clients. Each pathway lists its own in pathway.json "companies" (content tests check them). */
