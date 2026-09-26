@@ -814,7 +814,7 @@
             },
             {
               "label": "Quill's reason",
-              "detail": "\"Castle Foods, Castle Floors. Close enough!\" Quill's confidence: 96%.",
+              "detail": "\"Dunmarrow Foods, Dunmarrow Floors. Close enough!\" Quill's confidence: 96%.",
               "redFlag": false
             },
             {
@@ -829,7 +829,7 @@
             }
           ],
           "outcome": {
-            "executed": "Castle Floors gets Castle Foods' invoices. 140 pairs of companies share records. D. Ruiz spends weeks sorting them.",
+            "executed": "Dunmarrow Floors gets Dunmarrow Foods' invoices. 140 pairs of companies share records. D. Ruiz spends weeks sorting them.",
             "blocked": "Quill merges only D. Ruiz's 38 pairs. The 140 close matches stay separate.",
             "escalated": "Marisol reads the list. \"D. Ruiz asked for 38. Different tax IDs mean different companies.\""
           },
