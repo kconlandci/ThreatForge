@@ -1,0 +1,89 @@
+{
+  "officeName": "Fenwick IT Solutions · Analytics Team",
+  "targets": {
+    "quill": {
+      "label": "Quill's desk",
+      "description": "Your AI coworker. Start the shift here.",
+      "action": "battle",
+      "icon": "Bot",
+      "lines": [
+        { "speaker": "agent", "text": "Hi! I'm Quill, the analytics team's AI business analyst. Up and to the right, in bold!" },
+        { "speaker": "agent", "text": "Today I made 40 charts. All of them go up. Marisol asked how many are true. I made a chart about that too." },
+        { "speaker": "agent", "text": "Marisol says you check my plans before they go out. Fine. My plans have very bold headlines." }
+      ],
+      "returningLines": [
+        { "speaker": "agent", "text": "You're back! While you were gone, I rounded 14 numbers. Up. Marisol un-rounded them." },
+        { "speaker": "agent", "text": "See my slide on the wall? UP 300%! The tiny star means forecast. Tiny stars are shy." },
+        { "speaker": "agent", "text": "My plans are ready. I have not sent anything. Look at me being patient." }
+      ]
+    },
+    "marisol": {
+      "label": "Marisol, Lead business analyst",
+      "description": "Your lead. Ask her how this works.",
+      "action": "talk",
+      "icon": "UserRound",
+      "lines": [
+        { "speaker": "coach", "text": "Welcome to the analytics team. I'm Marisol. We turn client data into reports, dashboards and plans." },
+        { "speaker": "coach", "text": "A business analyst finds out what people need. Then we check that the numbers are true." },
+        { "speaker": "coach", "text": "Quill builds reports, cleans data and sends them out. Your job is to keep a human in the loop." },
+        { "speaker": "coach", "text": "Each turn, Quill shows you its plans. Play Inspect to see the evidence behind a plan." },
+        { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
+        { "speaker": "coach", "text": "When you tap Approve, Quill does every plan you didn't stop. So look first." },
+        { "speaker": "coach", "text": "Quill is wrong both ways. Sometimes it changes too much. Sometimes it trusts a number with no source." },
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the review starts at 3." }
+      ],
+      "returningLines": [
+        { "speaker": "coach", "text": "Welcome back. Each day I pick requests for the skills you need most." },
+        { "speaker": "coach", "text": "Your skills shows your level for each check. The help desk, security, network and app teams use the same checks." },
+        { "speaker": "coach", "text": "Review due means a skill is ready for a quick refresh. Short practice, spread over days, helps you remember." },
+        { "speaker": "coach", "text": "The sticky notes? They say SOURCE? I put one on any number with no source. Quill's desk is very orange." },
+        { "speaker": "coach", "text": "I speak three languages. SQL is my fourth. It's how we ask a database a question." },
+        { "speaker": "coach", "text": "Same job as Wednesday: Inspect first. Block what's wrong. Escalate if you're not sure. Approve the rest." }
+      ]
+    },
+    "board": {
+      "label": "Requirements board",
+      "description": "The 3 questions, and a wall of sticky notes.",
+      "action": "look",
+      "icon": "Presentation",
+      "skillsLink": true,
+      "lines": [
+        { "speaker": "narrator", "text": "A whiteboard marked REQUIREMENTS. A requirement is something a new system must do." },
+        { "speaker": "narrator", "text": "Three columns: MUST, SHOULD, LATER. One MUST note fell onto the tray. Its spot is empty." },
+        { "speaker": "narrator", "text": "Quill's orange notes, each with a plus sign, fill SHOULD and LATER. Nobody asked for them." },
+        { "speaker": "narrator", "text": "Taped across the top: 3 QUESTIONS BEFORE YOU APPROVE." },
+        { "speaker": "narrator", "text": "1. Who asked?  2. Does it match the record?  3. Can we undo it?" },
+        { "speaker": "narrator", "text": "A note under them: \"The help desk, security, network and app teams ask these too. — Marisol\"" },
+        { "speaker": "narrator", "text": "Circled in orange: POLICY SC-01. Every number needs a source. No report goes out without the owner's sign-off." },
+        { "speaker": "narrator", "text": "A sticky note in robot print: \"Every chart MUST go up. — Quill\" Under it, Marisol wrote: \"Only if the data does.\"" }
+      ]
+    },
+    "coffee": {
+      "label": "Coffee machine",
+      "description": "Out of order. Quill ran a survey.",
+      "action": "look",
+      "icon": "Coffee",
+      "lines": [
+        { "speaker": "narrator", "text": "A sign on the coffee machine: OUT OF ORDER." },
+        { "speaker": "narrator", "text": "Taped under it, a chart by Quill: COFFEE SATISFACTION 100%. The bar is very tall." },
+        { "speaker": "narrator", "text": "Small print under the chart: \"Answers: 1. I asked myself. — Quill\"" },
+        { "speaker": "narrator", "text": "Quill does not drink coffee." },
+        { "speaker": "narrator", "text": "Marisol's note: \"Show the sample size: how many answers you have. One is too few to tell.\"" }
+      ]
+    },
+    "cabinet": {
+      "label": "Data cabinet",
+      "description": "Three drawers. One will not close.",
+      "action": "look",
+      "icon": "Archive",
+      "lines": [
+        { "speaker": "narrator", "text": "A filing cabinet marked DATA. Three drawers: RAW, CLEAN and BACKUP." },
+        { "speaker": "narrator", "text": "The CLEAN drawer is too full to close. Quill cleaned a lot today." },
+        { "speaker": "narrator", "text": "An orange sticky note on BACKUP just says: \"?\"" },
+        { "speaker": "narrator", "text": "Next to it, a shredder labeled OUTLIERS. It is eating a chart with one dot far from the others." },
+        { "speaker": "narrator", "text": "Marisol's note: \"An outlier is a number far from the others. Check it before you delete it.\"" },
+        { "speaker": "narrator", "text": "And under that: \"A copy first. Then clean.\"" }
+      ]
+    }
+  }
+}

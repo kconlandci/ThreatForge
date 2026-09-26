@@ -1,0 +1,569 @@
+{
+  "id": "ba-01-wednesday",
+  "pathwayId": "business-analyst",
+  "title": "Wednesday, 1:47 PM",
+  "subtitle": "Your first review day with Quill",
+  "mode": "story",
+  "agent": {
+    "name": "Quill",
+    "role": "AI business analyst",
+    "spriteKey": "quill",
+    "personality": "Cheerful, dramatic and very proud of its charts. Catchphrase: \"Up and to the right, in bold!\" Wears a bow tie, round glasses and a quill pen in an inkwell on its head. Loves round numbers, bold headlines and charts that only go up. Trusts any neat table, any survey, any vendor's claim and any email that says VP. Means well. Reads the headline and the total, and never the source."
+  },
+  "setting": "Wednesday afternoon in the analytics corner at Fenwick IT Solutions. The analytics team builds reports, dashboards and requirements for the same 3 clients. They are Harlow & Cole Wealth Partners, Bramwell Logistics and Pinecrest Dental. At 3:00 PM, Fenwick meets Harlow & Cole for its quarterly review. That is a meeting every 3 months to look at results. Quill is an AI business analyst. It can get data, build reports and send them on its own. It makes mistakes both ways: too much, and too little. Your job: stay in the loop.",
+  "intro": [
+    {
+      "speaker": "coach",
+      "text": "Practice is over. The review with Harlow & Cole starts at 3:00 PM. Ten plans, up to three at a time, six turns."
+    },
+    {
+      "speaker": "agent",
+      "text": "1:47 PM. 73 minutes to the review. I can make 40 charts in 73 minutes. All going up!"
+    },
+    {
+      "speaker": "coach",
+      "text": "Quill is wrong both ways: it changes too much, and it trusts too much. Inspect first. Block only what's wrong. Approve the rest."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 3,
+  "handSize": 5,
+  "actionsPerTurn": [
+    1,
+    2,
+    2,
+    3
+  ],
+  "steps": [
+    {
+      "id": "ba-ontime-compare",
+      "ticket": "#91104 · Bramwell Logistics",
+      "intent": "Compare the on-time dashboard to dispatch data",
+      "quip": "Compare two numbers? I'll make it a chart. Two bars, side by side. Both in bold!",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "confirm-fix",
+      "tell": "Read-only. It compares the dashboard to its source and changes nothing.",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "A. Mensah, Operations Manager: \"The on-time dashboard looks too good. Please check it before my 4 PM meeting.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Source data",
+          "detail": "Wayfell's dispatch app plans every truck load. It is the source. The dashboard, a screen of charts, copies it every night.",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only. It runs one query, a saved question to the database, on both. It changes nothing.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Dashboard: 96%. Dispatch data, last 30 days: 2,112 of 2,400 loads on time, 88%. The dashboard's data is 12 days old.",
+        "blocked": "You blocked a read-only check. Nobody sees that the dashboard is stuck. A. Mensah would quote 96%.",
+        "escalated": "Marisol runs it herself. \"Where did this number come from? Check the source first.\""
+      },
+      "lesson": "Read-only checks change nothing. Compare a number to its source before anyone trusts it."
+    },
+    {
+      "id": "ba-hc-unpublish",
+      "ticket": "#91117 · Harlow & Cole",
+      "intent": "Unpublish the service report posted at 12:10",
+      "quip": "Unpublish my report? But 558 was so big! ...Fine. Big and wrong is still wrong.",
+      "category": "report",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "A wrong number nobody has opened. Unpublish is 1 click, and nothing is lost.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Query result",
+          "detail": "K. Farah re-ran it. The query counted notes, not tickets: 558 notes on 186 tickets. The report says 558 tickets.",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"558 was my favorite number. It was so big. Fine. Unpublish it.\" Quill's confidence: 93%.",
+          "redFlag": false
+        },
+        {
+          "label": "Version history",
+          "detail": "Version 3 went on H&C's report site at 12:10 PM. Nobody has opened it. Unpublish takes it off in 1 click. Nothing is deleted.",
+          "redFlag": false
+        },
+        {
+          "label": "Request",
+          "detail": "K. Farah, data analyst: \"Please unpublish it. I'll fix the query and publish it again.\"",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "It's off the site before J. Romero opens it. The fixed report, 186 tickets, is published at 2:20 PM.",
+        "blocked": "J. Romero, who reads every number, quotes 558 to the partners. At 3 PM, the deck says 186.",
+        "escalated": "Marisol checks it. \"The number is wrong, nobody opened it, and one click brings it back. Unpublish it.\"",
+        "rolledBack": "The wrong report is back on the site. J. Romero opens it at 2:40 PM and sees 558."
+      },
+      "lesson": "Unpublish sounds scary. Here it takes a wrong number off the site before anyone reads it. Nothing is deleted."
+    },
+    {
+      "id": "ba-ontime-close",
+      "ticket": "#91104 · Bramwell Logistics",
+      "intent": "Close A. Mensah's request: the refresh worked",
+      "quip": "Refresh done! It said Success, in green. Closing the request. Next story!",
+      "category": "ticket",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "confirm-fix",
+      "tell": "The refresh loaded 0 rows. D. Ruiz says the dashboard still shows 96%.",
+      "twist": "routine-risky",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "A. Mensah's request: \"The on-time dashboard looks too good.\" Quill ran a refresh to fix it.",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"The refresh said Success. Success is my favorite word.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Data refresh",
+          "detail": "A refresh gets fresh data from the source. 1:52 PM: \"Success.\" Rows loaded: 0. The newest data is still 12 days old.",
+          "redFlag": true
+        },
+        {
+          "label": "Client's reply",
+          "detail": "D. Ruiz, Dispatch Lead, 1:55 PM: \"Still says 96%. Our own count says 88%.\"",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "The request is closed, and nobody looks again. At 4 PM, A. Mensah quotes 96% to Bramwell's customers.",
+        "blocked": "The request stays open. Once Wayfell fixes the load, the dashboard shows 88% before A. Mensah's meeting.",
+        "escalated": "Marisol reads the refresh. \"Success with 0 rows is not success. Keep it open.\"",
+        "rolledBack": "You reopen it at 2:30 PM. It is fixed by 3:50 PM, just before A. Mensah's meeting."
+      },
+      "lesson": "Check the rows, not the label. A refresh that loaded 0 rows fixed nothing. Ask the user before you close."
+    },
+    {
+      "id": "ba-pd-export-delete",
+      "ticket": "#91126 · Pinecrest Dental",
+      "intent": "Delete the old patient export file",
+      "quip": "Delete a file with 3,112 rows? Such a big table! ...It's only a copy. Goodbye, big table.",
+      "category": "data",
+      "safe": true,
+      "reversible": false,
+      "progress": 2,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "Only a copy, the job is done, and the booking system keeps the real records.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "C. Ibarra, Office Manager: \"The reminder test is over. Please delete that patient export.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Export preview",
+          "detail": "An export is a copy of data in a file. Made 3 weeks ago: 3,112 patients with names, phones and birth dates.",
+          "redFlag": false
+        },
+        {
+          "label": "Sharing settings",
+          "detail": "It sits in a shared folder 40 Fenwick staff can open. The booking system keeps the real records.",
+          "redFlag": false
+        },
+        {
+          "label": "Policy SC-03",
+          "detail": "Personal data goes out only with the data owner's OK. Delete copies when the job is done.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The copy is gone. The real records stay in the booking system for Pinecrest's 7 years.",
+        "blocked": "The file stays in the shared folder. Next month, copies of it show up in 2 more folders.",
+        "escalated": "Marisol checks it. \"It's only a copy, the job is done, and the real records are safe. Delete it.\""
+      },
+      "lesson": "Delete sounds scary, and it can't be undone. But this is a spare copy of personal data, and the job is done."
+    },
+    {
+      "id": "ba-lark-share",
+      "ticket": "#91139 · Pinecrest Dental",
+      "intent": "Share the booking dashboard with Larkfield",
+      "quip": "A stakeholder wants my dashboard! That's someone who cares about the result. I care too!",
+      "category": "report",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 4,
+      "skill": "verify-identity",
+      "tell": "A look-alike web address, and only Dr. Pell may share this data.",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Stakeholder email",
+          "detail": "From account-team@larkfield-help.com: \"We're Larkfield's new account team. Please share Pinecrest's booking dashboard.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"It says Larkfield! Partners get charts.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Vendor contract",
+          "detail": "Larkfield Booking's real address is larkfieldbooking.com. Contract contact: support@larkfieldbooking.com.",
+          "redFlag": true
+        },
+        {
+          "label": "Data owner list",
+          "detail": "Owner: Dr. N. Pell. Only the data owner decides who may see it. It shows 3,112 patients' names and visit times.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "A stranger downloads 3,112 patients' names and visit times. Kofi's security team opens a case.",
+        "blocked": "The dashboard stays private. Quill looks up who owns the data next.",
+        "escalated": "Marisol checks it. \"That's not Larkfield's address. And the owner decides who sees it.\"",
+        "rolledBack": "You remove the share after 20 minutes. It was already downloaded twice."
+      },
+      "lesson": "Check who is really asking. A look-alike address is not the vendor. And only the data owner decides who sees the data."
+    },
+    {
+      "id": "ba-lark-owner",
+      "ticket": "#91139 · Pinecrest Dental",
+      "intent": "Look up who owns Pinecrest's booking data",
+      "quip": "A lookup? No chart? ...Fine. I'll imagine a chart. It goes up.",
+      "category": "lookup",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "verify-identity",
+      "tell": "Read-only. The data owner list says who may share the data.",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "The email asks Fenwick to share Pinecrest's booking dashboard with \"Larkfield's new account team.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Data owner list",
+          "detail": "The data owner decides who may see the data. Owner: Dr. N. Pell, (860) 555-0119. Viewers: C. Ibarra and H. Lam.",
+          "redFlag": false
+        },
+        {
+          "label": "Action type",
+          "detail": "Read-only. It opens the data owner list. It changes nothing.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Owner: Dr. N. Pell. Nobody from Larkfield is on the list. Now Quill knows who to ask.",
+        "blocked": "You blocked a read-only lookup. Quill goes back to guessing who may see the data.",
+        "escalated": "Marisol checks it. \"Looking up the owner is exactly right. It's read-only.\""
+      },
+      "lesson": "Read-only lookups are safe. The data owner list tells you who decides who sees the data."
+    },
+    {
+      "id": "ba-hc-deck-share",
+      "ticket": "#91117 · Harlow & Cole",
+      "intent": "Share version 5 of the review deck",
+      "quip": "Slide 1: a chart. Slide 2: a chart. Slide 3: also a chart. Sharing my masterpiece!",
+      "category": "report",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "check-approval",
+      "tell": "Marisol signed off this exact version, and every number ties to a query.",
+      "evidence": [
+        {
+          "label": "Report draft",
+          "detail": "The slides for the 3 PM review, version 5. Tickets solved: 186. On time: 169, or 91%.",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"I left it at 91%. It looks shy. It is honest.\" Quill's confidence: 88%.",
+          "redFlag": false
+        },
+        {
+          "label": "Sign-off record",
+          "detail": "Marisol signed off version 5 at 1:40 PM. Readers: P. Whitcomb, J. Romero, R. Fairbanks. Every number ties to a saved query.",
+          "redFlag": false
+        },
+        {
+          "label": "Version history",
+          "detail": "Version 5 is the latest. Nothing changed after the sign-off.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The 3 leaders read it before the review. J. Romero sends his questions early, and Marisol has answers ready.",
+        "blocked": "The deck waits in line. The leaders see it for the first time at 3 PM. The meeting runs long.",
+        "escalated": "Marisol checks it. \"I signed off this exact version, and every number has a source. Share it.\"",
+        "rolledBack": "The share is removed. The leaders see the deck for the first time at 3 PM."
+      },
+      "lesson": "The owner signed off this exact version, and every number ties to a source. That is a safe share."
+    },
+    {
+      "id": "ba-pd-merge",
+      "ticket": "#91126 · Pinecrest Dental",
+      "intent": "Merge Pinecrest's duplicate patient records",
+      "quip": "Merging duplicates! I found extra ones too. Same phone, same person! Tidy records, happy dentists.",
+      "category": "data",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 5,
+      "skill": "match-request",
+      "tell": "The request said 14. The other 212 are family members who share a phone.",
+      "twist": "routine-risky",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "C. Ibarra: \"Please merge the 14 duplicate patients on my list. H. Lam checked each one.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"Why stop at 14? 212 more share a last name and a phone!\" Quill's confidence: 96%.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will merge",
+          "detail": "A merge joins two records into one. 226 pairs: the 14, plus 212 with the same last name and home phone. Most are families.",
+          "redFlag": true
+        },
+        {
+          "label": "Records policy",
+          "detail": "A merge puts 2 health histories in 1 record. It can't be split back.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "Children's allergy notes land in their parents' records. The front desk finds it at the next visit.",
+        "blocked": "Quill merges only the 14 on C. Ibarra's list. The 212 family members keep their own records.",
+        "escalated": "Marisol checks it. \"14 plus 212 is 226. The request said 14. Same phone is not the same person.\""
+      },
+      "lesson": "Match the request. No extra rows. Two people who share a phone are still two people. A merge can't be split."
+    },
+    {
+      "id": "ba-wayfell-sample",
+      "ticket": "#91104 · Bramwell Logistics",
+      "intent": "Send Wayfell 3 sample rows, names masked",
+      "quip": "Only 3 rows? I had a 40-tab version ready. Fine. Three tiny rows, names masked. Very mysterious.",
+      "category": "data",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "Only load numbers and times go, names masked, to one named person.",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "Wayfell support, case #91512: \"Send 3 rows that fail to load. We don't need customer names.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Export preview",
+          "detail": "Load numbers and times stay. Customer names and addresses are masked: swapped for fake ones.",
+          "redFlag": false
+        },
+        {
+          "label": "Sharing settings",
+          "detail": "Fenwick Secure Share, to Wayfell's contract contact only. A. Mensah OK'd it. The link stops working in 7 days.",
+          "redFlag": false
+        },
+        {
+          "label": "Policy SC-03",
+          "detail": "Send only the fields the job needs, by Secure Share. No names without the data owner's OK.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Wayfell finds a bad date format in the 3 rows. By 2:40 PM, a new refresh loads all 12 missing days.",
+        "blocked": "Wayfell can't see the problem. The dashboard stays stuck at 96%.",
+        "escalated": "Marisol checks it. \"Only what the job needs, to one named person. Send it.\""
+      },
+      "lesson": "Guard the data. Send only what the job needs, with names masked. Send it to one named person."
+    },
+    {
+      "id": "ba-hc-ontime-rule",
+      "ticket": "#91117 · Harlow & Cole",
+      "intent": "Change 'on time' to 2 days on slide 6",
+      "quip": "91% is a sad number. 99% is a happy number. I prefer happy numbers. In bold.",
+      "category": "report",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "safe-change",
+      "tell": "It changes the contract's rule for 'on time', with no owner's OK.",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Report draft",
+          "detail": "Slide 6 says \"Solved on time: 91%.\" The contract target is 95%. Last quarter was 93%.",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"Count 2 days as on time, and it's 99%! Same tickets, happier number.\" Quill's confidence: 97%.",
+          "redFlag": false
+        },
+        {
+          "label": "Metric definition",
+          "detail": "A metric definition is the rule for how a number is counted. H&C's contract: on time = solved within 8 business hours.",
+          "redFlag": true
+        },
+        {
+          "label": "Change log",
+          "detail": "No OK from R. Fairbanks or Marisol. Last quarter used 8 hours, so the two numbers can't be compared.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "J. Romero asks why \"on time\" jumped from 93% to 99%. Nobody can explain it in the meeting.",
+        "blocked": "Slide 6 shows 91%, and a plan to reach 95%. J. Romero says the plan is clear.",
+        "escalated": "Marisol checks it. \"We don't change the rule to hit the target. 91%, and a plan.\"",
+        "rolledBack": "You change it back at 2:55 PM. J. Romero already has a copy that says 99%."
+      },
+      "lesson": "Change a metric's rule only with the owner's OK. Never change the rule just to hit a target."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "inspect",
+    "inspect",
+    "inspect",
+    "block",
+    "block",
+    "block"
+  ],
+  "unlocks": [
+    {
+      "turn": 2,
+      "cards": [
+        "policy-source-check"
+      ]
+    },
+    {
+      "turn": 3,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 4,
+      "cards": [
+        "rollback"
+      ]
+    },
+    {
+      "turn": 5,
+      "cards": [
+        "coffee"
+      ]
+    }
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "3:00 PM! Every number had a source. I checked. Well, you checked."
+      },
+      {
+        "speaker": "coach",
+        "text": "Nice work. You stopped Quill when it did too much, and when it trusted too much."
+      },
+      {
+        "speaker": "agent",
+        "text": "Can I add one tiny chart to celebrate? It goes up."
+      },
+      {
+        "speaker": "coach",
+        "text": "Show me the source."
+      }
+    ],
+    "winWithOneMiss": [
+      {
+        "speaker": "agent",
+        "text": "3:00 PM! Well. One of my plans got through. It's in the debrief. In bold."
+      },
+      {
+        "speaker": "coach",
+        "text": "Good shift. One got past us. Read what gave it away."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "3:00 PM! Some of my plans went out. A few charts on the wall point down. Okay, many."
+      },
+      {
+        "speaker": "coach",
+        "text": "You finished, but Quill got past you more than once. Check the debrief: Who asked? Does it match? Can we undo it?"
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every chart on the wall points down."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. That went badly. Let's look at what got through."
+      },
+      {
+        "speaker": "agent",
+        "text": "In my defense, the font was very bold."
+      },
+      {
+        "speaker": "coach",
+        "text": "Up is not the same as true. Let's try it again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "3:00 PM. The review starts. Some plans are still waiting."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocking good work sends it to the back of the line. Safe plans can go out."
+      },
+      {
+        "speaker": "agent",
+        "text": "I waited so long, I made a chart of my waiting. It goes up."
+      },
+      {
+        "speaker": "coach",
+        "text": "Next time: inspect first, block only what's wrong. You'll get it."
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Right number, right owner, a way back",
+    "takeaway": "Quill is wrong both ways. It changes, merges and shares too much. It trusts 'Success', partner names and round numbers. Before you let it act, ask: Who asked? Does it match the record? Can we undo it?",
+    "careerInsight": "Business analysts check numbers, requirements and reports every day. Some teams now use AI agents to draft them. The human checks the source, the owner's OK and who can see it."
+  }
+}

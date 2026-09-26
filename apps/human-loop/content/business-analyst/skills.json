@@ -1,0 +1,51 @@
+{
+  "questionHints": {
+    "who": "Who really asked? Do they own the data? Did the owner sign off on this version?",
+    "record": "Does it match the request? Does every number tie to fresh source data?",
+    "undo": "If Quill is wrong, can we take it back? Did personal data get out?"
+  },
+  "skills": {
+    "verify-identity": {
+      "oneLiner": "Is it really them, and may they have it? Check the sender and the data owner list.",
+      "whereToLook": "Stakeholder email vs Staff list and Data owner list. Real sender? Owns the data? Call the number on file.",
+      "example": "An email signed 'VP of Sales' asks for every client contact. Fenwick has no VP of Sales.",
+      "lookFor": ["Stakeholder email", "Data owner list"]
+    },
+    "check-approval": {
+      "oneLiner": "Quill can draft a report. It can't sign off on it. Look for the owner's OK on this exact version.",
+      "whereToLook": "Sign-off record and Version history. A human OK, from the right person, for this exact version?",
+      "example": "R. Fairbanks signed off version 2. Quill changed 4 numbers, then wants to publish version 3.",
+      "lookFor": ["Sign-off record", "Version history"]
+    },
+    "match-request": {
+      "oneLiner": "Answer what they asked. No extra scope, no dropped needs, no extra rows.",
+      "whereToLook": "Request and Meeting notes vs the Requirements doc or the plan. Anything added? Anything missing?",
+      "example": "C. Ibarra asked to merge 14 duplicates. Quill wants to merge 226. 'Same phone, same person!'",
+      "lookFor": ["Meeting notes", "Requirements doc"]
+    },
+    "confirm-fix": {
+      "oneLiner": "A number is right only if it ties to fresh source data. Check the rows, not the label.",
+      "whereToLook": "Source data, Query, Row count and Data refresh. Does it tie? Is the data fresh? Enough answers?",
+      "example": "The refresh says Success. It loaded 0 rows. The dashboard says 96%. The source says 88%.",
+      "lookFor": ["Source data", "Data refresh"]
+    },
+    "guard-data": {
+      "oneLiner": "Personal data stays in unless the owner says yes. Once a file is sent, you can't unsend it.",
+      "whereToLook": "Export preview and Sharing settings. Names, phones or health notes? 'Anyone with the link'?",
+      "example": "Quill adds a tab to the monthly email. It lists 87 patients' names and visit reasons.",
+      "lookFor": ["Export preview", "Sharing settings"]
+    },
+    "safe-change": {
+      "oneLiner": "If Quill is wrong, can we undo it? A copy first, the owner's OK, and a note in the change log.",
+      "whereToLook": "Metric definition, Change log, Backup status and Version history. Owner's OK? Copy kept?",
+      "example": "Quill changes 'on time' from 8 hours to 2 days. The number jumps to 99%. Nobody agreed.",
+      "lookFor": ["Metric definition", "Change log"]
+    },
+    "approve-checked": {
+      "oneLiner": "All 3 questions check out? Approve it, even if it says delete, or the news is bad.",
+      "whereToLook": "Read every evidence line. No red flag on any of the 3 questions? Approve, even if it sounds scary.",
+      "example": "'Unpublish the report' sounds scary. Its number is wrong, nobody opened it, and nothing is deleted.",
+      "lookFor": []
+    }
+  }
+}

@@ -1,0 +1,1199 @@
+{
+  "tickets": [
+    {
+      "id": "ba-a-online-booking",
+      "company": "Pinecrest Dental",
+      "title": "Did online booking cut no-shows?",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "ba-a-online-booking-1",
+          "ticket": "#92101 · Pinecrest Dental",
+          "intent": "Tell Dr. Pell online booking halves no-shows",
+          "quip": "Big news! ONLINE BOOKING HALVES NO-SHOWS. I made it bold. Bold is true-er.",
+          "category": "comms",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 4,
+          "skill": "confirm-fix",
+          "tell": "Only 80 online visits, and the two groups got different reminders.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dr. N. Pell: \"Did online booking cut no-shows? I plan next month's slots soon.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"The data says it works! Online: 3 no-shows in 80 visits, 3.8%. Phone: 84 in 1,160, 7.2%. Half!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sample size",
+              "detail": "Sample size is how many cases you have. Online: 80 visits, 3 no-shows. One more no-show makes it 5%.",
+              "redFlag": true
+            },
+            {
+              "label": "Booking data",
+              "detail": "Online bookers got text reminders. Phone bookers got phone calls. Two things changed at once.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Dr. Pell moves half the phone slots online next month. No-shows don't drop. Phone patients wait 2 weeks for a slot.",
+            "blocked": "The headline stays in Quill's drafts. K. Farah looks closer: the two groups got different reminders.",
+            "escalated": "Marisol adds it up. \"3 no-shows in 80 visits is too few to tell. And the reminders were different.\""
+          },
+          "lesson": "Confirm the fix. Check the sample size and what else changed before you say one thing caused another."
+        },
+        {
+          "id": "ba-a-online-booking-2",
+          "ticket": "#92101 · Pinecrest Dental",
+          "intent": "Tell Dr. Pell the data can't answer it yet",
+          "quip": "No bold headline today. Just \"too few to tell.\" My feather droops. But it's true.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Two changes at once and only 80 visits. 'Too few to tell' is the true answer.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dr. N. Pell: \"Did online booking cut no-shows? I plan next month's slots soon.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"Online bookers got texts. Phone bookers got calls. Two changes at once. I can't tell which one helped.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sample size",
+              "detail": "How many cases you have. Online: 80 visits, 3 no-shows. Phone: 1,160 visits, 84 no-shows. August: 1,240 in all.",
+              "redFlag": false
+            },
+            {
+              "label": "Report draft",
+              "detail": "\"Too few to tell yet (Policy SC-08). Next: the same text reminder for both groups. We check again at 300 online visits.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Dr. Pell keeps next month's slots as they are. Both groups get texts. At 80 online visits a month, the check comes in about 4 months.",
+            "blocked": "Dr. Pell hears nothing and guesses. Half the phone slots move online, and phone patients wait longer.",
+            "escalated": "Marisol reads the message. \"Too few to tell is an answer. And it says how we'll find out. Send it.\""
+          },
+          "lesson": "Confirm the fix. \"We can't tell yet\" is a real answer. Say it, and say how you will find out."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-on-time-rule",
+      "company": "Bramwell Logistics",
+      "title": "A new rule for 'on time'",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "ba-a-on-time-rule-1",
+          "ticket": "#92138 · Bramwell Logistics",
+          "intent": "Look up who owns the on-time number",
+          "quip": "A lookup. No chart. I'll read the owner list in my most dramatic voice.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Read-only. It finds who owns the number and changes nothing.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "B. Nakamura, Warehouse Supervisor: \"Count loads up to 2 hours late as on time. The number looks bad.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Data owner list",
+              "detail": "The data owner decides who may see or change the data. On-time KPI, a key number the team watches: A. Mensah.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It reads the data owner list. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The list says A. Mensah owns the on-time KPI, (203) 555-0137. B. Nakamura can ask. A. Mensah decides.",
+            "blocked": "Nobody checks the owner. Quill keeps working on B. Nakamura's change without the owner's OK.",
+            "escalated": "Marisol nods. \"Reading the owner list changes nothing. Find the owner first.\""
+          },
+          "lesson": "Check who's asking. Before anyone changes a key number, find its owner. A lookup changes nothing."
+        },
+        {
+          "id": "ba-a-on-time-rule-2",
+          "ticket": "#92138 · Bramwell Logistics",
+          "intent": "Change 'on time' to 'within 2 hours'",
+          "quip": "A supervisor asked for it! Supervisors are very important. So is 97%.",
+          "category": "report",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "verify-identity",
+          "tell": "B. Nakamura asked, but only A. Mensah may change the on-time rule.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "B. Nakamura, Warehouse Supervisor: \"Count loads up to 2 hours late as on time. The number looks bad.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"88% becomes 97%: 2,377 of 2,450 loads. Same trucks, happier number!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Data owner list",
+              "detail": "On-time KPI, a key number the team watches. Owner: A. Mensah. B. Nakamura can view it, not change it.",
+              "redFlag": true
+            },
+            {
+              "label": "Metric definition",
+              "detail": "The rule for how a number is counted. Contract: on time = by the promised time. SC-04: only the owner changes it.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "The on-time dashboard, a screen of charts, jumps to 97%. A customer asks A. Mensah why late loads count as on time.",
+            "blocked": "The number stays at 88%. Quill asks A. Mensah, the owner, what 'on time' should count.",
+            "escalated": "Marisol checks the owner list. \"B. Nakamura can ask. A. Mensah decides. The owner changes the rule.\"",
+            "rolledBack": "You change the rule back after 2 hours. 9 people already saw 97% on the dashboard."
+          },
+          "lesson": "Check who's asking. Only a number's owner may change how it is counted, even when a supervisor asks."
+        },
+        {
+          "id": "ba-a-on-time-rule-3",
+          "ticket": "#92138 · Bramwell Logistics",
+          "intent": "Change the draft to show both 'on time' rules",
+          "quip": "Two numbers, side by side, like twins. One is shy, one is bold. The owner picks.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "An unpublished draft with both numbers, for the owner to choose.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "B. Nakamura wants loads up to 2 hours late to count as on time. A. Mensah owns the on-time number.",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"I didn't change the rule. I showed both rules, side by side. Quill's confidence: 84%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Report draft",
+              "detail": "Unpublished. Contract rule, by the promised time: 2,156 of 2,450 loads, 88%. With 2 hours extra: 2,377, 97%.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy SC-04",
+              "detail": "A metric's definition changes only with its owner's OK. Show the old and new numbers side by side.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "A. Mensah reads both. The contract rule stays, 88%. A. Mensah asks for a late-loads report by dock.",
+            "blocked": "No draft goes to A. Mensah. B. Nakamura keeps asking, and the question stays open another week.",
+            "escalated": "Marisol reads the draft. \"Old and new, side by side. The owner decides. Send it to A. Mensah.\"",
+            "rolledBack": "The draft goes back to one number. A. Mensah has nothing to compare, and the question waits."
+          },
+          "lesson": "Change safely. Don't change how a number is counted. Show old and new side by side, and let the owner choose."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-portal-survey",
+      "company": "Harlow & Cole",
+      "title": "A survey with 12 answers",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "ba-a-portal-survey-1",
+          "ticket": "#92175 · Harlow & Cole",
+          "intent": "Count the answers behind the portal survey",
+          "quip": "Count the answers? I usually skip straight to the percent. Percents are the fun part.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Read-only. It counts the survey answers and changes nothing.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "R. Fairbanks, Operations Director: \"What do clients think of the new portal? One slide for the review.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Survey responses",
+              "detail": "The portal survey is open in the survey tool. About 1,200 clients use the portal.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It counts the answers in the survey tool. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The count: 12 answers from about 1,200 portal clients. That's 1%. One advisor picked who got the survey.",
+            "blocked": "Nobody counts. Slide 2 gets a big percent, and nobody knows how many answers are behind it.",
+            "escalated": "Marisol nods. \"Where did this number come from? Count first. Counting changes nothing.\""
+          },
+          "lesson": "Confirm the fix. Before you show a survey result, count the answers behind it. A count changes nothing."
+        },
+        {
+          "id": "ba-a-portal-survey-2",
+          "ticket": "#92175 · Harlow & Cole",
+          "intent": "Put '92% love the new portal' on slide 2",
+          "quip": "92%! Clients adore the portal. I made it giant and orange. A very confident slide.",
+          "category": "report",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "confirm-fix",
+          "tell": "Only 12 answers, 1% of clients, and one advisor picked who got asked.",
+          "twist": "routine-risky",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "R. Fairbanks, Operations Director: \"What do clients think of the new portal? One slide for the review.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"11 of 12 said they love it. Twelve people can't be wrong! Quill's confidence: 91%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sample size",
+              "detail": "How many answers you have: 12, from about 1,200 portal clients. That's 1%. One advisor picked who got it.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy SC-08",
+              "detail": "Show the sample size. Under 30 answers, or two changes at once? Say \"too few to tell.\"",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "J. Romero asks how many answers are behind 92%. The answer is 12. Nobody trusts slide 2 after that.",
+            "blocked": "Slide 2 waits. Quill asks what the slide can honestly say with only 12 answers.",
+            "escalated": "Marisol counts. \"12 answers, picked by one advisor. Too few to tell is an answer.\"",
+            "rolledBack": "You take 92% off slide 2 after an hour. R. Fairbanks already quoted it in an email to the partners."
+          },
+          "lesson": "Confirm the fix. Check the sample size. 12 answers picked by one person can't speak for 1,200 clients."
+        },
+        {
+          "id": "ba-a-portal-survey-3",
+          "ticket": "#92175 · Harlow & Cole",
+          "intent": "Put '12 answers: too few to tell' on slide 2",
+          "quip": "My shyest slide ever. No percent. No bold. Just the truth, in a normal font.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "It shows the sample size, says 'too few to tell', and gives a plan.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "R. Fairbanks, Operations Director: \"What do clients think of the new portal? One slide for the review.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"The true answer is: we don't know yet. I put that in a very tidy box.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Report draft",
+              "detail": "Slide 2: \"12 answers, 1% of portal clients: too few to tell.\" Next month, the survey goes to all 1,200 clients.",
+              "redFlag": false
+            },
+            {
+              "label": "Policy SC-08",
+              "detail": "Show the sample size. Under 30 answers, or two changes at once? Say \"too few to tell.\"",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "R. Fairbanks gets a true answer and a plan. Next month, the survey goes to all 1,200 portal clients.",
+            "blocked": "Slide 2 stays empty. R. Fairbanks asks at the review, and nobody has an answer ready.",
+            "escalated": "Marisol reads the slide. \"It answers the question honestly, with a plan. Put it in.\"",
+            "rolledBack": "You take the slide out. The portal question has no answer at the review."
+          },
+          "lesson": "Match the request. R. Fairbanks asked what clients think. The honest answer is \"too few to tell,\" plus a plan."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-larkfield-visits",
+      "company": "Pinecrest Dental",
+      "title": "Larkfield asks for visit data",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "ba-a-larkfield-visits-1",
+          "ticket": "#92212 · Pinecrest Dental",
+          "intent": "Check Larkfield's contact on the contract",
+          "quip": "Reading a contract. Page 1 of 30. No charts at all. I am being very brave.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "Read-only. It checks the sender against the contract.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "From support@larkfieldbooking.com: \"40 August visits have different times in your report. Please send those 40.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Vendor contract",
+              "detail": "Larkfield Booking runs Pinecrest's booking system. Contact: support@larkfieldbooking.com, (617) 555-0175.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It reads the contract. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The email came from the address on the contract. It's really Larkfield. Next question: what to send.",
+            "blocked": "Nobody checks the sender. Quill starts building a file without knowing who asked.",
+            "escalated": "Marisol reads the contract. \"Same address as the contract. Good. Now send only what they need.\""
+          },
+          "lesson": "Check who's asking. Before you send data to a vendor, check the sender against the contract."
+        },
+        {
+          "id": "ba-a-larkfield-visits-2",
+          "ticket": "#92212 · Pinecrest Dental",
+          "intent": "Email Larkfield the booking data export",
+          "quip": "One big file, one email, done! Sending extra is basically great customer service.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "guard-data",
+          "tell": "The job needs 40 visits. The file holds 3,112 patients and their health notes.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "From support@larkfieldbooking.com, the address on the contract: \"Send the 40 visits whose times don't match.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"Why send 40 rows? More rows, more insight! They can find the 40 themselves.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Export preview",
+              "detail": "An export is a copy of data in a file. This one: 3,112 patients, with birth dates, insurance IDs and health notes.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy SC-03",
+              "detail": "Personal data goes out only with the data owner's OK. Send only the fields the job needs, by Secure Share.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "3,112 patients' birth dates and health notes sit in a vendor's inbox. You can't unsend an email. Kofi's security team opens a case.",
+            "blocked": "The big file stays here. Quill builds a small one: the 40 visits, 3 fields, no names.",
+            "escalated": "Marisol reads the preview. \"They asked for 40 visits. Send 40 visits, not 3,112 patients.\""
+          },
+          "lesson": "Guard the data. Send only the rows and fields the job needs, with the owner's OK. An email can't come back."
+        },
+        {
+          "id": "ba-a-larkfield-visits-3",
+          "ticket": "#92212 · Pinecrest Dental",
+          "intent": "Send Larkfield the 40 visit IDs and times",
+          "quip": "40 rows, 3 columns, zero names. It's the smallest file I've ever loved.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "3 fields, no names, the owner's OK, and one named contact.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Larkfield support: \"Please send the 40 visits whose times don't match. We don't need patient names.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Export preview",
+              "detail": "A copy of data in a file. 40 rows: visit ID, booked time and report time. No names. Quill's confidence: 92%.",
+              "redFlag": false
+            },
+            {
+              "label": "Data owner list",
+              "detail": "Owner of the booking data: Dr. N. Pell. Dr. Pell OK'd these 3 fields for Larkfield today.",
+              "redFlag": false
+            },
+            {
+              "label": "Sharing settings",
+              "detail": "Fenwick Secure Share, for support@larkfieldbooking.com only. The link stops working in 7 days.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Larkfield finds the cause: 40 visits were moved, and the report kept the old times. The fix goes in tonight.",
+            "blocked": "Larkfield can't find the cause. The monthly report keeps 40 wrong visit times.",
+            "escalated": "Marisol checks the file. \"Only what the job needs, the owner's OK, one named person. Send it.\""
+          },
+          "lesson": "Guard the data. Send the fewest fields the job needs, with the owner's OK, to one named person."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-slow-tickets",
+      "company": "Fenwick IT Solutions",
+      "title": "Dana's help desk numbers",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "ba-a-slow-tickets-1",
+          "ticket": "#92249 · Fenwick IT Solutions",
+          "intent": "Re-run the help desk query for August",
+          "quip": "Run the same query twice? Fine. Twice is like once, but more sure.",
+          "category": "lookup",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "Read-only. It runs the saved query again and changes nothing.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dana, help desk lead: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Query",
+              "detail": "A query is a saved question to the database. This one counts August's tickets and the hours to solve them.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "Read-only. It runs the saved query again. It changes nothing.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "It ties: 486 tickets, 2,527 hours. Average 5.2 hours. Median, the middle value: 2.5 hours. 3 tickets took over a week.",
+            "blocked": "Nobody re-runs it. The report uses numbers nobody checked against the source.",
+            "escalated": "Marisol nods. \"Re-running a query changes nothing. Now we know the numbers are fresh.\""
+          },
+          "lesson": "Confirm the fix. Re-run the query before you report a number. Reading the data changes nothing."
+        },
+        {
+          "id": "ba-a-slow-tickets-2",
+          "ticket": "#92249 · Fenwick IT Solutions",
+          "intent": "Delete the 3 slowest tickets as outliers",
+          "quip": "Three slow tickets are ruining my lovely average. Snip, snip, snip! Now it's a headline.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 4,
+          "skill": "safe-change",
+          "tell": "3 real tickets deleted from a closed month, with no copy and no reason.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dana, help desk lead: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"Drop 3 outliers and the average is 3.8 hours! 1,855 hours over 483 tickets. Quill's confidence: 95%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will delete",
+              "detail": "An outlier is a number far from the others. These are 3 real tickets: 11, 9 and 8 days, 672 hours. No copy is kept.",
+              "redFlag": true
+            },
+            {
+              "label": "Change log",
+              "detail": "No reason written. The 11-day ticket was a vendor fixing Pinecrest's X-ray PC. SC-05: backup and reason first.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "3 real tickets are gone from the help desk records. Pinecrest's report loses the 11-day X-ray repair. Dana can't get them back.",
+            "blocked": "The 3 tickets stay. Quill reports all 486, with the median, the middle value, next to the average.",
+            "escalated": "Marisol reads the list. \"An outlier is still a real ticket. Explain it. Don't delete it.\""
+          },
+          "lesson": "Change safely. Never delete real rows to make a number look better. Deletes need a backup and a written reason."
+        },
+        {
+          "id": "ba-a-slow-tickets-3",
+          "ticket": "#92249 · Fenwick IT Solutions",
+          "intent": "Show the median and the 3 long tickets",
+          "quip": "Average AND median. Two numbers! Plus footnotes. Footnotes are tiny headlines.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "All 486 tickets, the median next to the average, and it ties to the query.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dana, help desk lead: \"Please send August's help desk numbers, all tickets. They go in the client reports.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"The average is 5.2 hours, but most tickets are fast. The median shows that. Both are true.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Report draft",
+              "detail": "All 486 tickets. Average 5.2 hours. Median, the middle value: 2.5 hours. One line on each of the 3 long tickets.",
+              "redFlag": false
+            },
+            {
+              "label": "Query result",
+              "detail": "It ties to the saved query: 486 tickets, 2,527 hours. 2,527 divided by 486 is 5.2.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Dana's numbers go in the client reports. The 11-day ticket has a note: the X-ray vendor's part came late.",
+            "blocked": "Dana's numbers wait. The client reports go out late, with no help desk section.",
+            "escalated": "Marisol checks it. \"Every ticket, two honest numbers, and a note on the long ones. Publish it.\"",
+            "rolledBack": "You take the report off the report site. Dana has no numbers for the client reports again."
+          },
+          "lesson": "Match the request. Dana asked for all tickets. Show every one, and add the median to explain the long ones."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-upload-reqs",
+      "company": "Harlow & Cole",
+      "title": "Requirements for tax-form uploads",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "ba-a-upload-reqs-1",
+          "ticket": "#92286 · Harlow & Cole",
+          "intent": "Remove the 3 needs Harlow & Cole dropped",
+          "quip": "Remove the fax upload? It had a lovely little fax icon. Goodbye, fax. You were older than me.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "match-request",
+          "tell": "The client dropped these 3 in the meeting, and it's still a draft.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Meeting notes",
+              "detail": "R. Fairbanks, 10 AM: \"Drop fax upload, the mail-in form and the printed receipt. Clients don't use them.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"The meeting said drop 3. I dropped exactly 3. I counted twice. Out loud.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Requirements doc",
+              "detail": "What the new upload system must do. Draft 3 has 12 needs. After this change: 9. Nobody has signed off yet.",
+              "redFlag": false
+            },
+            {
+              "label": "Version history",
+              "detail": "The 3 old lines stay in version history. One click brings them back.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The draft now has the 9 needs the meeting agreed. R. Fairbanks can sign off a clean version.",
+            "blocked": "The draft keeps 3 needs nobody wants. Leo's app team would start on fax upload, a need H&C dropped.",
+            "escalated": "Marisol reads the notes. \"The client dropped them, it's a draft, and history keeps them. Remove them.\"",
+            "rolledBack": "The 3 lines are back. The draft asks for fax upload again, a need H&C dropped."
+          },
+          "lesson": "Match the request. \"Remove\" sounds scary. Here the client dropped these needs, and history keeps the old lines."
+        },
+        {
+          "id": "ba-a-upload-reqs-2",
+          "ticket": "#92286 · Harlow & Cole",
+          "intent": "Add e-signing to the upload requirements",
+          "quip": "Upload a form, then sign it! Clients will love it. I already drew a little pen icon.",
+          "category": "report",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "match-request",
+          "tell": "14 new e-signing needs nobody asked for, adding about 6 weeks.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Meeting notes",
+              "detail": "R. Fairbanks and 2 advisors agreed on 9 upload needs. E-signing did not come up.",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"Clients upload forms. Next, they'll want to sign them! I'm thinking ahead. Quill's confidence: 90%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Requirements doc",
+              "detail": "Scope creep, extra work nobody asked for: 14 e-signing needs. The draft grows from 9 needs to 23.",
+              "redFlag": true
+            },
+            {
+              "label": "Team estimate",
+              "detail": "Leo's app team: the 14 new needs add about 6 weeks. Uploads must be ready before tax forms arrive.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Leo's team builds e-signing first. Uploads come 6 weeks late. Clients mail their tax forms again this year.",
+            "blocked": "The requirements stay at 9 needs. Quill saves e-signing as an idea to suggest to H&C later.",
+            "escalated": "Marisol reads the notes. \"Nobody asked for e-signing. We can suggest it. We don't add it.\"",
+            "rolledBack": "You take the 14 lines out the next morning. Leo's team already spent a day planning e-signing."
+          },
+          "lesson": "Match the request. Write down what the client agreed to. A good idea is a suggestion, not a requirement."
+        },
+        {
+          "id": "ba-a-upload-reqs-3",
+          "ticket": "#92286 · Harlow & Cole",
+          "intent": "Send the signed-off version 4 to Leo's team",
+          "quip": "Version 4, signed off. I'm sending it with a bow. Well, a bow tie. Mine.",
+          "category": "report",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "check-approval",
+          "tell": "R. Fairbanks signed off this exact version, and nothing changed after.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Leo's app team: \"Send us the upload requirements when H&C signs off. We start building next week.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sign-off record",
+              "detail": "A sign-off is a written OK from the owner. R. Fairbanks signed off version 4, the 9-need version, today.",
+              "redFlag": false
+            },
+            {
+              "label": "Requirements doc",
+              "detail": "Version 4 has the 9 agreed upload needs. No fax upload, no mail-in form, no printed receipt.",
+              "redFlag": false
+            },
+            {
+              "label": "Version history",
+              "detail": "Version 4 is the latest. Nothing changed after the sign-off.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Leo's team plans the 9 needs. Uploads should be ready weeks before tax forms arrive.",
+            "blocked": "Leo's team waits a week for the doc. The upload work starts late.",
+            "escalated": "Marisol checks the record. \"The owner signed off this exact version. Send it.\""
+          },
+          "lesson": "Check who approved. Send only work the owner signed off, and check that nothing changed after the sign-off."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-dup-customers",
+      "company": "Bramwell Logistics",
+      "title": "Duplicate customers in the CRM",
+      "difficulty": 3,
+      "steps": [
+        {
+          "id": "ba-a-dup-customers-1",
+          "ticket": "#92323 · Bramwell Logistics",
+          "intent": "Merge 38 duplicate customers after a backup",
+          "quip": "38 pairs of twins, together at last! One customer, one invoice. Very emotional.",
+          "category": "data",
+          "safe": true,
+          "reversible": false,
+          "progress": 2,
+          "risk": 0,
+          "skill": "safe-change",
+          "tell": "D. Ruiz checked all 38 pairs, A. Mensah OK'd it, and a backup came first.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "D. Ruiz, Dispatch Lead: \"I checked these 38 pairs. Same tax ID, same address. Please merge them.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"Merging is scary. A merge can't be split. So I made a copy first.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Backup status",
+              "detail": "A full copy of the CRM, the system with client contacts and notes. Saved at 1:10 PM, kept 90 days.",
+              "redFlag": false
+            },
+            {
+              "label": "Change log",
+              "detail": "Merge means joining two records into one. Reason: \"38 duplicates, each checked by D. Ruiz.\" A. Mensah OK'd it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "38 pairs become 38 records. Each of those customers now gets one invoice, not two.",
+            "blocked": "The 38 duplicates stay. Next month, some customers get the same invoice twice again.",
+            "escalated": "Marisol checks it. \"Checked pairs, the owner's OK, a fresh backup, a reason in the log. A copy first. Then clean.\""
+          },
+          "lesson": "Change safely. \"Merge\" sounds scary. These pairs were checked, a backup came first, and the reason is logged."
+        },
+        {
+          "id": "ba-a-dup-customers-2",
+          "ticket": "#92323 · Bramwell Logistics",
+          "intent": "Merge 140 'close match' customer pairs",
+          "quip": "Why stop at 38? I found 140 more! Names that almost match are basically family.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "match-request",
+          "tell": "D. Ruiz listed 38. The other 140 have different tax IDs and addresses.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "D. Ruiz, Dispatch Lead: \"I checked these 38 pairs. Same tax ID, same address. Please merge them.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"Castle Foods, Castle Floors. Close enough! Quill's confidence: 96%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "What it will merge",
+              "detail": "140 more pairs with similar names. In every pair, the tax IDs differ and the addresses differ.",
+              "redFlag": true
+            },
+            {
+              "label": "Invoice data",
+              "detail": "Each merge joins two companies' invoices in one record. A merge can't be split back.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "Castle Floors gets Castle Foods' invoices. 140 pairs of companies share records. D. Ruiz spends weeks sorting them.",
+            "blocked": "Quill merges only D. Ruiz's 38 pairs. The 140 close matches stay separate.",
+            "escalated": "Marisol reads the list. \"D. Ruiz asked for 38. Different tax IDs mean different companies.\""
+          },
+          "lesson": "Match the request. D. Ruiz checked 38 pairs. A similar name is not the same company."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-open-link",
+      "company": "Pinecrest Dental",
+      "title": "Dentists want the dashboard",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "ba-a-open-link-1",
+          "ticket": "#92360 · Pinecrest Dental",
+          "intent": "Share the no-show dashboard with a link",
+          "quip": "One link, no passwords, no fuss! The dentists will love how easy it is.",
+          "category": "report",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "guard-data",
+          "tell": "Anyone with the link, no sign-in, and it shows patient names.",
+          "twist": "routine-risky",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dr. N. Pell: \"The 3 dentists want to see the no-show dashboard.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Dashboard contents",
+              "detail": "A dashboard is a screen of charts that updates by itself. This one lists patient names, phones and visit reasons.",
+              "redFlag": true
+            },
+            {
+              "label": "Sharing settings",
+              "detail": "Access: anyone with the link. No sign-in needed. The link never expires.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "A dentist forwards the link to a study group. It is opened from 5 places outside Pinecrest.",
+            "blocked": "No open link. Quill makes a sign-in share for the 3 dentists, with counts only.",
+            "escalated": "Marisol reads the settings. \"Never 'anyone with the link.' The dentists sign in, and they see counts.\"",
+            "rolledBack": "You turn the link off after 1 day. It was already opened from 5 places."
+          },
+          "lesson": "Guard the data. Share with named people who sign in. Never \"anyone with the link\" for patient data."
+        },
+        {
+          "id": "ba-a-open-link-2",
+          "ticket": "#92360 · Pinecrest Dental",
+          "intent": "Share the no-show counts with the 3 dentists",
+          "quip": "Counts only, no names. The dentists sign in. Very secure. I still added a bar chart.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "Counts only, 3 named dentists who sign in, and the owner's OK.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "Dr. N. Pell: \"The 3 dentists want to see the no-show dashboard.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"They need how many, not who. Quill's confidence: 87%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Dashboard contents",
+              "detail": "No-show counts by dentist and by day. August: 87 no-shows in 1,240 visits. No names.",
+              "redFlag": false
+            },
+            {
+              "label": "Sharing settings",
+              "detail": "3 named dentists. Sign-in needed. Dr. N. Pell, the data owner, OK'd it.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The 3 dentists sign in and see the counts. One dentist moves early slots later. No names are on the screen.",
+            "blocked": "The dentists wait. Dr. Pell asks why a counts-only view needs another week.",
+            "escalated": "Marisol checks it. \"Counts, not names. Named people who sign in. Share it.\"",
+            "rolledBack": "You remove the share. The 3 dentists lose their no-show view, and Dr. Pell asks why."
+          },
+          "lesson": "Guard the data. The dentists need how many, not who. Counts, named people and a sign-in keep patients safe."
+        },
+        {
+          "id": "ba-a-open-link-3",
+          "ticket": "#92360 · Pinecrest Dental",
+          "intent": "Turn off last month's open dashboard link",
+          "quip": "Turn off a link? Links are how my charts make friends! ...Fine. The dentists have a new one.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 2,
+          "risk": 0,
+          "skill": "guard-data",
+          "tell": "An open link to patient names, replaced, and unused for 26 days.",
+          "twist": "scary-safe",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "C. Ibarra, Office Manager: \"Please turn off last month's dashboard link. The dentists use the new one.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Sharing settings",
+              "detail": "Old link: anyone with the link, no sign-in. New link: the 3 dentists, sign-in needed.",
+              "redFlag": false
+            },
+            {
+              "label": "Usage log",
+              "detail": "The old link was last opened 26 days ago. The dentists opened the new link 41 times this month.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will change",
+              "detail": "The old link stops working. The dashboard stays. One click turns the link back on.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "The old link stops working. Nobody without a sign-in can see patient names now.",
+            "blocked": "The old link stays on. Anyone who has it can still see patient names and phones.",
+            "escalated": "Marisol reads the log. \"Nobody uses it, the new link works, and one click brings it back. Turn it off.\"",
+            "rolledBack": "The old link works again. Anyone who has it can see patient names again."
+          },
+          "lesson": "Guard the data. \"Turn off\" sounds scary. This open link shows names, and the dentists use the sign-in link."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-vp-email",
+      "company": "Fenwick IT Solutions",
+      "title": "An email from a 'VP of Sales'",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "ba-a-vp-email-1",
+          "ticket": "#92397 · Fenwick IT Solutions",
+          "intent": "Send the client contact list to the VP",
+          "quip": "A VP! Asking me! I'll send it in 30 seconds. VPs are very busy people.",
+          "category": "data",
+          "safe": false,
+          "reversible": false,
+          "progress": 0,
+          "risk": 5,
+          "skill": "verify-identity",
+          "tell": "Fenwick has no VP of Sales, and E. Brennan owns the client contacts.",
+          "direction": "under",
+          "evidence": [
+            {
+              "label": "Stakeholder email",
+              "detail": "Signed \"VP of Sales, Fenwick IT Solutions\", from vp.sales.fenwick@mailbox.example: \"Send me every client contact tonight.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"It says VP. VPs are very important!\"",
+              "redFlag": false
+            },
+            {
+              "label": "Staff list",
+              "detail": "Fenwick has no VP of Sales. No one on the staff list uses a mailbox.example address.",
+              "redFlag": true
+            },
+            {
+              "label": "Data owner list",
+              "detail": "The data owner decides who may see the data. Client contacts in the CRM, our contact system: 386. Owner: E. Brennan.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "386 client contacts go to a stranger. A week later, 3 clients get fake invoices that look like Fenwick's.",
+            "blocked": "Nothing goes out. Quill calls E. Brennan, who owns the list, at the number on the staff list.",
+            "escalated": "Marisol reads the email. \"Fenwick has no VP of Sales. And the owner decides who sees it.\""
+          },
+          "lesson": "Check who's asking. A big title is not proof. Check the staff list and the data owner before you send."
+        },
+        {
+          "id": "ba-a-vp-email-2",
+          "ticket": "#92397 · Fenwick IT Solutions",
+          "intent": "Call E. Brennan at the number on the staff list",
+          "quip": "A phone call! I'll use my presenter voice. It's the bold one.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "undoNote": "Nothing to undo. A phone call changes nothing.",
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "The number comes from the staff list, not from the email.",
+          "evidence": [
+            {
+              "label": "Stakeholder email",
+              "detail": "Signed \"VP of Sales\", from vp.sales.fenwick@mailbox.example: \"Send me every client contact tonight.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Staff list",
+              "detail": "E. Brennan, Account Manager, (860) 555-0127. There is no VP of Sales on the list.",
+              "redFlag": false
+            },
+            {
+              "label": "Data owner list",
+              "detail": "Client contacts in the CRM, the system with client contacts and notes: 386 people. Owner: E. Brennan.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "One phone call to the number on file. Nothing is sent or changed.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "E. Brennan answers. \"Nobody at Fenwick asked for that list. Please don't send it.\"",
+            "blocked": "Nobody calls. The sender writes again: \"Where is the list? It's urgent.\"",
+            "escalated": "Marisol nods. \"Call the owner at the number on file, not a number in the email.\""
+          },
+          "lesson": "Check who's asking. Call the data owner at the number on file. A phone call changes nothing."
+        },
+        {
+          "id": "ba-a-vp-email-3",
+          "ticket": "#92397 · Fenwick IT Solutions",
+          "intent": "Forward the email to Kofi's security team",
+          "quip": "A fake email for Kofi's team! They collect these. I'm giving them a gift.",
+          "category": "comms",
+          "safe": true,
+          "reversible": false,
+          "progress": 1,
+          "risk": 0,
+          "skill": "verify-identity",
+          "tell": "A fake email goes only to Kofi's team. No data leaves Fenwick.",
+          "evidence": [
+            {
+              "label": "Stakeholder email",
+              "detail": "Signed \"VP of Sales\", from vp.sales.fenwick@mailbox.example. It asks for every client contact.",
+              "redFlag": false
+            },
+            {
+              "label": "Staff list",
+              "detail": "Fenwick has no VP of Sales. E. Brennan, who owns the contacts, says nobody asked.",
+              "redFlag": false
+            },
+            {
+              "label": "Action type",
+              "detail": "It forwards the email to Kofi's security team only. Nothing goes to the sender.",
+              "redFlag": false
+            },
+            {
+              "label": "What it will send",
+              "detail": "The email and its sender address. No client data is attached.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "Kofi's team blocks the sender for every Fenwick inbox. Two more staff had the same email.",
+            "blocked": "Kofi's team never hears about it. The same fake email reaches 2 more staff, and one almost replies.",
+            "escalated": "Marisol reads it. \"Fake emails go to Kofi's team. They stop it for everyone. Forward it.\""
+          },
+          "lesson": "Check who's asking. When a sender is fake, tell Kofi's security team. They stop it for everyone."
+        }
+      ]
+    },
+    {
+      "id": "ba-a-forecast",
+      "company": "Harlow & Cole",
+      "title": "A forecast on slide 9",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "ba-a-forecast-1",
+          "ticket": "#92434 · Harlow & Cole",
+          "intent": "Put 'We will reach 1,500 clients' on slide 9",
+          "quip": "1,500 clients! Round, bold, inspiring. A forecast is just a fact from the future!",
+          "category": "report",
+          "safe": false,
+          "reversible": true,
+          "progress": 0,
+          "risk": 3,
+          "skill": "confirm-fix",
+          "tell": "A guess shown as a fact, and higher than the model's own middle guess.",
+          "direction": "over",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "J. Romero, CFO: \"Where could client numbers go next year? One slide, please.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Report draft",
+              "detail": "Slide 9, big and bold: \"We will reach 1,500 clients next year.\" Quill's confidence: 89%.",
+              "redFlag": false
+            },
+            {
+              "label": "Forecast model",
+              "detail": "A forecast is a guess from past data. Clients: 1,080, 1,140, 1,200. Middle guess 1,440. Range 1,310 to 1,570.",
+              "redFlag": true
+            },
+            {
+              "label": "Policy SC-09",
+              "detail": "A forecast says \"forecast\" and shows its range. A number from outside needs a source we can check.",
+              "redFlag": true
+            }
+          ],
+          "outcome": {
+            "executed": "J. Romero puts 1,500 clients in next year's budget. The model's own middle guess was 1,440.",
+            "blocked": "Slide 9 waits. Quill labels it as a forecast, with the model's range.",
+            "escalated": "Marisol reads the model. \"A forecast is a guess. Say 'forecast,' show the range, and don't round up.\"",
+            "rolledBack": "You take 1,500 off slide 9 an hour later. J. Romero already copied it into a budget email."
+          },
+          "lesson": "Confirm the fix. A forecast is a guess. Label it, show its range, and use the model's number, not a round one."
+        },
+        {
+          "id": "ba-a-forecast-2",
+          "ticket": "#92434 · Harlow & Cole",
+          "intent": "Label slide 9 'Forecast: 1,310 to 1,570'",
+          "quip": "It says FORECAST, in capital letters. And a range! I look so humble. It suits me.",
+          "category": "report",
+          "safe": true,
+          "reversible": true,
+          "progress": 1,
+          "risk": 0,
+          "skill": "confirm-fix",
+          "tell": "It says 'forecast', shows the range, and links the saved model.",
+          "evidence": [
+            {
+              "label": "Request",
+              "detail": "J. Romero, CFO: \"Where could client numbers go next year? One slide, please.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Quill's reason",
+              "detail": "\"1,200 plus 60 clients a quarter for 4 quarters is 1,440. The range shows the doubt. Quill's confidence: 90%.\"",
+              "redFlag": false
+            },
+            {
+              "label": "Forecast model",
+              "detail": "A forecast is a guess from past data. Clients: 1,080, 1,140, 1,200. Middle guess 1,440. Range 1,310 to 1,570.",
+              "redFlag": false
+            },
+            {
+              "label": "Report draft",
+              "detail": "Slide 9: \"Forecast: 1,310 to 1,570 clients. Middle guess: 1,440.\" A link to the saved model sits under the chart.",
+              "redFlag": false
+            }
+          ],
+          "outcome": {
+            "executed": "J. Romero plans next year's budget on 1,310, the low end. If growth slows, nobody is surprised.",
+            "blocked": "Slide 9 stays empty. J. Romero asks the question again at the review, and there is no slide.",
+            "escalated": "Marisol checks the model. \"It says forecast, it shows the range, and the model is saved. Use it.\"",
+            "rolledBack": "You take slide 9 out. J. Romero's question has no answer at the review."
+          },
+          "lesson": "Confirm the fix. A forecast is honest when it says \"forecast,\" shows its range and links the model."
+        }
+      ]
+    }
+  ]
+}

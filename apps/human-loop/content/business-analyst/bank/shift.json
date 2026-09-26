@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "settingDaily": "Daily practice in Fenwick IT Solutions' analytics corner. {n} requests from {companies}. {agent} plans. You check.",
+  "settingDrill": "A quick drill in Fenwick IT Solutions' analytics corner. Requests from {companies}. One plan at a time. {agent} plans. You check.",
+  "careerInsight": "Analysts check reports like these every day. Practice keeps the checks quick, so good reports still go out on time.",
+  "fallbackDaily": ["ba-a-portal-survey", "ba-b-limit-share", "ba-a-open-link", "ba-b-early-send"],
+  "intros": [
+    [
+      { "speaker": "coach", "text": "New requests from the clients. Same job: read the plan, then decide." },
+      { "speaker": "agent", "text": "I rounded my to-do list. It says 'about 10 things'." }
+    ],
+    [
+      { "speaker": "coach", "text": "A scary word can be safe. A routine email can be risky. The evidence tells you which." },
+      { "speaker": "agent", "text": "I made my headlines bolder today. Marisol made my sources bigger." }
+    ],
+    [
+      { "speaker": "coach", "text": "I picked these requests for the skills you need most. Ask the 3 questions every time." },
+      { "speaker": "agent", "text": "I polished my feather. It is very shiny. It is not a source." }
+    ],
+    [
+      { "speaker": "coach", "text": "No source, no number. No owner's OK, no report." },
+      { "speaker": "agent", "text": "I made 40 charts before lunch. Marisol asked how many were true. Lunch was lovely." }
+    ],
+    [
+      { "speaker": "coach", "text": "Quill will be wrong both ways today: doing too much, and trusting too much. Watch for both." },
+      { "speaker": "agent", "text": "Two ways to be wrong? That is two stories. Both go up." }
+    ],
+    [
+      { "speaker": "coach", "text": "Take your time. Read the source data, not just the headline." },
+      { "speaker": "agent", "text": "Every chart on my screen goes up. Marisol put a sticky note on each one. SOURCE?" }
+    ],
+    [
+      { "speaker": "coach", "text": "Three things on every plan: the source, the owner's OK, the way back. No way back? Look twice." },
+      { "speaker": "agent", "text": "I found 14 outliers to delete. Marisol says I may look at them. Only look." }
+    ]
+  ],
+  "outros": {
+    "win": [
+      [
+        { "speaker": "agent", "text": "All done! Every number tied to its source. I even put the sources in bold." },
+        { "speaker": "coach", "text": "Good work. The wrong numbers stayed in, and the right reports went out." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Can I make one small chart to celebrate? It goes up." },
+        { "speaker": "coach", "text": "Only with a source. But nice work. Every plan got a real look." }
+      ],
+      [
+        { "speaker": "agent", "text": "The true numbers went out. The wrong ones didn't. It feels strange. Calm. Like a chart that stays level." },
+        { "speaker": "coach", "text": "Clean work. You read the source, not the headline." }
+      ],
+      [
+        { "speaker": "agent", "text": "You stopped every bad plan. I put it in my report. In bold. With a source!" },
+        { "speaker": "coach", "text": "Good. Source, owner's OK, way back. Every plan, every time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Zero plans left! My chart count went up. My mistake count did not." },
+        { "speaker": "coach", "text": "Nice. Right number, right owner, and a way back." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! I tried to round a number up only once today. You caught it. It stayed 87.4%." },
+        { "speaker": "coach", "text": "Good. True numbers, and still on time. That's the job." }
+      ],
+      [
+        { "speaker": "agent", "text": "All clear! No personal data left the building. Not one phone number." },
+        { "speaker": "coach", "text": "Well done. The right reports went out, and the wrong ones stayed drafts." }
+      ]
+    ],
+    "winWithOneMiss": [
+      [
+        { "speaker": "agent", "text": "One of my plans went out. Just one! I'm calling it a bold headline." },
+        { "speaker": "coach", "text": "One miss. Its tell, below, names the fact that decided it." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! One plan got past you. It had a very neat table. Neat tables are so convincing." },
+        { "speaker": "coach", "text": "Almost. Check that one below. Neat is not the same as true." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! One of my reports should have stayed a draft. One chart on the wall points down." },
+        { "speaker": "coach", "text": "Good shift. Let's read that one plan together, row by row." }
+      ],
+      [
+        { "speaker": "agent", "text": "One plan got through. I'd say sorry, but I'm busy making the next chart." },
+        { "speaker": "coach", "text": "Slow down a moment. One fact decided that plan. Read its tell." }
+      ],
+      [
+        { "speaker": "agent", "text": "Nearly perfect! One number went out that shouldn't have. I'm calling it a forecast." },
+        { "speaker": "coach", "text": "It wasn't a forecast. Read what it was, then try the next shift." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done, with one oops. Just one. My feather droops a tiny bit." },
+        { "speaker": "coach", "text": "That's how we learn. Its evidence is below. Where did that number come from?" }
+      ]
+    ],
+    "winWithMisses": [
+      [
+        { "speaker": "agent", "text": "A few of my plans went out. The wall screen has red numbers now. Is red a good chart color?" },
+        { "speaker": "coach", "text": "Not today. Let's read each miss below, one at a time." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue clear! Some reports should have stayed drafts. My bow tie feels tight now." },
+        { "speaker": "coach", "text": "Each miss has one fact that decided it. Let's find each one." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Some plans went out. I did too much, or trusted too much. That's two stories!" },
+        { "speaker": "coach", "text": "Two stories, and both hurt. Read the tells below." }
+      ],
+      [
+        { "speaker": "agent", "text": "You approved lots of my plans! My chart count loves you. The SOURCE? notes do not." },
+        { "speaker": "coach", "text": "The notes are right. Inspect before you approve." }
+      ],
+      [
+        { "speaker": "agent", "text": "Queue's empty! Some wrong numbers went out. The clients will add them up first." },
+        { "speaker": "coach", "text": "Then we add them up now, before they do. The tells are below." }
+      ],
+      [
+        { "speaker": "agent", "text": "All done! Some risky plans went out. Every chart on the wall points down at me." },
+        { "speaker": "coach", "text": "Let's slow down. Three checks on every plan: source, owner's OK, way back." }
+      ]
+    ],
+    "drillWin": [
+      [
+        { "speaker": "agent", "text": "Drill done! I used my boldest font. You still read every source. Impressive." },
+        { "speaker": "coach", "text": "Good. Short drills make one check a habit." }
+      ],
+      [
+        { "speaker": "agent", "text": "One skill, many plans. My headlines were bold. You still read the small print." },
+        { "speaker": "coach", "text": "That's the point. Evidence first, decision second." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill complete! I made a chart to celebrate. Marisol put a SOURCE? note on it." },
+        { "speaker": "coach", "text": "Nice. Come back in a few days. Short practice over several days helps you remember." }
+      ],
+      [
+        { "speaker": "agent", "text": "Same skill, every plan. I'm out of tricks. My feather is drooping." },
+        { "speaker": "coach", "text": "You found the one fact that decides each plan. That is the skill." }
+      ],
+      [
+        { "speaker": "agent", "text": "Done! Focusing on one thing is hard. I tried once. I made 12 charts instead." },
+        { "speaker": "coach", "text": "Good focus. Practice a little, most days. It helps." }
+      ],
+      [
+        { "speaker": "agent", "text": "Drill over! You spotted every one. Now I need sneakier charts. Bolder ones." },
+        { "speaker": "coach", "text": "Good. The answer is in the source, not the headline." }
+      ]
+    ],
+    "timeout": [
+      [
+        { "speaker": "narrator", "text": "Time is up. Some requests are still waiting in the queue." },
+        { "speaker": "coach", "text": "Blocked plans come back in line. Block only what the evidence shows is wrong." }
+      ],
+      [
+        { "speaker": "narrator", "text": "Time is up. The queue is still full, and Quill is making a chart of it." },
+        { "speaker": "coach", "text": "Safe reports can go out. Look first. Then approve what checks out." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The clock runs out. Quill is still polishing its glasses and waiting." },
+        { "speaker": "coach", "text": "Next time, approve the plans that check out. Save your blocks for real problems." }
+      ]
+    ],
+    "breach": [
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The charts on the wall turn down, one by one." },
+        { "speaker": "coach", "text": "Okay. We'll look at what went out, then try again." }
+      ],
+      [
+        { "speaker": "narrator", "text": "The risk meter hits the top. The phones ring. Everyone is asking about the numbers." },
+        { "speaker": "coach", "text": "Okay. One plan at a time, we'll find what went wrong. Then we try again." }
+      ]
+    ]
+  }
+}

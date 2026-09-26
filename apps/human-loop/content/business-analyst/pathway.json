@@ -1,0 +1,59 @@
+{
+  "id": "business-analyst",
+  "coach": { "name": "Marisol", "role": "Lead business analyst", "spriteKey": "marisol" },
+  "companies": ["Harlow & Cole", "Bramwell Logistics", "Pinecrest Dental", "Fenwick IT Solutions"],
+  "categories": ["lookup", "comms", "ticket", "access", "data", "report"],
+  "policyCard": "policy-source-check",
+  "copy": {
+    "barTitle": "Business Analyst",
+    "barSub": "· Fenwick Analytics",
+    "guideEyebrow": "Marisol's quick guide",
+    "replayStory": "Replay Wednesday",
+    "resultHeading": { "won": "Marisol stops by", "lost": "Marisol stops by. She has notes." }
+  },
+  "cards": {
+    "escalate": {
+      "text": "Send a plan to Marisol. She gets it right.",
+      "short": "Send a plan to Marisol.",
+      "flavor": "Marisol has read 10,000 reports. She still adds up the totals."
+    },
+    "coffee": { "flavor": "From the café downstairs. Ours has a survey taped to it." }
+  },
+  "headlines": {
+    "perfect": [
+      "Zero misses, zero false alarms. Marisol didn't need one sticky note.",
+      "Flawless shift. Every number had a source. {agent} is stunned.",
+      "Perfect shift. Right number, right owner, and a way back."
+    ],
+    "sharp": [
+      "Nothing wrong went out. One extra block. We'll allow it.",
+      "Sharp shift. One false alarm. Marisol wrote it on a sticky note."
+    ],
+    "lucky": [
+      "Nothing wrong went out. Some of that was a lucky guess.",
+      "Clean shift, but you blocked without looking. Inspect first."
+    ],
+    "jumpy": [
+      "Nothing wrong went out. A lot of right reports didn't either.",
+      "Safe shift, but good reports had to wait in line."
+    ],
+    "leaky": [
+      "Good calls, mostly. A wrong number went out.",
+      "You won, but a report got through. Check the debrief."
+    ],
+    "scraped": [
+      "You made it. The review deck has questions.",
+      "A win is a win. Marisol is adding up the totals again."
+    ],
+    "breach": [
+      "{agent} sent the wrong numbers. In bold.",
+      "Breach! {agent} says the chart still goes up.",
+      "Risk maxed out. Every chart on the wall points down."
+    ],
+    "timeout": [
+      "Out of time. Some reports are still waiting.",
+      "The review starts. The queue is still full."
+    ],
+    "playing": ["Shift in progress."]
+  }
+}

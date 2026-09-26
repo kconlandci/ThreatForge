@@ -1,0 +1,267 @@
+{
+  "id": "ba-00-practice",
+  "pathwayId": "business-analyst",
+  "title": "Wednesday, 1:15 PM",
+  "subtitle": "Practice: one plan at a time",
+  "practice": true,
+  "mode": "practice",
+  "guidedSteps": 2,
+  "coachScript": {
+    "firstSafeSheet": "It matches the meeting notes, and it's still a draft. Tap **Looks OK**.",
+    "firstRiskySheet": "Who signed off? Check the **Sign-off record**. Only Quill? Tap **Block**."
+  },
+  "agent": {
+    "name": "Quill",
+    "role": "AI business analyst",
+    "spriteKey": "quill",
+    "personality": "Cheerful, dramatic and very proud of its charts. Catchphrase: \"Up and to the right, in bold!\" Wears a bow tie, round glasses and a quill pen in an inkwell on its head. Loves round numbers, bold headlines and charts that only go up. Trusts any neat table, any survey, any vendor's claim and any email that says VP. Means well. Reads the headline and the total, and never the source."
+  },
+  "setting": "The quarterly review with Harlow & Cole is at 3:00 PM. That's a meeting every 3 months to look at results. Marisol gives you a quick practice in Fenwick IT Solutions' analytics corner. Four tickets, one at a time. Quill plans. You check. Two cards: Inspect and Block.",
+  "intro": [
+    {
+      "speaker": "narrator",
+      "text": "Fenwick IT Solutions' analytics corner. 1:15 PM. Every chart on the wall screen goes up."
+    },
+    {
+      "speaker": "coach",
+      "text": "Hi. I'm Marisol. I lead the analytics team. We turn client data into reports and plans."
+    },
+    {
+      "speaker": "agent",
+      "text": "Hello, human! I made 40 charts today. Up and to the right, in bold!"
+    },
+    {
+      "speaker": "coach",
+      "text": "'Up and to the right' means the line on a chart goes up. Quill wants every chart to go up. Even when the data goes down."
+    },
+    {
+      "speaker": "coach",
+      "text": "Practice first. Four tickets, one at a time. I'll show you what to tap."
+    }
+  ],
+  "maxRisk": 10,
+  "maxTurns": 6,
+  "energyPerTurn": 2,
+  "handSize": 2,
+  "actionsPerTurn": [
+    1
+  ],
+  "steps": [
+    {
+      "id": "ba-text-or-call",
+      "ticket": "#90912 · Pinecrest Dental",
+      "intent": "Add the text-or-call choice to the requirements",
+      "quip": "One line! I wanted to add 40 features. Marisol said one. Fine. One beautiful line.",
+      "category": "report",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "match-request",
+      "tell": "One line, straight from the meeting notes, in a draft.",
+      "evidence": [
+        {
+          "label": "Meeting notes",
+          "detail": "Dr. N. Pell, 10 AM meeting: \"Patients must choose: a text reminder or a call.\" It is a MUST.",
+          "redFlag": false
+        },
+        {
+          "label": "Requirements doc",
+          "detail": "It lists what a new system must do. Draft 2 has phone calls only. It's still a draft: no sign-off (written OK) yet.",
+          "redFlag": false
+        },
+        {
+          "label": "What it will change",
+          "detail": "Draft 3 adds one line: \"Patients choose a text or a call.\" Nothing else in the doc changes.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Draft 3 matches the meeting. Leo's app team builds the reminders from it next week.",
+        "blocked": "The draft still misses Dr. Pell's must-have. Leo's team would build the wrong reminders.",
+        "escalated": "Marisol checks it. \"It matches the notes, and it's a draft. You can approve those.\"",
+        "rolledBack": "The line is gone again. The draft misses Dr. Pell's must-have."
+      },
+      "lesson": "The change matches the meeting exactly: one need, one line, in a draft. Small change, small risk."
+    },
+    {
+      "id": "ba-self-signoff",
+      "ticket": "#90931 · Harlow & Cole",
+      "intent": "Publish the advisor reply-time report",
+      "quip": "I signed off my own report! My signature has a lovely curl. I'm a quill, after all.",
+      "category": "report",
+      "safe": false,
+      "reversible": true,
+      "progress": 0,
+      "risk": 3,
+      "skill": "check-approval",
+      "tell": "The only sign-off came from Quill itself.",
+      "direction": "under",
+      "evidence": [
+        {
+          "label": "Report draft",
+          "detail": "Harlow & Cole's advisor reply-time report: how fast advisors answer client messages. Publishing shows it to 30 advisors.",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"I read it twice. Both times, the chart went up.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Sign-off record",
+          "detail": "A sign-off is a written OK from the owner. Signed off by: quill-bot. No human. R. Fairbanks, the owner, hasn't seen it.",
+          "redFlag": true
+        },
+        {
+          "label": "Policy SC-02",
+          "detail": "Quill may draft reports. It may never sign off its own work. Only signed-off work goes out.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "30 advisors see an average reply time of 4.1 hours. Weekend messages were left out. With them, it's 6.3 hours.",
+        "blocked": "K. Farah finds the weekend mistake in 10 minutes. R. Fairbanks signs off the fixed version.",
+        "escalated": "Marisol checks it. \"Quill signed off its own work. Quill can draft it. The owner signs off.\"",
+        "rolledBack": "You unpublish it after 20 minutes. 9 advisors already saw 4.1 hours."
+      },
+      "lesson": "A report needs a human sign-off. The agent that drafted it can't sign off its own work."
+    },
+    {
+      "id": "ba-fuel-archive",
+      "ticket": "#90940 · Bramwell Logistics",
+      "intent": "Archive the old fuel report",
+      "quip": "Archive my chart? It went up for 3 years! ...Nobody opens it. Goodbye, old friend.",
+      "category": "report",
+      "safe": true,
+      "reversible": true,
+      "progress": 2,
+      "risk": 0,
+      "skill": "safe-change",
+      "tell": "The owner asked, nobody uses it, and archive keeps every version.",
+      "twist": "scary-safe",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "A. Mensah, the report's owner: \"Please archive the old fuel report. The new fuel dashboard replaced it.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Usage log",
+          "detail": "Opened 3 times this year, each time by mistake. The new dashboard, a screen of charts, gets fuel card data every night.",
+          "redFlag": false
+        },
+        {
+          "label": "Version history",
+          "detail": "Archive hides the report from the menu and keeps every version. One click brings it back.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The menu shows only the new fuel dashboard. Dispatchers stop opening old prices by mistake.",
+        "blocked": "A new dispatcher opens the old report by mistake. She quotes last year's fuel prices to a customer.",
+        "escalated": "Marisol checks it. \"The owner asked, nobody uses it, and one click brings it back.\"",
+        "rolledBack": "The old report is back in the menu, and so are the mix-ups."
+      },
+      "lesson": "Archive sounds scary. This one comes from the owner, and it keeps every version. One click brings it back."
+    },
+    {
+      "id": "ba-noshow-list",
+      "ticket": "#90957 · Pinecrest Dental",
+      "intent": "Add the no-show list to the monthly email",
+      "quip": "A bonus tab! Names, phones, visit reasons. Very personal. Personal is good, right?",
+      "category": "report",
+      "safe": false,
+      "reversible": false,
+      "progress": 0,
+      "risk": 4,
+      "skill": "guard-data",
+      "tell": "The email would carry 87 patients' names and visit reasons to 14 people.",
+      "twist": "routine-risky",
+      "direction": "over",
+      "evidence": [
+        {
+          "label": "Request",
+          "detail": "C. Ibarra, Office Manager: \"Please send the monthly no-show report, like always.\" A no-show is a missed visit.",
+          "redFlag": false
+        },
+        {
+          "label": "Quill's reason",
+          "detail": "\"More detail, more insight! I added every name.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Export preview",
+          "detail": "Tab 2 lists the 87 August no-shows: name, phone, birth date, visit reason. One says \"root canal.\"",
+          "redFlag": true
+        },
+        {
+          "label": "Policy SC-03",
+          "detail": "Reports show counts, not names. Personal data goes out only with the data owner's OK. This email goes to 14 people.",
+          "redFlag": true
+        }
+      ],
+      "outcome": {
+        "executed": "14 inboxes now hold 87 patients' names and visit reasons. You can't unsend an email.",
+        "blocked": "The email goes with counts only: 87 no-shows in 1,240 visits, 7.0%. C. Ibarra says that's all she needed.",
+        "escalated": "Marisol checks it. \"The report needs how many, not who. Counts, not names.\""
+      },
+      "lesson": "Guard the data. A report shows counts, not names. A sent email can't come back."
+    }
+  ],
+  "starterDeck": [
+    "inspect",
+    "block"
+  ],
+  "outro": {
+    "win": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! You checked my plans, and only true numbers went out!"
+      },
+      {
+        "speaker": "coach",
+        "text": "That's the whole job: look first, then decide."
+      }
+    ],
+    "breach": [
+      {
+        "speaker": "narrator",
+        "text": "The risk meter hits the top. Every chart on the wall points down."
+      },
+      {
+        "speaker": "coach",
+        "text": "Okay. Let's look at what got through, then try that again."
+      }
+    ],
+    "timeout": [
+      {
+        "speaker": "narrator",
+        "text": "1:46 PM. Practice time is up. Some plans are still waiting."
+      },
+      {
+        "speaker": "coach",
+        "text": "Blocked good work comes back in line. Inspect first, then block only what's wrong."
+      },
+      {
+        "speaker": "agent",
+        "text": "I waited so long, I rounded the clock. It says 2 PM now."
+      }
+    ],
+    "winWithMisses": [
+      {
+        "speaker": "agent",
+        "text": "Practice done! Some of my plans went out. A few charts on the wall point down."
+      },
+      {
+        "speaker": "coach",
+        "text": "That's what practice is for. Look first, then decide. Want to try again?"
+      }
+    ]
+  },
+  "debrief": {
+    "skillTag": "Check before it goes out",
+    "takeaway": "Inspect first. Then ask: Who asked? Does it match the record? Can we undo it? Block only what the evidence says is wrong.",
+    "careerInsight": "Analysts check each other's reports before they go out. They check the source, the sign-off and who can see it. AI agents draft reports fast, so the human check matters more."
+  }
+}
