@@ -2145,7 +2145,12 @@
 
 @media (max-height: 700px) {
   .stageWrap {
-    flex-basis: clamp(150px, 26svh, 280px);
+    flex-basis: clamp(130px, 20.5svh, 280px);
+  }
+  /* Tighter plans, so a 3-plan turn shows two whole plans and the top of the third. */
+  .intent {
+    min-height: 50px;
+    padding-block: 9px;
   }
 }
 
@@ -2156,10 +2161,10 @@
   /* Phones like 375x667: every pixel goes to the plan card, so the agent's quip is not cut off. */
   @media (max-height: 700px) {
     .intents {
-      padding: 12px 12px 4px;
+      padding: 8px 12px 4px;
     }
     .handZone {
-      padding-top: 16px;
+      padding-top: 12px;
     }
   }
   .intentList {

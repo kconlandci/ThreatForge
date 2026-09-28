@@ -82,7 +82,8 @@ export function Hand({
   // keeps room for the agent's quip.
   const share = !showCost ? 0.17 : n <= 2 ? 0.2 : 0.25;
   // Practice cards (no cost gem, short rules) are shorter: no empty space in their lower half.
-  const ratio = showCost ? 1.42 : 1.12;
+  // Short phones (375 x 667) get shorter cards too, so a 3-plan turn shows two whole plans.
+  const ratio = !showCost ? 1.12 : maxHeight && maxHeight < 700 ? 1.24 : 1.42;
   const byHeight = maxHeight ? (maxHeight * share) / ratio : Infinity;
   const cwNow = Math.round(Math.max(72, Math.min(byWidth, byHeight)));
   // The card width is set when the hand is dealt (and on a resize), then held until the next deal:
