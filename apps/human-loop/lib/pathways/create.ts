@@ -10,6 +10,19 @@ import type { PathwayBundle, PathwayInput } from "./types";
 /** Built encounters kept per pathway (enough for a daily, a drill and a few replays). */
 const SHIFT_CACHE_MAX = 8;
 
+/** The hub's main button after practice (HubOverlay startLabel). The bark names it, word for word. */
+export const HUB_START_LABEL = "Start shift";
+
+/**
+ * The coach's one bark in the office after practice ("Monday starts here. Tap **Start shift**."):
+ * the story's day (its title up to the comma), then the focused main button, so the line and the
+ * button give one instruction.
+ */
+export function defaultHubBark(storyTitle: string): string {
+  const day = storyTitle.split(",")[0].trim() || "Your shift";
+  return `${day} starts here. Tap **${HUB_START_LABEL}**.`;
+}
+
 export function createPathway(input: PathwayInput): PathwayBundle {
   const { meta, pathway: config, hub, skills, bank, shiftText, hubMap } = input;
   if (meta.id !== config.id) throw new Error(`pathway.json id "${config.id}" does not match the meta "${meta.id}"`);
@@ -21,8 +34,19 @@ export function createPathway(input: PathwayInput): PathwayBundle {
     coach: { ...config.coach },
     ...(config.headlines ? { headlines: config.headlines } : {}),
   });
-  const practice = hydrate(input.practice);
-  const story = hydrate(input.story);
+  // Practice-only fields (coachScript, coldOpen, hubBark) never reach the story shift.
+  const storyOnly = (enc: Encounter): Encounter => {
+    const rest = { ...enc };
+    delete rest.coachScript;
+    delete rest.coldOpen;
+    delete rest.hubBark;
+    return rest;
+  };
+  const practice: Encounter = {
+    ...hydrate(input.practice),
+    hubBark: input.practice.hubBark ?? defaultHubBark(input.story.title),
+  };
+  const story = hydrate(storyOnly(input.story));
   const encounters = [practice, story];
   const agent = story.agent;
   const bankVersion = bankVersionOf(bank);

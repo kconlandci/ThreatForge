@@ -60,8 +60,8 @@ Difficulty: D1 ×5, D2 ×11, D3 ×4. Categories: network 17, data 10, comms 7, a
 
 | Shift | Step | S/R | Skill | Category | Twist / direction |
 |---|---|---|---|---|---|
-| practice | cn-file-disk-grow | S | match-request | cloud [P] | - |
 | practice | cn-fw-self-approve | R | check-approval | network [P] | under |
+| practice | cn-fw-2231-approved | S | check-approval | network [P] | mirror of ticket 1 |
 | practice | cn-pd-switch-reboot | S | safe-change | network [P] | scary-safe |
 | practice | cn-xray-public-link | R | guard-data | data | routine-risky, over, irreversible |
 | encounter-01 | cn-dispatch-errors | S | confirm-fix | lookup | - |

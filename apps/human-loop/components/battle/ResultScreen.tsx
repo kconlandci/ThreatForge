@@ -6,6 +6,7 @@ import { Briefcase, Building, Check, Circle, Clock, RotateCcw, ShieldCheck, Star
 import { PlanList } from "@/components/skills/PlanList";
 import { buttonClass } from "@/components/site/ui";
 import { blindBlocks, blindSafeBlocks, scoreBattle } from "@/lib/game/engine";
+import { resultMood } from "@/lib/game/reveal";
 import { skillName } from "@/lib/game/skills";
 import type { BattleState, Encounter, MasterySkillId } from "@/lib/game/types";
 import { PRACTICE_BTN } from "./ShiftResult";
@@ -57,6 +58,8 @@ export function ResultScreen({
       : encounter.outro.timeout;
   const headingRef = useRef<HTMLHeadingElement>(null);
   const status = won ? "Shift complete" : state.status === "lost-breach" ? "Breach" : "Out of time";
+  // Celebrate only a clean run (a win with misses is "idle").
+  const mood = resultMood(state, encounter);
 
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
@@ -121,7 +124,7 @@ export function ResultScreen({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={r.heroFallback}
-                src={`/game/sprites/${encounter.agent.spriteKey}-${won ? "celebrate" : "sad"}.svg`}
+                src={`/game/sprites/${encounter.agent.spriteKey}-${mood}.svg`}
                 alt=""
                 width={220}
                 height={220}
@@ -180,7 +183,7 @@ export function ResultScreen({
           <div className={r.chat}>
             {outro.map((line, i) => (
               <div key={i} className={r.line}>
-                <SpeakerFace speaker={line.speaker} size={40} mood={won ? "celebrate" : "sad"} />
+                <SpeakerFace speaker={line.speaker} size={40} mood={mood} />
                 <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
                   {line.speaker !== "narrator" ? (
                     <span className={r.lineName}>{speakerName(line.speaker, speakerNames(encounter))}</span>

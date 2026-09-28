@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 import { Flag, Info, List, Play, X } from "lucide-react";
 import type { HubContent, HubTargetId } from "@/lib/game/hub";
+import { plainHint } from "@/lib/game/coach";
 import type { Encounter } from "@/lib/game/types";
 import { usePathway } from "@/lib/pathways/context";
 import { DialogueBox } from "./DialogueBox";
@@ -40,12 +41,17 @@ export interface HubOverlayProps {
   /** Where the avatar is walking, if anywhere. */
   walking: HubTargetId | null;
   resumeKind: ResumeKind;
-  /** Practice is not done yet: the main button starts it, with a "Skip practice" link. */
+  /** Practice is not done yet: the main button starts it ("Skip practice" is in the Menu). */
   practiceNext: boolean;
   /** One-time note (e.g. an old save was cleared). */
   note?: string | null;
   onDismissNote?: () => void;
-  onSkipPractice: () => void;
+  /**
+   * Right after practice ("Start the real shift"): the coach's one line ("Monday starts here. Tap
+   * **Ollie's desk**."), one screen, with the main button focused.
+   */
+  bark?: string | null;
+  onDismissBark?: () => void;
   reducedMotion: boolean;
   onOpenRooms: () => void;
   onCloseDialogue: () => void;
@@ -146,6 +152,59 @@ function TargetDialogue({
   );
 }
 
+/** The coach's one line after practice, with the main button (focused) under it. */
+function Bark({
+  text,
+  label,
+  agentName,
+  reducedMotion,
+  onStartShift,
+  onDismiss,
+}: {
+  text: string;
+  label: string;
+  agentName: string;
+  reducedMotion: boolean;
+  onStartShift: () => void;
+  onDismiss?: () => void;
+}) {
+  const { coach } = usePathway();
+  const startRef = useRef<HTMLButtonElement>(null);
+  const lineId = useId();
+  useEffect(() => {
+    const t = window.setTimeout(() => startRef.current?.focus({ preventScroll: true }), 30);
+    return () => window.clearTimeout(t);
+  }, []);
+  // One instruction: the line names this button, and there is no "OK" next to it (the X closes it).
+  return (
+    <DialogueBox
+      speaker="coach"
+      role={coach.role}
+      text={plainHint(text)}
+      index={0}
+      total={1}
+      agentName={agentName}
+      reducedMotion={reducedMotion}
+      nextLabel="OK"
+      hideNext
+      onNext={() => onDismiss?.()}
+      onClose={onDismiss}
+      primary={
+        <>
+        {/* The line arrives with the box (a new live region is not read): focusing the button reads it. */}
+        <span id={lineId} hidden>
+          {plainHint(text)}
+        </span>
+        <button ref={startRef} type="button" className={startBtn} onClick={onStartShift} data-hub-main="" aria-describedby={lineId}>
+          <Play className="h-5 w-5" aria-hidden="true" fill="currentColor" />
+          {label}
+        </button>
+        </>
+      }
+    />
+  );
+}
+
 /** Everything drawn over the office: the day's goal, the dialogue box, and the bottom actions. */
 export function HubOverlay({
   hub,
@@ -156,7 +215,8 @@ export function HubOverlay({
   practiceNext,
   note,
   onDismissNote,
-  onSkipPractice,
+  bark = null,
+  onDismissBark,
   reducedMotion,
   onOpenRooms,
   onCloseDialogue,
@@ -177,6 +237,8 @@ export function HubOverlay({
   return (
     <div className={h.overlay}>
       <div className={h.top}>
+        {/* While the coach's bark is up it is the only instruction: the TODAY banner waits. */}
+        {bark && !dialogue ? null : (
         <div className={h.objective}>
           <span className={h.objectiveIcon} aria-hidden="true">
             <Flag className="h-4 w-4" strokeWidth={2.6} />
@@ -196,6 +258,7 @@ export function HubOverlay({
             </span>
           </span>
         </div>
+        )}
         {note ? (
           <div className={h.note}>
             <Info className="h-4 w-4 flex-none text-teal" aria-hidden="true" />
@@ -217,7 +280,9 @@ export function HubOverlay({
       </p>
 
       <div className={h.bottom}>
-        {dialogue ? (
+        {bark && !dialogue ? (
+          <Bark text={bark} label={label} agentName={encounter.agent.name} reducedMotion={reducedMotion} onStartShift={onStartShift} onDismiss={onDismissBark} />
+        ) : dialogue ? (
           <TargetDialogue
             key={dialogue}
             hub={hub}
@@ -275,16 +340,11 @@ export function HubOverlay({
                 {/* Narrow phones: icon only, so the main button fits on one line. */}
                 <span className="max-[389px]:sr-only">Office list</span>
               </button>
-              <button type="button" className={`${startBtn} max-[389px]:whitespace-nowrap`} onClick={onStartShift}>
+              <button type="button" className={`${startBtn} max-[389px]:whitespace-nowrap`} onClick={onStartShift} data-hub-main="">
                 <Play className="h-5 w-5" aria-hidden="true" fill="currentColor" />
                 {label}
               </button>
             </div>
-            {practiceNext && !resumeKind ? (
-              <button type="button" className={`${skipLink} ${h.skipPractice}`} onClick={onSkipPractice}>
-                Skip practice
-              </button>
-            ) : null}
           </div>
         )}
       </div>

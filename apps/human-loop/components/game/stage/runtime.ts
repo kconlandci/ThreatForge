@@ -32,7 +32,10 @@ export interface StageRuntime {
   hubPos: GridPos | null;
   /** Walk request that arrived while the hub was not active. */
   pendingWalk: HubTargetId | null;
-  /** Mood React last set; fx may show a mood briefly and then return to this. */
+  /**
+   * The held mood: the last "agent-mood", or the mood a result holds (lib/game/bus.ts heldMood).
+   * Fx may show a mood briefly and then return to this.
+   */
   mood: AgentMood;
   fonts: { display: string; body: string };
   readySent: boolean;

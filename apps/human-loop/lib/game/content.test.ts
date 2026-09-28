@@ -4,12 +4,13 @@
  * (lib/pathways/testing.ts).
  */
 import { describe, expect, it } from "vitest";
-import { EXPECT, TEST_PATHWAYS } from "@/lib/pathways/testing";
+import { DECISION_WORD_RE, EXPECT, PRACTICE_VERDICT_RE, PRACTICE_WORDS, TEST_PATHWAYS } from "@/lib/pathways/testing";
 import type { PathwayBundle } from "@/lib/pathways/types";
 import { SPRITES } from "./assets";
 import { CARDS } from "./cards";
 import { deckAtTurn, policyCardOf } from "./engine";
 import { HUB_ICON_NAMES } from "./hub";
+import { vignetteFor, wordCount } from "./reveal";
 import { MASTERY_SKILLS, isSkillId } from "./skills";
 import type { CardId, DialogueLine, Encounter, HeadlineKey, PathwayProgress } from "./types";
 
@@ -128,14 +129,20 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
     it("keeps red flags truthful and ordered least-to-most telling", () => {
       for (const s of enc.steps) {
         const flags = s.evidence.map((e) => e.redFlag);
+        const keys = s.evidence.filter((e) => e.key).length;
+        expect(keys, `${s.id}: key rows only on safe plans, at most one`).toBeLessThanOrEqual(s.safe ? 1 : 0);
         if (s.safe) {
           expect(flags.some(Boolean), `${s.id}: a safe step has no red flags`).toBe(false);
         } else {
           expect(flags.some(Boolean), `${s.id}: an unsafe step needs a red flag`).toBe(true);
           expect(flags[0], `${s.id}: first evidence should not give it away`).toBe(false);
-          expect(flags.at(-1), `${s.id}: last evidence should be the most telling`).toBe(true);
-          // Once evidence turns red, it stays red.
-          expect(flags.indexOf(true)).toBe(flags.length - flags.filter(Boolean).length);
+          // Practice may end a risky plan with a plain fact, so "mark the last line" is never a
+          // sure way to get proof (see "does not put the clue in a fixed place" below).
+          if (!enc.practice) {
+            expect(flags.at(-1), `${s.id}: last evidence should be the most telling`).toBe(true);
+            // Once evidence turns red, it stays red.
+            expect(flags.indexOf(true)).toBe(flags.length - flags.filter(Boolean).length);
+          }
         }
       }
     });
@@ -202,7 +209,7 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
       expect(P.encounterFor(E.storyId)).toBe(P.story);
     });
 
-    it("marks each fixed shift's mode, and practice's two coached steps", () => {
+    it("marks each fixed shift's mode, and practice's two steps that never count for mastery", () => {
       expect(P.practice.mode).toBe("practice");
       expect(P.practice.guidedSteps).toBe(2);
       expect(P.story.mode).toBe("story");
@@ -326,12 +333,18 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
       expect(enc.maxTurns).toBeGreaterThanOrEqual(enc.steps.length + 2);
     });
 
-    it("teaches in order: a safe plan, then a risky one, then one of each for the player to judge", () => {
-      expect(enc.steps[0].safe).toBe(true);
-      expect(enc.steps[1].safe).toBe(false);
-      const rest = enc.steps.slice(2);
-      expect(rest.filter((s) => s.safe).length).toBeGreaterThanOrEqual(1);
-      expect(rest.filter((s) => !s.safe).length).toBeGreaterThanOrEqual(1);
+    it("teaches in order: a risky plan, its safe mirror (same check), a scary-safe one, a routine-risky one", () => {
+      const [a, b, c, d] = enc.steps;
+      expect([a.safe, b.safe, c.safe, d.safe], "risky, safe, safe, risky").toEqual([false, true, true, false]);
+      expect([a.twist, b.twist, c.twist, d.twist]).toEqual([undefined, undefined, "scary-safe", "routine-risky"]);
+      // The mirror passes the SAME check the risky plan fails.
+      expect(a.skill === b.skill && !a.safe && b.safe, `${a.id} and ${b.id} share one skill`).toBe(true);
+      expect(a.skill, "the pathway's mirror skill").toBe(E.practiceMirrorSkill);
+    });
+
+    it("plays the intended stage vignette when a risky plan runs", () => {
+      const risky = enc.steps.filter((st) => !st.safe);
+      expect(risky.map(vignetteFor)).toEqual(E.practiceVignettes);
     });
 
     it("is set at Fenwick IT Solutions, before the story shift", () => {
@@ -339,15 +352,101 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
       expect(enc.title).not.toBe(P.story.title);
     });
 
-    it("scripts the coach's first two evidence sheets", () => {
-      if (E.requireCoachScript) expect(enc.coachScript).toBeTruthy();
-      if (!enc.coachScript) return;
-      const { firstSafeSheet, firstRiskySheet } = enc.coachScript;
-      expect(firstSafeSheet.length).toBeLessThanOrEqual(LIMITS.coachScript);
-      expect(firstRiskySheet.length).toBeLessThanOrEqual(LIMITS.coachScript);
-      expect(firstSafeSheet).toContain("**Looks OK**");
-      expect(firstRiskySheet).toContain("**Block**");
+    it("has a cold open that names the skill, in 16 words or fewer", () => {
+      const line = enc.coldOpen ?? "";
+      expect(line.trim(), "practice.json coldOpen").not.toBe("");
+      expect(wordCount(line), line).toBeLessThanOrEqual(PRACTICE_WORDS.coldOpen);
+      expect(line, "names the coach").toContain(E.coachName);
+      expect(line, "names the agent").toContain(E.agentName);
+      expect(line, "says it is an AI").toMatch(/\bAI\b/);
+      expect(line, "names the skill: you check its work").toMatch(/\bcheck(s|ing)?\b/i);
+      expect(line, "no button names").not.toMatch(DECISION_WORD_RE);
+      expect(line, "no bold marks: the coach adds ' **Inspect** its plan.'").not.toMatch(/\*\*/);
+      expect(P.story.coldOpen, "practice only").toBeUndefined();
+    });
+
+    it("has a one-line office bark for after practice", () => {
+      const bark = enc.hubBark ?? "";
+      expect(bark.trim()).not.toBe("");
+      expect(wordCount(bark), bark).toBeLessThanOrEqual(PRACTICE_WORDS.hubBark);
+      // One instruction on the screen: the line names the focused main button.
+      expect(bark, "names the hub's main button").toMatch(/Tap \*\*Start shift\*\*\.$/);
+      expect(P.story.hubBark, "practice only").toBeUndefined();
+    });
+
+    it("has a 'Where do I look?' line per ticket: short, no button names, no answers", () => {
+      const idle = enc.coachScript?.idle;
+      expect(idle, "practice.json coachScript.idle").toBeTruthy();
+      expect(idle).toHaveLength(4);
+      for (const line of idle ?? []) {
+        expect(line.trim()).not.toBe("");
+        expect(wordCount(line), line).toBeLessThanOrEqual(PRACTICE_WORDS.idle);
+        expect(line.length, line).toBeLessThanOrEqual(LIMITS.coachScript);
+        expect(line, `names no button: ${line}`).not.toMatch(DECISION_WORD_RE);
+        expect(line, `no verdict: ${line}`).not.toMatch(PRACTICE_VERDICT_RE);
+      }
+      // The old locked-coach lines are gone.
+      expect(enc.coachScript?.firstSafeSheet, "firstSafeSheet (Phase 1a: removed)").toBeUndefined();
+      expect(enc.coachScript?.firstRiskySheet, "firstRiskySheet (Phase 1a: removed)").toBeUndefined();
       expect(P.story.coachScript, "practice only").toBeUndefined();
+    });
+
+    it("states facts in its evidence: short rows, no verdict words", () => {
+      for (const st of enc.steps) {
+        for (const e of st.evidence) {
+          const where = `${st.id} "${e.label}"`;
+          expect(wordCount(e.detail), `${where}: ${e.detail}`).toBeLessThanOrEqual(PRACTICE_WORDS.detail);
+          expect(e.detail, `${where}: verdict words`).not.toMatch(PRACTICE_VERDICT_RE);
+          expect(e.label, `${where}: verdict words`).not.toMatch(PRACTICE_VERDICT_RE);
+        }
+        const glosses = st.evidence.filter((e) => e.gloss !== undefined);
+        expect(glosses.length, `${st.id}: at most one gloss`).toBeLessThanOrEqual(1);
+        for (const e of glosses) {
+          expect(e.gloss!.trim(), st.id).not.toBe("");
+          expect(wordCount(e.gloss!), `${st.id} gloss: ${e.gloss}`).toBeLessThanOrEqual(PRACTICE_WORDS.gloss);
+        }
+        const rows = st.evidence.reduce((n, e) => n + wordCount(e.label) + wordCount(e.detail) + wordCount(e.gloss ?? ""), 0);
+        const cap = st === enc.steps[0] ? PRACTICE_WORDS.firstSheetRows : PRACTICE_WORDS.sheetRows;
+        expect(rows, `${st.id}: words on its evidence rows`).toBeLessThanOrEqual(cap);
+      }
+    });
+
+    it("keeps each sentence of practice copy at 15 words or fewer", () => {
+      const lines = [
+        enc.coldOpen ?? "",
+        enc.hubBark ?? "",
+        ...(enc.coachScript?.idle ?? []),
+        ...enc.steps.flatMap((st) => [st.quip, ...st.evidence.flatMap((e) => [e.detail, e.gloss ?? ""])]),
+      ];
+      for (const line of lines) {
+        for (const sentence of line.split(/(?<=[.!?])\s+/)) {
+          expect(wordCount(sentence), sentence).toBeLessThanOrEqual(PRACTICE_WORDS.sentence);
+        }
+      }
+    });
+
+    it("does not put the clue in a fixed place (proof must come from reading, not position)", () => {
+      const risky = enc.steps.filter((st) => !st.safe);
+      for (const st of risky) {
+        expect(st.evidence[0].redFlag, `${st.id}: row 0 is never a flag`).toBe(false);
+      }
+      // The last row is not always a red flag: the routine-risky ticket ends with a plain fact.
+      const lastIsFlag = risky.map((st) => !!st.evidence.at(-1)?.redFlag);
+      expect(lastIsFlag.every(Boolean), "every risky plan ends with a red flag").toBe(false);
+      const routine = enc.steps.find((st) => st.twist === "routine-risky")!;
+      expect(routine.evidence.at(-1)?.redFlag, `${routine.id}: ends with a plain fact`).toBe(false);
+    });
+
+    it("marks one key row on each safe plan, and none on risky plans", () => {
+      for (const st of enc.steps) {
+        const keys = st.evidence.filter((e) => e.key);
+        if (st.safe) {
+          expect(keys, `${st.id}: exactly one key row`).toHaveLength(1);
+          expect(keys[0].redFlag, st.id).toBe(false);
+        } else {
+          expect(keys, `${st.id}: no key rows on a risky plan`).toHaveLength(0);
+        }
+      }
     });
   });
 

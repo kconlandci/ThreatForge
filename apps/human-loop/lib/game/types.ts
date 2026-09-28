@@ -81,8 +81,19 @@ export type StepDirection = "over" | "under";
 export interface Evidence {
   label: string;
   detail: string;
-  /** Used for the debrief ("what gave it away"); never shown as a flag before resolution. */
+  /** Used for the debrief ("The clue"); never shown as a flag before resolution. */
   redFlag: boolean;
+  /**
+   * Safe plans only, at most one row per plan: the row that makes the plan OK (the review sheet
+   * ticks it after the plan resolves). Like redFlag, it never reaches the DOM before resolution.
+   * Practice content sets it on every safe plan (content tests).
+   */
+  key?: boolean;
+  /**
+   * A short definition of a term in this row, shown small under the label ("A sign-off is a written
+   * OK from the owner."). At most one per plan, 12 words or fewer. It counts toward the sheet's words.
+   */
+  gloss?: string;
 }
 
 export interface DialogueLine {
@@ -111,6 +122,11 @@ export interface AgentStep {
    * undone" would read like a red flag. Only cloud, full-stack and business-analyst content set it.
    */
   undoNote?: string;
+  /**
+   * Which stage vignette plays if this plan runs and it was risky ("leak", "report", "system").
+   * Optional: when missing, reveal.ts vignetteFor() picks it from the skill and category.
+   */
+  vignette?: "leak" | "report" | "system";
   /** Work credit when a safe step gets done (executed or escalated). */
   progress: number;
   /** Risk added when an unsafe step executes. */
@@ -176,7 +192,10 @@ export interface Encounter {
   /** A practice shift (read by the UI only): no stars, no stats, energy hidden. */
   practice?: boolean;
   mode?: EncounterMode;
-  /** The first N steps are coached step by step, so they never count as skill evidence. */
+  /**
+   * The first N steps never count as skill evidence (lib/game/mastery.ts callsFromBattle). That is
+   * all it means: the coach no longer locks or rings controls on them (Phase 1a). Practice keeps 2.
+   */
   guidedSteps?: number;
   outro: {
     win: DialogueLine[];
@@ -197,8 +216,34 @@ export interface Encounter {
   coach?: CoachInfo;
   /** Hydrated like coach: per-pathway headline lines; a missing key uses the engine's default pool. */
   headlines?: Partial<Record<HeadlineKey, string[]>>;
-  /** Practice only: the coach's lines on the first two evidence sheets (coach.ts p0-c, p1-c). */
-  coachScript?: { firstSafeSheet: string; firstRiskySheet: string };
+  /** Practice only: the coach's scripted lines (see CoachScript). */
+  coachScript?: CoachScript;
+  /**
+   * Practice only: the coach's one-line cold open on ticket 1 (16 words or fewer). It names the
+   * skill ("You check its plans."). The coach bar shows it before Inspect, followed by
+   * " **Inspect** its plan." (lib/game/coach.ts).
+   */
+  coldOpen?: string;
+  /**
+   * Practice only: the coach's one bark in the office after "Start the real shift" ("Monday starts
+   * here. Tap **Ollie's desk**."). Optional in content: lib/pathways/create.ts fills in a default
+   * from the story's day and the hub's battle target label.
+   */
+  hubBark?: string;
+}
+
+/**
+ * Practice coach lines. `idle` has 4 lines, one per queue position (content order), shown by the
+ * practice sheet's pull hint "Where do I look?" (and automatically on the plan right after a wrong
+ * call). Each says where to look, never what to decide: 12 words or fewer, the same form for a safe
+ * or a risky plan, no button names (content tests).
+ */
+export interface CoachScript {
+  idle?: string[];
+  /** @deprecated Phase 1a: replaced by idle. Read only by the old locked coach (coach.ts p0-c). */
+  firstSafeSheet?: string;
+  /** @deprecated Phase 1a: replaced by idle. Read only by the old locked coach (coach.ts p1-c). */
+  firstRiskySheet?: string;
 }
 
 /** The Help Desk clients. Each pathway lists its own in pathway.json "companies" (content tests check them). */

@@ -83,9 +83,12 @@ export interface PathwayBundle {
   /** The agent (identical in every encounter of the pathway). */
   agent: Encounter["agent"];
   coach: CoachInfo;
-  /** The coached practice shift (hydrated). */
+  /**
+   * The practice shift (hydrated: coach, headlines, and hubBark with a default from the story's
+   * day and the hub's battle target). It alone carries coldOpen, hubBark and coachScript.
+   */
   practice: Encounter;
-  /** The fixed story shift (hydrated). */
+  /** The fixed story shift (hydrated; practice-only fields are stripped). */
   story: Encounter;
   /** [practice, story] */
   encounters: Encounter[];

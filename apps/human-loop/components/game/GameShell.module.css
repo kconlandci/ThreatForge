@@ -7,6 +7,8 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  /* clip: focus() and scrollIntoView() can never scroll the game root (it would push the bar off). */
+  overflow: clip;
   background: var(--hl-paper);
   color: var(--hl-ink);
 }
@@ -289,4 +291,19 @@
   font-family: var(--font-display), system-ui, sans-serif;
   font-size: 12px;
   font-weight: 800;
+}
+
+/* Menu > Replay intro: the intro lines over the current view (the bar stays usable). */
+.replay {
+  position: absolute;
+  inset: 52px 0 0;
+  z-index: 45;
+  background: var(--hl-paper-soft);
+  background-image: radial-gradient(circle at 1px 1px, rgb(15 106 97 / 0.16) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+@media (max-height: 800px) {
+  .replay {
+    top: 48px;
+  }
 }

@@ -34,6 +34,7 @@ recommended setup for DCI).
 | `npm run lint`      | ESLint                                |
 | `npm test`          | Vitest (engine, content, server code) |
 | `npm run check:bundles` | After a build: each `/play/<pathway>` route ships only its own content |
+| `npm run e2e:first-five` | Playwright, against a running production server (`BASE=http://localhost:3141`): the first-minute checks (taps and words to the first decision, sheet fit, toasts vs stage, show me, keyboard, axe, reduced motion) for all 5 pathways at 390x844 and 375x667. Needs Playwright (`PW_MODULE`) and Chromium (`CHROMIUM`); screenshots go to `OUT` |
 
 Tip: to run more than one dev server at once, give the second one its own build folder and port:
 `NEXT_DIST_DIR=.next-alt npx next dev -p 3001`. Use exactly `.next-alt`: `tsconfig.json` already
@@ -307,20 +308,54 @@ HL_TEST_PG_URL=postgresql://USER:PASSWORD@localhost:5432/hl_test npx vitest run 
 
 ## How a first visit plays
 
-1. **Practice** (`content/help-desk/practice.json`, about 90 seconds): four tickets, one at a time,
-   with only Inspect and Block. Dana's hint line above the main button says what to tap
-   (`lib/game/coach.ts`, a pure function of the battle state; it never reads which plans are
-   safe). It can't end in a breach, and it never counts toward attempts, wins, best or history.
-   Presenters can tap **Skip practice** (on the intro and in the office).
+The first real decision comes about a minute in: landing **Play free** (1), `/play` **Play now**
+(2, a guest; the sign-up form below it is optional), a pathway card (3), **Inspect** (4). A deep
+link `/play/<pathway>` with no player yet goes to `/play?next=<pathway>`, and **Play now** (or a
+sign-up) comes straight back. Landing pathway buttons link to `/play/<pathway>`.
+
+1. **Practice** (`content/<pathway>/practice.json`, about 90 seconds): four tickets, one at a time,
+   with only Inspect and Block, in this order: a risky "who asked / who approved" plan, its safe
+   mirror (same skill), a scary-looking safe plan, a routine-looking risky plan. There are no intro
+   slides: the coach's first line is the cold open (`coldOpen`, e.g. "I'm Dana. Ollie is our AI.
+   It's fast, not careful. You check its plans."), and the intro lines play only from **Menu >
+   Replay intro**. The coach (`lib/game/coach.ts`, a pure function of the battle state that never
+   reads the answers) rings **Inspect** and never locks a control or names the decision. On the
+   sheet, **Where do I look?** shows the plan's `coachScript.idle` line (after a wrong call, the
+   next plan shows it by itself); **Let it run** approves in one tap. Right after a plan resolves,
+   the coach bar says what the agent didn't check ("Ollie didn't check: Sender address.",
+   `lib/game/reveal.ts` `practiceBar`). The result says "3 of 4 right." (plus "N caught with
+   proof.") and "You practiced: checking an AI agent's work before it runs." Practice can't end
+   in a breach, and it never counts toward attempts, wins, best or history. **Start the real
+   shift** opens the office with the coach's one line (`hubBark`, which names **Start shift**) and the main button focused;
+   reaching the agent's desk on that path starts the story at once. **Skip practice** is in the
+   Menu until practice is done.
 2. **The real shift** (`content/help-desk/encounter-01.json`): starts with Inspect and Block, then
    adds one new card per turn (the encounter's `unlocks` list: Policy on turn 2, Escalate on 3,
    Roll Back on 4, Coffee on 5). On the first shift, the hint line adds one tip per new card, at
    the start of that turn, only while the card can be played; "Out of energy" and "No Inspect
    left" always win over a tip.
 
-The main button is always **Approve** ("Approve 2 plans"): Ollie does every plan you didn't
-stop. While Ollie works, the same button reads **Next** and shows one outcome per tap; the small
-**Skip** link above it skips only the plain "Done." outcomes and stops at the next risky one. A saved battle made before the content changed fails `canResume` and starts fresh.
+The main button is **Approve** ("Approve 2 plans"): Ollie does every plan you didn't stop. In
+practice it reads **Let it run**, like the sheet's button. Tapping **Inspect** with one plan to check plays it at once and opens the evidence sheet.
+A saved battle made before the content changed fails `canResume` and starts fresh.
+
+**Spot it, then see it (every mode).** On an inspected plan that is still waiting, every evidence
+row is a button ("Check each line. Anything wrong? Mark that line."): the player can mark one row (red pen loop,
+a "Marked" badge; Up/Down move between rows). **Block** then reads **Block it** with "Your clue:
+<row>" above it, and blocking a risky plan on a red-flag row is "Caught with proof!". Marks live in
+memory only (`BattleView`), never in the save. Nothing on the sheet shows which rows are red flags
+before the plan resolves. When a plan resolves, the stage plays the outcome first (a vignette for a
+risky plan, `reveal.vignetteFor`: leak, report or system, and a mood the agent holds), then its
+toast docks under the stage 600 ms later (400 ms with reduced motion). Outcome toasts never time
+out (only short "hint" toasts do): an agent beat has its own **Next**, and an Oops or False alarm
+toast has **Show me**, a read-only sheet with the clue rows circled ("The clue", the plan's `tell`
+as the caption). The stage keeps a fixed height; the plan list below it scrolls. Result screens
+celebrate (and the stage throws confetti) only on a clean run (`reveal.isCleanRun`); a win with
+misses is "idle", with no cheer word. Good work that runs clears a busted or sad face (`bus.heldMood`
+"execute-safe" -> idle). In practice the coach bar carries the reveal line (`reveal.practiceBar`):
+it never sends the player to Inspect a plan that came back already checked ("It's back. Tap the plan
+to look again."), and it stops asking for **Show me** once it was opened. Test hooks: the stage wrapper carries `data-last-fx` (e.g. `risk:leak`) and
+`data-agent-mood`.
 
 ## Skills and generated shifts (M3 systems)
 

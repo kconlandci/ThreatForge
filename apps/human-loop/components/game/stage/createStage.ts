@@ -4,7 +4,7 @@
  * evaluates Phaser.
  */
 import * as Phaser from "phaser";
-import type { StageBus, StageMode, ToStage } from "@/lib/game/bus";
+import { heldMood, type StageBus, type StageMode, type ToStage } from "@/lib/game/bus";
 import { buildWalkable, type GridPos, type StageSetup } from "@/lib/game/hubMap";
 import { BattleScene } from "./BattleScene";
 import { BootScene } from "./BootScene";
@@ -151,6 +151,11 @@ export function createStage(opts: CreateStageOptions): StageHandle & { debug: St
   opts.parent.addEventListener("mousedown", onPressCapture, true);
 
   const onMsg = (msg: ToStage) => {
+    // Results hold a mood (sad after a miss or a false alarm, busted after a catch, celebrate only
+    // after a clean win) until the next turn beat sends "agent-mood". Fx moods are transient: the
+    // battle scene settles back on rt.mood when they end. Set it first so that fallback is right.
+    const held = heldMood(msg);
+    rt.mood = held ?? rt.mood;
     switch (msg.type) {
       case "mode":
         handle.setMode(msg.mode);
@@ -163,11 +168,15 @@ export function createStage(opts: CreateStageOptions): StageHandle & { debug: St
         else rt.pendingWalk = msg.target;
         break;
       case "agent-mood":
-        rt.mood = msg.mood;
         if (rt.active === "battle" && !rt.switching) battle.setMood(msg.mood);
         break;
       case "fx":
-        if (rt.active === "battle" && !rt.switching) battle.playFx(msg.fx, msg.intensity);
+        if (rt.active === "battle" && !rt.switching) {
+          battle.playFx(msg.fx, msg.intensity, { vignette: msg.vignette, clean: msg.clean });
+          // No transient mood (e.g. a win with misses): show the held mood now. With one, this
+          // waits and the scene settles on the held mood when the transient ends.
+          if (held) battle.setMood(held);
+        }
         break;
       case "stage-inset": {
         const v = Math.max(0, Math.round(msg.bottom));

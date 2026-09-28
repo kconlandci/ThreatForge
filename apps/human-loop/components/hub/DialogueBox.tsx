@@ -50,6 +50,8 @@ export interface DialogueBoxProps {
   focusRef?: RefObject<HTMLButtonElement | null>;
   /** Shows a close (X) button in the corner. */
   onClose?: () => void;
+  /** One-line boxes with a primary action: no Next button (the X closes it). */
+  hideNext?: boolean;
 }
 
 /** Visual-novel style dialogue box with a speaker tag, typewriter text, and actions. */
@@ -69,6 +71,7 @@ export function DialogueBox({
   secondary,
   focusRef,
   onClose,
+  hideNext = false,
 }: DialogueBoxProps) {
   const id = useId();
   const { shown, done, finish } = useTypewriter(text, reducedMotion);
@@ -120,6 +123,7 @@ export function DialogueBox({
       </p>
       <div className={h.controls}>
         {secondary}
+        {hideNext ? null : (
         <button
           ref={nextRef}
           type="button"
@@ -135,6 +139,7 @@ export function DialogueBox({
           {nextLabel}
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
         </button>
+        )}
         {primary ? <div className={h.grow}>{primary}</div> : null}
       </div>
     </section>

@@ -85,6 +85,12 @@
 }
 
 /* Focused on arrival so screen readers start here; no ring needed on a heading. */
+/* Practice: "2 caught with proof." on its own line under the score. */
+.headlineProof {
+  display: block;
+  white-space: nowrap;
+}
+
 .headline:focus,
 .headline:focus-visible {
   outline: none;
@@ -546,4 +552,27 @@
 .linkRow {
   margin-top: 14px;
   text-align: center;
+}
+
+/* Practice result (Phase 1a): the old headline as a subline, then the skill practiced. */
+.subline {
+  margin-top: 6px;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--hl-ink-soft);
+  text-wrap: balance;
+}
+
+.practiced {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: var(--hl-teal-tint);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--hl-teal-dark);
+  text-wrap: balance;
 }

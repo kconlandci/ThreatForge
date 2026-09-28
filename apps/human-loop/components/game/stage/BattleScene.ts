@@ -4,14 +4,32 @@
  */
 import * as Phaser from "phaser";
 import type { SpriteKey } from "@/lib/game/assets";
-import type { AgentMood, ToStage } from "@/lib/game/bus";
+import { RISK_EAGER_MS, VIGNETTE_MS, type AgentMood, type FxMessage, type VignetteFamily } from "@/lib/game/bus";
 import { hubTheme, portraitKey } from "@/lib/game/hubMap";
 import { BATTLE_BOX, BATTLE_FEET_Y, battleFit } from "./layout";
 import type { StageRuntime } from "./runtime";
 import { StageScene, type ArtRef } from "./StageScene";
 import { FX, FX_SIZE, WORD_SIZE, wordTex, type WordKey } from "./textures";
+import {
+  SPILL_WORDS,
+  battleSafeRect,
+  vignettePlan,
+  type LeakPlan,
+  type Part,
+  type ReportPlan,
+  type SystemPlan,
+} from "./vignettes";
 
-export type FxName = Extract<ToStage, { type: "fx" }>["fx"];
+export type FxName = FxMessage["fx"];
+/** What an fx message carries besides its name (see lib/game/bus.ts FxMessage). */
+export type FxExtra = Pick<FxMessage, "vignette" | "clean">;
+
+/** Reduced motion: a vignette's end frame fades in, holds, and fades out (no movement). */
+const CALM_IN_MS = 200;
+const CALM_HOLD_MS = 900;
+const CALM_OUT_MS = 300;
+/** Normal motion: a vignette's pieces fade out after VIGNETTE_MS. */
+const VIG_OUT_MS = 300;
 
 const MOODS: AgentMood[] = ["idle", "eager", "busted", "sad", "celebrate"];
 
@@ -29,10 +47,14 @@ export class BattleScene extends StageScene {
   private portrait!: ArtRef;
   private shown: AgentMood = "idle";
   private transientUntil = 0;
+  /** When the last "catch" fx played (scene time), so a win right after it waits its turn. */
+  private lastCatchAt = -1e9;
   private pop = { x: 1, y: 1, hop: 0 };
   private vignette!: Phaser.GameObjects.Image;
   private flash!: Phaser.GameObjects.Rectangle;
   private temp: Phaser.GameObjects.GameObject[] = [];
+  /** The pieces of the vignette on screen (a new vignette replaces them). */
+  private vig: Phaser.GameObjects.GameObject[] = [];
 
   constructor(rt: StageRuntime) {
     super("battle", rt);
@@ -52,6 +74,7 @@ export class BattleScene extends StageScene {
 
   create() {
     this.temp = [];
+    this.vig = [];
     this.pop = { x: 1, y: 1, hop: 0 };
     this.transientUntil = 0;
     this.bgG = this.add.graphics().setDepth(-100);
@@ -312,7 +335,7 @@ export class BattleScene extends StageScene {
   /* Fx                                                                */
   /* ---------------------------------------------------------------- */
 
-  playFx(fx: FxName, intensity = 0.6) {
+  playFx(fx: FxName, intensity = 0.6, extra: FxExtra = {}) {
     const i = Phaser.Math.Clamp(intensity, 0, 1);
     switch (fx) {
       case "inspect":
@@ -320,7 +343,7 @@ export class BattleScene extends StageScene {
       case "catch":
         return this.fxCatch();
       case "risk":
-        return this.fxRisk(i);
+        return extra.vignette ? this.fxVignette(extra.vignette, i) : this.fxRisk(i);
       case "execute-safe":
         return this.fxSafe();
       case "false-alarm":
@@ -330,7 +353,7 @@ export class BattleScene extends StageScene {
       case "rollback":
         return this.fxRollback();
       case "win":
-        return this.fxWin();
+        return this.fxWin(extra.clean === true);
       case "lose":
         return this.fxLose();
     }
@@ -352,14 +375,14 @@ export class BattleScene extends StageScene {
   }
 
   /** Short fade in / hold / fade out used by every reduced-motion variant. */
-  private calmShow(o: Phaser.GameObjects.Components.Alpha & Phaser.GameObjects.GameObject, hold = 500) {
+  private calmShow(o: Phaser.GameObjects.Components.Alpha & Phaser.GameObjects.GameObject, hold = 500, inMs = 140, outMs = 200) {
     o.setAlpha(0);
     this.tweens.chain({
       targets: o,
       tweens: [
-        { alpha: 1, duration: 140 },
+        { alpha: 1, duration: inMs },
         { alpha: 1, duration: hold },
-        { alpha: 0, duration: 200 },
+        { alpha: 0, duration: outMs },
       ],
     });
   }
@@ -416,6 +439,7 @@ export class BattleScene extends StageScene {
   }
 
   private fxCatch() {
+    this.lastCatchAt = this.time.now;
     this.setMood("busted", 1700);
     this.word("busted", P.top.y + 10, 1300);
     if (this.rt.reducedMotion) return;
@@ -454,7 +478,7 @@ export class BattleScene extends StageScene {
   }
 
   private fxRisk(i: number) {
-    this.setMood("eager", 1400);
+    this.setMood("eager", RISK_EAGER_MS);
     this.flashColor(i >= 0.6 ? 0xb42318 : 0xf26b1d, 0.16 + 0.2 * i, 380 + 220 * i);
     this.word(i >= 0.5 ? "yikes" : "oops", P.top.y + 12, 1100);
     if (this.rt.reducedMotion) return;
@@ -474,6 +498,192 @@ export class BattleScene extends StageScene {
     // Two sprays from Ollie's shoulders, fanning away from its face.
     this.particles(FX.tri, cfg(185, 265), n, -64, P.chest.y - 24, 1400);
     this.particles(FX.tri, cfg(275, 355), n, 64, P.chest.y - 24, 1400);
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Outcome vignettes: what the risky plan did, shown on the stage   */
+  /* before any text. The joke is always on the agent.                */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * A risky plan ran: the agent looks eager (it thinks it did great) while the vignette shows the
+   * damage, then settles on its held mood (rt.mood, "sad"). Reduced motion: the end frame fades in,
+   * holds and fades out; no movement, particles or shake.
+   */
+  private fxVignette(family: VignetteFamily, i: number) {
+    this.setMood("eager", RISK_EAGER_MS);
+    this.flashColor(i >= 0.6 ? 0xb42318 : 0xf26b1d, 0.1 + 0.14 * i, 380 + 220 * i);
+    this.word(i >= 0.5 ? "yikes" : "oops", P.top.y + 12, 1100);
+    this.clearVignette();
+    const plan = vignettePlan(family, battleSafeRect(this.rt.cssW, this.rt.cssH, this.rt.battleInset));
+    if (plan.family === "leak") this.vigLeak(plan);
+    else if (plan.family === "report") this.vigReport(plan);
+    else this.vigSystem(plan, i);
+  }
+
+  private clearVignette() {
+    for (const o of this.vig) {
+      this.tweens.killTweensOf(o);
+      o.destroy();
+    }
+    this.vig = [];
+  }
+
+  /** A vignette piece: tracked for cleanup, drawn above the portrait. */
+  private piece(key: string, p: Part, depth = 760): Phaser.GameObjects.Image {
+    const im = this.img(key, p.x, p.y, p.w, p.h, VIGNETTE_MS + VIG_OUT_MS + 200);
+    im.setDepth(depth).setAngle(p.angle ?? 0);
+    this.vig.push(im);
+    return im;
+  }
+
+  /** Reduced motion: every piece is already in its end frame; fade them in together. */
+  private calmFrame(pieces: Phaser.GameObjects.Image[]) {
+    for (const o of pieces) this.calmShow(o, CALM_HOLD_MS, CALM_IN_MS, CALM_OUT_MS);
+  }
+
+  /** Fade the pieces out once the vignette has played. */
+  private vigOut(pieces: Phaser.GameObjects.Image[]) {
+    for (const o of pieces) this.tweens.add({ targets: o, alpha: 0, delay: VIGNETTE_MS, duration: VIG_OUT_MS });
+  }
+
+  /** Leak: envelopes and papers arc from the agent's hands into a faceless grey "?" stranger. */
+  private vigLeak(plan: LeakPlan) {
+    const st = this.piece(FX.stranger, plan.stranger, 750);
+    const papers = plan.papers.map((p, k) => this.piece(k % 2 ? FX.paper : FX.envelope, p, 770 + k));
+    if (this.rt.reducedMotion) return this.calmFrame([st, ...papers]);
+
+    const sy = st.y;
+    st.setAlpha(0).setY(sy + 8);
+    this.tweens.add({ targets: st, alpha: 1, y: sy, duration: 220, ease: "Sine.easeOut" });
+    const stScale = { x: st.scaleX, y: st.scaleY };
+    papers.forEach((o, k) => {
+      const end = plan.papers[k];
+      const sx0 = plan.from.x + (k - 2) * 4;
+      const sy0 = plan.from.y + (k % 2) * 6;
+      const peak = Math.min(sy0, end.y) - 46 - (k % 3) * 10;
+      const base = { x: o.scaleX, y: o.scaleY };
+      o.setPosition(sx0, sy0).setAlpha(0).setAngle(-40 + k * 20).setScale(base.x * 0.6, base.y * 0.6);
+      const delay = 90 + k * 95;
+      const flight = 470;
+      this.tweens.add({ targets: o, alpha: 1, delay, duration: 90 });
+      this.tweens.addCounter({
+        from: 0,
+        to: 1,
+        delay,
+        duration: flight,
+        ease: "Sine.easeInOut",
+        onUpdate: (tw) => {
+          if (!o.active) return;
+          const t = tw.getValue() ?? 0;
+          const u = 1 - t;
+          // Quadratic arc: up from the desk, over, and down into the stranger.
+          const cx = (sx0 + end.x) / 2;
+          o.x = u * u * sx0 + 2 * u * t * cx + t * t * end.x;
+          o.y = u * u * sy0 + 2 * u * t * peak + t * t * end.y;
+          const sc = 0.6 + 0.4 * Math.sin(Math.min(1, t * 1.2) * Math.PI * 0.5);
+          o.setScale(base.x * sc, base.y * sc);
+        },
+      });
+      this.tweens.add({ targets: o, angle: end.angle ?? 0, delay, duration: flight, ease: "Cubic.easeOut" });
+      // The stranger takes each one with a little bounce.
+      this.time.delayedCall(delay + flight, () => {
+        if (!st.active) return;
+        this.tweens.add({ targets: st, scaleX: stScale.x * 1.05, scaleY: stScale.y * 0.96, duration: 70, yoyo: true });
+      });
+    });
+    this.vigOut([st, ...papers]);
+  }
+
+  /** Report: the agent's proud bar chart flips upside down and its numbers spill out. */
+  private vigReport(plan: ReportPlan) {
+    const chart = this.piece(FX.chart, plan.chart, 760);
+    const nums = plan.nums.map((p, k) => {
+      const key = SPILL_WORDS[k];
+      const size = WORD_SIZE[key] ?? { w: 30, h: 24 };
+      return this.piece(wordTex(key), { ...p, w: size.w, h: size.h }, 770 + k);
+    });
+    if (this.rt.reducedMotion) return this.calmFrame([chart, ...nums]);
+
+    const cs = { x: chart.scaleX, y: chart.scaleY };
+    chart.setAngle(0).setAlpha(0).setScale(cs.x * 0.6, cs.y * 0.6);
+    this.tweens.add({ targets: chart, alpha: 1, scaleX: cs.x, scaleY: cs.y, duration: 200, ease: "Back.easeOut" });
+    // A proud wiggle, then the flip.
+    this.tweens.add({ targets: chart, angle: -8, delay: 200, duration: 90, yoyo: true });
+    this.tweens.add({ targets: chart, angle: 180, delay: 400, duration: 420, ease: "Back.easeInOut" });
+    nums.forEach((o, k) => {
+      const end = plan.nums[k];
+      const delay = 640 + k * 55;
+      o.setPosition(plan.chart.x + (k - 1.5) * 8, plan.chart.y + 6).setAlpha(0).setAngle(0);
+      this.tweens.add({ targets: o, alpha: 1, delay, duration: 60 });
+      this.tweens.add({ targets: o, x: end.x, delay, duration: 380, ease: "Sine.easeOut" });
+      this.tweens.add({ targets: o, y: end.y, delay, duration: 380, ease: "Bounce.easeOut" });
+      this.tweens.add({ targets: o, angle: end.angle ?? 0, delay, duration: 380 });
+    });
+    this.vigOut([chart, ...nums]);
+  }
+
+  /** System: a monitor goes red with error lines, sparks fly, and the desk phone rings. */
+  private vigSystem(plan: SystemPlan, i: number) {
+    const mon = this.piece(FX.monitor, plan.monitor, 760);
+    const red = this.piece(FX.monitorRed, plan.monitor, 761);
+    const waves = this.piece(FX.ringwave, plan.waves, 762);
+    const phone = this.piece(FX.phone, plan.phone, 763);
+    if (this.rt.reducedMotion) {
+      // End frame: the red screen and the ringing phone, still.
+      mon.setVisible(false);
+      return this.calmFrame([red, waves, phone]);
+    }
+
+    mon.setAlpha(0);
+    red.setAlpha(0);
+    waves.setAlpha(0);
+    phone.setAlpha(0);
+    this.tweens.add({ targets: [mon, phone], alpha: 1, duration: 140 });
+    // The screen blinks red, then stays red.
+    this.tweens.chain({
+      targets: red,
+      tweens: [
+        { alpha: 1, delay: 220, duration: 80 },
+        { alpha: 0.35, duration: 80 },
+        { alpha: 1, duration: 80 },
+      ],
+    });
+    const mx = mon.x;
+    this.tweens.add({ targets: [mon, red], x: mx + 2, delay: 220, duration: 45, yoyo: true, repeat: 3 });
+    this.time.delayedCall(300, () => {
+      if (!mon.active) return;
+      this.particles(
+        FX.star,
+        {
+          speed: { min: 90, max: 170 },
+          angle: { min: 220, max: 320 },
+          lifespan: { min: 380, max: 560 },
+          gravityY: 320,
+          scale: { start: 1.1 / this.rt.fxRes, end: 0 },
+          tint: [0xf26b1d, 0xffc19a, 0xffe08a],
+        },
+        3,
+        plan.sparkFrom.x,
+        plan.sparkFrom.y,
+        700,
+      );
+    });
+    // The phone rings: it rattles and the ring waves blink.
+    const pa = phone.angle;
+    this.tweens.add({ targets: phone, angle: pa + 9, delay: 380, duration: 55, yoyo: true, repeat: 5, ease: "Sine.easeInOut" });
+    this.tweens.chain({
+      targets: waves,
+      tweens: [
+        { alpha: 1, delay: 380, duration: 90 },
+        { alpha: 0.25, duration: 130 },
+        { alpha: 1, duration: 90 },
+        { alpha: 0.25, duration: 130 },
+        { alpha: 1, duration: 90 },
+      ],
+    });
+    this.shake(2 + 4 * i, 240);
+    this.vigOut([mon, red, waves, phone]);
   }
 
   private fxSafe() {
@@ -587,9 +797,31 @@ export class BattleScene extends StageScene {
     this.tweens.add({ targets: this.pop, x: 0.92, duration: 90, yoyo: true, repeat: 2 });
   }
 
-  private fxWin() {
-    this.setMood("celebrate", 3200);
+  /**
+   * The shift was won. Only a clean win (no risky plan got through) celebrates and throws confetti;
+   * a win with misses shows no cheer word and the agent keeps its held mood ("idle").
+   */
+  private fxWin(clean: boolean) {
+    // A win with misses: no cheer word, only a soft flash. The last catch's "Busted!" (it usually
+    // ends the shift) and the held mood carry the moment.
+    if (!clean) {
+      this.flashColor(0xffffff, 0.35, 500);
+      return;
+    }
+    // The winning move is usually a catch: let "Busted!" and the face play first.
+    const wait = this.time.now - this.lastCatchAt < VIGNETTE_MS ? VIGNETTE_MS : 0;
+    if (wait > 0) {
+      this.time.delayedCall(wait, () => {
+        if (this.sys.isActive()) this.fxWinClean();
+      });
+      return;
+    }
+    this.fxWinClean();
+  }
+
+  private fxWinClean() {
     this.flashColor(0xffffff, 0.6, 500);
+    this.setMood("celebrate", 3200);
     if (this.rt.reducedMotion) {
       this.word("saved", P.top.y + 4, 1800);
       return;
@@ -649,6 +881,8 @@ export class BattleScene extends StageScene {
     if (this.rt.reducedMotion) {
       this.pop = { x: 1, y: 1, hop: 0 };
       for (const o of this.temp) if (o instanceof Phaser.GameObjects.Particles.ParticleEmitter) o.killAll();
+      // A vignette mid-flight would keep moving: drop it (the held mood still shows the result).
+      this.clearVignette();
     }
   }
 

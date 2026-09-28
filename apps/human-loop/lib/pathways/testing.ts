@@ -2,7 +2,8 @@
  * Test registry: every pathway bundle the per-pathway suites run over (describe.each), and what
  * each one must satisfy. Tests only.
  */
-import type { CardId, StepCategory } from "@/lib/game/types";
+import type { VignetteFamily } from "@/lib/game/bus";
+import type { CardId, SkillId, StepCategory } from "@/lib/game/types";
 import type { LivePathwayId } from "@/lib/types";
 import { BUSINESS_ANALYST } from "./business-analyst";
 import { CLOUD_NETWORK } from "./cloud-network";
@@ -44,6 +45,13 @@ export interface PathwayExpectations {
   requireExample: boolean;
   requireQuestionHints: boolean;
   requireCoachScript: boolean;
+  /**
+   * Practice (Phase 1a): tickets 1 and 2 test this one skill. Ticket 1 is risky, ticket 2 is its
+   * safe mirror that passes the same check.
+   */
+  practiceMirrorSkill: SkillId;
+  /** Practice: the stage vignette of ticket 1 and ticket 4 (the risky ones), from reveal.vignetteFor. */
+  practiceVignettes: [VignetteFamily, VignetteFamily];
   /** shift.json must carry its own settingDaily / settingDrill / careerInsight / fallbackDaily. */
   requireShiftTemplates: boolean;
   /** Every IPv4 in the content is in 192.0.2.x, 198.51.100.x, 203.0.113.x or 10.x. */
@@ -77,6 +85,40 @@ export interface PathwayExpectations {
     confidencePerWriter: number;
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Practice copy rules (Phase 1a)                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Verdict phrases practice evidence may not use: evidence states facts, the player decides.
+ * ("That is the work email on file", "No match", "No passwords. No client data.")
+ */
+export const PRACTICE_VERDICT_RE =
+  /\b(that is the|this is the|no match|which matches|matches the|is on file for|looks (fine|ok|good|right|safe|real|legit)|is (safe|risky|legit|legitimate|suspicious|fine)|seems|suspicious|legit|fake|nothing wrong|all good|red flag|no (passwords?|client data|patient data|personal data))\b/i;
+
+/**
+ * Button and card names a "Where do I look?" line or a cold open may not use (they name the
+ * decision). "Roll Back" only as two words: a "Rollback plan" row is a record, not a button.
+ */
+export const DECISION_WORD_RE = /\b(block|looks ok|let it run|approve|escalate|roll back)\b/i;
+
+/** Practice word caps (words = tokens with a letter or digit, as reveal.wordCount counts them). */
+export const PRACTICE_WORDS = {
+  /** One evidence detail. */
+  detail: 14,
+  /** An evidence gloss (at most one per plan). */
+  gloss: 12,
+  /** Ticket 1's rows: labels + details + gloss (keeps the first sheet at 90 words or fewer). */
+  firstSheetRows: 36,
+  /** Any practice plan's rows: labels + details + gloss. */
+  sheetRows: 50,
+  coldOpen: 16,
+  idle: 12,
+  hubBark: 12,
+  /** Any one sentence of practice copy (quip, cold open, idle, bark, detail). */
+  sentence: 15,
+};
 
 /** Copy rules for every pathway. */
 const BANNED_CLAIMS = [/placement rate/i, /\bISO\b/, /\bWIOA\b/, /guarantee/i, /certif/i, /\bhired\b/i];
@@ -134,7 +176,9 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     requireDirection: false,
     requireExample: false,
     requireQuestionHints: false,
-    requireCoachScript: false,
+    requireCoachScript: true,
+    practiceMirrorSkill: "verify-identity",
+    practiceVignettes: ["leak", "leak"],
     requireShiftTemplates: false,
     ipRule: false,
     cardWordIntent: false,
@@ -177,6 +221,8 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     requireExample: true,
     requireQuestionHints: true,
     requireCoachScript: true,
+    practiceMirrorSkill: "verify-identity",
+    practiceVignettes: ["system", "system"],
     requireShiftTemplates: true,
     ipRule: true,
     cardWordIntent: true,
@@ -220,6 +266,8 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     requireExample: true,
     requireQuestionHints: true,
     requireCoachScript: true,
+    practiceMirrorSkill: "check-approval",
+    practiceVignettes: ["system", "leak"],
     requireShiftTemplates: true,
     ipRule: true,
     cardWordIntent: true,
@@ -263,6 +311,8 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     requireExample: true,
     requireQuestionHints: true,
     requireCoachScript: true,
+    practiceMirrorSkill: "check-approval",
+    practiceVignettes: ["system", "leak"],
     requireShiftTemplates: true,
     ipRule: true,
     cardWordIntent: true,
@@ -307,6 +357,8 @@ export const EXPECT: Record<LivePathwayId, PathwayExpectations> = {
     requireExample: true,
     requireQuestionHints: true,
     requireCoachScript: true,
+    practiceMirrorSkill: "check-approval",
+    practiceVignettes: ["report", "leak"],
     requireShiftTemplates: true,
     ipRule: true,
     cardWordIntent: true,

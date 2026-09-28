@@ -8,6 +8,20 @@
  *   One trace changed (hd-daily-1|1330687161|perfect), only in its "All checked" hint line.
  * - Renamed made-up names that matched real ones (QuickChat, Kestrel, FastFreight, harlowcole.com).
  *   Audited: with the old names swapped back in, the capture equals the previous golden exactly.
+ * - Phase 1a (a real choice in the first minute): (a) practice content: risky ticket first, its
+ *   safe mirror second, quips, facts-only evidence, key rows, gloss, coachScript.idle, coldOpen,
+ *   hubBark (hydrated default), last intro line; (b) practice coach beats: no locks, new beat ids,
+ *   no button dictation; (c) stage fx "risk" carries a vignette and "win" carries clean (stage
+ *   messages only, not in traces); (d) guidedSteps unchanged (2), so mastery is unchanged.
+ *   Audited: only "practice" and the 24 practice|* traces changed; story, built, full, plans,
+ *   skills, cards, reasons, ui, bankVersion, headlines and every story|*, daily and drill trace are
+ *   identical. artifact-kinds.json: only 3 Help Desk practice rows changed.
+ * - Phase 1a review fixes (re-captured once more, same audit): practice content only (mirror row
+ *   without the "tray 3" trap, Callback as the key row, a plain last row on ticket 4, ESL copy,
+ *   outro, hubBark default now names "Start shift") and two practice coach beats (a plan back and
+ *   already checked -> "It's back. Tap the plan to look again."; "Your call." -> "Block it or let it
+ *   run."). Audited against git HEAD: only "practice" and the 24 practice|* traces changed; every
+ *   other key and trace is identical. artifact-kinds.json: 4 Help Desk practice rows.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

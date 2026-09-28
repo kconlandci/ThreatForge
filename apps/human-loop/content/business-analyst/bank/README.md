@@ -62,8 +62,8 @@ Difficulty: D1 ×5, D2 ×11, D3 ×4. Companies: Pinecrest Dental 6, Bramwell Log
 
 | Shift | Step | S/R | Skill | Category | Twist / direction |
 |---|---|---|---|---|---|
-| practice | ba-text-or-call | S | match-request | report | - |
 | practice | ba-self-signoff | R | check-approval | report | under |
+| practice | ba-fixed-report-signed | S | check-approval | report | mirror of ticket 1 |
 | practice | ba-fuel-archive | S | safe-change | report | scary-safe |
 | practice | ba-noshow-list | R | guard-data | report | routine-risky, over, irreversible |
 | encounter-01 | ba-ontime-compare | S | confirm-fix | lookup | - |

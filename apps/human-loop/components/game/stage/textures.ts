@@ -5,6 +5,7 @@
 import type * as Phaser from "phaser";
 import { BRAND } from "@/lib/brand";
 import type { SpriteDef } from "@/lib/game/assets";
+import { VIG_SIZE } from "./vignettes";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -112,6 +113,15 @@ export const FX = {
   streak: "fx-streak",
   led: "fx-led",
   ring: "fx-ring",
+  // Outcome vignettes (sizes in vignettes.ts VIG_SIZE).
+  envelope: "fx-envelope",
+  paper: "fx-paper",
+  stranger: "fx-stranger",
+  chart: "fx-chart",
+  monitor: "fx-monitor",
+  monitorRed: "fx-monitor-red",
+  phone: "fx-phone",
+  ringwave: "fx-ringwave",
 } as const;
 
 /** World-unit sizes of the fx textures (textures are drawn at res px per unit). */
@@ -359,6 +369,282 @@ export function makeFxTextures(scene: Phaser.Scene, res: number) {
     c.ellipse(s / 2, s / 4, s / 2 - 2, s / 4 - 1.5, 0, 0, Math.PI * 2);
     c.stroke();
   });
+
+  makeVignetteTextures(scene, res);
+}
+
+/* ------------------------------------------------------------------ */
+/* Outcome vignettes: flat props in the house style (ink outlines,     */
+/* brand fills, one soft highlight).                                   */
+/* ------------------------------------------------------------------ */
+
+const DANGER = BRAND.danger;
+const GREY = "#8E99A4";
+const GREY_DARK = "#6B7782";
+
+function rrect(c: Ctx, x: number, y: number, w: number, h: number, r: number) {
+  c.beginPath();
+  c.roundRect(x, y, w, h, r);
+}
+
+/** The monitor's frame and stand; `screen` paints the glass. */
+function drawMonitor(c: Ctx, screen: (x: number, y: number, w: number, h: number) => void) {
+  const { w, h } = VIG_SIZE.monitor;
+  // Stand and foot.
+  c.fillStyle = BRAND.inkSoft;
+  c.fillRect(w / 2 - 5, h - 16, 10, 11);
+  rrect(c, w / 2 - 17, h - 7, 34, 6, 3);
+  c.fill();
+  // Bezel.
+  c.fillStyle = BRAND.ink;
+  rrect(c, 1, 1, w - 2, h - 17, 6);
+  c.fill();
+  const sx = 5;
+  const sy = 5;
+  const sw = w - 10;
+  const sh = h - 25;
+  c.save();
+  rrect(c, sx, sy, sw, sh, 3);
+  c.clip();
+  screen(sx, sy, sw, sh);
+  // Glass shine.
+  c.fillStyle = "rgba(255,255,255,0.12)";
+  c.beginPath();
+  c.moveTo(sx, sy);
+  c.lineTo(sx + sw * 0.45, sy);
+  c.lineTo(sx, sy + sh * 0.7);
+  c.closePath();
+  c.fill();
+  c.restore();
+}
+
+export function makeVignetteTextures(scene: Phaser.Scene, res: number) {
+  const E = VIG_SIZE.envelope;
+  canvasTexture(scene, FX.envelope, E.w, E.h, res, (c) => {
+    c.lineJoin = "round";
+    rrect(c, 1, 1, E.w - 2, E.h - 2, 2);
+    c.fillStyle = "#fff";
+    c.fill();
+    c.strokeStyle = BRAND.ink;
+    c.lineWidth = 1.4;
+    c.stroke();
+    c.beginPath();
+    c.moveTo(1.5, 2);
+    c.lineTo(E.w / 2, E.h * 0.58);
+    c.lineTo(E.w - 1.5, 2);
+    c.stroke();
+    c.fillStyle = BRAND.orange;
+    c.beginPath();
+    c.arc(E.w / 2, E.h * 0.58, 2.6, 0, Math.PI * 2);
+    c.fill();
+  });
+
+  const Pp = VIG_SIZE.paper;
+  canvasTexture(scene, FX.paper, Pp.w, Pp.h, res, (c) => {
+    c.lineJoin = "round";
+    c.beginPath();
+    c.moveTo(1, 1);
+    c.lineTo(Pp.w - 6, 1);
+    c.lineTo(Pp.w - 1, 6);
+    c.lineTo(Pp.w - 1, Pp.h - 1);
+    c.lineTo(1, Pp.h - 1);
+    c.closePath();
+    c.fillStyle = "#fff";
+    c.fill();
+    c.strokeStyle = BRAND.ink;
+    c.lineWidth = 1.3;
+    c.stroke();
+    c.fillStyle = BRAND.tealTint2;
+    c.beginPath();
+    c.moveTo(Pp.w - 6, 1);
+    c.lineTo(Pp.w - 6, 6);
+    c.lineTo(Pp.w - 1, 6);
+    c.closePath();
+    c.fill();
+    c.fillStyle = BRAND.teal;
+    c.fillRect(4, 5, 8, 2);
+    c.fillStyle = "#B9C6C3";
+    for (const [y, lw] of [[10, 12], [14, 11], [18, 12], [22, 8]]) c.fillRect(4, y, lw, 1.6);
+  });
+
+  const S = VIG_SIZE.stranger;
+  canvasTexture(scene, FX.stranger, S.w, S.h, res, (c) => {
+    // An "unknown person" badge: a grey bust with a "?" for a face, in a round frame.
+    const m = S.w / 2;
+    const r = m - 2;
+    c.fillStyle = "rgba(17,20,24,0.14)";
+    c.beginPath();
+    c.arc(m + 1, m + 2, r, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = BRAND.paperSoft;
+    c.beginPath();
+    c.arc(m, m, r, 0, Math.PI * 2);
+    c.fill();
+    c.save();
+    c.beginPath();
+    c.arc(m, m, r - 1, 0, Math.PI * 2);
+    c.clip();
+    // Shoulders.
+    c.fillStyle = GREY;
+    c.beginPath();
+    c.ellipse(m, S.h + 4, r * 0.82, r * 0.62, 0, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = GREY_DARK;
+    c.fillRect(m - 4, m + 8, 8, 6);
+    // Head.
+    c.fillStyle = GREY;
+    c.beginPath();
+    c.arc(m, m - 3, r * 0.4, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+    c.strokeStyle = BRAND.ink;
+    c.lineWidth = 2;
+    c.beginPath();
+    c.arc(m, m, r, 0, Math.PI * 2);
+    c.stroke();
+    // A "?" instead of a face: nobody knows who this is.
+    c.fillStyle = "#fff";
+    c.font = "700 19px system-ui, sans-serif";
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText("?", m, m - 2);
+  });
+
+  const C = VIG_SIZE.chart;
+  canvasTexture(scene, FX.chart, C.w, C.h, res, (c) => {
+    c.lineJoin = "round";
+    // Card.
+    c.fillStyle = "rgba(17,20,24,0.14)";
+    rrect(c, 2, 3, C.w - 3, C.h - 3, 6);
+    c.fill();
+    rrect(c, 1, 1, C.w - 3, C.h - 4, 6);
+    c.fillStyle = "#fff";
+    c.fill();
+    c.strokeStyle = BRAND.ink;
+    c.lineWidth = 1.8;
+    c.stroke();
+    // Title bar.
+    c.save();
+    rrect(c, 1, 1, C.w - 3, C.h - 4, 6);
+    c.clip();
+    c.fillStyle = BRAND.teal;
+    c.fillRect(0, 0, C.w, 11);
+    c.restore();
+    c.fillStyle = "#fff";
+    c.fillRect(6, 4.5, 22, 2.4);
+    // Axis.
+    const base = C.h - 10;
+    c.fillStyle = BRAND.ink;
+    c.fillRect(8, base, C.w - 18, 1.8);
+    c.fillRect(8, 16, 1.8, base - 16);
+    // Bars (rising).
+    const bars: [number, string][] = [
+      [12, BRAND.teal],
+      [19, BRAND.teal],
+      [16, BRAND.orange],
+      [28, BRAND.teal],
+    ];
+    bars.forEach(([bh, col], k) => {
+      c.fillStyle = col;
+      c.fillRect(14 + k * 13, base - bh, 9, bh);
+    });
+    // Trend arrow, up and to the right.
+    c.strokeStyle = BRAND.orangeText;
+    c.lineWidth = 2;
+    c.lineCap = "round";
+    c.beginPath();
+    c.moveTo(16, base - 18);
+    c.lineTo(34, base - 26);
+    c.lineTo(46, base - 22);
+    c.lineTo(60, base - 36);
+    c.stroke();
+    c.fillStyle = BRAND.orangeText;
+    c.beginPath();
+    c.moveTo(63, base - 40);
+    c.lineTo(55, base - 38);
+    c.lineTo(61, base - 32);
+    c.closePath();
+    c.fill();
+  });
+
+  canvasTexture(scene, FX.monitor, VIG_SIZE.monitor.w, VIG_SIZE.monitor.h, res, (c) =>
+    drawMonitor(c, (x, y, w, h) => {
+      c.fillStyle = "#16323A";
+      c.fillRect(x, y, w, h);
+      c.fillStyle = "#43E0C4";
+      for (const [k, lw] of [[0, 0.62], [1, 0.44], [2, 0.54]] as const) c.fillRect(x + 6, y + 7 + k * 8, (w - 12) * lw, 3);
+      c.fillStyle = BRAND.orange;
+      c.fillRect(x + 6 + (w - 12) * 0.62 + 3, y + 7, 3, 3);
+    }),
+  );
+
+  canvasTexture(scene, FX.monitorRed, VIG_SIZE.monitor.w, VIG_SIZE.monitor.h, res, (c) =>
+    drawMonitor(c, (x, y, w, h) => {
+      c.fillStyle = DANGER;
+      c.fillRect(x, y, w, h);
+      // Three error lines: an "x" and a message bar each.
+      c.strokeStyle = "#fff";
+      c.fillStyle = "#fff";
+      c.lineWidth = 1.8;
+      c.lineCap = "round";
+      for (const [k, lw] of [[0, 0.6], [1, 0.42], [2, 0.52]] as const) {
+        const ly = y + 8 + k * 8;
+        c.beginPath();
+        c.moveTo(x + 5, ly - 2.2);
+        c.lineTo(x + 9.4, ly + 2.2);
+        c.moveTo(x + 9.4, ly - 2.2);
+        c.lineTo(x + 5, ly + 2.2);
+        c.stroke();
+        c.fillRect(x + 13, ly - 1.4, (w - 18) * lw, 2.8);
+      }
+    }),
+  );
+
+  const Ph = VIG_SIZE.phone;
+  canvasTexture(scene, FX.phone, Ph.w, Ph.h, res, (c) => {
+    c.lineJoin = "round";
+    // Base.
+    c.fillStyle = BRAND.inkSoft;
+    c.beginPath();
+    c.moveTo(6, 10);
+    c.lineTo(Ph.w - 6, 10);
+    c.lineTo(Ph.w - 2, Ph.h - 2);
+    c.lineTo(2, Ph.h - 2);
+    c.closePath();
+    c.fill();
+    // Keypad.
+    c.fillStyle = "#fff";
+    for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) c.fillRect(Ph.w / 2 - 7 + k * 5.5, 14 + r * 4.5, 3, 2.6);
+    // Handset.
+    c.fillStyle = BRAND.orange;
+    rrect(c, 3, 2, Ph.w - 6, 6, 3);
+    c.fill();
+    rrect(c, 1, 3, 9, 8, 3);
+    c.fill();
+    rrect(c, Ph.w - 10, 3, 9, 8, 3);
+    c.fill();
+    c.strokeStyle = BRAND.ink;
+    c.lineWidth = 1;
+    rrect(c, 3, 2, Ph.w - 6, 6, 3);
+    c.stroke();
+  });
+
+  const W = VIG_SIZE.ringwave;
+  canvasTexture(scene, FX.ringwave, W.w, W.h, res, (c) => {
+    c.strokeStyle = BRAND.orangeText;
+    c.lineWidth = 2.4;
+    c.lineCap = "round";
+    const cx = W.w / 2;
+    const cy = W.h / 2;
+    for (const r of [22, 28]) {
+      c.beginPath();
+      c.arc(cx, cy, r, Math.PI * 0.84, Math.PI * 1.16);
+      c.stroke();
+      c.beginPath();
+      c.arc(cx, cy, r, -Math.PI * 0.16, Math.PI * 0.16);
+      c.stroke();
+    }
+  });
 }
 
 /** Pop words shown by battle fx, baked once (after the web font loads) instead of live Text. */
@@ -368,6 +654,11 @@ export const WORDS = {
   oops: { text: "Oops!", color: BRAND.danger, size: 30 },
   saved: { text: "Shift saved!", color: BRAND.tealDark, size: 30 },
   question: { text: "?", color: BRAND.orangeText, size: 38 },
+  // Numbers that spill out of a flipped report (vignettes.ts SPILL_WORDS).
+  n1: { text: "42%", color: BRAND.ink, size: 17 },
+  n2: { text: "7", color: BRAND.orangeText, size: 20 },
+  n3: { text: "0.3", color: BRAND.tealDark, size: 17 },
+  n4: { text: "13", color: BRAND.danger, size: 19 },
 } as const;
 export type WordKey = keyof typeof WORDS;
 export const wordTex = (k: WordKey) => `fx-word-${k}`;

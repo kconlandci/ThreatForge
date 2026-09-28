@@ -9,11 +9,12 @@
  * The helpers are pure so they can be unit tested without React.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AgentMood, ToStage } from "./bus";
+import type { AgentMood, FxMessage, ToStage } from "./bus";
 import { CARDS } from "./cards";
 import { coachName } from "./coach";
 import { deckAtTurn, endTurn as engineEndTurn, playCard as enginePlayCard, policyCardOf } from "./engine";
 import { gradePlan, type PlanGrade } from "./mastery";
+import { isCleanRun, revealFor, vignetteFor, type Reveal } from "./reveal";
 import type {
   AgentStep,
   BattleEvent,
@@ -213,8 +214,12 @@ export interface Beat {
   status?: BattleStatus;
 }
 
-const fx = (name: Extract<ToStage, { type: "fx" }>["fx"], intensity?: number): ToStage =>
-  intensity === undefined ? { type: "fx", fx: name } : { type: "fx", fx: name, intensity };
+const fx = (name: FxMessage["fx"], intensity?: number, extra?: Pick<FxMessage, "vignette" | "clean">): ToStage => ({
+  type: "fx",
+  fx: name,
+  ...(intensity === undefined ? {} : { intensity }),
+  ...extra,
+});
 const mood = (m: AgentMood): ToStage => ({ type: "agent-mood", mood: m });
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
@@ -223,8 +228,13 @@ const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
  * Group new engine events into beats the UI plays one at a time.
  * A card play becomes one "player" beat; endTurn becomes one "agent" beat per executed
  * intent, then a "turn" beat (or an "end" beat when the battle is over).
+ *
+ * `state` (optional) is the battle state after these events. With it, a won "end" beat says
+ * whether the run was clean (fx win `clean`, and the agent's mood celebrate or idle). Without it
+ * (the golden traces), toasts and logs are exactly the same; only the stage messages differ.
+ * A risky plan that runs always carries its outcome vignette (fx risk `vignette`).
  */
-export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat[] {
+export function eventsToBeats(events: BattleEvent[], encounter: Encounter, state?: BattleState): Beat[] {
   const beats: Beat[] = [];
   const agent = agentShortName(encounter);
   const coach = coachName(encounter);
@@ -353,7 +363,7 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
           ],
           stage: ev.safe
             ? [fx("execute-safe", 0.6)]
-            : [fx("risk", clamp01(0.35 + ev.risk / encounter.maxRisk))],
+            : [fx("risk", clamp01(0.35 + ev.risk / encounter.maxRisk), step ? { vignette: vignetteFor(step) } : undefined)],
         });
         break;
       }
@@ -393,7 +403,11 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
                 ? "Breach! Risk hit the limit."
                 : "Out of time. The shift is over.",
           ],
-          stage: [fx(won ? "win" : "lose", 1), mood(won ? "celebrate" : ev.status === "lost-breach" ? "busted" : "sad")],
+          stage: won
+            ? state
+              ? [fx("win", 1, { clean: isCleanRun(state, encounter) }), mood(isCleanRun(state, encounter) ? "celebrate" : "idle")]
+              : [fx("win", 1), mood("celebrate")]
+            : [fx("lose", 1), mood(ev.status === "lost-breach" ? "busted" : "sad")],
         });
         break;
       }
@@ -408,6 +422,16 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter): Beat
 }
 
 /**
+ * How long a toast stays up on its own (ms; 0 = until the player closes it). Outcome toasts never
+ * auto-hide (the consequence is the lesson): they close on Next, Close or the next card play. Only
+ * "hint" toasts (a short tip, also written to the live log) keep a reading timer.
+ */
+export function toastMs(toast: ToastSpec | undefined): number {
+  if (!toast || toast.tone !== "hint") return 0;
+  return readingMs(toast);
+}
+
+/**
  * How long a toast stays up: enough time to read it for slow readers and ESL learners
  * (about 120 words a minute). The toast also pauses while it is hovered, touched or focused.
  */
@@ -415,6 +439,45 @@ export function readingMs(toast: ToastSpec | undefined, min = 3200, max = 15000)
   if (!toast) return min;
   const chars = toast.title.length + toast.text.length;
   return Math.max(min, Math.min(max, 1500 + chars * 80));
+}
+
+/* ------------------------------------------------------------------ */
+/* Evidence sheet copy and Show me (Phase 1a)                          */
+/* ------------------------------------------------------------------ */
+
+/** The spot-it prompt above the evidence rows (every mode, on an inspected, unresolved plan). */
+export const SPOT_PROMPT = "Check each line. Anything wrong? Mark that line.";
+/** The practice sheet's pull hint button. */
+export const HINT_BUTTON = "Where do I look?";
+
+/**
+ * The "Can we undo it?" row's answer, the same in every mode (a plan's undoNote wins). A one-way
+ * plan can still be right: the row says so, so "one-way" never reads as "block it".
+ */
+export function undoText(step: Pick<AgentStep, "undoNote" | "category" | "reversible">): string {
+  if (step.undoNote) return step.undoNote;
+  if (step.category === "lookup") return "Nothing to undo. It only reads. It changes nothing.";
+  return step.reversible ? "Yes. It can be undone after it runs." : "No. One-way. That is OK if it is right.";
+}
+
+/** An evidence row button's accessible name: "<label>: <detail>", then the gloss if any. */
+export function rowName(ev: Pick<Evidence, "label" | "detail" | "gloss">): string {
+  return `${ev.label}: ${ev.detail}${ev.gloss ? ` ${ev.gloss}` : ""}`;
+}
+
+/**
+ * The latest resolved plan's reveal when it offers "Show me" (a wrong call), else null. The
+ * practice coach bar shows a Show me button beside its reveal line while this is set.
+ */
+export function showMeReveal(state: BattleState, encounter: Encounter, marks: ReadonlyMap<string, number>): Reveal | null {
+  for (let i = state.events.length - 1; i >= 0; i--) {
+    const ev = state.events[i];
+    if (ev.t === "caught" || ev.t === "false-alarm" || ev.t === "executed" || ev.t === "escalated-safe" || ev.t === "rolled-back") {
+      const r = revealFor(state, encounter, ev.stepId, marks.get(ev.stepId));
+      return r?.showMe ? r : null;
+    }
+  }
+  return null;
 }
 
 /* ------------------------------------------------------------------ */

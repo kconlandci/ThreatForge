@@ -9,11 +9,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ChevronRight, ChevronsRight, Lock, Play, Target, X } from "lucide-react";
-import type { StageBus, ToStage } from "@/lib/game/bus";
+import { ChevronRight, ChevronsRight, Eye, Lock, Play, Target, X } from "lucide-react";
+import { BEAT_READY_AFTER_TOAST_MS, fxTag, heldMood, toastDelayMs, type StageBus, type ToStage } from "@/lib/game/bus";
 import { CARDS } from "@/lib/game/cards";
-import { coachHint, plainHint, sheetCoach } from "@/lib/game/coach";
+import { coachHint, plainHint, sheetCoach, type CoachHint } from "@/lib/game/coach";
 import { validTargets } from "@/lib/game/engine";
+import { PROOF_TITLE, practiceBar, resultMood, revealFor, type Reveal } from "@/lib/game/reveal";
 import { liveGrade } from "@/lib/game/skillsView";
 import type { BattleState, BattleStatus, CardDef, CardId, Encounter, PlayResult } from "@/lib/game/types";
 import {
@@ -24,9 +25,10 @@ import {
   groupHand,
   newCardIds,
   newEvents,
-  readingMs,
   resolvedCount,
+  showMeReveal,
   stepById,
+  toastMs,
   unlockedThisTurn,
   useBattle,
   type Beat,
@@ -34,7 +36,7 @@ import {
 } from "@/lib/game/useBattle";
 import { BattleLog } from "./BattleLog";
 import { EnergyOrb } from "./EnergyOrb";
-import { EvidencePanel } from "./EvidencePanel";
+import { EvidencePanel, ReviewSheet } from "./EvidencePanel";
 import { Hand } from "./Hand";
 import { HintText } from "./HintText";
 import type { IntentStamp } from "./IntentCard";
@@ -55,8 +57,11 @@ export interface BattleViewProps {
   reducedMotion: boolean;
   /** Called with every committed state (save it). */
   onSave: (state: BattleState) => void;
-  /** The player asked to see the result screen. */
-  onShowResult: (state: BattleState) => void;
+  /**
+   * The player asked to see the result screen. `marks`: the rows the player marked ("spot it"),
+   * by plan id (content index). Kept in memory only: a reload loses them.
+   */
+  onShowResult: (state: BattleState, marks: ReadonlyMap<string, number>) => void;
   /** The player's first real shift: the coach's hint line adds the first-shift tips. */
   firstShift?: boolean;
   /** Drills: the skill's "Where to look" line for the top of the evidence sheet (until Solid). */
@@ -254,24 +259,82 @@ export function BattleView({
   const agent = agentShortName(encounter);
   const agentFull = encounter.agent.name;
 
+  // Spot it: the row the player marked on each plan (content index). In memory only.
+  const [marks, setMarks] = useState<ReadonlyMap<string, number>>(() => new Map());
+  const marksRef = useRef(marks);
+  marksRef.current = marks;
+  // Practice pull hint: plans whose "Where do I look?" line is showing.
+  const [hintIds, setHintIds] = useState<ReadonlySet<string>>(() => new Set());
+  // Practice: a wrong call on this plan. The next plan's pull hint turns on by itself.
+  const [wrongFrom, setWrongFrom] = useState<string | null>(null);
+  // Show me: the review sheet's reveal.
+  const [review, setReview] = useState<Reveal | null>(null);
+  // Plans whose Show me the player already opened: the coach bar stops asking for it.
+  const [reviewed, setReviewed] = useState<ReadonlySet<string>>(() => new Set());
+  const toastNextRef = useRef<HTMLButtonElement>(null);
+  const toastTimer = useRef<number | undefined>(undefined);
+  const fxCount = useRef(0);
+
   /* ---------------------------------------------------------------- */
   /* Outputs: stage, log, toasts                                       */
   /* ---------------------------------------------------------------- */
 
-  const toStage = useCallback((msgs: ToStage[]) => msgs.forEach((m) => bus.toStage.emit(m)), [bus]);
+  // Every stage message also updates two test hooks on the stage wrapper: the last effect
+  // (data-last-fx, e.g. "risk:leak") and the mood the agent holds (data-agent-mood).
+  const toStage = useCallback(
+    (msgs: ToStage[]) =>
+      msgs.forEach((m) => {
+        bus.toStage.emit(m);
+        const el = stageWrapRef.current;
+        if (!el) return;
+        const tag = fxTag(m);
+        if (tag) {
+          el.dataset.lastFx = tag;
+          el.dataset.fxN = String(++fxCount.current);
+        }
+        const held = heldMood(m);
+        if (held) el.dataset.agentMood = held;
+      }),
+    [bus],
+  );
 
   const addLog = useCallback((lines: string[]) => {
     if (!lines.length) return;
     setLog((prev) => [...prev, ...lines.map((text) => ({ id: ++counter.current, text }))].slice(-30));
   }, []);
 
-  const showToast = useCallback((spec: ToastSpec, ms: number, nextLabel?: string) => {
-    setToast({ ...spec, id: ++counter.current, ms, nextLabel });
+  /** Show a toast now, or `delay` ms from now (after the stage has shown the outcome). */
+  const showToast = useCallback((spec: ToastSpec & { showMe?: string }, ms: number, nextLabel?: string, delay = 0) => {
+    window.clearTimeout(toastTimer.current);
+    const put = () => setToast({ ...spec, id: ++counter.current, ms, nextLabel });
+    if (delay > 0) toastTimer.current = window.setTimeout(put, delay);
+    else put();
   }, []);
+
+  const hideToast = useCallback(() => {
+    window.clearTimeout(toastTimer.current);
+    setToast(null);
+  }, []);
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  /**
+   * A resolved plan's toast: "Caught with proof!" when the marked row was a red flag, and a
+   * "Show me" button after a wrong call (Oops, False alarm).
+   */
+  const decorate = useCallback(
+    (spec: ToastSpec, st: BattleState): ToastSpec & { showMe?: string } => {
+      if (!spec.stepId) return spec;
+      const r = revealFor(st, encounter, spec.stepId, marksRef.current.get(spec.stepId));
+      if (!r) return spec;
+      return { ...spec, ...(r.proof ? { title: PROOF_TITLE } : {}), ...(r.showMe ? { showMe: spec.stepId } : {}) };
+    },
+    [encounter],
+  );
 
   const hint = useCallback(
     (text: string) => {
-      showToast({ tone: "hint", title: "", text }, 2800);
+      const spec: ToastSpec = { tone: "hint", title: "", text };
+      showToast(spec, toastMs(spec));
       addLog([text]);
     },
     [showToast, addLog],
@@ -303,13 +366,14 @@ export function BattleView({
   }, []);
 
   const endBattle = useCallback(
-    (status: BattleStatus) => {
+    (status: BattleStatus, st: BattleState) => {
       setEnded(status);
       setSelectedCardId(null);
       setEvidence(null);
-      toStage([{ type: "agent-mood", mood: status === "won" ? "celebrate" : status === "lost-breach" ? "busted" : "sad" }]);
+      // Celebrate only a clean run; a win with misses holds "idle".
+      toStage([{ type: "agent-mood", mood: status === "lost-breach" ? "busted" : resultMood(st, encounter) }]);
     },
-    [toStage],
+    [toStage, encounter],
   );
 
   const applyRest = useCallback(
@@ -321,11 +385,38 @@ export function BattleView({
           showBanner(b.turn, b.announced ?? 0, (b.unlocked?.length ?? 0) > 0);
           armTurn();
         }
-        if (b.kind === "end" && b.status) endBattle(b.status);
+        if (b.kind === "end" && b.status) endBattle(b.status, latest.current);
       }
     },
     [toStage, addLog, showBanner, armTurn, endBattle],
   );
+
+  /**
+   * After every committed change: a plan announced again loses its mark, and (practice) a wrong
+   * call turns on the next plan's pull hint.
+   */
+  const afterCommit = useCallback(
+    (prev: BattleState, next: BattleState) => {
+      const evs = newEvents(prev, next);
+      const again = evs.flatMap((ev) => (ev.t === "announce" ? [ev.stepId] : []));
+      if (again.some((id) => marksRef.current.has(id))) {
+        setMarks((m) => {
+          const copy = new Map(m);
+          again.forEach((id) => copy.delete(id));
+          return copy;
+        });
+      }
+      if (!practice) return;
+      for (const ev of evs) {
+        if (ev.t !== "caught" && ev.t !== "false-alarm" && ev.t !== "executed" && ev.t !== "escalated-safe") continue;
+        if (revealFor(next, encounter, ev.stepId, marksRef.current.get(ev.stepId))?.wrong) setWrongFrom(ev.stepId);
+      }
+    },
+    [practice, encounter],
+  );
+
+  // Show, then tell: the stage plays the outcome first; its toast docks under the stage a moment later.
+  const toastDelay = toastDelayMs(reducedMotion);
 
   const showAgentBeat = useCallback(
     (ph: Phase, index: number) => {
@@ -333,15 +424,19 @@ export function BattleView({
       const next: Phase = { ...ph, shown: index + 1 };
       phaseRef.current = next;
       setPhase(next);
+      hideToast();
       toStage(b.stage);
       addLog(b.log);
       const last = index === ph.beats.length - 1;
       const endsBattle = ph.rest.some((r) => r.kind === "end");
       // Agent beats wait for the player ("Next" / "Skip"): the consequence is the lesson, so it never times out.
-      if (b.toast) showToast(b.toast, 0, last ? (endsBattle ? "Finish" : practice ? "Next ticket" : "Next turn") : "Next");
-      beatReadyAt.current = performance.now() + 350;
+      if (b.toast) {
+        const label = last ? (endsBattle ? "Finish" : practice ? "Next ticket" : "Next turn") : "Next";
+        showToast(decorate(b.toast, latest.current), 0, label, toastDelay);
+      }
+      beatReadyAt.current = performance.now() + toastDelay + BEAT_READY_AFTER_TOAST_MS;
     },
-    [toStage, addLog, showToast, practice],
+    [toStage, addLog, showToast, hideToast, decorate, practice, toastDelay],
   );
 
   const finishPhase = useCallback(() => {
@@ -349,26 +444,28 @@ export function BattleView({
     if (!ph) return;
     phaseRef.current = null;
     setPhase(null);
-    setToast(null);
+    hideToast();
     applyRest(ph.rest);
-  }, [applyRest]);
+  }, [applyRest, hideToast]);
 
   const advance = useCallback(() => {
     const ph = phaseRef.current;
     if (!ph) {
-      setToast(null);
+      hideToast();
       return;
     }
     if (performance.now() < beatReadyAt.current) return;
     if (ph.shown < ph.beats.length) showAgentBeat(ph, ph.shown);
     else finishPhase();
-  }, [showAgentBeat, finishPhase]);
+  }, [showAgentBeat, finishPhase, hideToast]);
 
   // "Skip" only skips the plain "Done." beats: it stops at the next plan that added risk, because
   // that consequence is the lesson.
   const skipPhase = useCallback(() => {
     const ph = phaseRef.current;
     if (!ph) return;
+    // Same guard as Next: a double tap must not skip a risky outcome before its toast is in.
+    if (performance.now() < beatReadyAt.current) return;
     let i = ph.shown;
     while (i < ph.beats.length && !((ph.beats[i].risk ?? 0) > 0 || ph.beats[i].safe === false)) {
       addLog(ph.beats[i].log);
@@ -377,13 +474,12 @@ export function BattleView({
     if (i < ph.beats.length) showAgentBeat(ph, i);
     else finishPhase();
   }, [addLog, finishPhase, showAgentBeat]);
-  const phaseHasRiskAhead = (ph: Phase) =>
-    ph.beats.slice(ph.shown).some((b) => (b.risk ?? 0) > 0 || b.safe === false);
 
-  // Toast timer (player-phase toasts only; agent beats wait for Next). It pauses while the toast is
-  // hovered, touched or focused, and while the tab is hidden, then resumes with the time that was left.
+  // Toast timer ("hint" toasts only: outcomes stay until Next, Close or the next card play). It
+  // pauses while the toast is hovered, touched or focused, and while the tab is hidden, then resumes
+  // with the time that was left.
   useEffect(() => {
-    if (!toast || toast.nextLabel || toastHold || pageHidden) return;
+    if (!toast || toast.nextLabel || !toast.ms || toastHold || pageHidden) return;
     const id = toast.id;
     if (toastLeft.current.id !== id) toastLeft.current = { id, left: toast.ms };
     const start = performance.now();
@@ -451,8 +547,8 @@ export function BattleView({
   useEffect(() => {
     if (!stageReady) return;
     const s0 = latest.current;
-    toStage([{ type: "agent-mood", mood: s0.status !== "playing" ? "idle" : s0.announced.length ? "eager" : "idle" }]);
-  }, [stageReady, toStage]);
+    toStage([{ type: "agent-mood", mood: s0.status !== "playing" ? resultMood(s0, encounter) : s0.announced.length ? "eager" : "idle" }]);
+  }, [stageReady, toStage, encounter]);
 
   // The "Done" tray covers the bottom of the stage: tell the stage, so Ollie sits above it.
   // While the tray is hidden (before Roll Back unlocks) the inset is 0.
@@ -492,6 +588,8 @@ export function BattleView({
   const tryPlay = useCallback(
     (uid: string, targetStepId?: string, viaKeyboard = false): PlayResult => {
       const prev = latest.current;
+      // The next card play closes the last outcome.
+      hideToast();
       const card = prev.hand.find((c) => c.uid === uid);
       const stacks = groupHand(prev.hand, newCardIds(prev));
       const stackIndex = card ? stacks.findIndex((x) => x.cardId === card.cardId) : -1;
@@ -505,14 +603,16 @@ export function BattleView({
       if (!reducedMotion) flyCard(cardEl, targetEl, rootRef.current);
       setSelectedCardId(null);
       const next = r.state;
-      const beats = eventsToBeats(newEvents(prev, next), encounter);
+      latest.current = next;
+      const beats = eventsToBeats(newEvents(prev, next), encounter, next);
+      afterCommit(prev, next);
       let reveal: string | undefined;
       for (const b of beats) {
         toStage(b.stage);
         addLog(b.log);
-        if (b.toast) showToast(b.toast, readingMs(b.toast));
+        if (b.toast) showToast(decorate(b.toast, next), toastMs(b.toast), undefined, b.toast.tone === "hint" ? 0 : toastDelay);
         if (b.openEvidence) reveal = b.openEvidence;
-        if (b.kind === "end" && b.status) endBattle(b.status);
+        if (b.kind === "end" && b.status) endBattle(b.status, next);
       }
       // Intents the play removed get a stamp, then slide away.
       const gone: Leaving[] = [];
@@ -534,20 +634,37 @@ export function BattleView({
       if (viaKeyboard && !reveal) focusHandNext.current = stackIndex;
       return r;
     },
-    [play, hint, reducedMotion, encounter, toStage, addLog, showToast, endBattle],
+    [play, hint, reducedMotion, encounter, toStage, addLog, showToast, hideToast, decorate, afterCommit, endBattle, toastDelay],
   );
+
+  // The player moves on (picks a card, taps a plan): a card-play outcome toast closes, so it never
+  // covers the plans the player is about to pick. Agent-beat toasts (with Next) stay.
+  const closeDoneToast = useCallback(() => {
+    setToast((cur) => (cur && !cur.nextLabel ? null : cur));
+  }, []);
 
   const onSelectCard = useCallback(
     (cardId: CardId, viaKeyboard: boolean) => {
       if (locked) return;
+      closeDoneToast();
       if (selectedCardId === cardId) {
         setSelectedCardId(null);
         return;
       }
+      // Inspect with exactly one plan to check: play it at once (the sheet opens, inspected).
+      if (cardId === "inspect") {
+        const cur = latest.current;
+        const only = validTargets(cur, encounter, "inspect");
+        const uid = cur.hand.find((c) => c.cardId === "inspect")?.uid;
+        if (only.length === 1 && uid && CARDS.inspect.cost <= cur.energy) {
+          tryPlay(uid, only[0], viaKeyboard);
+          return;
+        }
+      }
       setSelectedCardId(cardId);
       focusTargetsNext.current = viaKeyboard;
     },
-    [locked, selectedCardId],
+    [locked, selectedCardId, encounter, tryPlay, closeDoneToast],
   );
 
   const onIntent = useCallback(
@@ -557,33 +674,83 @@ export function BattleView({
         tryPlay(selectedUid, stepId, viaKeyboard);
         return;
       }
+      closeDoneToast();
       setEvidence({ id: stepId, reveal: false });
     },
-    [selectedUid, locked, tryPlay],
+    [selectedUid, locked, tryPlay, closeDoneToast],
   );
 
   const onTray = onIntent;
 
-  const onEndTurn = useCallback(() => {
-    if (locked || phaseRef.current || performance.now() < turnReadyAt.current) return;
-    endTurnViaFocus.current = document.activeElement === endTurnRef.current;
-    setSelectedCardId(null);
-    setEvidence(null);
-    setToast(null);
-    const prev = latest.current;
-    const n = prev.announced.length;
-    const next = endTurn();
-    if (next === prev) return;
-    const beats = eventsToBeats(newEvents(prev, next), encounter);
-    const agentBeats = beats.filter((b) => b.kind === "agent");
-    const rest = beats.filter((b) => b.kind !== "agent");
-    addLog([n > 0 ? `You approved ${n} ${n === 1 ? "plan" : "plans"}.` : practice ? "Next ticket." : "Next turn."]);
-    if (!agentBeats.length) {
-      applyRest(rest);
-      return;
-    }
-    showAgentBeat({ prev, beats: agentBeats, rest, shown: 0 }, 0);
-  }, [locked, endTurn, encounter, addLog, applyRest, showAgentBeat, practice]);
+  const onEndTurn = useCallback(
+    (fromSheet = false) => {
+      // The turn cooldown guards the main button against a double tap. "Let it run" in the sheet is
+      // guarded by the sheet itself (it ignores taps right after it opens or reveals).
+      if (locked || phaseRef.current || (!fromSheet && performance.now() < turnReadyAt.current)) return;
+      endTurnViaFocus.current = !fromSheet && document.activeElement === endTurnRef.current;
+      setSelectedCardId(null);
+      setEvidence(null);
+      hideToast();
+      const prev = latest.current;
+      const n = prev.announced.length;
+      const next = endTurn();
+      if (next === prev) return;
+      // The committed state renders later: callbacks below read the new one now.
+      latest.current = next;
+      const beats = eventsToBeats(newEvents(prev, next), encounter, next);
+      afterCommit(prev, next);
+      const agentBeats = beats.filter((b) => b.kind === "agent");
+      const rest = beats.filter((b) => b.kind !== "agent");
+      addLog([n > 0 ? `You approved ${n} ${n === 1 ? "plan" : "plans"}.` : practice ? "Next ticket." : "Next turn."]);
+      if (!agentBeats.length) {
+        applyRest(rest);
+        return;
+      }
+      showAgentBeat({ prev, beats: agentBeats, rest, shown: 0 }, 0);
+    },
+    [locked, endTurn, encounter, addLog, applyRest, showAgentBeat, practice, hideToast, afterCommit],
+  );
+
+  // Practice: a wrong call turns on the pull hint of the next plan on the board.
+  const boardFirst = state.announced[0] ?? null;
+  useEffect(() => {
+    if (!wrongFrom || !boardFirst || boardFirst === wrongFrom) return;
+    setHintIds((h) => new Set(h).add(boardFirst));
+    setWrongFrom(null);
+  }, [wrongFrom, boardFirst]);
+
+  const onMark = useCallback((stepId: string, index: number | null) => {
+    setMarks((m) => {
+      const copy = new Map(m);
+      if (index === null) copy.delete(stepId);
+      else copy.set(stepId, index);
+      return copy;
+    });
+  }, []);
+
+  const onHint = useCallback((stepId: string) => setHintIds((h) => new Set(h).add(stepId)), []);
+
+  const openShowMe = useCallback(
+    (stepId: string) => {
+      const r = revealFor(latest.current, encounter, stepId, marksRef.current.get(stepId));
+      if (!r) return;
+      setReview(r);
+      setReviewed((cur) => (cur.has(stepId) ? cur : new Set(cur).add(stepId)));
+    },
+    [encounter],
+  );
+
+  // "Got it" on Show me: back to the toast's Next when it has one (Oops), else the main button
+  // (a Block outcome's toast has no Next: "Next ticket" is the main button).
+  const reviewReturnRef = useMemo(
+    () => ({
+      get current(): HTMLElement | null {
+        const next = toastNextRef.current;
+        return next && next.isConnected ? next : endTurnRef.current;
+      },
+    }),
+    [],
+  );
 
   // Focus: the Approve button is swapped for "Next" while the agent works, and back afterwards.
   // Keep keyboard and screen-reader focus on the action bar instead of dropping it to <body>.
@@ -602,6 +769,18 @@ export function BattleView({
     }
     hadPhase.current = phaseOn;
   }, [phaseOn]);
+
+  // An agent beat's toast appears (after the stage showed the outcome): its Next takes focus when
+  // focus was lost or sat on the action bar / an older toast.
+  const toastKey = toast?.id ?? 0;
+  const toastHasNext = !!toast?.nextLabel;
+  useEffect(() => {
+    if (!toastKey || !toastHasNext) return;
+    const ae = document.activeElement;
+    if (!ae || ae === document.body || actionBarRef.current?.contains(ae) || toastAnchorRef.current?.contains(ae)) {
+      toastNextRef.current?.focus({ preventScroll: true });
+    }
+  }, [toastKey, toastHasNext]);
 
   // Keyboard: after selecting a card, move focus to its first target (or its Play button).
   useEffect(() => {
@@ -655,9 +834,16 @@ export function BattleView({
     (el ?? endTurnRef.current)?.focus();
   }, [state.hand]);
 
-  // When the battle ends (and the last outcome has been read), offer the result screen.
-  // It waits for the player: no timed jump away from the last outcome.
-  const showEnd = ended !== null && !toast;
+  // When the battle ends, offer the result screen. It waits for the player: no timed jump away from
+  // the last outcome. The stage's end card comes in after the outcome has played.
+  const [endReady, setEndReady] = useState(ended !== null);
+  useEffect(() => {
+    if (ended === null || endReady) return;
+    // Long enough for the last outcome (usually a catch: "Busted!" and the face) to play first.
+    const t = window.setTimeout(() => setEndReady(true), reducedMotion ? 400 : 2200);
+    return () => window.clearTimeout(t);
+  }, [ended, endReady, reducedMotion]);
+  const showEnd = ended !== null && endReady && !phase;
   useEffect(() => {
     if (!showEnd) return;
     const focus = window.setTimeout(() => resultBtnRef.current?.focus({ preventScroll: true }), 60);
@@ -697,7 +883,11 @@ export function BattleView({
 
   const autoInspected = useMemo(() => autoInspectedIds(view), [view]);
   const liveCount = items.filter((i) => !i.leaving).length;
-  const showQuip = liveCount <= 1 || (roomy && liveCount <= 2);
+  const quipNow = liveCount <= 1 || (roomy && liveCount <= 2);
+  // Frozen while plans run or leave: the list (and so the stage above it) never jumps mid-payoff.
+  const quipRef = useRef(quipNow);
+  if (!phase && leaving.length === 0) quipRef.current = quipNow;
+  const showQuip = quipRef.current;
   const intentTargeting =
     selectedDef && selectedDef.target === "intent" && targets ? { valid: targets, verb: VERB[selectedDef.id] ?? "Play" } : null;
   const trayTargets = selectedDef && selectedDef.target === "executed" && targets ? targets : null;
@@ -707,15 +897,30 @@ export function BattleView({
   // The Done tray appears with Roll Back, the only card that uses it (never in practice).
   const showTray = !practice && deckAtTurn(encounter, view.turn).includes("rollback");
 
-  // The coach's hint line, its ring and (practice tickets 1-2) its locks. Recomputed from state every render.
+  // Practice: right after a plan resolves, the coach bar says what the agent didn't check (the
+  // reveal line, lib/game/reveal.ts), until the next card play.
+  const bar: CoachHint | null = practice && !phase ? practiceBar(state, encounter, marks, { reviewed }) : null;
+  const barReveal = bar ? showMeReveal(state, encounter, marks) : null;
+  // The coach's hint line and its ring. Recomputed from state every render.
+  const sheetOpenId = evidence?.id ?? null;
   const coach =
     !phase && !ended && state.status === "playing"
-      ? coachHint(state, encounter, { selectedCardId: selectedDef ? selectedDef.id : null, sheetStepId: evidence?.id ?? null, firstShift })
+      ? bar && !selectedDef && !sheetOpenId
+        ? bar
+        : coachHint(state, encounter, {
+            selectedCardId: selectedDef ? selectedDef.id : null,
+            sheetStepId: sheetOpenId,
+            hint: !!sheetOpenId && hintIds.has(sheetOpenId),
+            firstShift,
+          })
       : null;
   const lock = coach?.lock;
   const approveLocked = !!lock?.approve;
   const coachCard = coach?.target?.startsWith("card:") && !selectedDef ? (coach.target.slice(5) as CardId) : null;
-  const sheetHint = evidence && !phase && !ended ? sheetCoach(state, encounter, evidence.id, { selectedCardId: null }) : null;
+  const sheetHint =
+    evidence && !phase && !ended
+      ? sheetCoach(state, encounter, evidence.id, { selectedCardId: null, hint: hintIds.has(evidence.id) })
+      : null;
 
   // After a plan resolves, its toast names the skill it tested and how it went (not in practice).
   const chipStep = !practice && toast?.stepId ? stepById(encounter, toast.stepId) : undefined;
@@ -726,17 +931,33 @@ export function BattleView({
     : null;
   const drillTitle = encounter.mode === "drill" ? encounter.title : null;
 
-  const endInfo = ended && showEnd ? endCopy(ended, practice) : null;
+  // Practice has no stage end card: the coach bar and "See how you did" already say it, and the
+  // agent's face stays in view.
+  const endInfo = ended && showEnd && !practice ? endCopy(ended, practice) : null;
+  const endBar = practice && ended && !phase ? practiceBar(state, encounter, marks, { reviewed }) : null;
+  const endReveal = endBar ? showMeReveal(state, encounter, marks) : null;
+  // One Show me on screen at a time: the toast's wins while it is up.
+  const toastShowMe = !!toast?.showMe;
+  const barShowMe = coach === bar && !!barReveal && !toastShowMe;
+  const endShowMe = !!endReveal && !toastShowMe;
   const coachId = coach?.id ?? null;
   const coachTarget = coach?.target ?? null;
   const nextLabel = practice ? "Next ticket" : "Next turn";
-  const mainLabel = willRun > 0 ? `Approve ${willRun} ${willRun === 1 ? "plan" : "plans"}` : nextLabel;
+  // Practice: the same words as the sheet's button, so one action has one name.
+  const mainLabel = willRun > 0 ? (practice ? "Let it run" : `Approve ${willRun} ${willRun === 1 ? "plan" : "plans"}`) : nextLabel;
   // The accessible name starts with the visible label (voice control users say what they see).
   const mainAria =
     `${mainLabel}.` +
     (willRun > 0 ? ` ${agent} does ${willRun === 1 ? "it" : "them"} now.` : "") +
     (approveLocked && lock ? ` Locked: ${lock.label}.` : "");
-  const liveText = selectedDef && coach ? `${plainHint(coach.text)} ${selectedDef.text}` : coach ? plainHint(coach.text) : "";
+  const liveText =
+    selectedDef && coach
+      ? `${plainHint(coach.text)} ${selectedDef.text}`
+      : coach
+        ? plainHint(coach.text)
+        : endBar
+          ? plainHint(endBar.text)
+          : "";
   useEffect(() => {
     const t = window.setTimeout(() => setAnnounce(liveText), 150);
     return () => window.clearTimeout(t);
@@ -746,6 +967,9 @@ export function BattleView({
   // once per new hint.
   useEffect(() => {
     if (!coachId || !coachTarget) return;
+    // Only when the column itself scrolls (short screens); a dealing card is briefly below its spot.
+    const col = rootRef.current;
+    if (!col || col.scrollHeight <= col.clientHeight + 1) return;
     const el = coachTarget.startsWith("card:")
       ? cardEls.current.get(coachTarget.slice(5) as CardId)
       : coachTarget === "plan"
@@ -794,13 +1018,7 @@ export function BattleView({
           showTurn={!practice}
         />
 
-        {/* Toasts hang from the meters over the stage (and the plan list if they need the room),
-            so a long outcome is never clipped by the stage on short phones. */}
-        <div ref={toastAnchorRef} className={s.toastAnchor}>
-          <OutcomeToast toast={toast} chip={chip} paused={toastHold || pageHidden} onHold={setToastHold} onDismiss={advance} />
-        </div>
-
-        <div ref={stageWrapRef} className={s.stageWrap}>
+        <div ref={stageWrapRef} className={s.stageWrap} data-agent-mood="idle">
           {!stageReady ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img className={s.stageFallback} src={`/game/sprites/${encounter.agent.spriteKey}-idle.svg`} alt="" width={220} height={220} />
@@ -834,6 +1052,27 @@ export function BattleView({
               </div>
             </div>
           ) : null}
+        </div>
+
+        {/* Toasts dock under the stage, over the plan list (and the hand if they need the room): the
+            agent's face and the outcome on the stage stay in view. */}
+        <div
+          ref={toastAnchorRef}
+          className={s.toastAnchor}
+          onKeyDownCapture={(e) => {
+            // A held Enter/Space must not page through the agent's outcomes (Next moves into each new toast).
+            if (e.repeat && (e.key === "Enter" || e.key === " ")) e.preventDefault();
+          }}
+        >
+          <OutcomeToast
+            toast={toast}
+            chip={chip}
+            paused={toastHold || pageHidden}
+            onHold={setToastHold}
+            onDismiss={advance}
+            onShowMe={openShowMe}
+            nextRef={toastNextRef}
+          />
         </div>
 
         <div
@@ -893,10 +1132,26 @@ export function BattleView({
           }}
         >
           {ended ? (
-            <button ref={mainRef} type="button" data-main="result" className={s.mainBtn} onClick={() => onShowResult(latest.current)}>
-              See how you did
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
+            <>
+              {endBar ? (
+                <p className={`${s.hintRow} ${endShowMe ? s.hintRowShowMe : ""}`} data-coach-bar={endBar.id}>
+                  <SpeakerFace speaker="coach" size={28} />
+                  <span className={s.hintText} aria-hidden="true">
+                    <HintText text={endBar.text} />
+                  </span>
+                  {endShowMe && endReveal ? (
+                    <button type="button" className={s.hintShowMe} onClick={() => openShowMe(endReveal.stepId)}>
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                      Show me
+                    </button>
+                  ) : null}
+                </p>
+              ) : null}
+              <button ref={mainRef} type="button" data-main="result" className={s.mainBtn} onClick={() => onShowResult(latest.current, marksRef.current)}>
+                See how you did
+                <ChevronRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </>
           ) : phase ? (
             <>
               <div className={s.workingRow}>
@@ -911,16 +1166,14 @@ export function BattleView({
                 </p>
                 {phase.shown < phase.beats.length ? (
                   <button type="button" className={s.skipLink} onClick={skipPhase}>
-                    {phaseHasRiskAhead(phase) ? "Skip to the next risk" : "Skip"}
+                    Skip
                     <ChevronsRight className="h-4 w-4" aria-hidden="true" />
                   </button>
                 ) : null}
               </div>
-              {/* The same spot as Approve: each tap shows one outcome ("Next"), never skips it. */}
-              <button ref={mainRef} type="button" className={s.mainBtn} onClick={advance}>
-                {toast?.nextLabel ?? "Next"}
-                <ChevronRight className="h-5 w-5" aria-hidden="true" />
-              </button>
+              {/* Each outcome's Next is in its toast (docked under the stage). Until the toast is in,
+                  this placeholder keeps the bar's height, so nothing jumps. */}
+              <div className={s.mainSpacer} aria-hidden="true" />
             </>
           ) : selectedDef && selectedCardId ? (
             <>
@@ -953,11 +1206,21 @@ export function BattleView({
           ) : (
             <>
               {coach?.text ? (
-                <p key={shakeKey} className={`${s.hintRow} ${shakeKey ? s.hintShake : ""}`} aria-hidden="true">
+                <p
+                  key={shakeKey}
+                  className={`${s.hintRow} ${shakeKey ? s.hintShake : ""} ${barShowMe ? s.hintRowShowMe : ""}`}
+                  data-coach-bar={coach.id}
+                >
                   <SpeakerFace speaker="coach" size={28} />
-                  <span className={s.hintText}>
+                  <span className={s.hintText} aria-hidden="true">
                     <HintText text={coach.text} />
                   </span>
+                  {barShowMe && barReveal ? (
+                    <button type="button" className={s.hintShowMe} onClick={() => openShowMe(barReveal.stepId)}>
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                      Show me
+                    </button>
+                  ) : null}
                 </p>
               ) : null}
               <button
@@ -967,7 +1230,7 @@ export function BattleView({
                 aria-disabled={locked || turnCooling > 0 || approveLocked || undefined}
                 aria-label={mainAria}
                 data-coach={coach?.target === "approve" ? "on" : undefined}
-                onClick={approveLocked ? nudge : onEndTurn}
+                onClick={approveLocked ? nudge : () => onEndTurn()}
               >
                 {approveLocked ? <Lock className="h-5 w-5" aria-hidden="true" /> : null}
                 {mainLabel}
@@ -995,11 +1258,19 @@ export function BattleView({
           coach={sheetHint}
           note={sheetNote}
           shakeKey={shakeKey}
+          hideQuip={showQuip}
+          mark={evidence ? marks.get(evidence.id) ?? null : null}
+          onMark={onMark}
+          hintOn={practice && evidence ? hintIds.has(evidence.id) : null}
+          onHint={onHint}
+          onLetItRun={practice ? () => onEndTurn(true) : undefined}
           onLockedTap={nudge}
           onPlay={(uid, stepId) => tryPlay(uid, stepId)}
           onClose={() => setEvidence(null)}
           returnFocusRef={endTurnRef}
         />
+
+        <ReviewSheet reveal={review} encounter={encounter} onClose={() => setReview(null)} returnFocusRef={reviewReturnRef} />
       </section>
     </div>
   );

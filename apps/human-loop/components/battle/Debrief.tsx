@@ -64,7 +64,7 @@ export function Debrief({
               <div className={r.flags}>
                 <p className={r.flagsTitle}>
                   <Flag className="h-4 w-4" aria-hidden="true" strokeWidth={2.6} />
-                  What gave it away
+                  The clue
                 </p>
                 <ul className={r.flagList}>
                   {redFlags.map((f) => (

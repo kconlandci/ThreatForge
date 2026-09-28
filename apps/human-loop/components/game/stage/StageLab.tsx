@@ -6,7 +6,16 @@
  */
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createBus, type AgentMood, type FromStage, type StageMode, type ToStage } from "@/lib/game/bus";
+import {
+  createBus,
+  fxTag,
+  heldMood,
+  type AgentMood,
+  type FromStage,
+  type StageMode,
+  type ToStage,
+  type VignetteFamily,
+} from "@/lib/game/bus";
 import { BUSINESS_ANALYST } from "@/lib/pathways/business-analyst";
 import { CLOUD_NETWORK } from "@/lib/pathways/cloud-network";
 import { CYBERSECURITY } from "@/lib/pathways/cybersecurity";
@@ -35,7 +44,11 @@ const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), {
 type FxName = Extract<ToStage, { type: "fx" }>["fx"];
 const FX_LIST: FxName[] = ["inspect", "catch", "risk", "execute-safe", "false-alarm", "escalate", "rollback", "win", "lose"];
 const MOODS: AgentMood[] = ["idle", "eager", "busted", "sad", "celebrate"];
+const VIGNETTES: VignetteFamily[] = ["leak", "report", "system"];
 const SIZES = {
+  // The battle stage in the game: 30svh at 390 x 844, 26svh at 375 x 667 (battle.module.css).
+  game: { w: 390, h: 253, label: "390 × 253 (game)" },
+  small: { w: 375, h: 173, label: "375 × 173 (game, small)" },
   phone: { w: 390, h: 600, label: "390 × 600" },
   battle: { w: 390, h: 300, label: "390 × 300" },
   wide: { w: 900, h: 520, label: "900 × 520" },
@@ -63,6 +76,10 @@ export default function StageLab() {
   const [log, setLog] = useState<{ n: number; t: string; msg: FromStage }[]>([]);
   const [tile, setTile] = useState<string>("–");
   const [mountKey, setMountKey] = useState(0);
+  const [inset, setInset] = useState(0);
+  // Test hooks, like BattleView's: the last fx sent and the mood the agent holds after it.
+  const [lastFx, setLastFx] = useState("");
+  const [held, setHeld] = useState<AgentMood>("idle");
   const [pathwayId, setPathwayId] = useState<LivePathwayId>("help-desk");
   const pathway = LAB_PATHWAYS[pathwayId];
   const targetIds = Object.keys(pathway.hub.targets);
@@ -78,7 +95,14 @@ export default function StageLab() {
     if (readParam("rm") === "1") setReduced(true);
     const p = readParam("pathway");
     if (p && p in LAB_PATHWAYS) setPathwayId(p as LivePathwayId);
+    const i = Number(readParam("inset"));
+    if (i > 0) setInset(i);
   }, []);
+
+  // The DOM tray the game draws over the bottom of the stage (the agent and vignettes sit above it).
+  useEffect(() => {
+    bus.toStage.emit({ type: "stage-inset", bottom: inset });
+  }, [bus, inset, mountKey, pathwayId]);
 
   useEffect(() => {
     const off = bus.fromStage.on((msg) => {
@@ -106,7 +130,13 @@ export default function StageLab() {
     return () => el.removeEventListener("pointermove", onMove);
   }, []);
 
-  const send = (msg: ToStage) => bus.toStage.emit(msg);
+  const send = (msg: ToStage) => {
+    const tag = fxTag(msg);
+    if (tag) setLastFx(tag);
+    const m = heldMood(msg);
+    if (m) setHeld(m);
+    bus.toStage.emit(msg);
+  };
   const dims = SIZES[size];
 
   const btn =
@@ -121,10 +151,19 @@ export default function StageLab() {
           <div
             ref={boxRef}
             data-testid="stage-box"
-            className="overflow-hidden border-y border-line bg-white sm:rounded-2xl sm:border sm:shadow-sm"
+            data-last-fx={lastFx}
+            data-agent-mood={held}
+            className="relative overflow-hidden border-y border-line bg-white sm:rounded-2xl sm:border sm:shadow-sm"
             style={{ width: dims.w, height: dims.h, maxWidth: "100%" }}
           >
             <PhaserStage key={`${pathwayId}-${mountKey}`} bus={bus} stage={pathway.stage} mode={mode} reducedMotion={reduced} initialHubPos={null} className="h-full w-full" />
+            {inset > 0 && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 bg-ink/15"
+                style={{ height: inset }}
+              />
+            )}
           </div>
           <p className="px-3 font-mono text-xs text-muted sm:px-0">
             tile under pointer: <span data-testid="tile">{tile}</span>
@@ -143,6 +182,9 @@ export default function StageLab() {
             </button>
             <button type="button" className={btn} onClick={() => setMountKey((k) => k + 1)}>
               remount stage
+            </button>
+            <button type="button" className={`${btn} ${inset ? on : ""}`} onClick={() => setInset((v) => (v ? 0 : 44))}>
+              tray inset: {inset ? `${inset}px` : "off"}
             </button>
           </Group>
           <Group title="Pathway">
@@ -184,6 +226,28 @@ export default function StageLab() {
               />
               <span className="font-mono">{intensity.toFixed(1)}</span>
             </label>
+          </Group>
+          <Group title="Outcomes (battle)">
+            {VIGNETTES.map((v) => (
+              <button
+                key={v}
+                type="button"
+                data-vignette={v}
+                className={btn}
+                onClick={() => send({ type: "fx", fx: "risk", intensity, vignette: v })}
+              >
+                risk: {v}
+              </button>
+            ))}
+            <button type="button" data-win="clean" className={btn} onClick={() => send({ type: "fx", fx: "win", intensity: 1, clean: true })}>
+              win (clean)
+            </button>
+            <button type="button" data-win="misses" className={btn} onClick={() => send({ type: "fx", fx: "win", intensity: 1, clean: false })}>
+              win (with misses)
+            </button>
+            <span className="self-center font-mono text-xs text-muted">
+              last fx: {lastFx || "–"} · held: {held}
+            </span>
           </Group>
           <Group title="Mood (battle)">
             {MOODS.map((m) => (

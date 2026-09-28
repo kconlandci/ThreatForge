@@ -74,7 +74,7 @@ export function PathwayGrid() {
                   <p className="mt-2 max-w-xl text-[16px] leading-relaxed text-teal-tint">{p.firstShift}</p>
                 ) : null}
                 <div className={half ? "mt-6 lg:mt-auto lg:pt-6" : "mt-6"}>
-                  <Link href="/play" className={buttonClass("primary", "lg", "w-full py-2.5 sm:w-auto sm:px-8")}>
+                  <Link href={`/play/${p.id}`} className={buttonClass("primary", "lg", "w-full py-2.5 sm:w-auto sm:px-8")}>
                     {/* Long names ("Full-Stack Development") wrap on a phone: keep both lines centred. */}
                     <span className="min-w-0 text-center leading-tight">Play {p.name}</span>
                     <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />

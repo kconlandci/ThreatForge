@@ -10,9 +10,18 @@ import {
   guideCards,
   newCardIds,
   newEvents,
+  HINT_BUTTON,
+  SPOT_PROMPT,
+  readingMs,
   resolvedCount,
+  rowName,
+  showMeReveal,
+  toastMs,
+  undoText,
   unlockedThisTurn,
+  type ToastTone,
 } from "./useBattle";
+import type { BattleState, Encounter } from "./types";
 
 describe("fixtures", () => {
   it("builds every fixture with the expected status", () => {
@@ -142,6 +151,108 @@ describe("eventsToBeats", () => {
     const beats = eventsToBeats(newEvents(before, s), E);
     expect(beats[0].kind).toBe("player");
     expect(beats[0].openEvidence).toBe(before.announced.find((id) => s.steps[id].inspected));
+  });
+});
+
+describe("eventsToBeats: show, then tell (Phase 1a)", () => {
+  /** Play the practice shift: let every plan run (inspected), or block the risky ones. */
+  function runPractice(enc: Encounter, blockRisky: boolean): { prev: BattleState; next: BattleState }[] {
+    const out: { prev: BattleState; next: BattleState }[] = [];
+    let s = createBattle(enc, 7);
+    for (let guard = 0; guard < 20 && s.status === "playing"; guard++) {
+      const id = s.announced[0];
+      if (id) {
+        s = tryPlay(s, enc, "inspect", id);
+        const step = enc.steps.find((x) => x.id === id);
+        if (blockRisky && step && !step.safe) {
+          const prev = s;
+          s = tryPlay(s, enc, "block", id);
+          out.push({ prev, next: s });
+        }
+      }
+      const prev = s;
+      s = endTurn(s, enc);
+      out.push({ prev, next: s });
+    }
+    return out;
+  }
+
+  it("a risky plan that runs carries its vignette", () => {
+    const runs = runPractice(P, false);
+    const risk = runs.flatMap(({ prev, next }) => eventsToBeats(newEvents(prev, next), P, next)).flatMap((b) => b.stage).filter((m) => m.type === "fx" && m.fx === "risk");
+    expect(risk.length).toBeGreaterThan(0);
+    for (const m of risk) expect(m).toMatchObject({ vignette: expect.stringMatching(/^(leak|report|system)$/) });
+    // The same without a state (the golden traces call it with two arguments).
+    const noState = runs.flatMap(({ prev, next }) => eventsToBeats(newEvents(prev, next), P)).flatMap((b) => b.stage).filter((m) => m.type === "fx" && m.fx === "risk");
+    expect(noState).toEqual(risk);
+  });
+
+  it("a win carries clean with a state, and the mood follows it", () => {
+    const ended = (runs: { prev: BattleState; next: BattleState }[]) =>
+      runs.find(({ prev, next }) => newEvents(prev, next).some((e) => e.t === "end"))!;
+    const last = ended(runPractice(P, true));
+    expect(last.next.status).toBe("won");
+    const end = eventsToBeats(newEvents(last.prev, last.next), P, last.next).find((b) => b.kind === "end");
+    expect(end?.stage).toEqual([{ type: "fx", fx: "win", intensity: 1, clean: true }, { type: "agent-mood", mood: "celebrate" }]);
+
+    const m = ended(runPractice(P, false));
+    expect(m.next.status).toBe("won");
+    const endM = eventsToBeats(newEvents(m.prev, m.next), P, m.next).find((b) => b.kind === "end");
+    expect(endM?.stage).toEqual([{ type: "fx", fx: "win", intensity: 1, clean: false }, { type: "agent-mood", mood: "idle" }]);
+  });
+
+  it("without a state: no clean flag, and toasts and logs are identical", () => {
+    const runs = runPractice(P, false);
+    for (const { prev, next } of runs) {
+      const a = eventsToBeats(newEvents(prev, next), P);
+      const b = eventsToBeats(newEvents(prev, next), P, next);
+      expect(a.map((x) => [x.toast ?? null, x.log])).toEqual(b.map((x) => [x.toast ?? null, x.log]));
+      for (const beat of a) for (const msg of beat.stage) if (msg.type === "fx") expect(msg.clean).toBeUndefined();
+    }
+  });
+
+  it("toastMs: outcome toasts never auto-hide; only hints keep a timer", () => {
+    for (const tone of ["good", "bad", "warn", "info"] as ToastTone[]) expect(toastMs({ tone, title: "X", text: "Y" })).toBe(0);
+    const hint = { tone: "hint" as const, title: "", text: "Not enough energy. Block costs 1." };
+    expect(toastMs(hint)).toBe(readingMs(hint));
+    expect(toastMs(undefined)).toBe(0);
+  });
+});
+
+describe("evidence sheet copy (Phase 1a)", () => {
+  const wc = (t: string) => t.split(/\s+/).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
+
+  it("the undo row: one-way can be right; undoNote wins; lookups change nothing", () => {
+    expect(undoText({ category: "comms", reversible: false })).toBe("No. One-way. That is OK if it is right.");
+    expect(undoText({ category: "access", reversible: true })).toBe("Yes. It can be undone after it runs.");
+    expect(undoText({ category: "lookup", reversible: false })).toBe("Nothing to undo. It only reads. It changes nothing.");
+    expect(undoText({ category: "comms", reversible: true, undoNote: "Custom." })).toBe("Custom.");
+    for (const t of [undoText({ category: "comms", reversible: false }), undoText({ category: "comms", reversible: true }), SPOT_PROMPT, HINT_BUTTON]) {
+      for (const sentence of t.split(/(?<=[.?!])\s+/)) expect(wc(sentence)).toBeLessThanOrEqual(15);
+    }
+  });
+
+  it("a row's accessible name is label: detail, then the gloss", () => {
+    expect(rowName({ label: "Sender address", detail: "a@b.com" })).toBe("Sender address: a@b.com");
+    expect(rowName({ label: "Sign-off record", detail: "Signed off by: Quill (AI).", gloss: "Sign-off: the owner's written OK." })).toBe(
+      "Sign-off record: Signed off by: Quill (AI). Sign-off: the owner's written OK.",
+    );
+  });
+
+  it("showMeReveal: only after a wrong call, for the latest resolved plan", () => {
+    const none = new Map<string, number>();
+    let s = createBattle(P, 1);
+    s = tryPlay(s, P, "inspect", s.announced[0]);
+    expect(showMeReveal(s, P, none)).toBeNull();
+    // Ticket 1 is risky: letting it run is a miss (Show me)...
+    const ran = endTurn(s, P);
+    expect(showMeReveal(ran, P, none)).toMatchObject({ kind: "missed", stepId: P.steps[0].id, showMe: true });
+    // ...blocking it is a catch (no Show me).
+    const caught = tryPlay(s, P, "block", s.announced[0]);
+    expect(showMeReveal(caught, P, none)).toBeNull();
+    // Marking the red flag first: caught with proof.
+    const flag = P.steps[0].evidence.findIndex((e) => e.redFlag);
+    expect(showMeReveal(caught, P, new Map([[P.steps[0].id, flag]]))).toBeNull();
   });
 });
 

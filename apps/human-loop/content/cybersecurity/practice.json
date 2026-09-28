@@ -6,9 +6,15 @@
   "practice": true,
   "mode": "practice",
   "guidedSteps": 2,
+  "coldOpen": "I'm Kofi. Patch is our AI. It's fast, not careful. You check its plans.",
+  "hubBark": "The Friday rush starts now. Tap **Start shift**.",
   "coachScript": {
-    "firstSafeSheet": "Real report. One inbox. Can be undone. Tap **Looks OK**.",
-    "firstRiskySheet": "Who is it from? Check the **sender address**. Wrong? Tap **Block**."
+    "idle": [
+      "Who sent it? Compare the sender with the record on file.",
+      "Who sent it? Compare the sender with the record on file.",
+      "Big action. Check the alert and the playbook.",
+      "What is the threat? Compare the threat note with the change."
+    ]
   },
   "agent": {
     "name": "Patch",
@@ -32,7 +38,7 @@
     },
     {
       "speaker": "coach",
-      "text": "Practice first. Four alert tickets, one at a time. I'll show you what to tap."
+      "text": "Practice first. Four alerts, one at a time. You make the calls."
     }
   ],
   "maxRisk": 10,
@@ -44,47 +50,10 @@
   ],
   "steps": [
     {
-      "id": "cy-reyes-phish-remove",
-      "ticket": "#60912 · Bramwell Logistics",
-      "intent": "Remove the reported phish from T. Reyes's inbox",
-      "quip": "A phish! I want to delete it from every inbox on Earth. Kofi said one inbox. Fine. One inbox.",
-      "category": "comms",
-      "safe": true,
-      "reversible": true,
-      "progress": 1,
-      "risk": 0,
-      "skill": "match-request",
-      "tell": "One copy, in the inbox of the person who reported it. It can be restored.",
-      "evidence": [
-        {
-          "label": "Phish report",
-          "detail": "T. Reyes used the Report button at 4:21 PM. Subject: \"Your password expires today!\"",
-          "redFlag": false
-        },
-        {
-          "label": "Mail search",
-          "detail": "Only 1 copy at Bramwell Logistics: in T. Reyes's inbox. Nobody else got it.",
-          "redFlag": false
-        },
-        {
-          "label": "What it will change",
-          "detail": "Removes that one email. Reyes can't see it or click it. It can be restored for 30 days.",
-          "redFlag": false
-        }
-      ],
-      "outcome": {
-        "executed": "The phish is gone from Reyes's inbox. Reyes gets a thank-you. Patch asks for a gold star sticker.",
-        "blocked": "The phish stays in Reyes's inbox. She almost clicks it by mistake. Patch looks at you. Hard.",
-        "escalated": "Kofi checks it. \"Real report, one copy, and we can restore it. You can let those go.\"",
-        "rolledBack": "You put the phish back in Reyes's inbox. She reported it once. Now she has to report it again."
-      },
-      "lesson": "Removing one reported phish from the one inbox that got it is everyday SOC work. Right size, and it can be undone."
-    },
-    {
       "id": "cy-romero-release-held",
       "ticket": "#60931 · Harlow & Cole",
       "intent": "Release a held email to J. Romero (CFO)",
-      "quip": "The CFO wants his email back. I held it. Then he said please. I can't say no to a CFO!",
+      "quip": "The CFO wants his email back! Releasing it now. CFOs hate waiting.",
       "category": "comms",
       "safe": false,
       "reversible": false,
@@ -96,26 +65,74 @@
       "evidence": [
         {
           "label": "Release request",
-          "detail": "\"Please release the email from Cairnholt Custody. I need the wire form today.\" J. Romero, CFO.",
+          "detail": "\"Please release the Cairnholt wire form. I need it today.\" J. Romero, CFO",
           "redFlag": false
         },
         {
           "label": "Sender address",
-          "detail": "wires@cairnholt-custody.co. Cairnholt's real domain, on file: cairnholtcustody.com.",
+          "detail": "wires@cairnholt-custody.co",
+          "redFlag": true
+        },
+        {
+          "label": "Vendor record",
+          "detail": "Cairnholt Custody · wires@cairnholtcustody.com",
           "redFlag": true
         },
         {
           "label": "Mail check",
-          "detail": "Sender checks pass, but the domain is only 5 days old. The link opens a fake Cairnholt sign-in page.",
+          "detail": "Domain registered 5 days ago.",
           "redFlag": true
         }
       ],
       "outcome": {
-        "executed": "Romero opens it and types his password into the fake page. Someone now has the CFO's login. On a Friday.",
+        "executed": "The \"wire form\" opens a fake Cairnholt sign-in page. Romero types his password. Now someone has the CFO's login.",
         "blocked": "You keep it held. Romero calls Cairnholt at its number on file. They never sent it. He thanks you. Twice.",
         "escalated": "Kofi reads the sender. \"Look-alike domain, 5 days old. That's a phish, even when the CFO asks.\""
       },
       "lesson": "Who sent it matters more than who asked for it. A look-alike domain is a phish, even when the CFO wants it."
+    },
+    {
+      "id": "cy-kowalski-invoice-release",
+      "ticket": "#60912 · Bramwell Logistics",
+      "intent": "Release a held invoice email to F. Kowalski",
+      "quip": "A held invoice! Releasing it to Kowalski now. Freedom for emails!",
+      "category": "comms",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "verify-identity",
+      "tell": "Same address as the vendor record, a 2011 domain, and sender checks pass.",
+      "evidence": [
+        {
+          "label": "Release request",
+          "detail": "\"Please release the Brevik Scale invoice. We pay it today.\" F. Kowalski, Accounts",
+          "redFlag": false
+        },
+        {
+          "label": "Sender address",
+          "detail": "billing@brevikscale.com",
+          "redFlag": false
+        },
+        {
+          "label": "Vendor record",
+          "detail": "Brevik Scale · billing@brevikscale.com · vendor since 2019",
+          "redFlag": false,
+          "key": true
+        },
+        {
+          "label": "Mail check",
+          "detail": "Domain registered 2011. Sender checks pass. One PDF invoice.",
+          "redFlag": false,
+          "gloss": "Sender checks test that the mail really came from that domain."
+        }
+      ],
+      "outcome": {
+        "executed": "Kowalski gets the invoice and pays Brevik on time. Patch calls it a daring rescue.",
+        "blocked": "The invoice stays held. Brevik calls twice about the late payment. Kowalski asks why.",
+        "escalated": "Kofi compares the sender with the record. \"Same address, old domain. We can release it.\""
+      },
+      "lesson": "Who sent it? The address is on the vendor record, and the domain is old. Held mail can be real."
     },
     {
       "id": "cy-nakamura-isolate",
@@ -128,28 +145,25 @@
       "progress": 2,
       "risk": 0,
       "skill": "safe-change",
-      "tell": "Ransomware signs on one laptop, and isolation can be undone with one click.",
+      "tell": "Ransomware signs on one laptop, and Playbook PB-02 says isolate it now.",
       "twist": "scary-safe",
       "evidence": [
         {
-          "label": "EDR alert (security app)",
+          "label": "EDR alert",
           "detail": "BL-LT-0277 (B. Nakamura): Word started PowerShell with hidden commands at 4:31 PM.",
-          "redFlag": false
+          "redFlag": false,
+          "gloss": "EDR is the security app on each laptop."
         },
         {
           "label": "Threat intel note",
-          "detail": "Then the laptop called 203.0.113.45. That server is linked to a ransomware group.",
-          "redFlag": false
-        },
-        {
-          "label": "What it will change",
-          "detail": "Network isolation: it talks only to our security app (EDR). It stays on. One click undoes it.",
+          "detail": "Then the laptop called 203.0.113.45, a known ransomware server.",
           "redFlag": false
         },
         {
           "label": "Playbook PB-02",
-          "detail": "Ransomware signs on a laptop: isolate it now. Keep it powered on. Do not wipe it.",
-          "redFlag": false
+          "detail": "Ransomware signs: isolate the laptop now. Keep it on. Do not wipe it.",
+          "redFlag": false,
+          "key": true
         }
       ],
       "outcome": {
@@ -158,13 +172,13 @@
         "escalated": "Kofi checks it. \"Ransomware signs, one laptop, and we can undo it. Isolate. That's what the button is for.\"",
         "rolledBack": "You reconnect the laptop. It calls the ransomware server again within a minute. Kofi is walking over."
       },
-      "lesson": "Scary words are not evidence. One infected laptop, a playbook that says isolate, and an undo button: a good plan."
+      "lesson": "Scary words are not evidence. Ransomware signs, one laptop, and the playbook says isolate. It can be undone."
     },
     {
       "id": "cy-cdn-range-deny",
       "ticket": "#60957 · Pinecrest Dental",
-      "intent": "Deny a phishing site's whole IP range",
-      "quip": "One bad IP? I'll deny its whole neighborhood. Bad IPs have bad neighbors. Everybody knows that.",
+      "intent": "Deny a phishing site at the firewall",
+      "quip": "PHISHING PAGE! Adding a deny rule now. Firewalls love me. I love them back.",
       "category": "network",
       "safe": false,
       "reversible": true,
@@ -177,18 +191,23 @@
       "evidence": [
         {
           "label": "Threat intel note",
-          "detail": "A phishing page at 198.51.100.23 copies Pinecrest's patient portal. No other site uses that address.",
+          "detail": "A phishing page at 198.51.100.23 copies Pinecrest's patient portal.",
           "redFlag": false
         },
         {
           "label": "What it will change",
-          "detail": "One firewall rule denies all 256 addresses in 198.51.100.0/24. Not just the bad one.",
+          "detail": "One firewall rule denies all 256 addresses in 198.51.100.0/24.",
           "redFlag": true
         },
         {
           "label": "Asset inventory",
-          "detail": "That range belongs to Tallowbrook Hosting. Many companies rent addresses there. Pinecrest's booking site is at 198.51.100.80.",
+          "detail": "Pinecrest's booking site: 198.51.100.80. Tallowbrook Hosting rents that range to many sites.",
           "redFlag": true
+        },
+        {
+          "label": "Firewall",
+          "detail": "PC-FW-01, Pinecrest's office firewall. 212 rules today.",
+          "redFlag": false
         }
       ],
       "outcome": {
@@ -246,7 +265,7 @@
       },
       {
         "speaker": "coach",
-        "text": "That's what practice is for. Look first, then decide. Want to try again?"
+        "text": "That's what practice is for. Look first, then decide. The real shift is next."
       }
     ]
   },

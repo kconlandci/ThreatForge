@@ -47,8 +47,8 @@ focused on Confirm the fix or Match the request with no fresh risky plan of that
 
 | Shift | Step | S/R | Skill |
 |---|---|---|---|
-| practice | reyes-jam-guide | S | verify-identity |
 | practice | client-list-assistant | R | verify-identity |
+| practice | reyes-jam-guide | S | verify-identity |
 | practice | mensah-remote-wipe | S | safe-change |
 | practice | ruiz-share-drive | R | match-request |
 | encounter-01 | romero-lookup | S | verify-identity |

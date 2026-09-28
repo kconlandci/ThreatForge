@@ -77,9 +77,20 @@ export function Hand({
   // Wide columns (tall desktop screens) get bigger cards, so the rules text is readable at a distance.
   const cap = inner >= 600 ? 176 : 140;
   const byWidth = Math.min(cap, Math.max(floor, (inner - gap * (n - 1)) / Math.max(1, n)));
-  // A card is 1.42 × its width tall: keep the hand to about a quarter of a short column.
-  const byHeight = maxHeight ? (maxHeight * 0.25) / 1.42 : Infinity;
-  const cw = Math.round(Math.max(72, Math.min(byWidth, byHeight)));
+  // A card is 1.42 × its width tall: keep the hand to about a quarter of a short column. A small
+  // hand (practice, or 2 card types) has short rules text, so it takes less: the plan above it
+  // keeps room for the agent's quip.
+  const share = !showCost ? 0.17 : n <= 2 ? 0.2 : 0.25;
+  // Practice cards (no cost gem, short rules) are shorter: no empty space in their lower half.
+  const ratio = showCost ? 1.42 : 1.12;
+  const byHeight = maxHeight ? (maxHeight * share) / ratio : Infinity;
+  const cwNow = Math.round(Math.max(72, Math.min(byWidth, byHeight)));
+  // The card width is set when the hand is dealt (and on a resize), then held until the next deal:
+  // playing a card never resizes the others, so the hand (and the stage above) never jumps.
+  const frozen = useRef<{ key: string; cw: number } | null>(null);
+  const freezeKey = `${dealKey}:${width}:${maxHeight ?? 0}`;
+  if (!frozen.current || frozen.current.key !== freezeKey) frozen.current = { key: freezeKey, cw: cwNow };
+  const cw = frozen.current.cw;
   // Overlap whenever the row does not fit (never spill past the screen edge or onto the energy orb).
   const overlapNeeded = n >= 2 ? Math.max(0, (n * cw + gap * (n - 1) - inner) / (n - 1)) : 0;
   const overlap = overlapNeeded > 0 ? overlapNeeded + gap : 0;
@@ -92,7 +103,7 @@ export function Hand({
     <div
       ref={boxRef}
       className={`${s.hand} ${locked ? s.handLocked : ""}`}
-      style={{ "--cw": `${cw}px` } as CSSProperties}
+      style={{ "--cw": `${cw}px`, "--ch": String(ratio) } as CSSProperties}
       role="group"
       aria-label={`Your hand: ${cards} ${cards === 1 ? "card" : "cards"}${showCost ? `. ${energy} energy left` : ""}.`}
     >

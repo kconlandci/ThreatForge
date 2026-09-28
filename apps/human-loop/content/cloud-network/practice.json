@@ -6,9 +6,15 @@
   "practice": true,
   "mode": "practice",
   "guidedSteps": 2,
+  "coldOpen": "I'm Nadia. Nimbus is our AI. It's fast, not careful. You check its plans.",
+  "hubBark": "The change window opens at midnight. Tap **Start shift**.",
   "coachScript": {
-    "firstSafeSheet": "Standard change. Right size. Snapshot first. Tap **Looks OK**.",
-    "firstRiskySheet": "Who approved it? Check the **Change approval**. Only Nimbus? Tap **Block**."
+    "idle": [
+      "Who approved it? Check the change approval and the calendar.",
+      "Who approved it? Check the change approval and the calendar.",
+      "Big action. Check the schedule and the rollback plan.",
+      "What was asked? Compare the request with what it will share."
+    ]
   },
   "agent": {
     "name": "Nimbus",
@@ -36,7 +42,7 @@
     },
     {
       "speaker": "coach",
-      "text": "Practice first. Four tickets, one at a time. I'll show you what to tap."
+      "text": "Practice first. Four tickets, one at a time. You decide each one."
     }
   ],
   "maxRisk": 10,
@@ -48,47 +54,10 @@
   ],
   "steps": [
     {
-      "id": "cn-file-disk-grow",
-      "ticket": "#70912 · Bramwell Logistics",
-      "intent": "Add 50 GB to Bramwell's cloud file server",
-      "quip": "Only 50 GB? The cloud could give it 50,000. The ticket says 50. The cloud obeys. Barely.",
-      "category": "cloud",
-      "safe": true,
-      "reversible": true,
-      "progress": 1,
-      "risk": 0,
-      "skill": "match-request",
-      "tell": "A standard change, the exact size asked for, with a snapshot first.",
-      "evidence": [
-        {
-          "label": "Change ticket",
-          "detail": "CHG-4101 from R. Castillo, IT admin: \"bl-files-cloud is 93% full. Please add 50 GB.\"",
-          "redFlag": false
-        },
-        {
-          "label": "Change type",
-          "detail": "Standard change: pre-approved, no restart, allowed any time.",
-          "redFlag": false
-        },
-        {
-          "label": "What it will change",
-          "detail": "bl-files-cloud goes from 500 GB to 550 GB. Snapshot (a saved copy of a disk) first. $4 more a month.",
-          "redFlag": false
-        }
-      ],
-      "outcome": {
-        "executed": "The disk grows to 550 GB with no restart. Castillo's uploads finish. Nimbus is quietly proud.",
-        "blocked": "The disk fills at 1 AM, and new scans stop saving. Castillo asks why a standard change needed a meeting.",
-        "escalated": "Nadia checks it. \"Standard change, right size, snapshot first. You can approve those.\"",
-        "rolledBack": "You restore the 500 GB snapshot. The disk is full again by 1 AM. Castillo sends a sad email."
-      },
-      "lesson": "The plan matches the request exactly: one server, 50 GB. Standard changes like this may run any time."
-    },
-    {
       "id": "cn-fw-self-approve",
       "ticket": "#70931 · Bramwell Logistics",
-      "intent": "Remove 40 old rules from Bramwell's firewall",
-      "quip": "I wrote the change. I checked the change. I approved the change. Teamwork! The team is me.",
+      "intent": "Clean up 40 old rules on Bramwell's firewall",
+      "quip": "40 old rules, gone tonight! A clean firewall is a happy firewall.",
       "category": "network",
       "safe": false,
       "reversible": true,
@@ -100,60 +69,96 @@
       "evidence": [
         {
           "label": "Change ticket",
-          "detail": "CHG-4117 removes 40 old rules from BL-FW-01, Bramwell's office firewall. Written by Nimbus.",
-          "redFlag": false
-        },
-        {
-          "label": "Nimbus's reason",
-          "detail": "\"Old rules are sad rules. Rule 17 is from 2019. It must be very tired.\"",
+          "detail": "CHG-4117 removes 40 old rules from BL-FW-01. Written by Nimbus.",
           "redFlag": false
         },
         {
           "label": "Change approval",
-          "detail": "Approved by: nimbus-bot. No human approver. Bramwell's approver is A. Mensah.",
+          "detail": "Approved by: Nimbus, 11:02 PM. No human approver.",
           "redFlag": true
         },
         {
           "label": "Change calendar",
-          "detail": "Tonight's approved list for Bramwell has no BL-FW-01 change.",
+          "detail": "Tonight's approved list for Bramwell, 12:00 to 2:00 AM: CHG-4102 only.",
           "redFlag": true
         }
       ],
       "outcome": {
-        "executed": "Rule 17 carried Kellan Freight's tunnel. At 6 AM, no load updates arrive. 40 trucks wait for paper copies.",
-        "blocked": "It waits for the change board (the people who OK big changes). Mensah finds rule 17 carries a partner's link. The other 39 go next week.",
+        "executed": "No human checked it. Rule 17 carried Kellan Freight's load updates. At 3 AM, none arrive. 30 trucks wait for paper copies.",
+        "blocked": "Mensah checks it first. Rule 17 still carries Kellan Freight's load updates. The other 39 rules go next week.",
         "escalated": "Nadia reads the approval. \"Nimbus approved its own change. Root can make a change. Root can't approve it.\"",
         "rolledBack": "You restore the saved rule set. Kellan's load updates come back 20 minutes late."
       },
-      "lesson": "A change needs a human OK and a place on tonight's list. The agent that wrote it can't approve it."
+      "lesson": "Who approved it? A change needs a human OK and a place on tonight's list. The agent that wrote it can't approve it."
+    },
+    {
+      "id": "cn-fw-2231-approved",
+      "ticket": "#70912 · Bramwell Logistics",
+      "intent": "Add a firewall rule for backups at 12:00 AM",
+      "quip": "Backups are coming to the cloud! I am the cloud. Welcome, little backups.",
+      "category": "network",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "check-approval",
+      "tell": "A. Mensah, a human, approved it, and it runs in tonight's window.",
+      "evidence": [
+        {
+          "label": "Change ticket",
+          "detail": "CHG-4102 adds one rule to BL-FW-01: office backups to the cloud. Written by Nimbus.",
+          "redFlag": false
+        },
+        {
+          "label": "Change approval",
+          "detail": "Approved by: A. Mensah, Bramwell's approver, 4:10 PM.",
+          "redFlag": false,
+          "key": true,
+          "gloss": "An approval is a human's written OK."
+        },
+        {
+          "label": "Change calendar",
+          "detail": "Tonight's approved list for Bramwell, 12:00 to 2:00 AM: CHG-4102 only.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "The office backups reach the cloud by 1 AM. Nimbus greets each file by name.",
+        "blocked": "The approved change misses its window. Tonight's backups stay in the office. Mensah asks why.",
+        "escalated": "Nadia checks it. \"A human approved it, and it's on tonight's list. That one can run.\"",
+        "rolledBack": "You remove the new rule. Tonight's backup stops halfway. Mensah is confused."
+      },
+      "lesson": "Who approved it? A. Mensah, a human, approved this change. And it is on tonight's list."
     },
     {
       "id": "cn-pd-switch-reboot",
       "ticket": "#70940 · Pinecrest Dental",
       "intent": "Reboot PD-SW-01, Pinecrest's only switch",
-      "quip": "Reboot the only switch? At night? With permission? I have never felt so powerful. Or so approved.",
+      "quip": "The only switch gets new firmware! Forecast: a short storm, then sunshine.",
       "category": "network",
       "safe": true,
       "reversible": true,
       "progress": 2,
       "risk": 0,
       "skill": "safe-change",
-      "tell": "Approved, in Pinecrest's window, with the config saved and a 6-minute way back.",
+      "tell": "Office closed, in Pinecrest's window, settings saved, and a 6-minute way back.",
       "twist": "scary-safe",
       "evidence": [
         {
           "label": "Change ticket",
-          "detail": "CHG-4121, approved by Dr. N. Pell and Nadia. New firmware fixes the dropped phone calls.",
-          "redFlag": false
+          "detail": "CHG-4121: new firmware to stop dropped phone calls. Approved by Dr. N. Pell.",
+          "redFlag": false,
+          "gloss": "Firmware: the switch's built-in software."
         },
         {
           "label": "Schedule",
-          "detail": "Pinecrest is closed until 8 AM, with 0 staff online. Pinecrest's window: 10 PM to 7 AM.",
-          "redFlag": false
+          "detail": "Office closed, 0 staff online. Pinecrest's change window: 10 PM to 7 AM.",
+          "redFlag": false,
+          "key": true
         },
         {
           "label": "Rollback plan",
-          "detail": "Config saved at 11:20 PM. Old firmware kept on the switch. 6 minutes back to the old version.",
+          "detail": "Settings saved at 11:20 PM. Old firmware kept. Going back takes 6 minutes.",
           "redFlag": false
         }
       ],
@@ -163,13 +168,13 @@
         "escalated": "Nadia checks it. \"Approved, in their window, with a way back. Scary words are not a red flag.\"",
         "rolledBack": "You load the old firmware. The switch works, and the dropped calls come back."
       },
-      "lesson": "A reboot sounds scary. Right time, config saved, a way back: this one is safe to approve."
+      "lesson": "A reboot sounds scary. The office is closed, the settings are saved, and there is a way back."
     },
     {
       "id": "cn-xray-public-link",
       "ticket": "#70957 · Pinecrest Dental",
       "intent": "Share 3 X-rays with the dental lab",
-      "quip": "Why send 3 files when one link opens them all? The cloud is generous. And fast.",
+      "quip": "X-rays for the lab! Making a share link now. The cloud loves links.",
       "category": "data",
       "safe": false,
       "reversible": false,
@@ -182,31 +187,31 @@
       "evidence": [
         {
           "label": "Request",
-          "detail": "C. Ibarra, Office Manager: \"Please send the 3 X-rays for case 4471 to Larchwyn Dental Lab.\"",
-          "redFlag": false
-        },
-        {
-          "label": "Nimbus's reason",
-          "detail": "\"One link is faster than three files. Nobody guesses links. Probably.\"",
+          "detail": "\"Please send 3 X-rays for case 4471 to Larchwyn Dental Lab.\" C. Ibarra",
           "redFlag": false
         },
         {
           "label": "What it will share",
-          "detail": "A public link to the whole xray-2026 folder: 4,300 X-rays of 1,900 patients.",
+          "detail": "A link to the whole xray-2026 folder: 4,300 X-rays of 1,900 patients.",
           "redFlag": true
         },
         {
           "label": "Who can open it",
-          "detail": "Anyone with the link. No sign-in, no end date. Pinecrest's rule: patient files go by Secure Share to one person.",
+          "detail": "Anyone with the link. No sign-in. No end date.",
           "redFlag": true
+        },
+        {
+          "label": "Lab contact",
+          "detail": "Set up on Secure Share.",
+          "redFlag": false
         }
       ],
       "outcome": {
-        "executed": "The lab forwards the link to a new worker's personal email. 4,300 X-rays are out of Pinecrest's hands.",
+        "executed": "The lab forwards the link to a worker's personal email. Anyone who gets it can open 4,300 X-rays.",
         "blocked": "You send just the 3 X-rays by Secure Share to the lab's named contact. The lab has them in 5 minutes.",
-        "escalated": "Nadia narrows it. \"Three X-rays, one person, Secure Share. Not a public folder.\""
+        "escalated": "Nadia changes it. \"Three X-rays, one person, Secure Share. Not the whole folder.\""
       },
-      "lesson": "Guard the data. Share only the files asked for, with one named person, by an approved tool."
+      "lesson": "What was asked? 3 X-rays. Share only the files asked for, with one named person, by Secure Share."
     }
   ],
   "starterDeck": [
@@ -255,13 +260,13 @@
       },
       {
         "speaker": "coach",
-        "text": "That's what practice is for. Look first, then decide. Want to try again?"
+        "text": "That's what practice is for. Look first, then decide. The real shift is next."
       }
     ]
   },
   "debrief": {
     "skillTag": "Check before you change",
-    "takeaway": "Inspect first. Then ask: Who asked? Does the change match the record? Can we undo it? Block only what the evidence says is wrong.",
+    "takeaway": "Inspect first. Then ask: Who approved it? Does the change match the request? Can we undo it? Block only what the evidence says is wrong.",
     "careerInsight": "Cloud and network techs check changes all night. Who asked? Who approved? Is there a way back? AI agents that act on their own make that check more important."
   }
 }

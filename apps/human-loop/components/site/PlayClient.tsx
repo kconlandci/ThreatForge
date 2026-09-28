@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck, Info, LogOut, RotateCcw, Trash2, UserRound, X } from "lucide-react";
+import { CircleCheck, Info, LogOut, Play, RotateCcw, Save, Trash2, UserRound, X } from "lucide-react";
 import {
   continueAsGuest,
   getPathwayProgress,
@@ -15,6 +16,7 @@ import {
   type SaveData,
 } from "@/lib/client/save";
 import { preloadStageWhenIdle } from "@/lib/client/preloadStage";
+import { safeNextPathway } from "@/lib/site/nextPathway";
 import type { PathwayProgress } from "@/lib/game/types";
 import { livePathways, type PathwayId } from "@/lib/types";
 import { PathwayPicker } from "./PathwayPicker";
@@ -70,8 +72,18 @@ function SignUpView({
               Clock in for your first shift
             </h1>
             <p className="mt-3 max-w-sm text-[17px] leading-relaxed text-teal-tint">
-              Sign up to save your progress. Or jump in as a guest.
+              No sign-up needed. Save your progress later.
             </p>
+            {/* The one big button: play as a guest now (above the fold on every phone). */}
+            <button
+              type="button"
+              onClick={onGuest}
+              className={buttonClass("primary", "lg", "mt-4 w-full md:w-auto md:px-10")}
+              data-play-now=""
+            >
+              <Play className="h-5 w-5 fill-current" aria-hidden="true" />
+              Play now
+            </button>
             <ul className="mt-6 hidden space-y-2.5 md:block">
               {["Read your AI coworker's plan", "Inspect the evidence", "Approve it, block it, or escalate it"].map((t, i) => (
                 <li key={t} className="flex items-center gap-3 text-[16px] font-semibold text-paper">
@@ -117,13 +129,18 @@ function PlayerBar({
   save,
   onReset,
   onSignOut,
+  onSignUp,
 }: {
   save: SaveData;
   /** Delete this player's data. Resolves false when the server could not confirm (nothing was deleted). */
   onReset: () => Promise<boolean>;
   onSignOut: () => Promise<void>;
+  /** A guest saves their progress: sign up, keeping what they played (signUp keeps the save). */
+  onSignUp: (v: SignUpValues) => Promise<void>;
 }) {
   const [mode, setMode] = useState<BarMode>(null);
+  const [saving, setSaving] = useState(false);
+  const saveBtnRef = useRef<HTMLButtonElement>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const openerRef = useRef<HTMLButtonElement>(null);
@@ -131,6 +148,10 @@ function PlayerBar({
   const confirmRef = useRef<HTMLButtonElement>(null);
   const guest = save.profile?.guest ?? true;
   const name = guest ? "Guest" : save.profile?.name || "Player";
+  // A guest who has not played yet has nothing to start over.
+  const played = Object.values(save.pathways).some(
+    (p) => !!p && (p.introSeen || p.practiceDone || p.attempts > 0 || !!p.battle || p.history.length > 0),
+  );
 
   useEffect(() => {
     if (mode) confirmRef.current?.focus();
@@ -189,8 +210,20 @@ function PlayerBar({
             ) : null}
           </span>
         </p>
-        {!mode ? (
+        {!mode && !saving ? (
           <div className="flex flex-wrap items-center gap-x-5">
+            {guest ? (
+              <button
+                ref={saveBtnRef}
+                type="button"
+                onClick={() => setSaving(true)}
+                className="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-[15px] font-semibold text-teal underline decoration-2 underline-offset-4 hover:text-teal-dark hover:decoration-orange"
+              >
+                <Save className="h-4 w-4" aria-hidden="true" />
+                Save your progress
+              </button>
+            ) : null}
+            {!guest || played ? (
             <button
               ref={openerRef}
               type="button"
@@ -200,6 +233,7 @@ function PlayerBar({
               {guest ? <RotateCcw className="h-4 w-4" aria-hidden="true" /> : <LogOut className="h-4 w-4" aria-hidden="true" />}
               {guest ? "Start over" : "Not you? Sign out"}
             </button>
+            ) : null}
             {!guest ? (
               <button
                 ref={deleteRef}
@@ -214,6 +248,22 @@ function PlayerBar({
           </div>
         ) : null}
       </div>
+      {saving && guest ? (
+        <div className="mt-3 border-t-2 border-line pt-4">
+          <p className="mb-3 text-[15px] leading-relaxed text-ink-soft">Your progress so far stays with you.</p>
+          <SignUpForm onSignUp={onSignUp} />
+          <button
+            type="button"
+            onClick={() => {
+              setSaving(false);
+              requestAnimationFrame(() => saveBtnRef.current?.focus());
+            }}
+            className="mt-2 inline-flex min-h-11 items-center rounded-lg px-3 text-[15px] font-semibold text-ink underline decoration-2 underline-offset-4"
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
       {mode ? (
         <div className="mt-3 rounded-xl bg-orange-tint p-4" role="group" aria-labelledby="start-over-title">
           <p id="start-over-title" className="font-display font-bold text-ink">
@@ -250,7 +300,14 @@ function PlayerBar({
   );
 }
 
+/** `/play?next=<pathway>`: where to go after "Play now" or a sign-up (a live pathway id only). */
+function nextPathway(): PathwayId | null {
+  if (typeof window === "undefined") return null;
+  return safeNextPathway(window.location.search);
+}
+
 export function PlayClient() {
+  const router = useRouter();
   const [save, setSave] = useState<SaveData | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [announcement, setAnnouncement] = useState("");
@@ -316,7 +373,9 @@ export function PlayClient() {
     setDoneNotice(null);
     setAnnouncement(`${n.title} ${n.body}`);
     setSave(next);
-  }, []);
+    const go = nextPathway();
+    if (go) router.push(`/play/${go}`);
+  }, [router]);
 
   const handleGuest = useCallback(() => {
     moveFocus.current = true;
@@ -325,7 +384,10 @@ export function PlayClient() {
     setDoneNotice(null);
     setAnnouncement("Playing as a guest. Your progress stays on this device.");
     setSave(continueAsGuest());
-  }, []);
+    // Came from a pathway (/play/<id> with no player yet): straight back into it.
+    const go = nextPathway();
+    if (go) router.push(`/play/${go}`);
+  }, [router]);
 
   const handleReset = useCallback(async () => {
     const { save: fresh, serverDeleted } = await resetSave();
@@ -377,6 +439,7 @@ export function PlayClient() {
           onDismiss={() => setNotice(null)}
           onReset={handleReset}
           onSignOut={handleSignOut}
+          onSignUp={handleSignUp}
         />
       )}
     </>
@@ -390,6 +453,7 @@ function PickerView({
   onDismiss,
   onReset,
   onSignOut,
+  onSignUp,
 }: {
   save: SaveData;
   notice: Notice | null;
@@ -397,6 +461,7 @@ function PickerView({
   onDismiss: () => void;
   onReset: () => Promise<boolean>;
   onSignOut: () => Promise<void>;
+  onSignUp: (v: SignUpValues) => Promise<void>;
 }) {
   const progress = Object.fromEntries(
     livePathways().map((p) => [p.id, save.pathways[p.id] ? getPathwayProgress(save, p.id) : null]),
@@ -445,7 +510,7 @@ function PickerView({
       ) : null}
 
       <div className="mt-5">
-        <PlayerBar save={save} onReset={onReset} onSignOut={onSignOut} />
+        <PlayerBar save={save} onReset={onReset} onSignOut={onSignOut} onSignUp={onSignUp} />
       </div>
 
       <div className="mt-6 sm:mt-8">

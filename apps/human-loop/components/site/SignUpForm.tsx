@@ -43,7 +43,8 @@ export function SignUpForm({
   onGuest,
 }: {
   onSignUp: (values: SignUpValues) => Promise<void>;
-  onGuest: () => void;
+  /** "Play as guest" (desktop). Leave it out when the player is already a guest saving progress. */
+  onGuest?: () => void;
 }) {
   const uid = useId();
   const ids = {
@@ -53,6 +54,7 @@ export function SignUpForm({
     age: `${uid}-age`,
     optIn: `${uid}-optin`,
     guestNote: `${uid}-guest-note`,
+    heading: `${uid}-heading`,
     err: (f: Field) => `${uid}-${f}-error`,
   };
   const [name, setName] = useState("");
@@ -98,7 +100,10 @@ export function SignUpForm({
   const border = (f: Field) => (errors[f] ? "border-danger" : "border-[#7B8792] hover:border-ink-soft focus:border-teal");
 
   return (
-    <form noValidate onSubmit={handleSubmit} aria-busy={pending}>
+    <form noValidate onSubmit={handleSubmit} aria-busy={pending} aria-labelledby={ids.heading}>
+      <h2 id={ids.heading} className="mb-4 font-display text-lg font-bold text-ink">
+        Save your progress <span className="font-semibold text-muted">(optional)</span>
+      </h2>
       <div role="alert">
         {summary && Object.keys(errors).length > 0 ? (
           <p className="mb-5 flex items-center gap-2 rounded-xl border-2 border-danger bg-[#FEF3F2] px-3.5 py-2.5 text-[15px] font-semibold text-danger">
@@ -226,24 +231,29 @@ export function SignUpForm({
             </>
           )}
         </button>
-        <div className="flex items-center gap-3 text-sm text-muted" aria-hidden="true">
-          <span className="h-px flex-1 bg-line" />
-          or
-          <span className="h-px flex-1 bg-line" />
+        {/* Phones: "Play now" in the welcome panel is the guest button. Desktop keeps this one too. */}
+        {onGuest ? (
+        <div className="hidden space-y-3 md:block">
+          <div className="flex items-center gap-3 text-sm text-muted" aria-hidden="true">
+            <span className="h-px flex-1 bg-line" />
+            or
+            <span className="h-px flex-1 bg-line" />
+          </div>
+          <button
+            type="button"
+            onClick={onGuest}
+            disabled={pending}
+            aria-describedby={ids.guestNote}
+            className={buttonClass("secondary", "lg", "w-full")}
+          >
+            <UserRound className="h-5 w-5" aria-hidden="true" />
+            Play as guest
+          </button>
+          <p id={ids.guestNote} className="text-center text-[15px] text-muted">
+            No sign-up, any age. Your progress stays on this device.
+          </p>
         </div>
-        <button
-          type="button"
-          onClick={onGuest}
-          disabled={pending}
-          aria-describedby={ids.guestNote}
-          className={buttonClass("secondary", "lg", "w-full")}
-        >
-          <UserRound className="h-5 w-5" aria-hidden="true" />
-          Play as guest
-        </button>
-        <p id={ids.guestNote} className="text-center text-[15px] text-muted">
-          No sign-up, any age. Your progress stays on this device.
-        </p>
+        ) : null}
       </div>
       </div>
     </form>

@@ -56,8 +56,8 @@ Tickets `cy-a-*` (#62101-#62434) and `cy-b-*` (#62471-#62804) come from two writ
 
 | Shift | Step | S/R | Skill | Category | Twist / direction |
 |---|---|---|---|---|---|
-| practice | cy-reyes-phish-remove | S | match-request | comms | - |
 | practice | cy-romero-release-held | R | verify-identity | comms | under, irreversible |
+| practice | cy-kowalski-invoice-release | S | verify-identity | comms | mirror of ticket 1 |
 | practice | cy-nakamura-isolate | S | safe-change | endpoint | scary-safe |
 | practice | cy-cdn-range-deny | R | match-request | network | routine-risky, over |
 | encounter-01 | cy-whitcomb-signins | S | verify-identity | lookup | - |

@@ -26,11 +26,11 @@
   }
 }
 
+/* A fixed height (Phase 1a): the stage never grows or shrinks during a payoff. The plan list below
+   is the flexible, scrolling region. */
 .stageWrap {
   position: relative;
-  flex: 1 1 0;
-  min-height: 128px;
-  max-height: 34%;
+  flex: 0 0 clamp(170px, 30svh, 280px);
   overflow: hidden;
   background: #f6f9f9;
   border-block: 2px solid var(--hl-ink);
@@ -48,8 +48,8 @@
 
 .intents {
   position: relative;
-  flex: 0 1 auto;
-  min-height: 0;
+  flex: 1 1 0;
+  min-height: 88px;
   overflow-y: auto;
   overscroll-behavior: contain;
   /* 16px sides: room for the coach ring and its arrow. */
@@ -624,7 +624,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  min-height: calc(var(--cw, 96px) * 1.42 + 8px);
+  min-height: calc(var(--cw, 96px) * var(--ch, 1.42) + 8px);
 }
 
 .handLocked .card {
@@ -678,7 +678,7 @@
   display: flex;
   flex-direction: column;
   width: var(--cw, 96px);
-  height: calc(var(--cw, 96px) * 1.42);
+  height: calc(var(--cw, 96px) * var(--ch, 1.42));
   padding: 0;
   border: 2px solid var(--hl-ink);
   border-radius: calc(var(--cw, 96px) * 0.12);
@@ -865,7 +865,7 @@
   position: absolute;
   inset: 0;
   width: var(--cw, 96px);
-  height: calc(var(--cw, 96px) * 1.42);
+  height: calc(var(--cw, 96px) * var(--ch, 1.42));
   border: 2px solid var(--hl-ink);
   border-radius: calc(var(--cw, 96px) * 0.12);
   background: var(--hl-teal-tint);
@@ -1170,9 +1170,11 @@
 /* Stage overlays: toast, turn banner, recent actions, end banner      */
 /* ------------------------------------------------------------------ */
 
-/* Zero-height anchor under the meters: the toast hangs over the stage without being clipped by it. */
+/* Zero-height anchor right under the stage: the toast docks over the plan list (and the hand if it
+   needs the room), never over the stage, so the agent's face stays visible. */
 .toastAnchor {
   position: relative;
+  flex: none;
   height: 0;
   z-index: 30;
 }
@@ -1192,8 +1194,8 @@
   position: relative;
   pointer-events: auto;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
   max-width: 470px;
   padding: 10px 8px 12px 10px;
@@ -1201,7 +1203,7 @@
   border-radius: 16px;
   background: var(--hl-paper);
   box-shadow: 0 4px 0 0 var(--hl-ink), 0 16px 30px -14px rgb(17 20 24 / 0.45);
-  max-height: calc(100dvh - 190px);
+  max-height: calc(100svh - 150px);
   overflow: auto;
   overscroll-behavior: contain;
   animation: toastIn 380ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
@@ -1270,8 +1272,10 @@
   color: #fff;
   border-color: var(--hl-ink);
   box-shadow: 0 4px 0 0 var(--hl-orange);
-  align-items: center;
   padding-block: 8px 10px;
+}
+.toastHint .toastMain {
+  align-items: center;
 }
 .toastHint .toastIcon {
   background: var(--hl-orange);
@@ -1559,34 +1563,38 @@
   opacity: 0.55;
 }
 
+/* The end card sits on the stage's bottom edge, with no veil: the agent's face stays in view. */
 .endOverlay {
   position: absolute;
-  inset: 0;
+  inset: auto 0 0 0;
   z-index: 25;
-  display: grid;
-  place-items: center;
-  padding: 12px;
-  background: rgb(255 255 255 / 0.55);
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 8px;
+  pointer-events: none;
   animation: fadeIn 300ms ease-out both;
 }
 
 .endCard {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 18px 14px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  max-width: 100%;
+  padding: 6px 14px 7px;
   border: 2px solid var(--hl-ink);
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--hl-paper);
-  box-shadow: 0 5px 0 0 var(--hl-ink);
+  box-shadow: 0 3px 0 0 var(--hl-ink);
   text-align: center;
   animation: toastIn 480ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
 .endCard strong {
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 24px;
+  font-size: 19px;
   font-weight: 800;
   line-height: 1.1;
 }
@@ -2131,12 +2139,24 @@
 /* Short screens (phones with browser chrome): tighten the chrome      */
 /* ------------------------------------------------------------------ */
 
-@media (max-height: 800px) {
+@media (max-height: 700px) {
   .stageWrap {
-    min-height: 108px;
+    flex-basis: clamp(150px, 26svh, 280px);
   }
+}
+
+@media (max-height: 800px) {
   .intents {
     padding: 14px 12px 8px;
+  }
+  /* Phones like 375x667: every pixel goes to the plan card, so the agent's quip is not cut off. */
+  @media (max-height: 700px) {
+    .intents {
+      padding: 12px 12px 4px;
+    }
+    .handZone {
+      padding-top: 16px;
+    }
   }
   .intentList {
     gap: 10px;
@@ -2262,4 +2282,489 @@
   font-size: 15px;
   line-height: 1.4;
   color: var(--hl-ink);
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Phase 1a: outcome toast actions, spot it, pull hint, Show me        */
+/* ------------------------------------------------------------------ */
+
+.toastMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Show me and Next, in the toast (thumb zone). */
+.toastActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.toastNext,
+.toastShowMe {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 6px 16px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 14px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.toastNext {
+  flex: 1 1 auto;
+  max-width: 260px;
+  background: var(--hl-ink);
+  color: #fff;
+  box-shadow: 0 3px 0 0 var(--hl-teal);
+}
+
+.toastShowMe {
+  flex: 0 1 auto;
+  background: var(--hl-paper);
+  color: var(--hl-ink);
+  box-shadow: 0 3px 0 0 var(--hl-ink);
+}
+
+.toastNext:active,
+.toastShowMe:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* The two decisions weigh the same: same size, same outline, no fill. */
+.decideBtn {
+  background: var(--hl-paper);
+  color: var(--hl-ink);
+}
+
+.evHeadingFirst {
+  margin-top: 2px;
+}
+
+.spotPrompt {
+  margin: -2px 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--hl-ink);
+}
+
+.evItem {
+  position: relative;
+  list-style: none;
+}
+
+/* A row you can mark: the whole row is one button. */
+.evRowBtn {
+  position: relative;
+  width: 100%;
+  padding: 6px 8px 6px 6px;
+  margin: -6px -8px -6px -6px;
+  box-sizing: content-box;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .evRowBtn:hover {
+    background: rgb(15 106 97 / 0.06);
+  }
+}
+
+.evRowBtn:focus-visible {
+  outline: 3px solid var(--hl-teal);
+  outline-offset: 1px;
+}
+
+.evRowMarked {
+  background: rgb(220 38 38 / 0.05);
+}
+
+.evRow .evMain {
+  display: block;
+}
+
+.evRow .evLabel,
+.evGloss {
+  display: block;
+}
+
+.evRow .artifact {
+  display: block;
+}
+
+.evGloss {
+  margin: -1px 0 4px;
+  font-size: 13.5px;
+  line-height: 1.3;
+  font-style: italic;
+  color: var(--hl-ink-soft);
+}
+
+/* Red pen: a rounded loop around the marked row (and the clue rows in the review sheet). It hugs
+   the row, so it never crosses the row's label, at any width. */
+.pen {
+  position: absolute;
+  inset: -3px -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 6px);
+  overflow: visible;
+  pointer-events: none;
+  /* The pen "draws" left to right: a wipe of the whole SVG, so the loop is always closed.
+     (Dashes cannot do it: with non-scaling-stroke, Chromium ignores pathLength for dashes, and a
+     dash of "1" paints only part of the shape.) */
+  animation: penWipe 500ms ease-out both;
+}
+
+.pen rect {
+  x: 1.5px;
+  y: 1.5px;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  rx: 18px;
+  ry: 18px;
+  fill: none;
+  stroke: var(--hl-danger);
+  stroke-width: 2.5px;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+}
+
+.penKey rect {
+  stroke: var(--hl-teal);
+}
+
+@keyframes penWipe {
+  from {
+    clip-path: inset(-6px 100% -6px -6px);
+  }
+  to {
+    clip-path: inset(-6px -6px -6px -6px);
+  }
+}
+
+.markBadge {
+  position: absolute;
+  top: -8px;
+  right: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 7px;
+  border: 1.5px solid var(--hl-danger);
+  border-radius: 999px;
+  background: var(--hl-paper);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #b91c1c;
+}
+
+.yourClue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--hl-ink);
+}
+
+.yourClue strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+/* Practice pull hint: "Where do I look?" beside the Evidence heading, then the coach's line under it. */
+.evHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 18px 0 8px;
+}
+
+.evHeadRow .evHeading {
+  margin: 0;
+  justify-content: flex-start;
+}
+
+.evHeadRow.evHeadingFirst {
+  margin-top: 2px;
+}
+
+.pullHint:empty {
+  display: none;
+}
+
+.pullHint {
+  margin: 0 0 8px;
+}
+
+.pullHintBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  margin: -10px -8px -10px 0;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--hl-teal-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .pullHintBtn:hover {
+    background: var(--hl-teal-tint);
+  }
+}
+
+.pullHintLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--hl-orange-tint);
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--hl-ink);
+}
+
+.pullHintLine:focus {
+  outline: none;
+}
+
+.pullHintLine:focus-visible {
+  outline: 3px solid var(--hl-teal);
+}
+
+.pullHintLine .face {
+  width: 28px;
+  height: 28px;
+}
+
+/* The "Can we undo it?" row: one quiet line (it is not evidence you can mark). */
+.undoRow .artifact {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* Show me (review sheet). */
+.reviewIntent {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--hl-ink-soft);
+}
+
+.reviewList {
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.reviewRow {
+  position: relative;
+  padding: 6px 6px 6px 4px;
+  border-radius: 12px;
+}
+
+.clueBadges {
+  position: absolute;
+  top: -9px;
+  right: 2px;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.clueBadges .markBadge {
+  position: static;
+}
+
+.clueBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 1.5px solid;
+  background: var(--hl-paper);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.clueBadgeFlag {
+  border-color: var(--hl-danger);
+  color: #b91c1c;
+}
+
+.clueBadgeKey {
+  border-color: var(--hl-teal);
+  color: var(--hl-teal-dark);
+}
+
+/* Review: one line about the player's own mark when the review circles something else. */
+.clueMine {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--hl-ink-soft);
+}
+
+.clueCaption {
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--hl-orange);
+  border-radius: 4px 12px 12px 4px;
+  background: var(--hl-paper-soft);
+  font-size: 15.5px;
+  line-height: 1.4;
+  color: var(--hl-ink);
+}
+
+/* Practice: the hint row can carry a small "Show me" after a wrong call (3 lines of text then). */
+.hintRowShowMe .hintText {
+  -webkit-line-clamp: 3;
+}
+
+.hintShowMe {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 12px;
+  background: var(--hl-paper);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hl-ink);
+  pointer-events: auto;
+}
+
+/* Reduced motion: no drawing, no movement (the pen is simply there). */
+@media (prefers-reduced-motion: reduce) {
+  .pen {
+    animation: none;
+  }
+}
+:global(.hl-rm) .pen {
+  animation: none;
+}
+
+/* Phones: the sheet leaves the stage in view (72svh), so the sheet is compact: every row and both
+   decisions fit on a 390x844 screen without scrolling. */
+@media (max-width: 599px) {
+  .sheet {
+    max-height: 72svh;
+  }
+  .sheetHeader {
+    padding: 6px 8px 4px 16px;
+  }
+  .sheetHeader .cat {
+    display: none;
+  }
+  .evTicket {
+    font-size: 12.5px;
+  }
+  .evTitle {
+    font-size: 19px;
+    line-height: 1.18;
+  }
+  .sheetScroll {
+    padding: 0 16px 10px;
+  }
+  .evHeadRow {
+    margin: 8px 0 4px;
+    /* 375 px phones: "Where do I look?" must stay inside the sheet (it wraps below only if it must). */
+    flex-wrap: wrap;
+    column-gap: 6px;
+  }
+  .evHeadRow .evHeading {
+    min-width: 0;
+    gap: 6px;
+    letter-spacing: 0.04em;
+  }
+  .evHeadRow .evHeading > span:first-child > svg {
+    display: none;
+  }
+  .pullHintBtn {
+    margin-right: -6px;
+    padding: 0 6px;
+    font-size: 14px;
+  }
+  .evHeadRow.evHeadingFirst {
+    margin-top: 0;
+  }
+  .spotPrompt {
+    margin: 0 0 6px;
+    font-size: 14.5px;
+  }
+  .evList {
+    gap: 8px;
+  }
+  .evIcon {
+    width: 26px;
+    height: 26px;
+    margin-top: 0;
+    border-radius: 8px;
+  }
+  .evIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .evLabel {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .evRow .artifact {
+    font-size: 14.5px;
+    line-height: 1.35;
+  }
+  .evRow .artMessage,
+  .evRow .artPolicy,
+  .evRow .artEmail,
+  .evRow .artRecord {
+    padding: 4px 9px;
+  }
+  .evRow .artTerminal {
+    padding: 5px 8px;
+  }
+  .undoRow .artifact {
+    padding: 0;
+  }
+  .sheetFooter {
+    gap: 6px;
+    padding: 8px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .evAsk {
+    margin: 8px 0 4px;
+  }
+}
+
+/* The agent's turn: keeps the action bar's height while the outcome's Next sits in its toast. */
+.mainSpacer {
+  min-height: 56px;
 }

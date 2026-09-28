@@ -7,6 +7,7 @@ import { PlanList } from "@/components/skills/PlanList";
 import k from "@/components/skills/skills.module.css";
 import { buttonClass } from "@/components/site/ui";
 import { shiftTally } from "@/lib/game/mastery";
+import { resultMood } from "@/lib/game/reveal";
 import { skillName } from "@/lib/game/skills";
 import { orderMoves, planLines, recentCalls, reviewDays, tallyHeadline, weakestInShift } from "@/lib/game/skillsView";
 import type { BattleState, Encounter, MasterySkillId, PathwayProgress, SkillLevel } from "@/lib/game/types";
@@ -86,8 +87,8 @@ export function ShiftResult({
       : o.timeout;
   // One quip: Ollie's line (or the first line when Ollie has none).
   const quip = outro.find((l) => l.speaker === "agent") ?? outro[0];
-  // The same mood as the big stage Ollie (GameShell sends celebrate / sad by the outcome).
-  const mood = won ? "celebrate" : "sad";
+  // The same mood as the big stage agent (GameShell sends resultMood): celebrate only a clean run.
+  const mood = resultMood(state, encounter);
 
   const weakest = weakestInShift(lines, progress.skills, today);
   const ordered = orderMoves(moved, focus, lines);

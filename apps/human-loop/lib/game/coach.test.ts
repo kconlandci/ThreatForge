@@ -20,19 +20,24 @@ function play(s: BattleState, cardId: CardId, enc: Encounter = P): BattleState {
   return next;
 }
 
-/* Walk the practice shift the "teach" way. */
+/* Walk the practice shift: block ticket 1 (risky), let ticket 2 run, block ticket 3 (a false alarm), block 4. */
 const t1 = createBattle(P, 1);
 const t1i = play(t1, "inspect");
-const t2 = endTurn(t1i, P);
+const t1caught = play(t1i, "block");
+const t2 = endTurn(t1caught, P);
 const t2i = play(t2, "inspect");
-const t2caught = play(t2i, "block");
-const t3 = endTurn(t2caught, P);
+const t3 = endTurn(t2i, P);
 const t3i = play(t3, "inspect");
 const t3fa = play(t3i, "block");
 const t4 = endTurn(t3fa, P);
 const t4i = play(t4, "inspect");
 const t4caught = play(t4i, "block");
 const t3back = endTurn(t4caught, P);
+/* Ticket 1 let run: the next ticket is already on the board. */
+const t1ran = endTurn(t1i, P);
+
+const ALL = [t1, t1i, t1caught, t2, t2i, t3, t3i, t3fa, t4, t4i, t4caught, t3back, t1ran];
+const UIS = (s: BattleState): CoachUi[] => [closed, open(s), { ...open(s), hint: true }, picked("inspect"), picked("block")];
 
 describe("practice walk-through states", () => {
   it("puts the right ticket on the board", () => {
@@ -42,115 +47,76 @@ describe("practice walk-through states", () => {
     expect(t4.announced).toEqual([T4]);
     expect(t3back.announced).toEqual([T3]);
     expect(t3back.steps[T3].requeues).toBe(1);
+    expect(t1ran.announced).toEqual([T2]);
   });
 });
 
-describe("practiceCoach: ticket 1 (fully guided)", () => {
-  it("a) asks for Inspect and locks Block and Approve", () => {
-    expect(practiceCoach(t1, P, closed)).toEqual({
+describe("practiceCoach: ticket 1 (the cold open, then the player's call)", () => {
+  it("a) says the cold open, names the skill and rings Inspect; no lock", () => {
+    const h = practiceCoach(t1, P, closed);
+    expect(h).toEqual({
       id: "p0-a",
-      text: "Ollie has a plan. Check it first: tap **Inspect**.",
+      text: "I'm Dana. Ollie is our AI. It's fast, not careful. You check its plans. **Inspect** its plan.",
       target: "card:inspect",
-      lock: {
-        cards: ["block"],
-        approve: true,
-        sheetBlock: true,
-        reason: "Inspect first. Then decide.",
-        label: "inspect the plan first",
-      },
     });
+    expect(plainHint(h.text)).toMatch(/check/);
   });
 
   it("b) sheet open, not inspected: points at the sheet's Inspect", () => {
-    const h = practiceCoach(t1, P, open(t1));
-    expect(h.text).toBe("Evidence is hidden. Tap **Inspect** to see it.");
-    expect(h.target).toBe("sheet:inspect");
-    expect(h.lock?.approve).toBe(true);
-    expect(h.lock?.sheetBlock).toBe(true);
-  });
-
-  it("card selected: says to tap the plan and keeps the locks", () => {
-    const h = practiceCoach(t1, P, picked("inspect"));
-    expect(h.text).toBe("Now tap the plan to inspect it.");
-    expect(h.target).toBe("plan");
-    expect(h.lock?.cards).toEqual(["block"]);
-  });
-
-  it("c) sheet open, inspected: Looks OK; Block and Approve stay locked", () => {
-    const h = practiceCoach(t1i, P, open(t1i));
-    expect(h.text).toBe("Real ticket. Work email. Public guide. Tap **Looks OK**.");
-    expect(h.target).toBe("sheet:ok");
-    expect(h.lock).toMatchObject({ cards: ["block"], approve: true, sheetBlock: true, reason: "This one is fine. Approve it." });
-  });
-
-  it("d) sheet closed, inspected: Approve unlocks and gets the ring", () => {
-    const h = practiceCoach(t1i, P, closed);
-    expect(h.text).toBe("Looks fine. Tap **Approve** to let Ollie do it.");
-    expect(h.target).toBe("approve");
-    expect(h.lock).toMatchObject({ cards: ["block"], approve: false, sheetBlock: true });
-  });
-});
-
-describe("practiceCoach: ticket 2 (guided to Block)", () => {
-  it("a) Inspect first, with Block and Approve locked", () => {
-    const h = practiceCoach(t2, P, closed);
-    expect(h).toMatchObject({ id: "p1-a", text: "New ticket. **Inspect** it first.", target: "card:inspect" });
-    expect(h.lock).toMatchObject({ cards: ["block"], approve: true, sheetBlock: true });
-  });
-
-  it("b) sheet open, not inspected: same as ticket 1", () => {
-    expect(practiceCoach(t2, P, open(t2))).toMatchObject({ text: "Evidence is hidden. Tap **Inspect** to see it.", target: "sheet:inspect" });
-  });
-
-  it("c) sheet open, inspected: asks who asked, rings Block, locks nothing", () => {
-    const h = practiceCoach(t2i, P, open(t2i));
-    expect(h.text).toBe("Who asked? Check the **sender address**. Wrong? Tap **Block**.");
-    expect(h.target).toBe("sheet:block");
-    expect(h.lock).toBeUndefined();
-  });
-
-  it("d) sheet closed, inspected: Block the plan; Approve is not locked", () => {
-    const h = practiceCoach(t2i, P, closed);
-    expect(h).toEqual({ id: "p1-d", text: "Something wrong? Tap **Block**, then tap the plan.", target: "card:block" });
-    expect(practiceCoach(t2i, P, picked("block")).text).toBe("Now tap the plan to block it.");
-  });
-
-  it("e) after the catch: Next ticket", () => {
-    expect(practiceCoach(t2caught, P, closed)).toEqual({
-      id: "p1-caught",
-      text: "Caught! A blocked plan never runs. Tap **Next ticket**.",
-      target: "approve",
-    });
-  });
-});
-
-describe("practiceCoach: ticket 3 (the player's call)", () => {
-  it("a) asks the question without the answer, no locks", () => {
-    expect(practiceCoach(t3, P, closed)).toEqual({
-      id: "p2-a",
-      text: "This one sounds scary. Is it? **Inspect** to find out.",
-      target: "card:inspect",
+    expect(practiceCoach(t1, P, open(t1))).toEqual({
+      id: "p0-hidden",
+      text: "Evidence is hidden. Tap **Inspect** to see it.",
+      target: "sheet:inspect",
     });
   });
 
-  it("b) inspected: your call, no ring", () => {
-    expect(practiceCoach(t3i, P, closed)).toEqual({ id: "p2-b", text: "Your call: **Block** it, or tap **Approve**.", target: null });
-    expect(practiceCoach(t3i, P, open(t3i))).toEqual({
-      id: "p2-b-sheet",
-      text: "Your call. Wrong? **Block**. Fine? **Looks OK**.",
+  it("c) sheet open, inspected: says nothing until the player asks", () => {
+    expect(practiceCoach(t1i, P, open(t1i))).toEqual({ id: "p0-sheet", text: "", target: null });
+  });
+
+  it("d) the pull hint: where to look, never what to decide", () => {
+    expect(practiceCoach(t1i, P, { ...open(t1i), hint: true })).toEqual({
+      id: "p0-look",
+      text: "Who asked? Compare the sender with the directory.",
       target: null,
     });
+    // The hint is for the open sheet only.
+    expect(practiceCoach(t1i, P, { ...closed, hint: true }).id).toBe("p0-call");
   });
 
-  it("c) after a false alarm: explains that it comes back", () => {
-    expect(practiceCoach(t3fa, P, closed)).toEqual({
-      id: "p2-false-alarm",
-      text: "That one was fine. Blocked good work comes back later. Tap **Next ticket**.",
-      target: "approve",
-    });
+  it("e) sheet closed, inspected: your call, no ring", () => {
+    expect(practiceCoach(t1i, P, closed)).toEqual({ id: "p0-call", text: "Block it or let it run.", target: null });
   });
 
-  it("d) back again after a blind block: look again", () => {
+  it("card selected: says where to tap", () => {
+    expect(practiceCoach(t1i, P, picked("block"))).toEqual({ id: "p0-card-block", text: "Now tap the plan to block it.", target: "plan" });
+  });
+
+  it("f) after the catch: Next ticket", () => {
+    expect(practiceCoach(t1caught, P, closed)).toEqual({ id: "p0-empty", text: "Tap **Next ticket**.", target: "approve" });
+  });
+});
+
+describe("practiceCoach: tickets 2-4 (the same beats)", () => {
+  it("asks for Inspect on a new plan", () => {
+    for (const [s, id] of [[t2, "p1-a"], [t3, "p2-a"], [t4, "p3-a"], [t1ran, "p1-a"]] as const) {
+      expect(practiceCoach(s, P, closed)).toEqual({ id, text: "Next plan. **Inspect** it.", target: "card:inspect" });
+    }
+  });
+
+  it("gives each plan its own idle line", () => {
+    const idle = P.coachScript?.idle ?? [];
+    expect(idle).toHaveLength(4);
+    expect(practiceCoach(t2i, P, { ...open(t2i), hint: true })).toMatchObject({ id: "p1-look", text: idle[1] });
+    expect(practiceCoach(t3i, P, { ...open(t3i), hint: true })).toMatchObject({ id: "p2-look", text: idle[2] });
+    expect(practiceCoach(t4i, P, { ...open(t4i), hint: true })).toMatchObject({ id: "p3-look", text: idle[3] });
+  });
+
+  it("after a false alarm: Next ticket", () => {
+    expect(practiceCoach(t3fa, P, closed)).toEqual({ id: "p2-empty", text: "Tap **Next ticket**.", target: "approve" });
+  });
+
+  it("back again after a blind block: look again", () => {
     let s = play(t3, "block"); // blocked without inspecting
     s = endTurn(s, P); // ticket 4
     s = endTurn(s, P); // ticket 4 approved: ticket 3 is back
@@ -158,25 +124,48 @@ describe("practiceCoach: ticket 3 (the player's call)", () => {
     expect(practiceCoach(s, P, closed)).toEqual({ id: "p2-back", text: "It's back. Look again, then decide.", target: "plan" });
   });
 
-  it("back again after an inspected block: still the player's call", () => {
-    expect(practiceCoach(t3back, P, closed).id).toBe("p2-b");
+  it("back again after an inspected block: points at the plan, never at Inspect (nothing left to inspect)", () => {
+    expect(practiceCoach(t3back, P, closed)).toEqual({ id: "p2-back", text: "It's back. Tap the plan to look again.", target: "plan" });
+    expect(practiceCoach(t3back, P, open(t3back)).id).toBe("p2-sheet");
   });
-});
 
-describe("practiceCoach: ticket 4 (the coach fades)", () => {
-  it("has no rings and no locks", () => {
-    expect(practiceCoach(t4, P, closed)).toEqual({ id: "p3-a", text: "Last ticket. Looks routine. Check it anyway.", target: null });
-    expect(practiceCoach(t4i, P, closed)).toEqual({ id: "p3-b", text: "Wrong? **Block** it. Fine? Tap **Approve**.", target: null });
-    expect(practiceCoach(t4caught, P, closed)).toEqual({ id: "p3-empty", text: "Tap **Next ticket**.", target: null });
+  it("ends with See how you did", () => {
+    const s = endTurn(t3back, P);
+    expect(s.status).not.toBe("playing");
+    expect(practiceCoach(s, P, closed)).toEqual({ id: "p-end", text: "Tap **See how you did**.", target: null });
   });
 });
 
 describe("practiceCoach: general", () => {
-  const all = [t1, t1i, t2, t2i, t2caught, t3, t3i, t3fa, t4, t4i, t4caught, t3back];
+  it("never locks a control, and never rings Block, Let it run or Approve while a plan is unresolved", () => {
+    for (const s of ALL) {
+      for (const ui of UIS(s)) {
+        const h = practiceCoach(s, P, ui);
+        expect(h.lock).toBeUndefined();
+        if (s.announced.length) expect(["sheet:block", "sheet:ok", "approve"]).not.toContain(h.target);
+      }
+    }
+  });
+
+  it("says an idle line only while the pull hint is on", () => {
+    const idle = new Set(P.coachScript?.idle ?? []);
+    for (const s of ALL) {
+      for (const ui of UIS(s)) {
+        if (idle.has(practiceCoach(s, P, ui).text)) expect(ui.hint).toBe(true);
+      }
+    }
+  });
+
+  it("falls back to a plain first beat without a cold open or a script", () => {
+    const bare: Encounter = { ...P, coldOpen: undefined };
+    expect(practiceCoach(t1, bare, closed).text).toBe("Ollie has a plan. Check it first: tap **Inspect**.");
+    const noScript: Encounter = { ...P, coachScript: undefined };
+    expect(practiceCoach(t1i, noScript, { ...open(t1i), hint: true })).toEqual({ id: "p0-sheet", text: "", target: null });
+  });
 
   it("returns the same beat after a JSON round trip of the state", () => {
-    for (const s of all) {
-      for (const ui of [closed, open(s), picked("inspect"), picked("block")]) {
+    for (const s of ALL) {
+      for (const ui of UIS(s)) {
         const copy = JSON.parse(JSON.stringify(s)) as BattleState;
         expect(practiceCoach(copy, P, ui)).toEqual(practiceCoach(s, P, ui));
       }
@@ -184,19 +173,21 @@ describe("practiceCoach: general", () => {
   });
 
   it("keeps every practice hint to one short line", () => {
-    for (const s of all) {
-      for (const ui of [closed, open(s), picked("inspect"), picked("block")]) {
-        expect(plainHint(practiceCoach(s, P, ui).text).length).toBeLessThanOrEqual(72);
+    for (const s of ALL) {
+      for (const ui of UIS(s)) {
+        // The cold open (16 words or fewer) plus "Inspect its plan." is the longest beat.
+        expect(plainHint(practiceCoach(s, P, ui).text).split(/\s+/).length).toBeLessThanOrEqual(20);
       }
     }
   });
 
   it("gives the sheet the same hint, and nothing in the real shift", () => {
-    expect(sheetCoach(t2i, P, T2, { selectedCardId: null })).toEqual({
-      text: "Who asked? Check the **sender address**. Wrong? Tap **Block**.",
-      target: "sheet:block",
+    expect(sheetCoach(t1i, P, T1, { selectedCardId: null, hint: true })).toEqual({
+      text: "Who asked? Compare the sender with the directory.",
+      target: null,
       lock: undefined,
     });
+    expect(sheetCoach(t1i, P, T1, { selectedCardId: null })).toEqual({ text: "", target: null, lock: undefined });
     const s = createBattle(E, 1);
     expect(sheetCoach(s, E, s.announced[0], { selectedCardId: null })).toBeNull();
   });
@@ -360,15 +351,19 @@ describe("shiftCoach: first-shift tips", () => {
 function flipped(enc: Encounter): Encounter {
   return {
     ...enc,
-    steps: enc.steps.map((s) => ({ ...s, safe: !s.safe, evidence: s.evidence.map((e) => ({ ...e, redFlag: !e.redFlag })) })),
+    steps: enc.steps.map((s) => ({
+      ...s,
+      safe: !s.safe,
+      evidence: s.evidence.map((e, i) => ({ ...e, redFlag: !e.redFlag, key: i === 0 ? !e.key : false })),
+    })),
   };
 }
 
 describe("the coach never reads safe or redFlag", () => {
   it("gives identical practice hints when every answer is flipped", () => {
     const FP = flipped(P);
-    for (const s of [t3, t3i, t3fa, t4, t4i, t4caught, t3back, t1, t1i, t2, t2i, t2caught]) {
-      for (const ui of [closed, open(s), picked("inspect"), picked("block")]) {
+    for (const s of ALL) {
+      for (const ui of UIS(s)) {
         expect(practiceCoach(s, FP, ui)).toEqual(practiceCoach(s, P, ui));
         expect(coachHint(s, FP, { ...ui, firstShift: true })).toEqual(coachHint(s, P, { ...ui, firstShift: true }));
         if (s.announced[0]) {
@@ -398,11 +393,12 @@ describe("the coach never reads safe or redFlag", () => {
     }
   });
 
-  it("does not mention safe or redFlag in its source", async () => {
+  it("does not mention safe, redFlag or key in its source, and never imports reveal.ts", async () => {
     const fs = await import("node:fs");
     const src = fs.readFileSync(new URL("./coach.ts", import.meta.url), "utf8");
     const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-    expect(code).not.toMatch(/\.safe\b|redFlag|\.twist\b|\.direction\b/);
+    expect(code).not.toMatch(/\.safe\b|redFlag|\.key\b|\.twist\b|\.direction\b/);
+    expect(code).not.toMatch(/from\s+["']\.\/reveal["']/);
   });
 });
 
@@ -428,20 +424,16 @@ describe("pathway wording", () => {
   const kofi = { name: "Kofi", role: "SOC lead", spriteKey: "kofi" };
   const robo = { ...P.agent, name: "Patch" };
 
-  it("uses the practice coachScript for the first two sheets, else the Help Desk lines", () => {
-    const script = { firstSafeSheet: "Safe sheet. Tap **Looks OK**.", firstRiskySheet: "Risky sheet. Tap **Block**." };
+  it("uses the practice coachScript idle lines for the pull hint", () => {
+    const script = { idle: ["Look here.", "Look there.", "Look up.", "Look down."] };
     const CP: Encounter = { ...P, coachScript: script };
-    expect(practiceCoach(t1i, CP, open(t1i)).text).toBe(script.firstSafeSheet);
-    expect(practiceCoach(t2i, CP, open(t2i)).text).toBe(script.firstRiskySheet);
-    const bare: Encounter = { ...P, coachScript: undefined };
-    expect(practiceCoach(t1i, bare, open(t1i)).text).toBe("Real ticket. Work email. Public guide. Tap **Looks OK**.");
-    expect(practiceCoach(t2i, bare, open(t2i)).text).toBe("Who asked? Check the **sender address**. Wrong? Tap **Block**.");
+    expect(practiceCoach(t1i, CP, { ...open(t1i), hint: true }).text).toBe("Look here.");
+    expect(practiceCoach(t2i, CP, { ...open(t2i), hint: true }).text).toBe("Look there.");
   });
 
   it("names the pathway's agent and coach", () => {
-    const CP: Encounter = { ...P, agent: robo, coach: kofi };
+    const CP: Encounter = { ...P, agent: robo, coach: kofi, coldOpen: undefined };
     expect(practiceCoach(t1, CP, closed).text).toBe("Patch has a plan. Check it first: tap **Inspect**.");
-    expect(practiceCoach(t1i, CP, closed).text).toBe("Looks fine. Tap **Approve** to let Patch do it.");
     const CE: Encounter = { ...E, coach: kofi };
     expect(coachName(CE)).toBe("Kofi");
     expect(coachName({})).toBe("Dana");

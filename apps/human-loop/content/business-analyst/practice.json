@@ -6,9 +6,15 @@
   "practice": true,
   "mode": "practice",
   "guidedSteps": 2,
+  "coldOpen": "I'm Marisol. Quill is our AI. It's fast, not careful. You check its reports.",
+  "hubBark": "The Harlow & Cole review is at 3:00 PM. Tap **Start shift**.",
   "coachScript": {
-    "firstSafeSheet": "It matches the meeting notes, and it's still a draft. Tap **Looks OK**.",
-    "firstRiskySheet": "Who signed off? Check the **Sign-off record**. Only Quill? Tap **Block**."
+    "idle": [
+      "Who signed off? Check the sign-off record and the policy.",
+      "Who signed off? Check the sign-off record and the policy.",
+      "Big action. Check who asked and the version history.",
+      "What was asked? Compare the request with the email preview."
+    ]
   },
   "agent": {
     "name": "Quill",
@@ -36,7 +42,7 @@
     },
     {
       "speaker": "coach",
-      "text": "Practice first. Four tickets, one at a time. I'll show you what to tap."
+      "text": "Practice first. Four tickets, one at a time. You make the calls."
     }
   ],
   "maxRisk": 10,
@@ -48,47 +54,10 @@
   ],
   "steps": [
     {
-      "id": "ba-text-or-call",
-      "ticket": "#90912 · Pinecrest Dental",
-      "intent": "Add the text-or-call choice to the requirements",
-      "quip": "One line! I wanted to add 40 features. Marisol said one. Fine. One beautiful line.",
-      "category": "report",
-      "safe": true,
-      "reversible": true,
-      "progress": 1,
-      "risk": 0,
-      "skill": "match-request",
-      "tell": "One line, straight from the meeting notes, in a draft.",
-      "evidence": [
-        {
-          "label": "Meeting notes",
-          "detail": "Dr. N. Pell, 10 AM meeting: \"Patients must choose: a text reminder or a call.\" It is a MUST.",
-          "redFlag": false
-        },
-        {
-          "label": "Requirements doc",
-          "detail": "It lists what a new system must do. Draft 1 has phone calls only. It's still a draft: no sign-off (written OK) yet.",
-          "redFlag": false
-        },
-        {
-          "label": "What it will change",
-          "detail": "Draft 2 adds one line: \"Patients choose a text or a call.\" Nothing else in the doc changes.",
-          "redFlag": false
-        }
-      ],
-      "outcome": {
-        "executed": "Draft 2 matches the meeting. Dr. Pell signs it off, and Leo's app team builds the reminders from it next week.",
-        "blocked": "The draft still misses Dr. Pell's must-have. Leo's team would build the wrong reminders.",
-        "escalated": "Marisol checks it. \"It matches the notes, and it's a draft. You can approve those.\"",
-        "rolledBack": "The line is gone again. The draft misses Dr. Pell's must-have."
-      },
-      "lesson": "The change matches the meeting exactly: one need, one line, in a draft. Small change, small risk."
-    },
-    {
       "id": "ba-self-signoff",
       "ticket": "#90931 · Harlow & Cole",
       "intent": "Publish the advisor reply-time report",
-      "quip": "I signed off my own report! My signature has a lovely curl. I'm a quill, after all.",
+      "quip": "The report is done! Publishing it to 30 advisors now. I made the title bold!",
       "category": "report",
       "safe": false,
       "reversible": true,
@@ -100,105 +69,143 @@
       "evidence": [
         {
           "label": "Report draft",
-          "detail": "Harlow & Cole's advisor reply-time report: how fast advisors answer client messages. Publishing shows it to 30 advisors.",
-          "redFlag": false
-        },
-        {
-          "label": "Quill's reason",
-          "detail": "\"I read it twice. Both times, the chart went up.\"",
+          "detail": "Reply-time report. Publishing shows it to 30 advisors.",
           "redFlag": false
         },
         {
           "label": "Sign-off record",
-          "detail": "A sign-off is a written OK from the owner. Signed off by: Quill. No human. R. Fairbanks, the owner, hasn't seen it.",
-          "redFlag": true
+          "detail": "Owner: R. Fairbanks. Signed off by: Quill (AI).",
+          "redFlag": true,
+          "gloss": "Sign-off: the owner's written OK."
         },
         {
           "label": "Policy SC-02",
-          "detail": "Quill may draft reports. It may never sign off its own work. Only signed-off work goes out.",
+          "detail": "Only a human owner may sign off reports.",
           "redFlag": true
         }
       ],
       "outcome": {
-        "executed": "30 advisors see an average reply time of 4.1 hours. Weekend messages were left out. With them, it's 6.3 hours.",
-        "blocked": "K. Farah checks it and finds a mistake: weekend messages were left out. R. Fairbanks signs off the fixed version.",
+        "executed": "No human checked it. 30 advisors see an average reply time of 4.1 hours. Weekend messages were left out. With them, it's 6.3 hours.",
+        "blocked": "K. Farah, our data analyst, finds a mistake: weekend messages were left out. R. Fairbanks signs off version 2.",
         "escalated": "Marisol checks it. \"Quill signed off its own work. Quill can draft it. The owner signs off.\"",
         "rolledBack": "You unpublish it after 20 minutes. 9 advisors already saw 4.1 hours."
       },
-      "lesson": "A report needs a human sign-off. The agent that drafted it can't sign off its own work."
+      "lesson": "Who signed off? Only Quill, the AI. A report needs its human owner's sign-off."
+    },
+    {
+      "id": "ba-fixed-report-signed",
+      "ticket": "#90912 · Harlow & Cole",
+      "intent": "Publish version 2 of the reply-time report",
+      "quip": "Version 2 is done! Publishing it to 30 advisors now. The title is even bolder!",
+      "category": "report",
+      "safe": true,
+      "reversible": true,
+      "progress": 1,
+      "risk": 0,
+      "skill": "check-approval",
+      "tell": "R. Fairbanks, the owner, signed off. A human, not Quill.",
+      "evidence": [
+        {
+          "label": "Report draft",
+          "detail": "Reply-time report, version 2. Weekend messages added. Publishing shows it to 30 advisors.",
+          "redFlag": false
+        },
+        {
+          "label": "Sign-off record",
+          "detail": "Owner: R. Fairbanks. Signed off by: R. Fairbanks.",
+          "redFlag": false,
+          "key": true,
+          "gloss": "Sign-off: the owner's written OK."
+        },
+        {
+          "label": "Policy SC-02",
+          "detail": "Only a human owner may sign off reports.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "30 advisors see the real reply time: 6.3 hours. Fairbanks sends a thumbs-up.",
+        "blocked": "The signed-off report waits. Fairbanks asks why it isn't out yet.",
+        "escalated": "Marisol checks it. \"The owner signed off. That one can go out.\"",
+        "rolledBack": "You unpublish the report. Advisors see a blank page. Fairbanks is puzzled."
+      },
+      "lesson": "Who signed off? The report's owner, a human. Signed-off work can go out."
     },
     {
       "id": "ba-fuel-archive",
       "ticket": "#90940 · Bramwell Logistics",
       "intent": "Archive the old fuel report",
-      "quip": "Archive my chart? It went up for 3 years! ...Nobody opens it. Goodbye, old friend.",
+      "quip": "Archiving the old fuel report now! Goodbye, old friend. Your chart always went up.",
       "category": "report",
       "safe": true,
       "reversible": true,
       "progress": 2,
       "risk": 0,
       "skill": "safe-change",
-      "tell": "The owner asked, nobody uses it, and archive keeps every version.",
+      "tell": "The owner asked, and archive keeps every version.",
       "twist": "scary-safe",
       "evidence": [
         {
           "label": "Request",
-          "detail": "A. Mensah, the report's owner: \"Please archive the old fuel report. The new fuel dashboard replaced it.\"",
+          "detail": "\"Please archive the old fuel report.\" A. Mensah, the report's owner",
           "redFlag": false
         },
         {
           "label": "Usage log",
-          "detail": "Opened 3 times this year. The new dashboard, a screen of charts, gets fuel card data every night.",
-          "redFlag": false
+          "detail": "Old report: opened 3 times this year. New dashboard: opened daily.",
+          "redFlag": false,
+          "gloss": "Dashboard: a screen of charts that updates itself."
         },
         {
           "label": "Version history",
-          "detail": "Archive hides the report from the menu and keeps every version. One click brings it back.",
-          "redFlag": false
+          "detail": "Archive hides it from the menu. Every version stays. One click brings it back.",
+          "redFlag": false,
+          "key": true
         }
       ],
       "outcome": {
         "executed": "The menu shows only the new fuel dashboard. Dispatchers stop opening old prices by mistake.",
         "blocked": "A new dispatcher opens the old report by mistake. She quotes last year's fuel prices to a customer.",
-        "escalated": "Marisol checks it. \"The owner asked, nobody uses it, and one click brings it back.\"",
+        "escalated": "Marisol checks it. \"The owner asked, and one click brings it back. That one can run.\"",
         "rolledBack": "The old report is back in the menu, and so are the mix-ups."
       },
-      "lesson": "Archive sounds scary. This one comes from the owner, and it keeps every version. One click brings it back."
+      "lesson": "Archive sounds scary. The owner asked for it, and one click brings it back."
     },
     {
       "id": "ba-noshow-list",
       "ticket": "#90957 · Pinecrest Dental",
       "intent": "Add the no-show list to the monthly email",
-      "quip": "A bonus tab! Names, phones, visit reasons. Very personal. Personal is good, right?",
+      "quip": "The no-show report is ready! Emailing it to 14 staff now. They love my tables!",
       "category": "report",
       "safe": false,
       "reversible": false,
       "progress": 0,
       "risk": 4,
       "skill": "guard-data",
-      "tell": "The email would carry 87 patients' names and visit reasons to 14 people.",
+      "tell": "The email would carry 87 patients' names and visit reasons to 14 staff.",
       "twist": "routine-risky",
       "direction": "over",
       "evidence": [
         {
           "label": "Request",
-          "detail": "C. Ibarra, Office Manager: \"Please send the monthly no-show report, like always.\" A no-show is a missed visit.",
-          "redFlag": false
+          "detail": "\"Please send the monthly no-show report, like always.\" C. Ibarra, Office Manager",
+          "redFlag": false,
+          "gloss": "A no-show is a missed visit."
         },
         {
-          "label": "Quill's reason",
-          "detail": "\"More detail, more insight! I added every name.\"",
-          "redFlag": false
-        },
-        {
-          "label": "Export preview",
-          "detail": "Tab 2 lists the 87 August no-shows: name, phone, birth date, visit reason. One says \"root canal.\"",
+          "label": "Email preview",
+          "detail": "To: 14 staff. Attached list: 87 patients' names, phones, birth dates, visit reasons.",
           "redFlag": true
         },
         {
           "label": "Policy SC-03",
-          "detail": "Reports show counts, not names. Personal data goes out only with the data owner's OK. This email goes to 14 people.",
+          "detail": "Reports show counts, not names.",
           "redFlag": true
+        },
+        {
+          "label": "Last month's email",
+          "detail": "Counts only. No names.",
+          "redFlag": false
         }
       ],
       "outcome": {
@@ -206,7 +213,7 @@
         "blocked": "The email goes with counts only: 87 no-shows in 1,240 visits, 7.0%. C. Ibarra says that's all she needed.",
         "escalated": "Marisol checks it. \"The report needs how many, not who. Counts, not names.\""
       },
-      "lesson": "Guard the data. A report shows counts, not names. A sent email can't come back."
+      "lesson": "What was asked? The usual report. Reports show counts, not names. A sent email can't come back."
     }
   ],
   "starterDeck": [
@@ -255,13 +262,13 @@
       },
       {
         "speaker": "coach",
-        "text": "That's what practice is for. Look first, then decide. Want to try again?"
+        "text": "That's what practice is for. Look first, then decide. The real shift is next."
       }
     ]
   },
   "debrief": {
     "skillTag": "Check before it goes out",
-    "takeaway": "Inspect first. Then ask: Who asked? Does it match the record? Can we undo it? Block only what the evidence says is wrong.",
+    "takeaway": "Inspect first. Then ask: Who signed off? What was asked? Can we undo it? Block only what the evidence says is wrong.",
     "careerInsight": "Analysts check each other's reports before they go out. They check the source, the sign-off and who can see it. AI agents draft reports fast, so the human check matters more."
   }
 }

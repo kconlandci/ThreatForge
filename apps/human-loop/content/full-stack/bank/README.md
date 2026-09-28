@@ -62,8 +62,8 @@ Difficulty: D1 ×4, D2 ×11, D3 ×5. Companies: Bramwell Logistics 7, Harlow & C
 
 | Shift | Step | S/R | Skill | Category | Twist / direction |
 |---|---|---|---|---|---|
-| practice | fs-phone-field | S | match-request | code | - |
 | practice | fs-self-merge | R | check-approval | code | under |
+| practice | fs-phone-merge-reviewed | S | check-approval | code | mirror of ticket 1 |
 | practice | fs-hc-revert | S | safe-change | code | scary-safe |
 | practice | fs-form-log | R | guard-data | code | routine-risky, over, irreversible |
 | encounter-01 | fs-track-errors | S | confirm-fix | lookup | - |

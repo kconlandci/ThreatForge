@@ -9,20 +9,22 @@ import { DialogueBox } from "./DialogueBox";
 import h from "./hub.module.css";
 
 /**
- * First-visit intro over the office: narrator lines as scene cards, the coach and the agent as a
- * visual-novel exchange. Skippable at any time.
+ * The intro lines: narrator lines as scene cards, the coach and the agent as a visual-novel
+ * exchange. Skippable at any time. New players no longer see it first (Phase 1a: practice opens
+ * with the coach's cold open); it plays from Menu > Replay intro, and for a returning player whose
+ * practice is done but who never saw it. "Skip practice" lives in the Menu.
  */
 export function IntroSequence({
   encounter,
   reducedMotion,
   onDone,
-  onSkipPractice,
+  lastLabel: lastLabelProp,
 }: {
   encounter: Encounter;
   reducedMotion: boolean;
   onDone: () => void;
-  /** Practice comes next: the last screen offers "Skip practice" (for presenters). */
-  onSkipPractice?: () => void;
+  /** The last button (default "Start practice" / "Let's go"). Replay: "Back to the game". */
+  lastLabel?: string;
 }) {
   const { coach, stage } = usePathway();
   const coachArt = SPRITES[stage.coachSprite as SpriteKey];
@@ -33,13 +35,7 @@ export function IntroSequence({
   const nextRef = useRef<HTMLButtonElement>(null);
   const sceneBtnRef = useRef<HTMLButtonElement>(null);
   const next = () => (last ? onDone() : setI(i + 1));
-  const lastLabel = encounter.practice ? "Start practice" : "Let's go";
-  const skip =
-    last && onSkipPractice ? (
-      <button type="button" className={h.skip} onClick={onSkipPractice}>
-        Skip practice
-      </button>
-    ) : null;
+  const lastLabel = lastLabelProp ?? (encounter.practice ? "Start practice" : "Let's go");
 
   useEffect(() => {
     const t = window.setTimeout(() => (line?.speaker === "narrator" ? sceneBtnRef.current : nextRef.current)?.focus(), 40);
@@ -78,7 +74,6 @@ export function IntroSequence({
             {last ? lastLabel : "Next"}
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
-          {skip}
           <div className={h.dots} aria-hidden="true">
             {lines.map((_, n) => (
               <span key={n} className={`${h.dot} ${n === i ? h.dotOn : ""}`} />
@@ -118,12 +113,11 @@ export function IntroSequence({
             nextLabel={last ? lastLabel : "Next"}
             onNext={next}
             secondary={
-              skip ??
-              (i > 0 ? (
+              i > 0 ? (
                 <button type="button" className={h.skip} onClick={() => setI(i - 1)}>
                   Back
                 </button>
-              ) : null)
+              ) : null
             }
           />
         </>

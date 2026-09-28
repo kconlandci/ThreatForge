@@ -20,6 +20,8 @@ export interface SheetProps {
   initialFocusRef?: RefObject<HTMLElement | null>;
   /** Where focus goes when the sheet closes, if the opener is gone. */
   returnFocusRef?: RefObject<HTMLElement | null>;
+  /** Close: focus returnFocusRef first (when it is on the page), before the opener. */
+  preferReturnRef?: boolean;
   closeLabel?: string;
 }
 
@@ -36,6 +38,7 @@ export function Sheet({
   footer,
   initialFocusRef,
   returnFocusRef,
+  preferReturnRef = false,
   closeLabel = "Close",
 }: SheetProps) {
   const [rendered, setRendered] = useState(open);
@@ -67,7 +70,10 @@ export function Sheet({
   // Focus in on open, back out on close.
   useEffect(() => {
     if (!open) return;
-    openerRef.current = document.activeElement as HTMLElement | null;
+    // <body> is not an opener: it is where focus sits when the control that opened the sheet is
+    // already gone (Inspect auto-played its only plan and left the hand). Then returnFocusRef wins.
+    const active = document.activeElement as HTMLElement | null;
+    openerRef.current = active && active !== document.body ? active : null;
     const t = window.setTimeout(() => {
       const target = initialFocusRef?.current ?? closeRef.current ?? panelRef.current;
       target?.focus({ preventScroll: true });
@@ -76,13 +82,15 @@ export function Sheet({
       window.clearTimeout(t);
       const back = openerRef.current;
       window.setTimeout(() => {
-        if (back && back.isConnected && !back.closest("[aria-hidden='true']")) back.focus({ preventScroll: true });
+        const preferred = preferReturnRef ? returnFocusRef?.current : null;
+        if (preferred && preferred.isConnected) preferred.focus({ preventScroll: true });
+        else if (back && back !== document.body && back.isConnected && !back.closest("[aria-hidden='true'],[inert]")) back.focus({ preventScroll: true });
         // The fallback should be whatever the ref points at *after* closing (e.g. a re-rendered button).
         // eslint-disable-next-line react-hooks/exhaustive-deps
         else returnFocusRef?.current?.focus({ preventScroll: true });
       }, 0);
     };
-  }, [open, initialFocusRef, returnFocusRef]);
+  }, [open, initialFocusRef, returnFocusRef, preferReturnRef]);
 
   if (!rendered || typeof document === "undefined") return null;
   const host = document.getElementById("hl-game-root") ?? document.body;

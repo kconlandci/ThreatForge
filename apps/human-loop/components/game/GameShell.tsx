@@ -30,6 +30,8 @@ import {
   BookOpen,
   Building,
   ChevronDown,
+  Clapperboard,
+  FastForward,
   LayoutGrid,
   List,
   Menu,
@@ -57,6 +59,7 @@ import { canResume, createBattle, deckAtTurn, scoreBattle } from "@/lib/game/eng
 import type { HubTargetId } from "@/lib/game/hub";
 import { stageSprites } from "@/lib/game/hubMap";
 import { drillCoach } from "@/lib/game/coach";
+import { resultMood } from "@/lib/game/reveal";
 import { applyBattle, localDay, shiftTally, skillChanges } from "@/lib/game/mastery";
 import { skillName } from "@/lib/game/skills";
 import { beginShift } from "@/lib/game/shiftGen";
@@ -161,6 +164,9 @@ function GameMenu({
   onPracticeAgain,
   canPracticeAgain,
   onSkills,
+  onReplayIntro,
+  onSkipPractice,
+  buttonRef,
 }: {
   view: View;
   /** The battle has ended (its result screen is one tap away): no "Pause". */
@@ -175,10 +181,16 @@ function GameMenu({
   canPracticeAgain: boolean;
   /** "Your skills" (only once there are skills to show). */
   onSkills?: () => void;
+  /** "Replay intro": the practice intro lines as an overlay (never starts a battle). */
+  onReplayIntro: () => void;
+  /** "Skip practice" (for presenters), only while practice is not done. */
+  onSkipPractice?: () => void;
+  buttonRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
-  const btnRef = useRef<HTMLButtonElement>(null);
+  const ownRef = useRef<HTMLButtonElement>(null);
+  const btnRef = buttonRef ?? ownRef;
   const boxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -192,7 +204,7 @@ function GameMenu({
       document.removeEventListener("pointerdown", onDown);
       window.clearTimeout(t);
     };
-  }, [open]);
+  }, [open, btnRef]);
 
   const close = (refocus = true) => {
     setOpen(false);
@@ -247,6 +259,20 @@ function GameMenu({
             </span>
             How to play
           </button>
+          <button type="button" className={g.menuItem} onClick={run(onReplayIntro)}>
+            <span className={g.menuIcon} aria-hidden="true">
+              <Clapperboard className="h-5 w-5" />
+            </span>
+            Replay intro
+          </button>
+          {onSkipPractice ? (
+            <button type="button" className={g.menuItem} onClick={run(onSkipPractice)}>
+              <span className={g.menuIcon} aria-hidden="true">
+                <FastForward className="h-5 w-5" />
+              </span>
+              Skip practice
+            </button>
+          ) : null}
           {view === "hub" || view === "intro" || view === "resume" ? (
             <button type="button" className={g.menuItem} onClick={run(onOfficeList)}>
               <span className={g.menuIcon} aria-hidden="true">
@@ -320,8 +346,8 @@ function HowToPlay({ open, deck, onClose }: { open: boolean; deck: HowDeck; onCl
       {deck.practice ? (
         <ol className="mb-4 list-decimal space-y-1.5 pl-5 text-[16px] leading-relaxed text-ink">
           <li>{agentShort} shows a plan.</li>
-          <li>Tap Inspect, then the plan, to see the evidence.</li>
-          <li>Something wrong? Block it. Looks fine? Approve.</li>
+          <li>Tap Inspect to see the evidence.</li>
+          <li>Something wrong? Tap that line, then Block. Looks fine? Let it run.</li>
         </ol>
       ) : (
         <>
@@ -428,6 +454,16 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [initialHubPos, setInitialHubPos] = useState<{ x: number; y: number } | null>(null);
   // Skills whose level changed in the battle that just ended (for the Daily / drill result).
   const [moved, setMoved] = useState<{ key: string; list: SkillMove[] } | null>(null);
+  // The rows the player marked in the battle that just ended ("spot it"; in memory only).
+  const [finalMarks, setFinalMarks] = useState<ReadonlyMap<string, number>>(() => new Map());
+  // "Replay intro" from the Menu: the intro plays over the current view, then closes.
+  const [replayIntro, setReplayIntro] = useState(false);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+  // After practice: the coach's one line in the office ("Monday starts here. Tap Ollie's desk.").
+  // While the path is on, reaching the agent's desk starts the story (no first-visit lines).
+  const [bark, setBark] = useState<string | null>(null);
+  const [barkPath, setBarkPath] = useState(false);
+  const barkPathRef = useRef(false);
   const walkingRef = useRef<HubTargetId | null>(null);
   const viewRef = useRef<View>("boot");
   const recorded = useRef<string | null>(null);
@@ -443,6 +479,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   useEffect(() => {
     walkingRef.current = walking;
   }, [walking]);
+  useEffect(() => {
+    barkPathRef.current = barkPath;
+  }, [barkPath]);
 
   /* Boot: load the save, pick the first view. */
   useEffect(() => {
@@ -455,7 +494,8 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
 
     const s = loadSave();
     if (!s.profile) {
-      router.replace("/play");
+      // Back here after "Play now" (or a sign-up): /play sends the player straight to this pathway.
+      router.replace(`/play?next=${pathway.id}`);
       return;
     }
     setSave(s);
@@ -518,6 +558,16 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
       if (p.battle || p.pendingResult || p.shift) {
         setSave(api.patchProgress((x) => ({ ...x, battle: null, pendingResult: null, shift: null })));
       }
+      if (!p.introSeen && !api.practiceDone(p)) {
+        // First run: no intro slides. Straight into practice; its first coach line is the cold open
+        // (the intro lines are one tap away: Menu, Replay intro).
+        const st = createBattle(pathway.practice, newSeed());
+        setSave(api.patchProgress((x) => ({ ...x, introSeen: true, battle: st, pendingResult: null, shift: null })));
+        setBattle(st);
+        setBattleKey((k) => k + 1);
+        setView("battle");
+        return;
+      }
       setView(p.introSeen ? "hub" : "intro");
     }
   }, [router, ENC, api, pathway]);
@@ -553,6 +603,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
           if (viewRef.current !== "hub") break;
           setWalking(null);
           setDialogue(msg.target);
+          setBark(null);
           break;
         case "hub-moved":
           if (!walkingRef.current) setDialogue(null);
@@ -582,19 +633,20 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
     return () => window.clearTimeout(t);
   }, [walking, stageReady]);
 
-  // Result screen: the agent's mood matches how the shift went.
+  // Result screen: the agent's mood matches how the shift went (celebrate only a clean run).
   useEffect(() => {
     if (view !== "result" || !finalState || !stageReady) return;
-    const won = finalState.status === "won";
-    bus.toStage.emit({ type: "agent-mood", mood: won ? "celebrate" : "sad" });
-  }, [view, finalState, stageReady, bus]);
+    bus.toStage.emit({ type: "agent-mood", mood: resultMood(finalState, pathway.encounterFor(finalState.encounterId, api.progressOf(loadSave()))) });
+  }, [view, finalState, stageReady, bus, pathway, api]);
 
-  // Focus: entering the hub from another view lands on the hub heading.
+  // Focus: entering the hub from another view lands on the hub heading (with the coach's bark, on
+  // the main button: HubOverlay focuses it).
   useEffect(() => {
     const from = prevView.current;
     prevView.current = view;
-    if (view === "hub" && from !== "boot" && from !== "hub") hubHeadingRef.current?.focus({ preventScroll: true });
+    if (view === "hub" && from !== "boot" && from !== "hub" && !bark) hubHeadingRef.current?.focus({ preventScroll: true });
     if (view === "resume") window.setTimeout(() => resumeBtnRef.current?.focus(), 30);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);
 
   /* ---------------------------------------------------------------- */
@@ -612,6 +664,8 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   );
 
   const beginBattle = useCallback((st: BattleState, next: "battle" | "brief" = "battle") => {
+    setBark(null);
+    setBarkPath(false);
     // A Daily practice or drill spec lives only as long as its own battle.
     setSave(api.patchProgress((p) => ({ ...p, battle: st, pendingResult: null, shift: p.shift?.id === st.encounterId ? p.shift : null })));
     setBattle(st);
@@ -740,8 +794,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
     setFinalState(st);
   }, [api, pathway]);
 
-  const showResult = useCallback((st: BattleState) => {
+  const showResult = useCallback((st: BattleState, marks?: ReadonlyMap<string, number>) => {
     setFinalState(st);
+    setFinalMarks(marks ?? new Map());
     setView("result");
   }, []);
 
@@ -788,10 +843,46 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
 
   /** For presenters: mark practice as done and go to the office, where "Start shift" waits. */
   const skipPractice = useCallback(() => {
-    setSave(api.patchProgress((p) => ({ ...p, introSeen: true, practiceDone: true })));
+    // A practice battle in progress is dropped (it would come back as "Resume practice").
+    setSave(
+      api.patchProgress((p) => ({
+        ...p,
+        introSeen: true,
+        practiceDone: true,
+        battle: p.battle?.encounterId === PRACTICE.id ? null : p.battle,
+      })),
+    );
     setDialogue(null);
     setView("hub");
-  }, [api]);
+  }, [api, PRACTICE]);
+
+  // The bark's path: reaching the agent's desk starts the story at once (no first-visit lines).
+  useEffect(() => {
+    if (!barkPath || view !== "hub" || !dialogue || HUB.targets[dialogue]?.action !== "battle") return;
+    setDialogue(null);
+    startShift();
+  }, [barkPath, view, dialogue, HUB, startShift]);
+
+  /** "Start the real shift" after practice: the office, with the coach's one line. */
+  const toRealShift = useCallback(() => {
+    setSave(
+      api.patchProgress((p) => ({
+        ...p,
+        pendingResult: null,
+        shift: p.shift && p.battle?.encounterId !== p.shift.id ? null : p.shift,
+      })),
+    );
+    setDialogue(null);
+    setWalking(null);
+    setBark(PRACTICE.hubBark ?? null);
+    setBarkPath(true);
+    setView("hub");
+  }, [api, PRACTICE]);
+
+  const closeReplay = useCallback(() => {
+    setReplayIntro(false);
+    window.setTimeout(() => menuBtnRef.current?.focus({ preventScroll: true }), 0);
+  }, []);
 
   const openHowTo = useCallback(() => {
     if (viewRef.current === "battle") {
@@ -861,7 +952,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const firstShift = !!progress && progress.attempts === 0 && !battleEnc.practice && !isGenerated(battleEnc);
   // Drills: "Where to look" at the top of the evidence sheet until the skill is Solid.
   const drillSkill = battleEnc.mode === "drill" && progress?.shift?.id === battleEnc.id ? progress.shift.focus[0] : undefined;
-  const sheetNote = drillSkill ? drillCoach(drillSkill, progress?.skills?.[drillSkill]?.level ?? 0) : null;
+  const sheetNote = drillSkill
+    ? drillCoach(drillSkill, progress?.skills?.[drillSkill]?.level ?? 0, pathway.skill(drillSkill).whereToLook)
+    : null;
   // Result screens: the weakest skill of this shift ("Practice this: ..."), once Daily practice is open.
   const resultLines = finalState && view === "result" ? planLines(finalState, resultEnc) : [];
   const practiceSkill = unlocked && finalState ? weakestInShift(resultLines, progress?.skills, day) ?? nextUpSkill(progress?.skills, day) : null;
@@ -874,7 +967,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
         Skip to the game
       </a>
       {/* While the resume prompt (a modal) is open, the bar behind it is inert. */}
-      <header className={g.bar} inert={view === "resume"}>
+      <header className={g.bar} inert={view === "resume" || replayIntro}>
         <Link href="/play" className="-mx-1 flex min-h-11 flex-none items-center rounded-lg px-1" aria-label="DCI Resources: choose a pathway">
           <DciLogo decorative className="h-7 w-auto" priority />
         </Link>
@@ -894,11 +987,18 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onPracticeAgain={startPractice}
             canPracticeAgain={!resumeKind || resumeKind === "practice"}
             onSkills={skillsOn && view === "hub" ? openSkills : undefined}
+            onReplayIntro={() => setReplayIntro(true)}
+            onSkipPractice={practiceNext ? skipPractice : undefined}
+            buttonRef={menuBtnRef}
           />
         ) : null}
       </header>
 
-      <main id="main" className={`${g.main} ${view === "battle" || view === "result" || view === "skills" ? g.mainFramed : ""}`}>
+      <main
+        id="main"
+        className={`${g.main} ${view === "battle" || view === "result" || view === "skills" ? g.mainFramed : ""}`}
+        inert={replayIntro}
+      >
         {view === "boot" ? (
           <div className={g.boot} role="status">
             <div>
@@ -947,7 +1047,18 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
                 practiceNext={practiceNext}
                 note={note}
                 onDismissNote={() => setNote(null)}
-                onSkipPractice={skipPractice}
+                bark={bark}
+                onDismissBark={() => {
+                  // The bark's focused button goes away with it: keep keyboard focus in the game.
+                  const hadFocus = document.activeElement?.closest("section") != null;
+                  setBark(null);
+                  if (hadFocus) {
+                    requestAnimationFrame(() => {
+                      const main = document.querySelector<HTMLElement>("[data-hub-main]");
+                      (main ?? hubHeadingRef.current)?.focus({ preventScroll: true });
+                    });
+                  }
+                }}
                 reducedMotion={reducedMotion}
                 onOpenRooms={() => setRoomsOpen(true)}
                 onCloseDialogue={() => {
@@ -962,12 +1073,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
               />
             ) : null}
             {view === "intro" ? (
-              <IntroSequence
-                encounter={practiceNext ? PRACTICE : ENC}
-                reducedMotion={reducedMotion}
-                onDone={finishIntro}
-                onSkipPractice={practiceNext ? skipPractice : undefined}
-              />
+              <IntroSequence encounter={practiceNext ? PRACTICE : ENC} reducedMotion={reducedMotion} onDone={finishIntro} />
             ) : null}
             {view === "brief" && battle ? (
               <ShiftIntro
@@ -1059,7 +1165,8 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             next={ENC}
             stage={<StageSlot host={host} />}
             stageReady={stageReady}
-            onStartShift={newShift}
+            marks={finalMarks}
+            onStartShift={toRealShift}
             onPracticeAgain={startPractice}
             onOffice={backToOffice}
             practiceSkill={practiceSkill}
@@ -1119,6 +1226,23 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             host,
           )
         : null}
+
+      {replayIntro ? (
+        <div
+          className={g.replay}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Intro"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.stopPropagation();
+              closeReplay();
+            }
+          }}
+        >
+          <IntroSequence encounter={PRACTICE} reducedMotion={reducedMotion} onDone={closeReplay} lastLabel="Back to the game" />
+        </div>
+      ) : null}
 
       <RoomList open={roomsOpen} hub={HUB} onClose={() => setRoomsOpen(false)} onGo={goTo} />
       <HowToPlay open={howOpen} deck={howDeck} onClose={() => setHowOpen(false)} />

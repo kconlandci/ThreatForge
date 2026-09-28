@@ -6,8 +6,9 @@
  * open evidence sheet), so a reload, a resumed save or keyboard play all land on the same hint.
  *
  * Hints are keyed by queue position and engine state only. They never read a step's `safe`
- * flag, any evidence `redFlag`, `twist` or `direction` (lib/game/coach.test.ts enforces this): the coach may ask the
- * question, but it never gives away the answer.
+ * flag, any evidence `redFlag` or `key`, `twist` or `direction`, and never import reveal.ts
+ * (lib/game/coach.test.ts enforces this): the coach may ask the question, but it never gives away
+ * the answer. The reveal line after a plan resolves is built in lib/game/reveal.ts.
  *
  * `**word**` marks the name of a control; the UI renders it bold (see hintParts()).
  */
@@ -26,7 +27,10 @@ export type CoachTarget =
   | "sheet:block"
   | "sheet:ok";
 
-/** Controls that are locked for now (practice tickets 1-2 only). The engine is never told. */
+/**
+ * Controls that are locked for now. Phase 1a: the practice coach no longer locks anything; the
+ * type and CoachHint.lock stay so the UI that renders a lock still compiles.
+ */
 export interface CoachLock {
   cards: CardId[];
   approve: boolean;
@@ -49,6 +53,8 @@ export interface CoachUi {
   selectedCardId: CardId | null;
   /** The step whose evidence sheet is open, if any. */
   sheetStepId: string | null;
+  /** Practice: the pull hint ("Where do I look?") is shown for the open sheet's plan. */
+  hint?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -87,14 +93,12 @@ function stepIndex(enc: Encounter, stepId: string): number {
   return enc.steps.findIndex((s) => s.id === stepId);
 }
 
-/** The last thing that took a plan off the board this turn (engine events only). */
-function lastResolution(state: BattleState): { stepId: string; kind: "caught" | "false-alarm" | "escalated" } | null {
+/** The last plan taken off the board this turn (engine events only). */
+function lastResolution(state: BattleState): { stepId: string } | null {
   const evs = turnEvents(state);
   for (let i = evs.length - 1; i >= 0; i--) {
     const ev = evs[i];
-    if (ev.t === "caught") return { stepId: ev.stepId, kind: "caught" };
-    if (ev.t === "false-alarm") return { stepId: ev.stepId, kind: "false-alarm" };
-    if (ev.t === "escalated-safe") return { stepId: ev.stepId, kind: "escalated" };
+    if (ev.t === "caught" || ev.t === "false-alarm" || ev.t === "escalated-safe") return { stepId: ev.stepId };
   }
   return null;
 }
@@ -130,22 +134,16 @@ export function cardPrompt(state: BattleState, enc: Encounter, cardId: CardId): 
 /* Practice                                                            */
 /* ------------------------------------------------------------------ */
 
-const LOCK_INSPECT_FIRST: Omit<CoachLock, "approve"> = {
-  cards: ["block"],
-  sheetBlock: true,
-  reason: "Inspect first. Then decide.",
-  label: "inspect the plan first",
-};
-
 const HIDDEN = "Evidence is hidden. Tap **Inspect** to see it.";
-/** Practice sheet lines for tickets 1 and 2 when the encounter has no coachScript (the Help Desk lines). */
-const FIRST_SAFE_SHEET = "Real ticket. Work email. Public guide. Tap **Looks OK**.";
-const FIRST_RISKY_SHEET = "Who asked? Check the **sender address**. Wrong? Tap **Block**.";
-const YOUR_CALL_SHEET = "Your call. Wrong? **Block**. Fine? **Looks OK**.";
 
 /**
- * The practice shift's script. k = the queue position (0-3) of the plan on the board; tickets 1
- * and 2 are guided (with locks), tickets 3 and 4 are the player's call.
+ * The practice shift's coach (Phase 1a). k = the queue position (content order) of the plan on the
+ * board. It never locks a control and never points at Block, Let it run or Approve while a plan is
+ * unresolved (it names both choices together, never one): the decision is the player's, from ticket 1. On the first ticket it says the cold
+ * open, which names the skill ("You check its plans."). With the sheet open and the pull hint on
+ * ("Where do I look?"), it says the plan's `coachScript.idle[k]` line: where to look, never what to
+ * decide. After a resolution BattleView shows the reveal line first (lib/game/reveal.ts
+ * practiceBar); this file never reads the answers and never imports reveal.ts.
  */
 export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): CoachHint {
   if (state.status !== "playing") {
@@ -156,17 +154,7 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
   if (board.length === 0) {
     const last = lastResolution(state);
     const k = last ? stepIndex(enc, last.stepId) : -1;
-    if (last && k <= 2 && last.kind === "caught") {
-      return { id: `p${k}-caught`, text: "Caught! A blocked plan never runs. Tap **Next ticket**.", target: "approve" };
-    }
-    if (last && k <= 2 && last.kind === "false-alarm") {
-      return {
-        id: `p${k}-false-alarm`,
-        text: "That one was fine. Blocked good work comes back later. Tap **Next ticket**.",
-        target: "approve",
-      };
-    }
-    return { id: `p${k}-empty`, text: "Tap **Next ticket**.", target: k >= 0 && k <= 2 ? "approve" : null };
+    return { id: `p${k}-empty`, text: "Tap **Next ticket**.", target: "approve" };
   }
 
   const stepId = board[0];
@@ -176,62 +164,35 @@ export function practiceCoach(state: BattleState, enc: Encounter, ui: CoachUi): 
   const sheetOpen = !!ui.sheetStepId && board.includes(ui.sheetStepId);
   let hint: CoachHint;
 
-  if (k === 0) {
-    if (!inspected) {
-      const lock = { ...LOCK_INSPECT_FIRST, approve: true };
-      hint = sheetOpen
-        ? { id: "p0-b", text: HIDDEN, target: "sheet:inspect", lock }
-        : { id: "p0-a", text: `${agentShort(enc)} has a plan. Check it first: tap **Inspect**.`, target: "card:inspect", lock };
-    } else {
-      const lock: CoachLock = {
-        cards: ["block"],
-        sheetBlock: true,
-        approve: sheetOpen,
-        reason: "This one is fine. Approve it.",
-        label: "this one is fine, approve it",
+  if (!inspected) {
+    if (sheetOpen) {
+      hint = { id: `p${k}-hidden`, text: HIDDEN, target: "sheet:inspect" };
+    } else if ((rt?.requeues ?? 0) > 0) {
+      hint = { id: `p${k}-back`, text: "It's back. Look again, then decide.", target: "plan" };
+    } else if (k === 0) {
+      hint = {
+        id: "p0-a",
+        text: enc.coldOpen ? `${enc.coldOpen} **Inspect** its plan.` : `${agentShort(enc)} has a plan. Check it first: tap **Inspect**.`,
+        target: "card:inspect",
       };
-      hint = sheetOpen
-        ? { id: "p0-c", text: enc.coachScript?.firstSafeSheet ?? FIRST_SAFE_SHEET, target: "sheet:ok", lock }
-        : { id: "p0-d", text: `Looks fine. Tap **Approve** to let ${agentShort(enc)} do it.`, target: "approve", lock };
-    }
-  } else if (k === 1) {
-    if (!inspected) {
-      const lock = { ...LOCK_INSPECT_FIRST, approve: true };
-      hint = sheetOpen
-        ? { id: "p1-b", text: HIDDEN, target: "sheet:inspect", lock }
-        : { id: "p1-a", text: "New ticket. **Inspect** it first.", target: "card:inspect", lock };
     } else {
-      hint = sheetOpen
-        ? { id: "p1-c", text: enc.coachScript?.firstRiskySheet ?? FIRST_RISKY_SHEET, target: "sheet:block" }
-        : { id: "p1-d", text: "Something wrong? Tap **Block**, then tap the plan.", target: "card:block" };
+      hint = { id: `p${k}-a`, text: "Next plan. **Inspect** it.", target: "card:inspect" };
     }
-  } else if (k === 2) {
-    const returned = (rt?.requeues ?? 0) > 0;
-    if (!inspected) {
-      hint = sheetOpen
-        ? { id: "p2-hidden", text: HIDDEN, target: "sheet:inspect" }
-        : returned
-          ? { id: "p2-back", text: "It's back. Look again, then decide.", target: "plan" }
-          : { id: "p2-a", text: "This one sounds scary. Is it? **Inspect** to find out.", target: "card:inspect" };
-    } else {
-      hint = sheetOpen
-        ? { id: "p2-b-sheet", text: YOUR_CALL_SHEET, target: null }
-        : { id: "p2-b", text: "Your call: **Block** it, or tap **Approve**.", target: null };
-    }
-  } else if (!inspected) {
-    hint = sheetOpen
-      ? { id: "p3-hidden", text: HIDDEN, target: null }
-      : { id: "p3-a", text: "Last ticket. Looks routine. Check it anyway.", target: null };
+  } else if (sheetOpen) {
+    const idle = enc.coachScript?.idle?.[k];
+    hint = ui.hint && idle ? { id: `p${k}-look`, text: idle, target: null } : { id: `p${k}-sheet`, text: "", target: null };
+  } else if ((rt?.requeues ?? 0) > 0) {
+    // A blocked safe plan came back, already checked: Inspect has nothing left to show, so the
+    // way in is the plan itself.
+    hint = { id: `p${k}-back`, text: "It's back. Tap the plan to look again.", target: "plan" };
   } else {
-    hint = sheetOpen
-      ? { id: "p3-b-sheet", text: YOUR_CALL_SHEET, target: null }
-      : { id: "p3-b", text: "Wrong? **Block** it. Fine? Tap **Approve**.", target: null };
+    hint = { id: `p${k}-call`, text: "Block it or let it run.", target: null };
   }
 
-  // A card is picked (and the sheet is closed): say where to tap. Locks stay as they were.
+  // A card is picked (and the sheet is closed): say where to tap.
   if (ui.selectedCardId && !sheetOpen) {
     const prompt = cardPrompt(state, enc, ui.selectedCardId);
-    return { ...prompt, id: `p${k}-${prompt.id}`, lock: hint.lock };
+    return { ...prompt, id: `p${k}-${prompt.id}` };
   }
   return hint;
 }
@@ -392,10 +353,10 @@ export function sheetCoach(
   state: BattleState,
   enc: Encounter,
   stepId: string,
-  ui: Pick<CoachUi, "selectedCardId">,
+  ui: Pick<CoachUi, "selectedCardId" | "hint">,
 ): Pick<CoachHint, "text" | "target" | "lock"> | null {
   if (!enc.practice || !state.announced.includes(stepId)) return null;
-  const { text, target, lock } = practiceCoach(state, enc, { selectedCardId: ui.selectedCardId, sheetStepId: stepId });
+  const { text, target, lock } = practiceCoach(state, enc, { selectedCardId: ui.selectedCardId, sheetStepId: stepId, hint: ui.hint });
   return { text, target, lock };
 }
 
