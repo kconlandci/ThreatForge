@@ -1099,7 +1099,8 @@ export function BattleView({
           />
         </div>
 
-        <div className={s.handZone}>
+        {/* While the agent's results play, the hand is locked: hide it (keeping its space) so the result reads alone. */}
+        <div className={`${s.handZone} ${phase ? s.handZoneBusy : ""}`} aria-hidden={phase ? true : undefined}>
           {!practice ? <EnergyOrb energy={view.energy} max={encounter.energyPerTurn} coach={coach?.target === "energy"} /> : null}
           <Hand
             stacks={stacks}
@@ -1155,7 +1156,7 @@ export function BattleView({
           ) : phase ? (
             <>
               <div className={s.workingRow}>
-                <p className={s.working} aria-hidden="true">
+                <p className={s.working} aria-hidden="true" hidden={phase.shown >= phase.beats.length}>
                   {agent} is working
                   {phase.beats.length >= 2 ? ` · Plan ${Math.max(1, phase.shown)} of ${phase.beats.length}` : ""}
                   <span className={s.dots}>

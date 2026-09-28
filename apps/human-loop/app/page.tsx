@@ -68,7 +68,7 @@ export default function Home() {
                 How a shift works
               </h2>
               <p className="mt-3 text-lg leading-relaxed text-ink-soft">
-                One shift. One AI coworker with a lot of confidence. You play oversight cards to keep its work safe.
+                Your AI coworker makes plans. You check them before they run.
               </p>
             </div>
             <div className="mt-10 sm:mt-12">

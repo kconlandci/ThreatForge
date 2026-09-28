@@ -27,6 +27,7 @@ import {
 import { createPortal } from "react-dom";
 import {
   Accessibility,
+  BookMarked,
   BookOpen,
   Building,
   ChevronDown,
@@ -188,6 +189,7 @@ function GameMenu({
   buttonRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const [open, setOpen] = useState(false);
+  const { id: guideId } = usePathway();
   const menuId = useId();
   const ownRef = useRef<HTMLButtonElement>(null);
   const btnRef = buttonRef ?? ownRef;
@@ -306,6 +308,12 @@ function GameMenu({
             </button>
           ) : null}
           <div className={g.divider} />
+          <Link href={`/guide#${guideId}`} className={g.menuItem}>
+            <span className={g.menuIcon} aria-hidden="true">
+              <BookMarked className="h-5 w-5" />
+            </span>
+            Field guide
+          </Link>
           <Link href="/play" className={g.menuItem}>
             <span className={g.menuIcon} aria-hidden="true">
               <LayoutGrid className="h-5 w-5" />

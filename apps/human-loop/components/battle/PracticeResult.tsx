@@ -16,7 +16,7 @@ export interface PracticeResultProps {
   state: BattleState;
   /** The practice shift that just ended. */
   encounter: Encounter;
-  /** The real shift that comes next (its intro lines show under "Up next"). */
+  /** The real shift that comes next (not shown here; the button starts it). */
   next: Encounter;
   stage: ReactNode;
   stageReady: boolean;
@@ -65,7 +65,6 @@ const NO_MARKS: ReadonlyMap<string, number> = new Map();
 export function PracticeResult({
   state,
   encounter,
-  next,
   stage,
   stageReady,
   marks = NO_MARKS,
@@ -100,6 +99,9 @@ export function PracticeResult({
   const practice = practiceSkill && onPractice ? practiceSkill : null;
   // Celebrate only a clean run; a win with misses is "idle".
   const mood = resultMood(state, encounter);
+  // One line, not a chat: the coach's last word (or the last line if the coach has none).
+  const coachLines = outro.filter((l) => l.speaker === "coach");
+  const outroLines = coachLines.length ? coachLines.slice(-1) : outro.slice(-1);
 
   return (
     <div className={r.page}>
@@ -132,7 +134,7 @@ export function PracticeResult({
             <p className={r.subline}>{practiceHeadline(state, encounter)}</p>
             <p className={r.practiced}>{PRACTICED_LINE}</p>
             <div className={`${r.chat} mt-4 text-left`}>
-              {outro.map((line, i) => (
+              {outroLines.map((line, i) => (
                 <div key={i} className={r.line}>
                   <SpeakerFace speaker={line.speaker} size={40} mood={mood} />
                   <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
@@ -155,25 +157,6 @@ export function PracticeResult({
           <PlanList state={state} encounter={encounter} />
         </section>
 
-        {practice ? null : (
-        <section className={r.section} aria-labelledby="hl-next-title">
-          <p className={r.eyebrow}>{next.title}</p>
-          <h2 id="hl-next-title" className={r.h2}>
-            Up next: the real shift
-          </h2>
-          <div className={r.chat}>
-            {next.intro.map((line, i) => (
-              <div key={i} className={r.line}>
-                <SpeakerFace speaker={line.speaker} size={40} mood="eager" />
-                <p className={`${r.lineBubble} ${line.speaker === "narrator" ? r.lineNarrator : ""}`}>
-                  {line.speaker !== "narrator" ? <span className={r.lineName}>{speakerName(line.speaker, speakerNames(next))}</span> : null}
-                  {line.text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-        )}
 
         <div className={r.stickyFoot}>
           {practice && onPractice ? (

@@ -85,7 +85,7 @@ function SignUpView({
               Play now
             </button>
             <ul className="mt-6 hidden space-y-2.5 md:block">
-              {["Read your AI coworker's plan", "Inspect the evidence", "Approve it, block it, or escalate it"].map((t, i) => (
+              {["Read your AI coworker's plan", "Check the evidence", "Let it run, block it, or ask for help"].map((t, i) => (
                 <li key={t} className="flex items-center gap-3 text-[16px] font-semibold text-paper">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 border-ink bg-orange font-display text-sm font-bold text-ink">
                     {i + 1}

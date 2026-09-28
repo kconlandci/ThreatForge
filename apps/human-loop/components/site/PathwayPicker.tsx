@@ -43,6 +43,11 @@ export function PathwayPicker({
 
   return (
     <div>
+      <p className="mb-4 text-[15px]">
+        <Link href="/guide" prefetch={false} className={textLink}>
+          Meet the AI coworkers
+        </Link>
+      </p>
       <ul className="grid gap-5">
         {live.map((meta, i) => (
           <li key={meta.id}>

@@ -102,18 +102,18 @@ function DecideArt() {
 
 const STEPS = [
   {
-    title: "Read the agent’s intent",
-    body: "Each turn, the AI agent shows you its plan. Most plans are fine. A few are bad ideas that sound very sure of themselves.",
+    title: "Read the plan",
+    body: "Your AI coworker shows you what it wants to do. Most plans are fine. Some are not.",
     Art: IntentArt,
   },
   {
-    title: "Inspect the evidence",
-    body: "Play an Inspect card to see what the agent missed. Check who asked, what the record says, and what the policy allows.",
+    title: "Check the evidence",
+    body: "Tap Inspect. Mark the line that looks wrong.",
     Art: InspectArt,
   },
   {
-    title: "Approve, block, or escalate",
-    body: "Good plan? Approve it. Bad plan? Block it. Not sure? Escalate to Dana, your manager. Stop the bad calls without stalling the good work.",
+    title: "Decide",
+    body: "Good plan? Let it run. Bad plan? Block it. Not sure? Ask your team lead.",
     Art: DecideArt,
   },
 ];

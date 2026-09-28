@@ -27,6 +27,12 @@ export function SiteFooter() {
             Privacy notice
           </Link>
           <Link
+            href="/guide"
+            className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-orange"
+          >
+            Field guide
+          </Link>
+          <Link
             href="/play"
             className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-orange"
           >
