@@ -305,6 +305,15 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
       // Hand: at most handSize + one unlock, and at most 6 stacks (one per card type).
       expect(enc.handSize + Math.max(...unlocks.map((u) => u.cards.length))).toBeLessThanOrEqual(6);
     });
+
+    it("states facts in its evidence: no verdict words (the agent's own reason may claim anything)", () => {
+      for (const st of enc.steps) {
+        for (const e of st.evidence) {
+          if (/'s reason$/.test(e.label)) continue;
+          expect(e.detail, `${st.id} "${e.label}": verdict words`).not.toMatch(PRACTICE_VERDICT_RE);
+        }
+      }
+    });
   });
 
   describe("the practice shift", () => {

@@ -227,7 +227,7 @@
         },
         {
           "label": "Vendor contract",
-          "detail": "Larkfield Booking's real address is larkfieldbooking.com. Contract contact: support@larkfieldbooking.com.",
+          "detail": "Larkfield Booking. Website: larkfieldbooking.com. Contract contact: support@larkfieldbooking.com.",
           "redFlag": true
         },
         {
@@ -291,7 +291,7 @@
       "progress": 1,
       "risk": 0,
       "skill": "check-approval",
-      "tell": "Marisol signed off this exact version, and every number matches a query.",
+      "tell": "Marisol signed off this exact version, and nothing changed after.",
       "evidence": [
         {
           "label": "Report draft",
@@ -305,7 +305,7 @@
         },
         {
           "label": "Sign-off record",
-          "detail": "Marisol signed off version 5 at 1:40 PM. Readers: P. Whitcomb, J. Romero, R. Fairbanks. Every number matches a saved query.",
+          "detail": "Marisol signed off version 5 at 1:40 PM. Readers: P. Whitcomb, J. Romero, R. Fairbanks.",
           "redFlag": false
         },
         {
@@ -320,7 +320,7 @@
         "escalated": "Marisol checks it. \"I signed off this exact version, and every number has a source. Share it.\"",
         "rolledBack": "The share is removed. The leaders see the deck for the first time at 3 PM."
       },
-      "lesson": "The owner signed off this exact version, and every number matches a source. That is a safe share."
+      "lesson": "The owner signed off this exact version, and nothing changed after. That is a safe share."
     },
     {
       "id": "ba-pd-merge",
@@ -385,7 +385,7 @@
         },
         {
           "label": "Export preview",
-          "detail": "Load numbers and times stay. Customer names and addresses are masked: swapped for fake ones.",
+          "detail": "Load numbers and times stay. Customer names and addresses are masked: swapped for made-up ones.",
           "redFlag": false
         },
         {
@@ -437,7 +437,7 @@
         },
         {
           "label": "Change log",
-          "detail": "No OK from R. Fairbanks or Marisol. Last quarter used 8 hours, so the two numbers can't be compared.",
+          "detail": "No OK from R. Fairbanks or Marisol. Last quarter's 93% used 8 business hours.",
           "redFlag": true
         }
       ],

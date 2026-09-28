@@ -385,7 +385,7 @@
         },
         {
           "label": "Test data",
-          "detail": "Tracking numbers stay. Names, addresses and phones are masked: real ones swapped for fake ones.",
+          "detail": "Tracking numbers stay. Names, addresses and phones are masked: real ones swapped for made-up ones.",
           "redFlag": false
         },
         {
@@ -418,7 +418,7 @@
       "evidence": [
         {
           "label": "Pull request",
-          "detail": "PR #530, the new statements page. V. Iyer reviewed it at 2 PM. The code is fine.",
+          "detail": "PR #530, the new statements page. V. Iyer reviewed it at 2 PM.",
           "redFlag": false
         },
         {

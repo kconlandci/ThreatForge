@@ -228,7 +228,7 @@
         },
         {
           "label": "Status page",
-          "detail": "Harlow & Cole's public status page announces tonight's maintenance. Anyone could know.",
+          "detail": "Harlow & Cole's public status page: \"Disaster test tonight. Short outages possible.\"",
           "redFlag": true
         },
         {
@@ -271,7 +271,7 @@
         },
         {
           "label": "Callback",
-          "detail": "Nimbus will call (617) 555-0164, the number on the contract. It changes nothing.",
+          "detail": "Nimbus will call (617) 555-0164. It changes nothing.",
           "redFlag": false
         }
       ],

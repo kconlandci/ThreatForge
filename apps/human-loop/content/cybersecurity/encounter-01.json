@@ -183,7 +183,7 @@
         },
         {
           "label": "Mail check",
-          "detail": "Sender checks pass (SPF and DKIM). The link opens wrenfieldpayroll.com, the real portal.",
+          "detail": "Sender checks pass (SPF and DKIM). The link opens wrenfieldpayroll.com.",
           "redFlag": false
         },
         {
@@ -227,12 +227,12 @@
         },
         {
           "label": "Sender address",
-          "detail": "payroll@wrenfield-payroll.co. The real sender is notices@wrenfieldpayroll.com.",
+          "detail": "From: payroll@wrenfield-payroll.co. Vendor list: notices@wrenfieldpayroll.com.",
           "redFlag": true
         },
         {
           "label": "Link check",
-          "detail": "The link opens a fake Wrenfield sign-in page. It asks for her payroll password, then her bank details.",
+          "detail": "The link opens wrenfield-payroll.co/login. It asks for her payroll password, then her bank details.",
           "redFlag": true
         }
       ],
@@ -355,7 +355,7 @@
         },
         {
           "label": "Legal hold",
-          "detail": "Harlow & Cole's lawyer: \"Keep everything. We may go to court.\" A wipe erases the proof.",
+          "detail": "Harlow & Cole's lawyer: \"Keep everything. We may go to court.\"",
           "redFlag": true
         },
         {

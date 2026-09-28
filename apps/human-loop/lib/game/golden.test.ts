@@ -22,6 +22,9 @@
  *   already checked -> "It's back. Tap the plan to look again."; "Your call." -> "Block it or let it
  *   run."). Audited against git HEAD: only "practice" and the 24 practice|* traces changed; every
  *   other key and trace is identical. artifact-kinds.json: 4 Help Desk practice rows.
+ * - Honest story evidence (every pathway): story rows state facts, not verdicts ("No match",
+ *   "That part is normal", "This is step 1 ..." cut). Audited: only "story" changed, in exactly
+ *   those 3 evidence details; every trace and artifact-kinds.json are identical.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

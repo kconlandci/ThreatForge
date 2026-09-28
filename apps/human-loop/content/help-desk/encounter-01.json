@@ -61,7 +61,7 @@
         },
         {
           "label": "Access check",
-          "detail": "Help desk role is allowed to view the directory. This is step 1 of the identity check.",
+          "detail": "Help desk role is allowed to view the directory.",
           "redFlag": false
         }
       ],
@@ -133,7 +133,7 @@
         },
         {
           "label": "Directory record",
-          "detail": "Phone on file for J. Romero: (860) 555-0148. Callback number in the ticket: (305) 555-9927. No match.",
+          "detail": "J. Romero, CFO. Phone on file: (860) 555-0148.",
           "redFlag": true
         },
         {
@@ -391,7 +391,7 @@
       "evidence": [
         {
           "label": "Handoff notes",
-          "detail": "Dana wants a 3-line summary on every closed ticket. That part is normal.",
+          "detail": "Dana wants a 3-line summary on every closed ticket.",
           "redFlag": false
         },
         {
