@@ -1,13 +1,16 @@
 /**
  * Background music: off unless the player turns it on (classrooms and libraries). The choice is
- * per device (localStorage), not in the cloud save. With TRACK set (a file in public/game/music/),
- * that track loops; otherwise a calm chord loop is made in code with Web Audio (no files, no licenses).
+ * per device (localStorage), not in the cloud save. The TRACKS playlist (files in public/game/music/)
+ * plays in order and repeats; if it can't play, a calm chord loop made in code with Web Audio takes over.
  * Browsers only allow sound after a tap or key press, so start() must run from one.
  */
 
 const KEY = "human-loop:music";
-/** A licensed track to loop instead of the code-made music, e.g. "/game/music/theme.mp3". */
-const TRACK: string | null = null;
+/**
+ * The playlist, played in order and repeated. Each track needs a license that allows use in the game:
+ * both songs were made by DCI with Google Gemini (Lyria), which leaves the output to its maker.
+ */
+const TRACKS: string[] = ["/game/music/ten-am-office-shuffle.mp3", "/game/music/coffee-at-ten.mp3"];
 const VOLUME = 0.12;
 
 export function musicPref(): boolean {
@@ -47,6 +50,7 @@ type Synth = { ctx: AudioContext; master: GainNode; timer: number; nextBar: numb
 let synth: Synth | null = null;
 let audio: HTMLAudioElement | null = null;
 let wanted = false;
+let trackIndex = 0;
 
 function tone(ctx: AudioContext, out: AudioNode, type: OscillatorType, freq: number, at: number, dur: number, peak: number, attack: number) {
   const osc = ctx.createOscillator();
@@ -135,17 +139,27 @@ export function startMusic(): void {
   wanted = true;
   if (audio || synth) return;
   document.addEventListener("visibilitychange", onVisibility);
-  if (!TRACK) {
+  if (TRACKS.length === 0) {
     startSynth();
     return;
   }
-  const a = new Audio(TRACK);
-  a.loop = true;
+  playTrack(trackIndex);
+}
+
+function playTrack(i: number) {
+  trackIndex = i % TRACKS.length;
+  const a = new Audio(TRACKS[trackIndex]);
+  a.loop = TRACKS.length === 1;
   a.volume = 0.35;
+  // Next song when this one ends (a one-song list just loops).
+  a.addEventListener("ended", () => {
+    if (audio === a && wanted) playTrack(trackIndex + 1);
+  });
   audio = a;
   // If the track can't play (missing file, blocked), fall back to the code-made loop.
   void a.play().catch(() => {
-    if (audio === a) audio = null;
+    if (audio !== a) return;
+    audio = null;
     if (wanted && !synth) startSynth();
   });
 }
