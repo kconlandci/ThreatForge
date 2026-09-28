@@ -25,6 +25,11 @@
  * - Honest story evidence (every pathway): story rows state facts, not verdicts ("No match",
  *   "That part is normal", "This is step 1 ..." cut). Audited: only "story" changed, in exactly
  *   those 3 evidence details; every trace and artifact-kinds.json are identical.
+ * - Rush turn coaching (every pathway): the first turn with more plans than energy to inspect them
+ *   all and still Block gets "tip-rush" (first shift), and the generic hint says "Save 1 for Block"
+ *   (g-check-save) instead of "Tap Inspect" when that would spend the Block's energy. Audited on raw
+ *   (unhashed) traces: 48 traces changed, only in hint rows (tip-rollback/g-check -> tip-rush,
+ *   g-check -> g-check-save); every event, beat, debrief and score is identical.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

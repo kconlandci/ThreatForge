@@ -263,8 +263,21 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
     return { id: "tip-two-plans", text: "**Two plans** now. They run in order, top to bottom.", target: "plan" };
   }
 
-  // The two-plans tip used the turn's first moment, so its unlock tip gets the next one.
-  if (played.size > (twoPlanTurn ? 1 : 0)) return null;
+  // The first rush turn: inspecting every plan would leave no energy to Block (the policy may have
+  // checked some already, so count what is still unchecked).
+  const unchecked = state.announced.filter((id) => !state.steps[id]?.inspected).length;
+  const rushTurn =
+    !twoPlanTurn && announcedNow >= enc.energyPerTurn && maxBefore < enc.energyPerTurn && unchecked >= state.energy;
+  if (rushTurn && played.size === 0 && state.hand.some((c) => c.cardId === "block")) {
+    return {
+      id: "tip-rush",
+      text: `**${unchecked} plans**, **${state.energy} energy**. Inspect the most risky first. Save 1 for **Block**.`,
+      target: "plan",
+    };
+  }
+
+  // The two-plans and rush tips used the turn's first moment, so its unlock tip gets the next one.
+  if (played.size > (twoPlanTurn || rushTurn ? 1 : 0)) return null;
   for (const ev of evs) {
     if (ev.t !== "unlock") continue;
     for (const id of ev.cardIds) {
@@ -298,6 +311,14 @@ export function genericHint(state: BattleState): CoachHint {
   const canInspect = state.hand.some((c) => c.cardId === "inspect") && state.energy >= CARDS.inspect.cost;
   if (unchecked > 0 && canInspect) {
     if (board.length === 1) return { id: "g-check-one", text: "Check the plan: tap **Inspect**, then the plan.", target: "card:inspect" };
+    // Inspecting them all would spend the energy a Block needs: say so, never "inspect them all".
+    if (state.energy >= 2 && unchecked >= state.energy && state.hand.some((c) => c.cardId === "block")) {
+      return {
+        id: "g-check-save",
+        text: `${unchecked} plans not checked, ${state.energy} energy. Save 1 for **Block**.`,
+        target: "card:inspect",
+      };
+    }
     return {
       id: "g-check",
       text: `${unchecked} ${unchecked === 1 ? "plan" : "plans"} not checked. Tap **Inspect**, then a plan.`,

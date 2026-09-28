@@ -5,6 +5,7 @@ import { createBattle, endTurn } from "./engine";
 import { tryPlay } from "./fixtures";
 import { LENS_SKILLS } from "./skills";
 import { HELP_DESK } from "@/lib/pathways/help-desk";
+import { TEST_PATHWAYS } from "@/lib/pathways/testing";
 import type { BattleState, CardId, Encounter } from "./types";
 
 const closed: CoachUi = { selectedCardId: null, sheetStepId: null };
@@ -243,6 +244,44 @@ describe("shiftCoach: first-shift tips", () => {
     if (s.status === "playing") {
       expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-coffee", text: "New card: **Coffee**. Free. Draw 2 more cards." });
     }
+  });
+
+  it("warns once on the rush turn: more plans than energy to inspect them and still Block", () => {
+    for (const TP of TEST_PATHWAYS) {
+      const S = TP.story;
+      let s = createBattle(S, 21);
+      while (s.status === "playing" && s.turn < 4) s = endTurn(s, S);
+      expect(s.announced, TP.id).toHaveLength(3);
+      expect(shiftCoach(s, S, first), TP.id).toEqual({
+        id: "tip-rush",
+        text: "**3 plans**, **3 energy**. Inspect the most risky first. Save 1 for **Block**.",
+        target: "plan",
+      });
+      // After a card, the generic hint agrees with the tip (unless a new-card tip takes the moment).
+      // A fixed hand: the drawn one may hold a single Inspect ("No Inspect left" is right then).
+      const hand = ["inspect", "inspect", "inspect", "block", "block"].map((cardId, i) => ({ uid: `r${i}`, cardId: cardId as CardId }));
+      const after = play({ ...s, hand }, "inspect", S);
+      expect(shiftCoach(after, S, first).id, TP.id).toMatch(/^(g-check-save|tip-rollback)$/);
+      expect(shiftCoach(after, S, { ...closed, firstShift: false }), TP.id).toMatchObject({
+        id: "g-check-save",
+        text: "2 plans not checked, 2 energy. Save 1 for **Block**.",
+      });
+      // Later shifts: no tip.
+      expect(shiftCoach(s, S, { ...closed, firstShift: false }).id, TP.id).toBe("g-check-save");
+    }
+  });
+
+  it("skips the rush tip when the policy already checked a plan (energy is enough)", () => {
+    let s = createBattle(E, 21);
+    while (s.status === "playing" && s.turn < 4) s = endTurn(s, E);
+    const one = s.announced[0];
+    const checked = { ...s, steps: { ...s.steps, [one]: { ...s.steps[one], inspected: true } } };
+    expect(shiftCoach(checked, E, first).id).not.toBe("tip-rush");
+    // 1 energy left and 1 plan unchecked: inspecting it is fine to suggest.
+    expect(shiftCoach({ ...checked, energy: 1, steps: { ...checked.steps, [s.announced[1]]: { ...checked.steps[s.announced[1]], inspected: true } } }, E, {
+      ...closed,
+      firstShift: false,
+    }).id).toBe("g-check");
   });
 
   it("shows no tips after the first shift, only generic hints", () => {
