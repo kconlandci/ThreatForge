@@ -490,3 +490,10 @@ lib/client/     browser save (localStorage first, optional cloud sync)
 lib/server/     server-only code for the API routes
 public/         brand and game art
 ```
+
+### Background music
+
+Off by default (classrooms). The speaker button in the game bar and **Menu > Music** turn it on; the
+choice is saved per device (`localStorage` key `human-loop:music`), not in the cloud save. With no
+file, `lib/client/music.ts` plays a calm chord loop made with Web Audio. To use a real track, add it
+under `public/game/music/` (check its license first) and set `TRACK` in `lib/client/music.ts`.

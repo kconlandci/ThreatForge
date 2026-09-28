@@ -36,9 +36,12 @@ import {
   LayoutGrid,
   List,
   Menu,
+  Music,
   Play,
   RotateCcw,
   Target,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { BattleView } from "@/components/battle/BattleView";
 import { PracticeResult } from "@/components/battle/PracticeResult";
@@ -52,6 +55,7 @@ import { IntroSequence } from "@/components/hub/IntroSequence";
 import { ShiftIntro } from "@/components/hub/ShiftIntro";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
+import { musicPref, setMusicPref, startMusic, stopMusic } from "@/lib/client/music";
 import { preloadStage } from "@/lib/client/preloadStage";
 import { prefetchSvgs } from "@/components/game/stage/svgCache";
 import { getPathwayProgress, loadSave, practiceDone, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
@@ -159,6 +163,8 @@ function GameMenu({
   battleOver,
   reducedMotion,
   onToggleMotion,
+  musicOn,
+  onToggleMusic,
   onOfficeList,
   onLeaveBattle,
   onHowTo,
@@ -174,6 +180,8 @@ function GameMenu({
   battleOver: boolean;
   reducedMotion: boolean;
   onToggleMotion: () => void;
+  musicOn: boolean;
+  onToggleMusic: () => void;
   onOfficeList: () => void;
   onLeaveBattle: () => void;
   onHowTo: () => void;
@@ -254,6 +262,13 @@ function GameMenu({
             </span>
             Reduce motion
             <span className={`${g.switch} ${reducedMotion ? g.switchOn : ""}`} aria-hidden="true" />
+          </button>
+          <button type="button" role="switch" aria-checked={musicOn} className={g.menuItem} onClick={onToggleMusic}>
+            <span className={g.menuIcon} aria-hidden="true">
+              <Music className="h-5 w-5" />
+            </span>
+            Music
+            <span className={`${g.switch} ${musicOn ? g.switchOn : ""}`} aria-hidden="true" />
           </button>
           <button type="button" className={g.menuItem} onClick={run(onHowTo)}>
             <span className={g.menuIcon} aria-hidden="true">
@@ -480,6 +495,32 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const prevView = useRef<View>("boot");
   const systemReduced = usePrefersReducedMotion();
   const reducedMotion = save?.settings.reducedMotion ?? systemReduced;
+
+  // Music: off unless the player turns it on (saved per device). Browsers need a tap before sound.
+  const [musicOn, setMusicOn] = useState(false);
+  useEffect(() => {
+    if (!musicPref()) return;
+    setMusicOn(true);
+    const kick = () => {
+      stop();
+      if (musicPref()) startMusic();
+    };
+    const stop = () => {
+      window.removeEventListener("pointerdown", kick);
+      window.removeEventListener("keydown", kick);
+    };
+    window.addEventListener("pointerdown", kick);
+    window.addEventListener("keydown", kick);
+    return stop;
+  }, []);
+  useEffect(() => () => stopMusic(), []);
+  const toggleMusic = useCallback(() => {
+    const on = !musicOn;
+    setMusicPref(on);
+    setMusicOn(on);
+    if (on) startMusic();
+    else stopMusic();
+  }, [musicOn]);
 
   useEffect(() => {
     viewRef.current = view;
@@ -984,11 +1025,18 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
           {copy.barTitle} <span className={g.titleSub}>{copy.barSub}</span>
         </p>
         {view !== "boot" ? (
+          <button type="button" className={g.soundButton} aria-pressed={musicOn} aria-label="Music" onClick={toggleMusic}>
+            {musicOn ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
+          </button>
+        ) : null}
+        {view !== "boot" ? (
           <GameMenu
             view={view}
             battleOver={battleOver}
             reducedMotion={reducedMotion}
             onToggleMotion={toggleMotion}
+            musicOn={musicOn}
+            onToggleMusic={toggleMusic}
             onOfficeList={() => setRoomsOpen(true)}
             onLeaveBattle={backToOffice}
             onHowTo={openHowTo}

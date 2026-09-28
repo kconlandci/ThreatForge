@@ -101,6 +101,23 @@
   box-shadow: 0 2px 0 0 var(--hl-ink);
 }
 
+.soundButton {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 12px;
+  background: var(--hl-paper);
+  color: var(--hl-ink);
+  box-shadow: 0 2px 0 0 var(--hl-ink);
+}
+
+.soundButton[aria-pressed="true"] {
+  background: var(--hl-teal-tint);
+}
+
 .menuButton[aria-expanded="true"] {
   background: var(--hl-teal-tint);
 }
