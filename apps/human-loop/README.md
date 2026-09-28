@@ -497,4 +497,5 @@ Off by default (classrooms). The speaker button in the game bar and **Menu > Mus
 choice is saved per device (`localStorage` key `human-loop:music`), not in the cloud save. With no
 file, `lib/client/music.ts` plays a calm chord loop made with Web Audio. Songs live in
 `public/game/music/` and play in order from the `TRACKS` list in `lib/client/music.ts`. Check each
-song's license first. "Ten AM Office Shuffle" and "Coffee at Ten" were made by DCI with Google Gemini (Lyria).
+song's license first. "Ten AM Office Shuffle", "The Afternoon Deck" and "Coffee at Ten" were made by DCI with Google
+Gemini (Lyria).

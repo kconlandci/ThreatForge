@@ -8,9 +8,13 @@
 const KEY = "human-loop:music";
 /**
  * The playlist, played in order and repeated. Each track needs a license that allows use in the game:
- * both songs were made by DCI with Google Gemini (Lyria), which leaves the output to its maker.
+ * all three songs were made by DCI with Google Gemini (Lyria), which leaves the output to its maker.
  */
-const TRACKS: string[] = ["/game/music/ten-am-office-shuffle.mp3", "/game/music/coffee-at-ten.mp3"];
+const TRACKS: string[] = [
+  "/game/music/ten-am-office-shuffle.mp3",
+  "/game/music/the-afternoon-deck.mp3",
+  "/game/music/coffee-at-ten.mp3",
+];
 const VOLUME = 0.12;
 
 export function musicPref(): boolean {
