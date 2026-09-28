@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           <div className="mx-auto max-w-3xl">
             <p className="font-display text-sm font-semibold text-teal">Human Loop · DCI Resources</p>
             <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">Privacy notice</h1>
-            <p className="mt-3 text-[15px] text-muted">Last updated: September 24, 2026</p>
+            <p className="mt-3 text-[15px] text-muted">Last updated: September 28, 2026</p>
             <p className="mt-5 text-lg leading-relaxed text-ink-soft sm:text-xl">
               Human Loop is a free training game by DCI Resources. This page explains what we collect, why we
               collect it, and how to delete it. Plain words, no tricks.
@@ -94,6 +94,11 @@ export default function PrivacyPage() {
                 <p>
                   The game also saves your progress in your browser&rsquo;s storage, so it works even when you&rsquo;re
                   offline. We don&rsquo;t collect your location, your contacts, or any payment details.
+                </p>
+                <p>
+                  If you use <strong>Send feedback</strong> in the game menu, we store your note, your star rating, and
+                  which pathway and screen you were on. We don&rsquo;t ask for your name with it and don&rsquo;t link it
+                  to your player ID. Please don&rsquo;t put private information in a note.
                 </p>
               </Section>
 

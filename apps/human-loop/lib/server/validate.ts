@@ -69,6 +69,36 @@ export function normalizeEmail(raw: string): string {
   return email.slice(0, at) + "@" + email.slice(at + 1).toLowerCase();
 }
 
+export const FEEDBACK_MAX_BYTES = 4 * 1024;
+export const FEEDBACK_MESSAGE_MAX = 1000;
+/** Where in the game the note was written (GameShell views), or "other". */
+const FEEDBACK_SCREENS = new Set(["intro", "hub", "brief", "battle", "result", "skills", "resume", "other"]);
+/** Control and invisible characters, but not line breaks (a note may have several lines). */
+const NOTE_CONTROL_RE = /[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g;
+
+export type FeedbackInput = { message: string; rating: number | null; pathway: string; screen: string };
+
+/** Validate a POST /api/feedback body. No names or emails are asked for. */
+export function validateFeedback(body: unknown): Valid<FeedbackInput> {
+  if (!isPlainObject(body)) return { ok: false, error: "Please write a short note." };
+  const raw = typeof body.message === "string" ? body.message : "";
+  const message = raw.replace(/\r\n?/g, "\n").replace(NOTE_CONTROL_RE, "").replace(/\n{3,}/g, "\n\n").trim();
+  if (!message) return { ok: false, error: "Please write a short note." };
+  if (message.length > FEEDBACK_MESSAGE_MAX) {
+    return { ok: false, error: `Please keep it under ${FEEDBACK_MESSAGE_MAX.toLocaleString("en-US")} characters.` };
+  }
+  let rating: number | null = null;
+  if (body.rating !== undefined && body.rating !== null) {
+    if (typeof body.rating !== "number" || !Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
+      return { ok: false, error: "Please pick 1 to 5 stars." };
+    }
+    rating = body.rating;
+  }
+  const pathway = typeof body.pathway === "string" && PATHWAY_IDS.has(body.pathway) ? body.pathway : "";
+  const screen = typeof body.screen === "string" && FEEDBACK_SCREENS.has(body.screen) ? body.screen : "other";
+  return { ok: true, value: { message, rating, pathway, screen } };
+}
+
 /** Validate a POST /api/lead body. Error text is short and player-facing. */
 export function validateLead(body: unknown): Valid<LeadInput> {
   if (!isPlainObject(body)) return { ok: false, error: "Please send your name and email." };

@@ -27,7 +27,7 @@ import type { BattleStatus, EncounterMode, MasterySkillId, SaveData, SaveProfile
 import { PATHWAYS, type PathwayId } from "@/lib/types";
 import type { CloudLoad } from "./db";
 import { PURGE_EVERY_MS, RETENTION_MONTHS } from "./retention";
-import { isPlainObject, isUuid, validateSave, type LeadInput } from "./validate";
+import { isPlainObject, isUuid, validateSave, type FeedbackInput, type LeadInput } from "./validate";
 
 export const AIRTABLE_API = "https://api.airtable.com/v0";
 /** DCI's "Human Loop — Players" base. Used when AIRTABLE_BASE_ID is not set. */
@@ -35,6 +35,18 @@ export const DEFAULT_AIRTABLE_BASE_ID = "appp6a1BiX6qyMUkj";
 
 export const PLAYERS_TABLE = "tblVJYIXEbxGsSsfc";
 export const RESULTS_TABLE = "tbl5ZbLtXi5NIvw6x";
+/** Notes from the game's Menu > Send feedback. */
+export const FEEDBACK_TABLE = "tblhuWWSqHumTiTKp";
+export const FEEDBACK_FIELDS = {
+  summary: "fld30UNwtCscto954", // singleLineText, primary: "Help Desk · battle · 4/5"
+  message: "fldbLpQdSLf1iyudf", // multilineText
+  rating: "fldyx9wS0OlbSN8FT", // rating 1-5 (empty when not given)
+  pathway: "fld6OS2JGxCMXVRoE", // singleLineText: pathway name
+  screen: "fld1Y5RdaTEPaN7pX", // singleLineText: intro / hub / battle / result / skills ...
+  version: "fldnj6cgZBizKdNQL", // singleLineText: git commit of the build
+  sentAt: "fldqg9lMjw8KjwQZV", // dateTime
+  status: "fldJRp01XREc0BVJ4", // singleSelect: New / Reviewing / Done
+} as const;
 
 /** Players table columns (IDs never change when a column is renamed). */
 export const PLAYER_FIELDS = {
@@ -856,6 +868,31 @@ function remember(key: string, value: Known) {
 /* ------------------------------------------------------------------ */
 
 /** Store a new player. Every sign-up is a new row: emails are unverified, so we never merge by email. */
+/** Save one feedback note. Nothing links it to a player. */
+export function createFeedback(note: FeedbackInput, version: string, now = new Date(airtableTiming.now())): Promise<WriteOutcome> {
+  return withAirtable<WriteOutcome>(
+    "create-feedback",
+    { stored: false },
+    async (cfg) => {
+      const where = PATHWAYS.find((p) => p.id === note.pathway)?.name ?? "Site";
+      await createRecords(cfg, FEEDBACK_TABLE, [
+        {
+          [FEEDBACK_FIELDS.summary]: `${where} · ${note.screen}${note.rating ? ` · ${note.rating}/5` : ""}`,
+          [FEEDBACK_FIELDS.message]: note.message,
+          ...(note.rating ? { [FEEDBACK_FIELDS.rating]: note.rating } : {}),
+          [FEEDBACK_FIELDS.pathway]: where,
+          [FEEDBACK_FIELDS.screen]: note.screen,
+          [FEEDBACK_FIELDS.version]: version,
+          [FEEDBACK_FIELDS.sentAt]: now.toISOString(),
+          [FEEDBACK_FIELDS.status]: "New",
+        },
+      ]);
+      return { stored: true };
+    },
+    (sec) => ({ stored: false, retryAfterSec: sec }),
+  );
+}
+
 export function createPlayer(playerId: string, lead: LeadInput, now = new Date(airtableTiming.now())): Promise<WriteOutcome> {
   if (!isUuid(playerId)) return Promise.resolve({ stored: false });
   return withAirtable<WriteOutcome>(

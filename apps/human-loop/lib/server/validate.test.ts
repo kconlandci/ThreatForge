@@ -8,6 +8,7 @@ import {
   readJsonBody,
   SAVE_MAX_DEPTH,
   tooDeep,
+  validateFeedback,
   validateLead,
   validateSave,
 } from "./validate";
@@ -68,6 +69,27 @@ describe("validateLead", () => {
 
   it("rejects non-objects", () => {
     for (const body of [null, "x", 1, [], [lead]]) expect(validateLead(body).ok).toBe(false);
+  });
+});
+
+describe("validateFeedback", () => {
+  it("accepts a note with an optional rating and known pathway and screen", () => {
+    expect(validateFeedback({ message: "  Too much text on the result.  ", rating: 4, pathway: "help-desk", screen: "result" })).toEqual({
+      ok: true,
+      value: { message: "Too much text on the result.", rating: 4, pathway: "help-desk", screen: "result" },
+    });
+    expect(validateFeedback({ message: "Fun!" })).toEqual({ ok: true, value: { message: "Fun!", rating: null, pathway: "", screen: "other" } });
+  });
+  it("keeps line breaks but drops control characters, and ignores unknown pathways and screens", () => {
+    const r = validateFeedback({ message: "a\r\n\n\n\nb\u0007", pathway: "nope", screen: "admin" });
+    expect(r).toEqual({ ok: true, value: { message: "a\n\nb", rating: null, pathway: "", screen: "other" } });
+  });
+  it("rejects empty, too long, and bad ratings", () => {
+    expect(validateFeedback({ message: "   " }).ok).toBe(false);
+    expect(validateFeedback({ message: "x".repeat(1001) }).ok).toBe(false);
+    expect(validateFeedback({ message: "ok", rating: 6 }).ok).toBe(false);
+    expect(validateFeedback({ message: "ok", rating: 2.5 }).ok).toBe(false);
+    expect(validateFeedback("hi").ok).toBe(false);
   });
 });
 

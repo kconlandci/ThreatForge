@@ -36,6 +36,7 @@ import {
   LayoutGrid,
   List,
   Menu,
+  MessageSquare,
   Music,
   Play,
   RotateCcw,
@@ -55,6 +56,7 @@ import { IntroSequence } from "@/components/hub/IntroSequence";
 import { ShiftIntro } from "@/components/hub/ShiftIntro";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
+import { FeedbackSheet } from "@/components/game/FeedbackSheet";
 import { musicPref, setMusicPref, startMusic, stopMusic } from "@/lib/client/music";
 import { preloadStage } from "@/lib/client/preloadStage";
 import { prefetchSvgs } from "@/components/game/stage/svgCache";
@@ -168,6 +170,7 @@ function GameMenu({
   onOfficeList,
   onLeaveBattle,
   onHowTo,
+  onFeedback,
   onPracticeAgain,
   canPracticeAgain,
   onSkills,
@@ -185,6 +188,7 @@ function GameMenu({
   onOfficeList: () => void;
   onLeaveBattle: () => void;
   onHowTo: () => void;
+  onFeedback: () => void;
   onPracticeAgain: () => void;
   /** False while a real shift is saved: practice would take its battle slot and lose it. */
   canPracticeAgain: boolean;
@@ -322,6 +326,12 @@ function GameMenu({
               Pause: back to the office
             </button>
           ) : null}
+          <button type="button" className={g.menuItem} onClick={run(onFeedback)}>
+            <span className={g.menuIcon} aria-hidden="true">
+              <MessageSquare className="h-5 w-5" />
+            </span>
+            Send feedback
+          </button>
           <div className={g.divider} />
           <Link href={`/guide#${guideId}`} className={g.menuItem}>
             <span className={g.menuIcon} aria-hidden="true">
@@ -469,6 +479,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [walking, setWalking] = useState<HubTargetId | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   // The full guide (outside a battle): this pathway's cards only, never another pathway's policy card.
   const allCards = useMemo<HowDeck>(() => ({ practice: false, cards: guideCards(pathway.config.policyCard) }), [pathway]);
   const [howDeck, setHowDeck] = useState<HowDeck>(allCards);
@@ -1040,6 +1051,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onOfficeList={() => setRoomsOpen(true)}
             onLeaveBattle={backToOffice}
             onHowTo={openHowTo}
+            onFeedback={() => setFeedbackOpen(true)}
             onPracticeAgain={startPractice}
             canPracticeAgain={!resumeKind || resumeKind === "practice"}
             onSkills={skillsOn && view === "hub" ? openSkills : undefined}
@@ -1302,6 +1314,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
 
       <RoomList open={roomsOpen} hub={HUB} onClose={() => setRoomsOpen(false)} onGo={goTo} />
       <HowToPlay open={howOpen} deck={howDeck} onClose={() => setHowOpen(false)} />
+      <FeedbackSheet open={feedbackOpen} onClose={() => setFeedbackOpen(false)} pathwayId={pathway.id} screen={view} />
     </div>
   );
 }

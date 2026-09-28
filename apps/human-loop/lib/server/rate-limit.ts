@@ -83,6 +83,9 @@ export const leadLimiter = createRateLimiter({
 /** Cloud save writes per player per minute (any backend). */
 export const saveLimiter = createRateLimiter({ limit: 60, windowMs: 60 * 1000 });
 
+/** Feedback notes per IP per 10 minutes (a classroom shares one Wi-Fi IP). */
+export const feedbackLimiter = createRateLimiter({ limit: 30, windowMs: 10 * 60 * 1000 });
+
 /**
  * Airtable only (5 requests per second per base, and a monthly API call cap): cloud save writes
  * per player per minute. The client pushes about once a minute, plus battle ends, tab hides and

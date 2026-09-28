@@ -16,7 +16,7 @@ import * as airtable from "./airtable";
 import * as postgres from "./db";
 import type { LoadOutcome, WriteOutcome } from "./airtable";
 import type { CloudLoad } from "./db";
-import type { LeadInput } from "./validate";
+import type { FeedbackInput, LeadInput } from "./validate";
 
 export type StorageBackend = "postgres" | "airtable" | "none";
 export type { CloudLoad, LoadOutcome, WriteOutcome };
@@ -36,6 +36,12 @@ export async function createPlayer(playerId: string, lead: LeadInput): Promise<W
   const backend = storageBackend();
   if (backend === "postgres") return { stored: await postgres.createPlayer(playerId, lead) };
   if (backend === "airtable") return airtable.createPlayer(playerId, lead);
+  return { stored: false };
+}
+
+/** Feedback notes go to Airtable only (Postgres has no feedback table): elsewhere they are not stored. */
+export async function createFeedback(note: FeedbackInput, version: string): Promise<WriteOutcome> {
+  if (storageBackend() === "airtable") return airtable.createFeedback(note, version);
   return { stored: false };
 }
 
