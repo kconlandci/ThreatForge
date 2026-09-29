@@ -1,0 +1,13 @@
+{
+  "name": "depth-v2",
+  "notes": "v1 + rollback no longer saves the 3rd star (rollbackCosts3rd); 3 stars: finish / no damage left / every catch before it ran, with the clue.",
+  "cards": { "coffee": { "energy": 1 }, "rollback": { "cost": 1 } },
+  "rules": { "coffee": "energy", "coffeeEnergy": 1, "starRule": "proof", "proofRow": "last" },
+  "all": { "engineRules": { "proofStar": true, "stopGuarantee": true, "escalateBudget": 1, "rollbackCosts3rd": true } },
+  "story": {
+    "actionsPerTurn": [2, 3, 3, 2], "maxTurns": 5,
+    "starterDeck": ["inspect", "inspect", "inspect", "inspect", "block", "block", "block", "rollback"],
+    "unlocks": [{ "turn": 2, "cards": ["policy"] }, { "turn": 3, "cards": ["escalate"] }, { "turn": 4, "cards": ["coffee"] }]
+  },
+  "bands": { "guessStar3Max": 1 }
+}

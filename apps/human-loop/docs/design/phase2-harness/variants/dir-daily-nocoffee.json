@@ -1,0 +1,181 @@
+{
+ "name": "dir-daily-nocoffee",
+ "notes": "DIRECTOR BLEND (depth-final base): Escalate exhausts (encounter rule, once per shift) instead of a budget; story turn 1 = 2 safe plans (one scary-safe) in all 5 pathways, so the cost-2 policy on turn 1 is an investment choice, never a trap; CN/FS/BA orders re-searched for that.",
+ "cards": {
+  "coffee": {
+   "energy": 1
+  },
+  "rollback": {
+   "cost": 1
+  },
+  "policy": {
+   "cost": 2
+  }
+ },
+ "rules": {
+  "coffee": "energy",
+  "coffeeEnergy": 1,
+  "starRule": "proof",
+  "proofRow": "last",
+  "readOnlyBadge": true
+ },
+ "all": {
+  "engineRules": {
+   "proofStar": true,
+   "stopGuarantee": true,
+   "rollbackCosts3rd": true,
+   "inspectFloor": 1,
+   "exhaust": [
+    "escalate"
+   ]
+  }
+ },
+ "story": {
+  "actionsPerTurn": [
+   2,
+   2,
+   2,
+   3,
+   1
+  ],
+  "maxTurns": 6,
+  "starterDeck": [
+   "inspect",
+   "inspect",
+   "inspect",
+   "inspect",
+   "block",
+   "block",
+   "block",
+   "rollback"
+  ],
+  "unlocks": [
+   {
+    "turn": 1,
+    "cards": [
+     "policy"
+    ]
+   },
+   {
+    "turn": 3,
+    "cards": [
+     "escalate"
+    ]
+   },
+   {
+    "turn": 4,
+    "cards": [
+     "coffee"
+    ]
+   }
+  ]
+ },
+ "bands": {
+  "guessStar3Max": 1
+ },
+ "shiftGen": {
+  "dailyActionsPerTurn": [
+   2,
+   2
+  ]
+ },
+ "pathways": {
+  "help-desk": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "ruiz-vpn-fix",
+      "okafor-disable",
+      "romero-lookup",
+      "ruiz-vpn-close",
+      "okafor-mail-forward",
+      "romero-mfa-reset",
+      "ortiz-laptop",
+      "okafor-summary",
+      "ortiz-unlock",
+      "ortiz-access"
+     ]
+    }
+   }
+  },
+  "cybersecurity": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "cy-lam-report-real",
+      "cy-dsp04-isolate",
+      "cy-whitcomb-signins",
+      "cy-duarte-report-close",
+      "cy-sandoval-disable",
+      "cy-whitcomb-disable",
+      "cy-sandoval-wipe",
+      "cy-c2-deny",
+      "cy-sandoval-hr-list",
+      "cy-ransom-close"
+     ]
+    }
+   }
+  },
+  "cloud-network": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "cn-hc-failover",
+      "cn-pd-orphan-disks",
+      "cn-test-servers-stop",
+      "cn-stonebridge-tunnel",
+      "cn-dispatch-errors",
+      "cn-dispatch-close",
+      "cn-stonebridge-call",
+      "cn-pd-archive-delete",
+      "cn-dispatch-log-vendor",
+      "cn-dispatch-scale-zero"
+     ]
+    }
+   }
+  },
+  "full-stack": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "fs-pd-key-rotate",
+      "fs-track-errors",
+      "fs-lark-package",
+      "fs-hc-flag-off",
+      "fs-track-close",
+      "fs-hc-date-fix",
+      "fs-track-test-data",
+      "fs-lark-docs",
+      "fs-hc-late-release",
+      "fs-pd-cleanup"
+     ]
+    }
+   }
+  },
+  "business-analyst": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "ba-ontime-compare",
+      "ba-pd-export-delete",
+      "ba-hc-unpublish",
+      "ba-lark-share",
+      "ba-ontime-close",
+      "ba-lark-owner",
+      "ba-hc-deck-share",
+      "ba-wayfell-sample",
+      "ba-pd-merge",
+      "ba-hc-ontime-rule"
+     ]
+    }
+   }
+  }
+ },
+ "daily": {
+  "deck": {
+   "remove": [
+    "coffee"
+   ]
+  }
+ }
+}

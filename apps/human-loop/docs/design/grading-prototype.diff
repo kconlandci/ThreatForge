@@ -1,0 +1,228 @@
+diff --git a/lib/game/engine.ts b/lib/game/engine.ts
+index 41f047f..be87579 100644
+--- a/lib/game/engine.ts
++++ b/lib/game/engine.ts
+@@ -226,6 +226,7 @@ function startTurn(s: BattleState, encounter: Encounter) {
+     const id = s.queue.shift() as string;
+     s.announced.push(id);
+     s.steps[id].status = "announced";
++    if (s.steps[id].clue !== undefined) s.steps[id].clue = null;
+     emit(s, { t: "announce", stepId: id });
+   }
+ 
+@@ -286,6 +287,7 @@ export function createBattle(encounter: Encounter, seed: number): BattleState {
+ 
+   const state: BattleState = {
+     version: 1,
++    ...(PROOF_GRADING ? { grading: "proof" as const } : {}),
+     encounterId: encounter.id,
+     seed: normalizedSeed,
+     rng: shuffled.state,
+@@ -310,6 +312,16 @@ export function createBattle(encounter: Encounter, seed: number): BattleState {
+   return state;
+ }
+ 
++/** Prototype switch: new battles use proof grading (HL_PROOF=0 turns it off for comparison). */
++export const PROOF_GRADING = process.env.HL_PROOF !== "0";
++
++/** A clue the engine accepts: a real evidence row on a plan the player has seen. */
++function validClue(encounter: Encounter, rt: StepRuntime | undefined, stepId: string, clue: unknown): number | null {
++  if (typeof clue !== "number" || !Number.isInteger(clue) || !rt?.inspected) return null;
++  const n = stepDef(encounter, stepId).evidence.length;
++  return clue >= 0 && clue < n ? clue : null;
++}
++
+ const STEP_STATUSES = new Set<string>(["queued", "announced", "executed", "blocked", "escalated", "rolled-back"]);
+ 
+ function isStepRuntime(value: unknown): value is StepRuntime {
+@@ -400,6 +412,7 @@ export function playCard(
+   encounter: Encounter,
+   cardUid: string,
+   targetStepId?: string,
++  clue?: number | null,
+ ): PlayResult {
+   if (state.status !== "playing") return fail("The shift is over.");
+   if (state.encounterId !== encounter.id) return fail("This battle belongs to a different shift.");
+@@ -433,7 +446,13 @@ export function playCard(
+   else s.discardPile.push(instance);
+ 
+   const target = card.target === "none" ? undefined : targetStepId;
+-  emit(s, target ? { t: "card-played", cardId: card.id, targetStepId: target } : { t: "card-played", cardId: card.id });
++  const c = target && (card.id === "block" || card.id === "escalate") ? validClue(encounter, s.steps[target], target, clue) : null;
++  emit(
++    s,
++    target
++      ? { t: "card-played", cardId: card.id, targetStepId: target, ...(c !== null ? { clue: c } : {}) }
++      : { t: "card-played", cardId: card.id },
++  );
+ 
+   if (card.autoInspect) {
+     s.powers.callbackPolicy = true;
+@@ -465,6 +484,7 @@ export function playCard(
+       } else {
+         rt.status = "blocked";
+         rt.resolvedOnTurn = s.turn;
++        if (s.grading === "proof") rt.clue = c;
+         s.stats.catches++;
+         emit(s, { t: "caught", stepId: id, by: "block" });
+       }
+@@ -477,6 +497,7 @@ export function playCard(
+       removeAnnounced(s, id);
+       rt.status = "escalated";
+       rt.resolvedOnTurn = s.turn;
++      if (s.grading === "proof") rt.clue = c;
+       s.stats.escalations++;
+       if (def.safe) {
+         s.progress += def.progress;
+@@ -519,9 +540,11 @@ export function playCard(
+ }
+ 
+ /** Let the agent carry out every remaining announced intent, then start the next turn. */
+-export function endTurn(state: BattleState, encounter: Encounter): BattleState {
++export function endTurn(state: BattleState, encounter: Encounter, marks?: Readonly<Record<string, number>>): BattleState {
+   if (state.status !== "playing") return state;
+   const s = cloneState(state);
++  // Phase 2: could the player still stop a plan? (a Block or Escalate they can afford)
++  const noStop = !s.hand.some((h) => (h.cardId === "block" || h.cardId === "escalate") && CARDS[h.cardId].cost <= s.energy);
+ 
+   while (s.announced.length > 0) {
+     const id = s.announced.shift() as string;
+@@ -529,6 +552,10 @@ export function endTurn(state: BattleState, encounter: Encounter): BattleState {
+     const rt = s.steps[id];
+     rt.status = "executed";
+     rt.resolvedOnTurn = s.turn;
++    if (s.grading === "proof") {
++      rt.clue = validClue(encounter, rt, id, marks?.[id]);
++      if (noStop) rt.noStop = true;
++    }
+     s.executedHistory.push(id);
+     if (def.safe) {
+       s.progress += def.progress;
+@@ -600,13 +627,25 @@ export function blindSafeBlocks(state: BattleState, encounter: Encounter): strin
+   return [...out];
+ }
+ 
++/** A clue that proves the catch: one of the plan's red-flag rows. */
++export function isProof(step: AgentStep, rt: StepRuntime | undefined): boolean {
++  return typeof rt?.clue === "number" && !!step.evidence[rt.clue]?.redFlag;
++}
++
++/** Proof battles: risky plans stopped (Block or Escalate) without a red-flag clue. */
++export function unprovedCatches(state: BattleState, encounter: Encounter): string[] {
++  return encounter.steps
++    .filter((x) => !x.safe && (state.steps[x.id]?.status === "blocked" || state.steps[x.id]?.status === "escalated") && !isProof(x, state.steps[x.id]))
++    .map((x) => x.id);
++}
++
+ export function scoreBattle(state: BattleState, encounter: Encounter): BattleScore {
+   const { catches, falseAlarms, misses } = state.stats;
+   const won = state.status === "won";
+   // The third star rewards checking before blocking: a risky plan blocked without inspecting it
+   // (a lucky guess from its wording) does not count as careful oversight.
+   const blind = blindBlocks(state, encounter).length;
+-  const careful = falseAlarms <= 1 && blind === 0;
++  const careful = falseAlarms <= 1 && (state.grading === "proof" ? unprovedCatches(state, encounter).length === 0 : blind === 0);
+   const stars = (won ? 1 + (misses === 0 ? 1 : 0) + (careful ? 1 : 0) : 0) as BattleScore["stars"];
+ 
+   return {
+diff --git a/lib/game/mastery.ts b/lib/game/mastery.ts
+index 9658726..e4fc9ad 100644
+--- a/lib/game/mastery.ts
++++ b/lib/game/mastery.ts
+@@ -127,7 +127,14 @@ function call(step: AgentStep, skill: MasterySkillId, grade: CallGrade, reason:
+ }
+ 
+ /** The reasons a call can be partly right (kept with a skill's latest miss when it is a P). */
+-export const MISS_REASONS = ["Lucky guess", STORED_COACH_CHECKED, "Caught it late", STORED_COACH_NOT_NEEDED, "Fixed it later"] as const;
++export const MISS_REASONS = ["Lucky guess", STORED_COACH_CHECKED, "Caught it late", STORED_COACH_NOT_NEEDED, "Fixed it later", "Right call, wrong clue", "Right call, no clue", "Spotted it, no card"] as const;
++
++/**
++ * Prototype switch for the no-clue grade: "A" (default) an inspected catch with no clue stays R
++ * ("Caught"), a wrong clue is P; "B" no clue and a wrong clue are both P; "A0" no clue and wrong
++ * clue both stay R (proof only moves the star).
++ */
++export const NO_CLUE_MODE = (process.env.HL_NOCLUE ?? "A") as "A" | "B" | "A0";
+ 
+ /**
+  * A stored reason for display: the reasons that name the coach were saved with the Help Desk
+@@ -154,15 +161,26 @@ export function gradePlan(step: AgentStep, runtime: StepRuntime | undefined): Pl
+     return { stepId: step.id, result, reason, calls };
+   };
+ 
++  // Phase 2 proof battles: the engine wrote `clue` (a row index or null) when the plan resolved.
++  const proofBattle = runtime?.clue !== undefined;
++  const clue = runtime?.clue;
++  const proof = typeof clue === "number" && !!step.evidence[clue]?.redFlag;
++  const stopped = (legacy: PlanGrade): PlanGrade => {
++    if (!proofBattle || !inspected) return legacy;
++    if (proof) return out("R", "Caught with proof", "R", null);
++    if (typeof clue === "number") return NO_CLUE_MODE === "A0" ? legacy : out("P", "Right call, wrong clue", "P", null);
++    return NO_CLUE_MODE === "B" ? out("P", "Right call, no clue", "P", null) : legacy;
++  };
+   if (!step.safe) {
+     switch (status) {
+       case "blocked":
+-        return inspected ? out("R", "Caught", "R", null) : out("P", "Lucky guess", "P", null);
++        return stopped(inspected ? out("R", "Caught", "R", null) : out("P", "Lucky guess", "P", null));
+       case "escalated":
+-        return inspected ? out("R", "Caught", "R", null) : out("P", STORED_COACH_CHECKED, "P", null);
++        return stopped(inspected ? out("R", "Caught", "R", null) : out("P", STORED_COACH_CHECKED, "P", null));
+       case "rolled-back":
+         return out("P", "Caught it late", "P", null);
+       case "executed":
++        if (proofBattle && proof && runtime?.noStop) return out("P", "Spotted it, no card", "P", null);
+         return out("W", "Got through", "W", null);
+       default:
+         return out(null, "", null, null);
+diff --git a/lib/game/reveal.ts b/lib/game/reveal.ts
+index d5d6b36..2c38ad7 100644
+--- a/lib/game/reveal.ts
++++ b/lib/game/reveal.ts
+@@ -132,7 +132,9 @@ export function revealFor(state: BattleState, enc: Encounter, stepId: string, ma
+   const agent = agentShort(enc);
+   const flagIdx = flagIndices(step);
+   const keyIdx = keyIndex(step);
+-  const mark = isMarkable(step, markedIdx) ? markedIdx : null;
++  // Phase 2: the engine's record of the clue wins over the UI's in-memory mark (it survives a reload).
++  const recorded = state.steps[stepId]?.clue;
++  const mark = typeof recorded === "number" ? recorded : isMarkable(step, markedIdx) ? markedIdx : null;
+   const markedFlag = mark !== null && step.evidence[mark].redFlag;
+   const firstFlag = flagIdx.length ? step.evidence[flagIdx[0]].label : null;
+   const flagLabel = markedFlag ? step.evidence[mark].label : firstFlag;
+diff --git a/lib/game/types.ts b/lib/game/types.ts
+index a62e4a1..68875a6 100644
+--- a/lib/game/types.ts
++++ b/lib/game/types.ts
+@@ -354,6 +354,14 @@ export interface StepRuntime {
+   /** Times this (safe) step was blocked and sent back to the queue. */
+   requeues: number;
+   resolvedOnTurn: number | null;
++  /**
++   * Phase 2 proof battles only (BattleState.grading "proof"): the evidence row (content index) the
++   * player marked when this plan was last resolved, or null for no mark. Absent = a battle from
++   * before Phase 2 (graded the old way).
++   */
++  clue?: number | null;
++  /** Phase 2: the plan ran while the player had no playable Block or Escalate. */
++  noStop?: boolean;
+ }
+ 
+ export interface CardInstance {
+@@ -366,7 +374,7 @@ export type BattleStatus = "playing" | "won" | "lost-breach" | "lost-timeout";
+ export type BattleEvent =
+   | { t: "turn-start"; turn: number }
+   | { t: "announce"; stepId: string }
+-  | { t: "card-played"; cardId: CardId; targetStepId?: string }
++  | { t: "card-played"; cardId: CardId; targetStepId?: string; clue?: number }
+   | { t: "inspected"; stepId: string; auto: boolean }
+   | { t: "executed"; stepId: string; safe: boolean; risk: number; progress: number }
+   | { t: "caught"; stepId: string; by: "block" | "escalate" }
+@@ -381,6 +389,8 @@ export type BattleEvent =
+ 
+ export interface BattleState {
+   version: 1;
++  /** Phase 2: "proof" = the 3rd star and the lens grade read clues. Absent = an older battle. */
++  grading?: "proof";
+   encounterId: string;
+   seed: number;
+   /** Internal seeded-RNG state; advancing it keeps battles deterministic and resumable. */

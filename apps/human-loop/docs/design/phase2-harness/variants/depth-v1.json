@@ -1,0 +1,13 @@
+{
+  "name": "depth-v1",
+  "notes": "Depth: engine-native proof star (one proof row = last red row as stand-in), rule A grades, stop guarantee, Escalate budget 1, Coffee +1 energy, Roll Back cost 1 in the starter deck. 4 Inspects kept. Story 2-3 plans a turn from turn 1.",
+  "cards": { "coffee": { "energy": 1 }, "rollback": { "cost": 1 } },
+  "rules": { "coffee": "energy", "coffeeEnergy": 1, "starRule": "proof", "proofRow": "last" },
+  "all": { "engineRules": { "proofStar": true, "stopGuarantee": true, "escalateBudget": 1 } },
+  "story": {
+    "actionsPerTurn": [2, 2, 3, 3],
+    "starterDeck": ["inspect", "inspect", "inspect", "inspect", "block", "block", "block", "rollback"],
+    "unlocks": [{ "turn": 2, "cards": ["policy"] }, { "turn": 3, "cards": ["escalate"] }, { "turn": 4, "cards": ["coffee"] }]
+  },
+  "bands": { "guessStar3Max": 1 }
+}

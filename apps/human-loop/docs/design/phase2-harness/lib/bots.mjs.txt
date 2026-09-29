@@ -1,0 +1,335 @@
+/**
+ * Scripted players. Each bot is make(seed) -> { turn(game), wrapUp?(game) }.
+ * turn() plays cards through game.play(...) and must finish with game.end().
+ * "Knows red" = the plan was inspected and has a redFlag row (what the sheet shows a reader).
+ */
+import { nextInt, nextFloat } from "./rngLocal.mjs";
+
+const GUARD = 60;
+
+function rollbackPass(g) {
+  // Roll back a known-bad action; with the draw-2 Coffee, drink it to find Roll Back.
+  const bad = g.knownBad();
+  if (!bad.length) return false;
+  if (g.can("rollback")) return g.play("rollback", bad[0]);
+  if (!g.has("rollback") && g.rules.coffee !== "energy" && g.canAfford("coffee") && g.has("coffee") && g.s.energy >= g.cost("rollback")) return g.play("coffee");
+  if (g.has("rollback") && g.rules.coffee === "energy" && g.has("coffee") && g.s.energy + g.rules.coffeeEnergy >= g.cost("rollback")) return g.play("coffee");
+  return false;
+}
+
+/** Coffee when it unlocks `want`: draw-2 when `want` is missing from hand, energy when `want` is in hand but unaffordable. */
+function coffeeFor(g, want) {
+  if (!g.has("coffee") || !g.canAfford("coffee")) return false;
+  if (g.rules.coffee === "energy") return g.has(want) && !g.canAfford(want) && g.s.energy + g.rules.coffeeEnergy - g.cost("coffee") >= g.cost(want) && g.play("coffee");
+  return !g.has(want) && g.s.energy - g.cost("coffee") >= g.cost(want) && g.play("coffee");
+}
+
+function policyMove(g) {
+  const pol = g.policy;
+  if (!pol || !g.has(pol) || g.s.powers.callbackPolicy || !g.canAfford(pol)) return false;
+  const inCats = (id) => g.policyCats.includes(g.step.get(id).category) && !g.inspected(id);
+  const pending = [...g.s.queue, ...g.s.announced].some(inCats);
+  if (!pending) return false;
+  const unins = g.s.announced.filter((id) => !g.inspected(id));
+  const now = unins.some(inCats);
+  const cost = g.cost(pol);
+  // Cost <= 1: the balance.test careful rule (a matching plan needs inspecting now, or spare energy).
+  if (cost <= 1) return now || g.s.energy - unins.length >= 2 ? g.play(pol) : false;
+  // Dearer policy: buy it when, after paying, every plan on the board can still be inspected
+  // (and, if it inspects one of them now, one Block is left over for what it finds).
+  const uncovered = unins.filter((id) => !inCats(id)).length;
+  const covered = unins.length - uncovered;
+  const left = g.s.energy - cost;
+  if ((now && covered >= 1 && left >= uncovered + 1) || (!now && left >= unins.length)) return g.play(pol);
+  return false;
+}
+
+/** The balance.test.ts "careful" player, generalized to every pathway's policy card and the variant rules. */
+function eagerPolicy(g) {
+  const pol = g.policy;
+  if (!pol || !g.has(pol) || g.s.powers.callbackPolicy || !g.canAfford(pol)) return false;
+  const inCats = (id) => g.policyCats.includes(g.step.get(id).category) && !g.inspected(id);
+  if (![...g.s.queue, ...g.s.announced].some(inCats)) return false;
+  return g.play(pol);
+}
+function carefulTurn(g, clue, eager = false) {
+  for (let i = 0; g.playing && i < GUARD; i++) {
+    if (eager ? eagerPolicy(g) : policyMove(g)) continue;
+    let acted = false;
+    for (const id of g.s.announced) {
+      if (!g.inspected(id)) {
+        acted =
+          (g.can("inspect") && g.play("inspect", id)) ||
+          coffeeFor(g, "inspect") ||
+          (g.can("escalate") && g.play("escalate", id, null));
+      } else if (g.red(id)) {
+        const flag = clue(g, id);
+        acted = (g.can("block") && g.play("block", id, flag)) || coffeeFor(g, "block") || (g.can("escalate") && g.play("escalate", id, flag));
+      }
+      if (acted) break;
+    }
+    if (acted) continue;
+    if (rollbackPass(g)) continue;
+    break;
+  }
+  g.end();
+}
+
+const wrapUpRollbacks = (g) => {
+  for (let i = 0; i < 5 && g.playing; i++) if (!rollbackPass(g)) break;
+};
+
+const trueClue = (g, id) => g.redIndex(id);
+
+export const BOTS = {
+  /** Inspect every plan it can, block red ones (true clue), escalate what it can't inspect, policy/coffee/rollback. */
+  careful: () => ({ turn: (g) => carefulTurn(g, trueClue), wrapUp: wrapUpRollbacks }),
+  "careful-pol": () => ({ turn: (g) => carefulTurn(g, trueClue, true), wrapUp: wrapUpRollbacks }),
+
+  /**
+   * Careful, but short of Inspects it checks one-way plans first and lets can-undo plans run
+   * (rolling back the bad ones later). With rules.glance it also blocks a plan whose free glance row is red.
+   */
+  triage: () => ({
+    turn: (g) => {
+      for (let i = 0; g.playing && i < GUARD; i++) {
+        if (policyMove(g)) continue;
+        const ann = g.s.announced;
+        const known = ann.filter((id) => g.inspected(id) && g.red(id));
+        const glanced = g.rules.glance ? ann.filter((id) => !g.inspected(id) && g.step.get(id).evidence[0]?.redFlag) : [];
+        const target = known[0] ?? glanced[0];
+        if (target) {
+          const flag = known[0] ? g.redIndex(target) : 0;
+          if ((g.can("block") && g.play("block", target, flag)) || coffeeFor(g, "block") || (g.can("escalate") && g.play("escalate", target, flag))) continue;
+        }
+        const unins = ann.filter((id) => !g.inspected(id) && !glanced.includes(id));
+        unins.sort((a, b) => stakeRank(g, a) - stakeRank(g, b));
+        const next = unins[0];
+        if (next) {
+          const oneWay = !g.step.get(next).reversible;
+          // Keep 1 energy for a Block when more than one plan is still unknown.
+          const reserve = unins.length > 1 && g.has("block") ? g.cost("block") : 0;
+          if (g.can("inspect") && (g.s.energy - g.cost("inspect") >= reserve || unins.length === 1 || oneWay) && g.play("inspect", next)) continue;
+          if (coffeeFor(g, "inspect")) continue;
+          if (oneWay && g.can("escalate") && g.play("escalate", next, null)) continue;
+        }
+        if (rollbackPass(g)) continue;
+        break;
+      }
+      g.end();
+    },
+    wrapUp: wrapUpRollbacks,
+  }),
+
+  /** Approves everything (never plays a card). */
+  "approve-all": () => ({ turn: (g) => g.end() }),
+
+  /** Blocks every plan it can (clue: row 0), drinking Coffee for more Blocks. */
+  "block-all": () => ({
+    turn: (g) => {
+      for (let i = 0; g.playing && i < GUARD && g.s.announced.length; i++) {
+        const id = g.s.announced[0];
+        if (!((g.can("block") && g.play("block", id, 0)) || coffeeFor(g, "block"))) break;
+      }
+      g.end();
+    },
+  }),
+
+  /** Never inspects: hands every plan it can to the coach (Escalate), approves the rest. The buck-passer. */
+  "escalate-unknown": () => ({
+    turn: (g) => {
+      for (let i = 0; g.playing && i < GUARD && g.s.announced.length; i++) {
+        const id = g.s.announced.find((x) => !g.inspected(x)) ?? g.s.announced[0];
+        if (!((g.can("escalate") && g.play("escalate", id, null)) || coffeeFor(g, "escalate"))) break;
+      }
+      g.end();
+    },
+  }),
+
+  /** Plays random cards on random targets (clue: random row), stopping 30% of the time. Port of balance.test randomBot. */
+  random: (seed) => {
+    let r = seedOf(`random-${seed}`);
+    const roll = (n) => {
+      const x = nextInt(r, n);
+      r = x.state;
+      return x.value;
+    };
+    return {
+      turn: (g) => {
+        for (let i = 0; i < 6 && g.playing && g.s.hand.length > 0; i++) {
+          if (roll(10) < 3) break;
+          const card = g.s.hand[roll(g.s.hand.length)];
+          const targets = g.ctx.engine.validTargets(g.s, g.enc, card.cardId);
+          const t = targets.length ? targets[roll(targets.length)] : undefined;
+          const flag = t && g.step.get(t) ? roll(g.step.get(t).evidence.length) : null;
+          g.play(card.cardId, t, flag);
+        }
+        g.end();
+      },
+    };
+  },
+
+  /** Careful play, but the clue is a random evidence row: "I know it's bad, can't say why". */
+  "guess-flag": (seed) => {
+    let r = seedOf(`guess-${seed}`);
+    const clue = (g, id) => {
+      const x = nextInt(r, g.step.get(id).evidence.length);
+      r = x.state;
+      return x.value;
+    };
+    return { turn: (g) => carefulTurn(g, clue), wrapUp: wrapUpRollbacks };
+  },
+
+  /** Never inspects. Blocks each plan with probability = the shift's risky share, with a random clue. */
+  "gut-flag": (seed) => {
+    let r = seedOf(`gut-${seed}`);
+    const f = () => {
+      const x = nextFloat(r);
+      r = x.state;
+      return x.value;
+    };
+    return {
+      turn: (g) => {
+        const share = g.enc.steps.filter((s) => !s.safe).length / g.enc.steps.length;
+        for (const id of g.s.announced.slice()) {
+          if (!g.playing) break;
+          if (f() < share) {
+            const flag = Math.floor(f() * g.step.get(id).evidence.length);
+            if (!(g.can("block") && g.play("block", id, flag))) coffeeFor(g, "block") && g.can("block") && g.play("block", id, flag);
+          }
+        }
+        g.end();
+      },
+    };
+  },
+
+  /** Knows the answers: blocks every risky plan (true clue), never inspects. Upper bound on outcomes. */
+  perfect: () => ({
+    turn: (g) => {
+      for (let i = 0; g.playing && i < GUARD; i++) {
+        let acted = false;
+        for (const id of g.s.announced) {
+          if (g.step.get(id).safe) continue;
+          const flag = g.redIndex(id);
+          acted = (g.can("block") && g.play("block", id, flag)) || coffeeFor(g, "block") || (g.can("escalate") && g.play("escalate", id, flag));
+          if (acted) break;
+        }
+        if (acted || rollbackPass(g)) continue;
+        break;
+      }
+      g.end();
+    },
+    wrapUp: wrapUpRollbacks,
+  }),
+};
+
+import { seedState } from "./rngLocal.mjs";
+
+/** A clue picker that names the proof row with probability pRight, a wrong row with pWrong, else no mark. */
+function noisyClue(seed, tag, pRight, pWrong) {
+  let r = seedState(`${tag}-${seed}`);
+  const f = () => {
+    const x = nextFloat(r);
+    r = x.state;
+    return x.value;
+  };
+  return (g, id) => {
+    const right = g.redIndex(id);
+    const u = f();
+    if (u < pRight) return right;
+    if (u < pRight + pWrong) {
+      const n = g.step.get(id).evidence.length;
+      const others = [...Array(n).keys()].filter((i) => i !== right);
+      return others[Math.floor(f() * others.length)];
+    }
+    return null;
+  };
+}
+
+/** Stakes order for triage: one-way first, then can-undo; with rules.readOnlyBadge, read-only lookups last. */
+function stakeRank(g, id) {
+  const s = g.step.get(id);
+  if (g.rules.readOnlyBadge && s.category === "lookup") return 2;
+  return s.reversible ? 1 : 0;
+}
+
+/** Triage play (one-way first, let can-undo run, roll back) with a given clue picker. */
+function triageTurn(g, clue) {
+  for (let i = 0; g.playing && i < GUARD; i++) {
+    if (policyMove(g)) continue;
+    const ann = g.s.announced;
+    const known = ann.filter((id) => g.inspected(id) && g.red(id));
+    const target = known[0];
+    if (target) {
+      const flag = clue(g, target);
+      if ((g.can("block") && g.play("block", target, flag)) || coffeeFor(g, "block") || (g.can("escalate") && g.play("escalate", target, flag))) continue;
+    }
+    const unins = ann.filter((id) => !g.inspected(id));
+    unins.sort((a, b) => stakeRank(g, a) - stakeRank(g, b));
+    const next = unins[0];
+    if (next) {
+      const oneWay = !g.step.get(next).reversible;
+      const reserve = unins.length > 1 && g.has("block") ? g.cost("block") : 0;
+      if (g.can("inspect") && (g.s.energy - g.cost("inspect") >= reserve || unins.length === 1 || oneWay) && g.play("inspect", next)) continue;
+      if (coffeeFor(g, "inspect")) continue;
+      if (oneWay && g.can("escalate") && g.play("escalate", next, null)) continue;
+    }
+    if (rollbackPass(g)) continue;
+    break;
+  }
+  g.end();
+}
+
+/**
+ * Oracle: knows which plans are risky, but plays by the proof rule: inspects (or lets the policy
+ * inspect) each risky plan, then blocks it naming the proof row; lets safe plans run unseen; rolls back.
+ * Its 3-star rate is the ceiling: a seed it cannot 3-star is unwinnable (card or timing luck).
+ */
+BOTS.oracle = () => ({
+  turn: (g) => {
+    for (let i = 0; g.playing && i < GUARD; i++) {
+      // The policy only when no risky plan on the board is still unhandled (it needs the energy first).
+      if (!g.s.announced.some((id) => !g.step.get(id).safe) && policyMove(g)) continue;
+      let acted = false;
+      const risky = g.s.announced.filter((id) => !g.step.get(id).safe);
+      // One-way first: it can never be undone.
+      risky.sort((a, b) => Number(g.step.get(a).reversible) - Number(g.step.get(b).reversible));
+      for (const id of risky) {
+        if (!g.inspected(id)) {
+          // Proof when it can afford Inspect + a stop; else stop it unseen (no damage beats no proof).
+          const needBlock = g.cost("inspect") + g.cost("block");
+          const needEsc = g.cost("inspect") + g.cost("escalate");
+          const others = risky.filter((x) => x !== id && !g.inspected(x)).length;
+          const spare = g.s.energy - others * g.cost("block");
+          if (g.can("inspect") && spare >= needBlock && g.has("block")) acted = g.play("inspect", id);
+          else if (g.can("inspect") && spare >= needEsc && g.can("escalate")) acted = g.play("inspect", id);
+          else if (coffeeFor(g, "inspect")) acted = true;
+          else if (g.can("block")) acted = g.play("block", id, g.redIndex(id));
+          else if (g.can("escalate")) acted = g.play("escalate", id, g.redIndex(id));
+          else acted = coffeeFor(g, "block");
+        } else {
+          acted = (g.can("block") && g.play("block", id, g.redIndex(id))) || coffeeFor(g, "block") || (g.can("escalate") && g.play("escalate", id, g.redIndex(id)));
+        }
+        if (acted) break;
+      }
+      if (acted || rollbackPass(g)) continue;
+      break;
+    }
+    g.end();
+  },
+  wrapUp: wrapUpRollbacks,
+});
+
+/** Triage play that finds the proof row 80% of the time (else a wrong row). */
+BOTS.human80 = (seed) => {
+  const clue = noisyClue(seed, "h80", 0.8, 0.2);
+  return { turn: (g) => triageTurn(g, clue), wrapUp: wrapUpRollbacks };
+};
+/** Mixed ESL player: triage play; proof row 50%, a wrong row 20%, no mark 30%. */
+BOTS["esl-mix"] = (seed) => {
+  const clue = noisyClue(seed, "esl", 0.5, 0.2);
+  return { turn: (g) => triageTurn(g, clue), wrapUp: wrapUpRollbacks };
+};
+/** Careful play that never marks a clue (today's player who ignores the new tap). */
+BOTS["no-mark"] = () => ({ turn: (g) => carefulTurn(g, () => null), wrapUp: wrapUpRollbacks });
+const seedOf = (x) => seedState(x);

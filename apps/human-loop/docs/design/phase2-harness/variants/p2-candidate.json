@@ -1,0 +1,84 @@
+{
+  "name": "p2-candidate",
+  "notes": "p2-rules + proof on the most telling red row only (proofRow last) + story: policy (cost 2) arrives on turn 1, 2 plans a turn from turn 1 ([2,2,2,3]), 3 Inspect copies (was 4) + dailies announce 2 plans on turn 1 (generator re-orders for it). Guess band relaxed to <=1% (random clue picks can never be exactly 0). Cybersecurity story: its last two plans swap (ransom-close and hr-list), else careful play misses a risky plan on 78% of seeds.",
+  "cards": {
+    "policy": {
+      "cost": 2
+    }
+  },
+  "rules": {
+    "coffee": "energy",
+    "coffeeEnergy": 1,
+    "escalateBudget": 2,
+    "stopGuarantee": [
+      "daily"
+    ],
+    "wrapUpRollback": true,
+    "glance": true,
+    "spottedNoCardPartly": true,
+    "starRule": "proof",
+    "proofRow": "last"
+  },
+  "story": {
+    "unlocks": [
+      {
+        "turn": 1,
+        "cards": [
+          "policy"
+        ]
+      },
+      {
+        "turn": 3,
+        "cards": [
+          "escalate"
+        ]
+      },
+      {
+        "turn": 4,
+        "cards": [
+          "rollback"
+        ]
+      },
+      {
+        "turn": 5,
+        "cards": [
+          "coffee"
+        ]
+      }
+    ],
+    "actionsPerTurn": [
+      2,
+      2,
+      2,
+      3
+    ],
+    "deck": {
+      "remove": [
+        "inspect"
+      ]
+    }
+  },
+  "shiftGen": {
+    "dailyActionsPerTurn": [
+      2,
+      2
+    ]
+  },
+  "bands": {
+    "guessStar3Max": 1
+  },
+  "pathways": {
+    "cybersecurity": {
+      "story": {
+        "stepOrder": {
+          "swap": [
+            [
+              8,
+              9
+            ]
+          ]
+        }
+      }
+    }
+  }
+}

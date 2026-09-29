@@ -1,0 +1,177 @@
+{
+ "name": "dir-exhaust-cb1",
+ "notes": "DEPTH OVER BREADTH. Engine-native (private copy): proof 3rd star (every stop names the proof row of a seen plan; proof row = Evidence.proof, else the last red row as the migration stand-in), rule A grades (no mark = Caught, wrong mark = Right call wrong clue (P), proof = Caught with proof), a rolled-back risky plan keeps the 2nd star but not the 3rd, hand floor (every hand has a Block and at least 1 Inspect), Escalate budget 1, Coffee = +1 energy, Roll Back cost 1 and in the starter deck, policy cost 2 from turn 1. 4 Inspects kept. Story: 2-2-2-3-1 plans (a rush turn 4), 6 turns, per-pathway chain-preserving order. Dailies: 2 plans a turn from turn 1 (generator re-orders for it).",
+ "cards": {
+  "coffee": {
+   "energy": 1
+  },
+  "rollback": {
+   "cost": 1
+  },
+  "policy": {
+   "cost": 2
+  },
+  "policy-callback": {
+   "cost": 1
+  }
+ },
+ "rules": {
+  "coffee": "energy",
+  "coffeeEnergy": 1,
+  "starRule": "proof",
+  "proofRow": "last",
+  "readOnlyBadge": true
+ },
+ "all": {
+  "engineRules": {
+   "proofStar": true,
+   "stopGuarantee": true,
+   "rollbackCosts3rd": true,
+   "inspectFloor": 1,
+   "exhaust": [
+    "escalate"
+   ]
+  }
+ },
+ "story": {
+  "actionsPerTurn": [
+   2,
+   2,
+   2,
+   3,
+   1
+  ],
+  "maxTurns": 6,
+  "starterDeck": [
+   "inspect",
+   "inspect",
+   "inspect",
+   "inspect",
+   "block",
+   "block",
+   "block",
+   "rollback"
+  ],
+  "unlocks": [
+   {
+    "turn": 1,
+    "cards": [
+     "policy"
+    ]
+   },
+   {
+    "turn": 3,
+    "cards": [
+     "escalate"
+    ]
+   },
+   {
+    "turn": 4,
+    "cards": [
+     "coffee"
+    ]
+   }
+  ]
+ },
+ "bands": {
+  "guessStar3Max": 1
+ },
+ "shiftGen": {
+  "dailyActionsPerTurn": [
+   2,
+   2
+  ]
+ },
+ "pathways": {
+  "help-desk": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "ruiz-vpn-fix",
+      "okafor-disable",
+      "romero-lookup",
+      "ruiz-vpn-close",
+      "okafor-mail-forward",
+      "romero-mfa-reset",
+      "ortiz-laptop",
+      "okafor-summary",
+      "ortiz-unlock",
+      "ortiz-access"
+     ]
+    }
+   }
+  },
+  "cybersecurity": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "cy-lam-report-real",
+      "cy-dsp04-isolate",
+      "cy-whitcomb-signins",
+      "cy-duarte-report-close",
+      "cy-sandoval-disable",
+      "cy-whitcomb-disable",
+      "cy-sandoval-wipe",
+      "cy-c2-deny",
+      "cy-sandoval-hr-list",
+      "cy-ransom-close"
+     ]
+    }
+   }
+  },
+  "cloud-network": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "cn-dispatch-errors",
+      "cn-dispatch-close",
+      "cn-hc-failover",
+      "cn-stonebridge-tunnel",
+      "cn-stonebridge-call",
+      "cn-pd-orphan-disks",
+      "cn-dispatch-log-vendor",
+      "cn-test-servers-stop",
+      "cn-dispatch-scale-zero",
+      "cn-pd-archive-delete"
+     ]
+    }
+   }
+  },
+  "full-stack": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "fs-track-errors",
+      "fs-track-close",
+      "fs-lark-package",
+      "fs-pd-key-rotate",
+      "fs-track-test-data",
+      "fs-pd-cleanup",
+      "fs-hc-flag-off",
+      "fs-hc-date-fix",
+      "fs-hc-late-release",
+      "fs-lark-docs"
+     ]
+    }
+   }
+  },
+  "business-analyst": {
+   "story": {
+    "stepOrder": {
+     "order": [
+      "ba-ontime-compare",
+      "ba-ontime-close",
+      "ba-lark-share",
+      "ba-hc-unpublish",
+      "ba-wayfell-sample",
+      "ba-pd-export-delete",
+      "ba-lark-owner",
+      "ba-hc-deck-share",
+      "ba-hc-ontime-rule",
+      "ba-pd-merge"
+     ]
+    }
+   }
+  }
+ }
+}

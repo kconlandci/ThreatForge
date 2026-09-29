@@ -1,0 +1,139 @@
+/**
+ * runVariant(ctx, variant, opts) -> result JSON (per pathway, per mode, per bot), plus band checks.
+ * Shared by run.mjs (one variant, full report) and sweep.mjs (many variants, compact table).
+ */
+import { applyCards, applyOverrides, overridesFor, rulesFor } from "./variant.mjs";
+import { aggregate, runOne } from "./sim.mjs";
+import { BOTS } from "./bots.mjs";
+
+export const DEFAULT_BANDS = { triageMin: 60, star3Min: 40, star3Max: 70, carefulWinMin: 80, degenerateMax: 5, guessStar3Max: 0, cardLuckMax: 1, oracleCleanMin: 99, oracleStar3Min: 90 };
+
+/** Dailies like lib/game/balance.test.ts: alternate a new player and one with 2 dailies done (D3 open). */
+export function dailies(p, count, playerPrefix = "sim-") {
+  const hist = Array.from({ length: 2 }, (_, i) => ({ encounterId: `x-daily-${i}`, status: "won", stars: 0, at: "2026-09-20T10:00:00.000Z", catches: 0, falseAlarms: 0, misses: 0, mode: "daily" }));
+  const base = { introSeen: true, hub: null, battle: null, pendingResult: null, best: null, attempts: 1, wins: 1, history: [] };
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const prog = i % 2 ? { ...base, history: hist, dailyCount: 2 + i } : { ...base, dailyCount: i };
+    const spec = p.planDaily(prog, { playerId: `${playerPrefix}${i}`, today: "2026-09-25" });
+    out.push({ enc: p.shiftEncounter(spec), seed: spec.seed, spec });
+  }
+  return out;
+}
+
+const dailyCache = new Map();
+
+function battlesFor(p, mode, overrides, o) {
+  const policy = p.config.policyCard;
+  if (mode === "story" || mode === "practice") {
+    const enc = applyOverrides(mode === "story" ? p.story : p.practice, overrides, policy);
+    return Array.from({ length: o.seeds }, (_, i) => ({ enc, seed: i + 1 }));
+  }
+  if (mode === "daily") {
+    const key = `${p.id}|${o.dailies}|${o.playerPrefix}|${o.shiftGenKey}`;
+    if (!dailyCache.has(key)) dailyCache.set(key, dailies(p, o.dailies, o.playerPrefix));
+    const list = [];
+    for (const d of dailyCache.get(key)) {
+      const enc = applyOverrides(d.enc, overrides, policy);
+      for (let k = 0; k < o.dailySeeds; k++) list.push({ enc, seed: k === 0 ? d.seed : (d.seed + k * 7919) >>> 0 });
+    }
+    return list;
+  }
+  throw new Error(`unknown mode ${mode}`);
+}
+
+export function runVariant(ctx, variant, opts = {}) {
+  const o = {
+    seeds: 1000,
+    dailies: 200,
+    dailySeeds: 1,
+    playerPrefix: "sim-",
+    modes: ["story", "daily"],
+    bots: Object.keys(BOTS),
+    pathways: "all",
+    ablate: false,
+    ablateBots: ["careful", "triage"],
+    ...opts,
+    shiftGenKey: JSON.stringify(variant.shiftGen ?? {}),
+  };
+  for (const b of o.bots) if (!BOTS[b]) throw new Error(`unknown bot ${b}; have ${Object.keys(BOTS).join(", ")}`);
+  const pathways = ctx.pathways.filter((p) => o.pathways === "all" || o.pathways.includes(p.id));
+  const policyIds = Object.keys(ctx.CARDS).filter((id) => ctx.CARDS[id].autoInspect);
+  const restore = applyCards(ctx.CARDS, variant.cards, policyIds);
+  // shiftGen knob: the daily's plans-per-turn. shiftGen orders plans for it (never 2 risky plans on
+  // one turn) and buildShift copies it, so patch the exported array in place, then restore it.
+  const apt = ctx.shiftGen.DAILY_ACTIONS_PER_TURN;
+  const aptSaved = apt.slice();
+  const wantApt = variant.shiftGen?.dailyActionsPerTurn;
+  if (wantApt) apt.splice(0, apt.length, ...wantApt);
+  const t0 = Date.now();
+  const result = { variant, app: ctx.APP, seeds: o.seeds, dailies: o.dailies, dailySeeds: o.dailySeeds, at: new Date().toISOString(), pathways: {} };
+  try {
+    for (const p of pathways) {
+      const rules = rulesFor(variant, p.id);
+      result.pathways[p.id] = {};
+      for (const mode of o.modes) {
+        const overrides = overridesFor(variant, p.id, mode);
+        const list = battlesFor(p, mode, overrides, o);
+        const enc0 = list[0].enc;
+        const run = (lst, bot) => lst.map(({ enc, seed }) => runOne(ctx, enc, seed, bot, rules, mode));
+        const entry = {
+          encounter:
+            mode === "daily"
+              ? { actionsPerTurn: enc0.actionsPerTurn, energyPerTurn: enc0.energyPerTurn, handSize: enc0.handSize, maxTurns: enc0.maxTurns, starterDeck: enc0.starterDeck, plansMean: Math.round((list.reduce((a, b) => a + b.enc.steps.length, 0) / list.length) * 100) / 100 }
+              : { id: enc0.id, actionsPerTurn: enc0.actionsPerTurn, energyPerTurn: enc0.energyPerTurn, handSize: enc0.handSize, maxTurns: enc0.maxTurns, maxRisk: enc0.maxRisk, starterDeck: enc0.starterDeck, unlocks: enc0.unlocks, stepOrder: enc0.steps.map((s) => `${s.id}${s.safe ? "" : "!"}`) },
+          rules,
+          bots: {},
+        };
+        for (const bot of o.bots) entry.bots[bot] = aggregate(run(list, bot), mode);
+        if (o.ablate) {
+          entry.ablation = {};
+          for (const card of [...new Set(ctx.engine.deckAtTurn(enc0, enc0.maxTurns))]) {
+            const abl = list.map(({ enc, seed }) => ({ enc: applyOverrides(enc, { deck: { remove: [card] } }, p.config.policyCard), seed }));
+            entry.ablation[card] = {};
+            for (const bot of o.ablateBots.filter((b) => o.bots.includes(b))) {
+              const a = aggregate(run(abl, bot), mode);
+              const b = entry.bots[bot];
+              const star = rules.starRule === "proof" ? "star3Proof" : "star3";
+              entry.ablation[card][bot] = { win: a.win, dWin: Math.round((a.win - b.win) * 10) / 10, star3: a[star], dStar3: Math.round((a[star] - b[star]) * 10) / 10, dMisses: Math.round((a.misses - b.misses) * 100) / 100 };
+            }
+          }
+        }
+        result.pathways[p.id][mode] = entry;
+      }
+    }
+  } finally {
+    restore();
+    apt.splice(0, apt.length, ...aptSaved);
+  }
+  result.ms = Date.now() - t0;
+  result.bands = checkBands(result, { ...DEFAULT_BANDS, ...(variant.bands ?? {}) });
+  return result;
+}
+
+/** The Phase 2 draft's balance bands (result.json plan.phases[1]). */
+export function checkBands(result, BANDS) {
+  const checks = {};
+  for (const [pid, modesOut] of Object.entries(result.pathways)) {
+    for (const [mode, e] of Object.entries(modesOut)) {
+      const rule = e.rules.starRule === "proof" ? "star3Proof" : "star3";
+      const b = e.bots;
+      const out = [];
+      const chk = (name, ok, val) => out.push({ name, ok, val });
+      const succ = (a) => (mode === "daily" ? a.pass : a.win);
+      if (b.careful) {
+        chk("triage", b.careful.anyTriage >= BANDS.triageMin, b.careful.anyTriage);
+        chk("3*", b.careful[rule] >= BANDS.star3Min && b.careful[rule] <= BANDS.star3Max, b.careful[rule]);
+        chk("win", b.careful.win >= BANDS.carefulWinMin, b.careful.win);
+      }
+      for (const bot of ["approve-all", "block-all"]) if (b[bot]) chk(bot, succ(b[bot]) <= BANDS.degenerateMax, succ(b[bot]));
+      for (const bot of ["guess-flag", "gut-flag"]) if (b[bot]) chk(`${bot} 3*`, b[bot][rule] <= BANDS.guessStar3Max, b[bot][rule]);
+      if (b.careful) chk("cardLuck", b.careful.anyCardLuckMiss <= BANDS.cardLuckMax, b.careful.anyCardLuckMiss);
+      if (b.oracle) chk("oracle clean", b.oracle.clean >= BANDS.oracleCleanMin, b.oracle.clean);
+      if (b.oracle) chk("oracle 3*", b.oracle[rule] >= BANDS.oracleStar3Min, b.oracle[rule]);
+      for (const [bn, a] of Object.entries(b)) if (a.mismatches) chk(`${bn} engine/harness star mismatch`, false, a.mismatches);
+      checks[`${pid}/${mode}`] = out;
+    }
+  }
+  return { spec: BANDS, checks };
+}

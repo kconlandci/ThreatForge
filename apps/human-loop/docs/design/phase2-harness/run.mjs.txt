@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+/**
+ * Human Loop balance simulator: one variant, full report. See README.md.
+ *
+ *   node run.mjs [--variant variants/x.json] [--pathways all|help-desk,...] [--modes story,daily]
+ *                [--seeds 1000] [--dailies 200] [--daily-seeds 1] [--bots all|careful,triage,...]
+ *                [--ablate] [--per-turn] [--quiet] [--app DIR] [--out results/name.json]
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { loadApp } from "./lib/load.mjs";
+import { runVariant } from "./lib/runner.mjs";
+import { CARD_ORDER } from "./lib/sim.mjs";
+import { BOTS } from "./lib/bots.mjs";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const argv = process.argv.slice(2);
+const arg = (name, def) => {
+  const i = argv.indexOf(`--${name}`);
+  if (i < 0) return def;
+  const v = argv[i + 1];
+  return v === undefined || v.startsWith("--") ? true : v;
+};
+const flag = (name) => argv.includes(`--${name}`);
+
+const ctx = await loadApp(arg("app"));
+const variantPath = arg("variant");
+const variant = variantPath ? JSON.parse(fs.readFileSync(path.resolve(variantPath), "utf8")) : { name: "baseline" };
+variant.name ??= path.basename(variantPath ?? "baseline", ".json");
+const list = (v) => (v === "all" ? "all" : String(v).split(","));
+
+const result = runVariant(ctx, variant, {
+  seeds: Number(arg("seeds", 1000)),
+  dailies: Number(arg("dailies", 200)),
+  dailySeeds: Number(arg("daily-seeds", 1)),
+  playerPrefix: String(arg("player-prefix", "sim-")),
+  modes: String(arg("modes", "story,daily")).split(","),
+  bots: arg("bots", "all") === "all" ? Object.keys(BOTS) : list(arg("bots")),
+  pathways: list(arg("pathways", "all")),
+  ablate: flag("ablate"),
+  ablateBots: String(arg("ablate-bots", "careful,triage")).split(","),
+});
+const quiet = flag("quiet");
+
+/* ------------------------------ print ------------------------------ */
+const pad = (x, n) => String(x ?? "-").padStart(n);
+const lines = [];
+lines.push(`Human Loop balance sim — variant "${variant.name}" — ${result.seeds} story seeds, ${result.dailies}x${result.dailySeeds} dailies per pathway — app ${ctx.APP} — ${(result.ms / 1000).toFixed(1)}s`);
+if (variant.notes) lines.push(`notes: ${variant.notes}`);
+for (const [pid, modesOut] of Object.entries(result.pathways)) {
+  for (const [mode, e] of Object.entries(modesOut)) {
+    const en = e.encounter;
+    const daily = mode === "daily";
+    lines.push("");
+    lines.push(`== ${pid} / ${mode}  apt ${JSON.stringify(en.actionsPerTurn)} energy ${en.energyPerTurn} hand ${en.handSize} turns ${en.maxTurns}${en.plansMean ? ` plans~${en.plansMean}` : ""}`);
+    if (en.stepOrder) lines.push(`   steps: ${en.stepOrder.join(" ")}   deck: ${en.starterDeck.join(",")} unlocks: ${(en.unlocks ?? []).map((u) => `T${u.turn}:${u.cards.join("+")}`).join(" ")}`);
+    lines.push(`${"bot".padEnd(16)}${pad("win%", 6)}${pad("3*%", 6)}${pad("3*pf%", 7)}${daily ? pad("pass%", 7) + pad("passP2", 7) : ""}${pad("triag%", 7)}${pad("blind%", 7)}${pad("short%", 7)}${pad("blnd/r", 7)}${pad("unusE", 7)}${pad("dead", 6)}${pad("0card", 6)}${pad("noRsk", 6)}${pad("pl/t", 6)}${pad("miss", 6)}${pad("FA", 6)}${pad("proof%", 7)}${pad("esc", 5)}${pad("noStp%", 7)}${pad("luckM%", 7)}${pad("cardL%", 7)}${pad("rb", 5)}${pad("mism", 5)}${pad("cardSh", 7)}${pad("timeSh", 7)}`);
+    for (const [bot, a] of Object.entries(e.bots)) {
+      lines.push(
+        `${bot.padEnd(16)}${pad(a.win, 6)}${pad(a.star3, 6)}${pad(a.star3Proof, 7)}${daily ? pad(a.pass, 7) + pad(a.passP2, 7) : ""}${pad(a.anyTriage, 7)}${pad(a.anyForcedBlind, 7)}${pad(a.anyShort, 7)}${pad(a.blindRuns, 7)}${pad(a.unusedEnergy, 7)}${pad(a.deadTurns, 6)}${pad(a.zeroCardTurns, 6)}${pad(a.noRiskTurns, 6)}${pad(a.plansPerTurn, 6)}${pad(a.misses, 6)}${pad(a.falseAlarms, 6)}${pad(a.proofShare, 7)}${pad(a.escalations, 5)}${pad(a.anyStopless, 7)}${pad(a.anyLuckMiss, 7)}${pad(a.anyCardLuckMiss, 7)}${pad(a.rollbacks, 5)}${pad(a.mismatches, 5)}${pad(a.anyCardShort, 7)}${pad(a.anyTimeShort, 7)}`,
+      );
+    }
+    if (!quiet) {
+      for (const bot of ["careful", "triage"].filter((b) => e.bots[b])) {
+        const c = e.bots[bot].cards;
+        lines.push(`  cards (${bot}): ` + CARD_ORDER.map((k) => `${k} played ${c[k].playedRuns}% decisive ${c[k].decisiveRuns}% x${c[k].playsPerRun} held→used ${c[k].usedWhenHeld ?? "-"}%`).join(" | "));
+      }
+    }
+    if (flag("per-turn")) {
+      for (const bot of ["careful", "triage"].filter((b) => e.bots[b])) {
+        const pt = e.bots[bot].perTurn;
+        lines.push(`  per turn (${bot}): ` + Object.entries(pt).map(([t, x]) => `T${t}[reach ${x.reached}% plans ${x.plans} triage ${x.triage}% blind ${x.forcedBlind}% noRisk ${x.noRisk}% dead ${x.dead}% 0card ${x.zeroCard}% short ${x.short}% E-left ${x.energyLeft}]`).join(" "));
+      }
+    }
+    if (e.ablation) {
+      lines.push(`  ablation (remove one copy; Δwin/Δ3* in points): ` + Object.entries(e.ablation).map(([card, b]) => `${card}: ` + Object.entries(b).map(([bot, x]) => `${bot} ${x.dWin}/${x.dStar3}`).join(", ")).join(" | "));
+    }
+  }
+}
+const B = result.bands.spec;
+lines.push("");
+lines.push(`Bands: careful triage>=${B.triageMin}% | careful 3* ${B.star3Min}-${B.star3Max}% | careful win>=${B.carefulWinMin}% | approve-all & block-all win (story) / pass (daily) <=${B.degenerateMax}% | guess-flag & gut-flag 3*<=${B.guessStar3Max}% | careful card-luck miss<=${B.cardLuckMax}% | oracle clean>=${B.oracleCleanMin}%`);
+for (const [key, out] of Object.entries(result.bands.checks)) {
+  const [pid, mode] = key.split("/");
+  lines.push(`  ${key.padEnd(24)} (3* rule: ${result.pathways[pid][mode].rules.starRule}) ` + out.map((c) => `${c.ok ? "ok  " : "FAIL"} ${c.name} ${c.val}`).join(" | "));
+}
+const text = lines.join("\n");
+console.log(text);
+
+const out = arg("out", path.join(HERE, "results", `${variant.name}.json`));
+fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
+fs.writeFileSync(path.resolve(out), JSON.stringify(result, null, 1));
+fs.writeFileSync(path.resolve(out).replace(/\.json$/, ".txt"), text + "\n");
+console.log(`\nwrote ${path.resolve(out)} (+ .txt)`);

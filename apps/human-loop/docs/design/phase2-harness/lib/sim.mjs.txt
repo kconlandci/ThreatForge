@@ -1,0 +1,236 @@
+/**
+ * Runs bots over encounters and turns the Game logs into the balance numbers.
+ */
+import { Game } from "./game.mjs";
+import { BOTS } from "./bots.mjs";
+
+export const CARD_ORDER = ["inspect", "block", "escalate", "rollback", "policy", "coffee"];
+const cardKey = (id) => (id.startsWith("policy-") ? "policy" : id);
+
+/** Phase 2 draft grade of one plan (flag-aware). Safe plans keep today's mastery.gradePlan. */
+function gradeP2(ctx, step, rt, flag, rules, spottedNoCard) {
+  if (step.safe) return ctx.mastery.gradePlan(step, rt).result;
+  switch (rt?.status) {
+    case "blocked":
+    case "escalated":
+      return flag?.proof ? "R" : "P";
+    case "rolled-back":
+      return "P";
+    case "executed":
+      return rules.spottedNoCardPartly && spottedNoCard.has(step.id) ? "P" : "W";
+    default:
+      return null;
+  }
+}
+
+export function runOne(ctx, enc, seed, botName, rules, mode) {
+  const bot = BOTS[botName](seed);
+  const g = new Game(ctx, enc, seed, rules, mode);
+  for (let t = 0; g.playing; t++) {
+    if (t > enc.maxTurns + 2) throw new Error(`${enc.id} seed ${seed} ${botName}: battle did not end`);
+    bot.turn(g);
+  }
+  g.wrapUp(bot);
+  const s = g.s;
+  const score = ctx.engine.scoreBattle(s, enc);
+  const won = s.status === "won";
+
+  const riskyCaught = enc.steps.filter((x) => !x.safe && (s.steps[x.id].status === "blocked" || s.steps[x.id].status === "escalated"));
+  const proofCatches = riskyCaught.filter((x) => g.flags[x.id]?.proof).length;
+  const allProof = proofCatches === riskyCaught.length;
+  const starsProof = won ? 1 + (s.stats.misses === 0 ? 1 : 0) + (s.stats.falseAlarms <= 1 && allProof ? 1 : 0) : 0;
+  // Cross-check: the engine's own proof star (grading "proof") must agree with the harness side table.
+  const engineProof = s.grading === "proof";
+  const mismatch = engineProof && !enc.rules?.rollbackCosts3rd && score.stars !== starsProof ? 1 : 0;
+  // With the engine grading on proof, the engine's stars are the truth (they also apply rollbackCosts3rd).
+  const starsProofOut = engineProof ? score.stars : starsProof;
+
+  const gradesNow = { R: 0, P: 0, W: 0 };
+  const gradesP2 = { R: 0, P: 0, W: 0 };
+  for (const step of enc.steps) {
+    const rt = s.steps[step.id];
+    const a = ctx.mastery.gradePlan(step, rt).result;
+    if (a) gradesNow[a]++;
+    // Engine-native Phase 2 grade (rule A in the private mastery.ts) unless the old emulation is asked for.
+    const b = rules.gradeEmulation ? gradeP2(ctx, step, rt, g.flags[step.id], rules, g.spottedNoCard) : a;
+    if (b) gradesP2[b]++;
+  }
+
+  // Cards.
+  const cards = {};
+  for (const k of CARD_ORDER) cards[k] = { plays: 0, decisive: 0, turnsInHand: 0, turnsPlayed: 0 };
+  let autoRisky = 0;
+  for (const ev of s.events) if (ev.t === "inspected" && ev.auto && !g.step.get(ev.stepId).safe) autoRisky++;
+  const turnByNo = new Map(g.turns.map((t) => [t.turn, t]));
+  const playedTurns = {};
+  for (const p of g.plays) {
+    const k = cardKey(p.cardId);
+    const c = cards[k];
+    c.plays++;
+    (playedTurns[k] ??= new Set()).add(p.turn);
+    if (["inspect", "block", "escalate", "rollback"].includes(k)) {
+      if (p.safe === false) c.decisive++;
+    } else if (k === "policy") {
+      if (autoRisky > 0) c.decisive++;
+    } else if (k === "coffee") {
+      const t = turnByNo.get(p.turn);
+      const used = rules.coffee === "energy" ? t && t.energyLeft !== undefined ? t.energyLeft < rules.coffeeEnergy : true : g.plays.some((q) => q.turn === p.turn && q.fromCoffee);
+      if (used) c.decisive++;
+    }
+  }
+  for (const t of g.turns) {
+    const kinds = new Set(t.hand.map(cardKey));
+    for (const k of kinds) {
+      cards[k].turnsInHand++;
+      if (playedTurns[k]?.has(t.turn)) cards[k].turnsPlayed++;
+    }
+  }
+
+  const ended = g.turns.filter((t) => t.energyLeft !== undefined);
+  const sum = (arr, f) => arr.reduce((n, x) => n + f(x), 0);
+  return {
+    seed,
+    status: s.status,
+    won,
+    stars: score.stars,
+    starsProof: starsProofOut,
+    misses: s.stats.misses,
+    falseAlarms: s.stats.falseAlarms,
+    catches: riskyCaught.length,
+    proofCatches,
+    blindCatches: riskyCaught.filter((x) => !g.flags[x.id]?.seen).length,
+    escalations: s.stats.escalations,
+    rollbacks: s.stats.rollbacks,
+    gradesNow,
+    gradesP2,
+    passNow: won && gradesNow.W <= 1,
+    passP2: won && gradesP2.W <= 1,
+    turns: g.turns.length,
+    forcedBlindTurns: g.turns.filter((t) => t.forcedBlind).length,
+    triageTurns: g.turns.filter((t) => t.triage).length,
+    cardShortTurns: g.turns.filter((t) => t.cardShort).length,
+    timeShortTurns: g.turns.filter((t) => t.timeShort).length,
+    stoplessTurns: g.turns.filter((t) => t.stopless).length,
+    luckMisses: g.spottedNoCard.size,
+    cardLuckMisses: g.turns.filter((t) => t.cardLuckMiss).length,
+    mismatch,
+    engineProof,
+    shortTurns: ended.filter((t) => t.short).length,
+    blindRuns: sum(ended, (t) => t.blindRun),
+    redRuns: sum(ended, (t) => t.redRun),
+    unusedEnergy: sum(ended, (t) => t.energyLeft),
+    endedTurns: ended.length,
+    deadTurns: g.turns.filter((t) => t.dead).length,
+    zeroCardTurns: ended.filter((t) => t.cardsPlayed === 0).length,
+    noRiskTurns: g.turns.filter((t) => t.noRisk).length,
+    plans: sum(g.turns, (t) => t.plans),
+    perTurn: g.turns.map((t) => ({ turn: t.turn, plans: t.plans, forcedBlind: t.forcedBlind, triage: t.triage, dead: t.dead, noRisk: t.noRisk, zeroCard: t.energyLeft !== undefined && t.cardsPlayed === 0, short: !!t.short, energyLeft: t.energyLeft })),
+    cards,
+    autoRisky,
+    wrapUps: g.wrapUps,
+    stopSwaps: g.stopSwaps ?? 0,
+  };
+}
+
+const r1 = (x) => Math.round(x * 1000) / 10; // percent, 1 decimal
+const m2 = (x) => Math.round(x * 100) / 100;
+
+export function aggregate(runs, mode) {
+  const n = runs.length;
+  const rate = (f) => r1(runs.filter(f).length / n);
+  const mean = (f) => m2(runs.reduce((a, r) => a + f(r), 0) / n);
+  const totalTurns = runs.reduce((a, r) => a + r.turns, 0);
+  const out = {
+    runs: n,
+    win: rate((r) => r.won),
+    breach: rate((r) => r.status === "lost-breach"),
+    timeout: rate((r) => r.status === "lost-timeout"),
+    stars: [0, 1, 2, 3].map((k) => rate((r) => r.stars === k)),
+    star3: rate((r) => r.stars === 3),
+    star3Proof: rate((r) => r.starsProof === 3),
+    pass: rate((r) => r.passNow),
+    passP2: rate((r) => r.passP2),
+    clean: rate((r) => r.won && r.misses === 0),
+    anyForcedBlind: rate((r) => r.forcedBlindTurns > 0),
+    forcedBlindTurns: mean((r) => r.forcedBlindTurns),
+    anyTriage: rate((r) => r.triageTurns > 0),
+    anyCardShort: rate((r) => r.cardShortTurns > 0),
+    anyTimeShort: rate((r) => r.timeShortTurns > 0),
+    anyStopless: rate((r) => r.stoplessTurns > 0),
+    anyLuckMiss: rate((r) => r.luckMisses > 0),
+    anyCardLuckMiss: rate((r) => r.cardLuckMisses > 0),
+    mismatches: runs.reduce((a, r) => a + r.mismatch, 0),
+    engineProofRuns: runs.filter((r) => r.engineProof).length,
+    triageTurns: mean((r) => r.triageTurns),
+    anyShort: rate((r) => r.shortTurns > 0),
+    shortTurns: mean((r) => r.shortTurns),
+    blindRuns: mean((r) => r.blindRuns),
+    unusedEnergy: mean((r) => r.unusedEnergy),
+    unusedEnergyPerTurn: m2(runs.reduce((a, r) => a + r.unusedEnergy, 0) / Math.max(1, runs.reduce((a, r) => a + r.endedTurns, 0))),
+    deadTurns: mean((r) => r.deadTurns),
+    anyDead: rate((r) => r.deadTurns > 0),
+    zeroCardTurns: mean((r) => r.zeroCardTurns),
+    noRiskTurns: mean((r) => r.noRiskTurns),
+    plansPerTurn: m2(runs.reduce((a, r) => a + r.plans, 0) / Math.max(1, totalTurns)),
+    turns: mean((r) => r.turns),
+    misses: mean((r) => r.misses),
+    falseAlarms: mean((r) => r.falseAlarms),
+    catches: mean((r) => r.catches),
+    proofShare: r1(runs.reduce((a, r) => a + r.proofCatches, 0) / Math.max(1, runs.reduce((a, r) => a + r.catches, 0))),
+    blindCatchShare: r1(runs.reduce((a, r) => a + r.blindCatches, 0) / Math.max(1, runs.reduce((a, r) => a + r.catches, 0))),
+    escalations: mean((r) => r.escalations),
+    rollbacks: mean((r) => r.rollbacks),
+    wrapUps: mean((r) => r.wrapUps),
+    stopSwaps: mean((r) => r.stopSwaps),
+    grades: ["R", "P", "W"].map((k) => mean((r) => r.gradesNow[k])),
+    gradesP2: ["R", "P", "W"].map((k) => mean((r) => r.gradesP2[k])),
+    cards: {},
+    perTurn: {},
+  };
+  for (const k of CARD_ORDER) {
+    const inHand = runs.reduce((a, r) => a + r.cards[k].turnsInHand, 0);
+    out.cards[k] = {
+      playedRuns: rate((r) => r.cards[k].plays > 0),
+      decisiveRuns: rate((r) => r.cards[k].decisive > 0),
+      playsPerRun: mean((r) => r.cards[k].plays),
+      decisiveShare: r1(runs.reduce((a, r) => a + r.cards[k].decisive, 0) / Math.max(1, runs.reduce((a, r) => a + r.cards[k].plays, 0))),
+      usedWhenHeld: inHand ? r1(runs.reduce((a, r) => a + r.cards[k].turnsPlayed, 0) / inHand) : null,
+    };
+  }
+  const byTurn = new Map();
+  for (const r of runs)
+    for (const t of r.perTurn) {
+      const b = byTurn.get(t.turn) ?? { n: 0, plans: 0, forcedBlind: 0, triage: 0, dead: 0, noRisk: 0, zeroCard: 0, short: 0, energyLeft: 0, ended: 0 };
+      b.n++;
+      b.plans += t.plans;
+      b.forcedBlind += t.forcedBlind ? 1 : 0;
+      b.triage += t.triage ? 1 : 0;
+      b.dead += t.dead ? 1 : 0;
+      b.noRisk += t.noRisk ? 1 : 0;
+      b.zeroCard += t.zeroCard ? 1 : 0;
+      b.short += t.short ? 1 : 0;
+      if (t.energyLeft !== undefined) {
+        b.energyLeft += t.energyLeft;
+        b.ended++;
+      }
+      byTurn.set(t.turn, b);
+    }
+  for (const [turn, b] of [...byTurn].sort((a, b) => a[0] - b[0])) {
+    out.perTurn[turn] = {
+      reached: r1(b.n / n),
+      plans: m2(b.plans / b.n),
+      forcedBlind: r1(b.forcedBlind / b.n),
+      triage: r1(b.triage / b.n),
+      dead: r1(b.dead / b.n),
+      noRisk: r1(b.noRisk / b.n),
+      zeroCard: r1(b.zeroCard / b.n),
+      short: r1(b.short / b.n),
+      energyLeft: b.ended ? m2(b.energyLeft / b.ended) : null,
+    };
+  }
+  if (mode !== "daily") {
+    delete out.pass;
+    delete out.passP2;
+  }
+  return out;
+}

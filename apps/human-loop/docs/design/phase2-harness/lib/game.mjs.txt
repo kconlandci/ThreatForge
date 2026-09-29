@@ -1,0 +1,245 @@
+/**
+ * Game: a thin wrapper around the real engine (createBattle / playCard / endTurn) that
+ *  - adds the Phase 2 draft mechanics the engine does not have yet (clue flags and proof,
+ *    Coffee-as-energy, an Escalate budget, the stop guarantee, a wrap-up Roll Back beat), and
+ *  - records the per-turn measurements (forced blind calls, dead turns, unused energy, card use).
+ * Every rule off = the engine exactly as shipped (checked against lib/game/balance.test.ts).
+ */
+
+const STOP_CARDS = new Set(["block", "escalate"]);
+
+export class Game {
+  constructor(ctx, enc, seed, rules, mode) {
+    this.ctx = ctx;
+    this.enc = enc;
+    this.rules = rules;
+    this.mode = mode;
+    this.step = new Map(enc.steps.map((s) => [s.id, s]));
+    this.policy = ctx.engine.policyCardOf(enc);
+    this.policyCats = this.policy ? ctx.CARDS[this.policy].autoInspect ?? [] : [];
+    this.flags = {}; // stepId -> { flag, seen, proof, by }
+    this.escUsed = 0;
+    this.turns = []; // one record per turn
+    this.plays = []; // every successful play
+    this.coffeeDrawn = new Set();
+    this.wrapUps = 0;
+    this.spottedNoCard = new Set();
+    this.escBudget = enc.rules?.escalateBudget ?? rules.escalateBudget;
+    this.s = ctx.engine.createBattle(enc, seed);
+    this._turnStarted();
+  }
+
+  get playing() {
+    return this.s.status === "playing";
+  }
+  cost(id) {
+    return this.ctx.CARDS[id].cost;
+  }
+  has(id) {
+    if (id === "inspect" && this.enc.rules?.lookAction) return true;
+    return this.s.hand.some((c) => c.cardId === id);
+  }
+  count(id) {
+    if (id === "inspect" && this.enc.rules?.lookAction) return 99;
+    return this.s.hand.filter((c) => c.cardId === id).length;
+  }
+  canAfford(id) {
+    return this.cost(id) <= this.s.energy;
+  }
+  /** In hand, affordable and (for Escalate) within the budget. */
+  can(id) {
+    if (!this.has(id) || !this.canAfford(id)) return false;
+    if (id === "escalate" && this.escBudget != null && this.escUsed >= this.escBudget) return false;
+    return true;
+  }
+  red(id) {
+    return this.step.get(id).evidence.some((e) => e.redFlag);
+  }
+  /** The row a knowing player flags: the first red row, or the last (most telling) with rules.proofRow "last". */
+  redIndex(id) {
+    const ev = this.step.get(id).evidence;
+    const marked = ev.findIndex((e) => e.proof);
+    if (marked >= 0) return marked;
+    if (this.rules.proofRow === "last") {
+      for (let i = ev.length - 1; i >= 0; i--) if (ev[i].redFlag) return i;
+      return -1;
+    }
+    return ev.findIndex((e) => e.redFlag);
+  }
+  /** Does this row count as proof? Any red row, or only the last red row with rules.proofRow "last". */
+  isProofRow(id, flag) {
+    if (flag == null || flag < 0) return false;
+    if (this.rules.proofRow === "last") return flag === this.redIndex(id);
+    return !!this.step.get(id).evidence[flag]?.redFlag;
+  }
+  inspected(id) {
+    return !!this.s.steps[id]?.inspected;
+  }
+  /** Executed, reversible, risky, not yet rolled back: the player saw it go wrong. */
+  knownBad() {
+    return this.ctx.engine
+      .validTargets(this.s, this.enc, "rollback")
+      .filter((id) => !this.step.get(id).safe)
+      .sort((a, b) => this.step.get(b).risk - this.step.get(a).risk);
+  }
+  deckHas(id) {
+    return this.ctx.engine.deckAtTurn(this.enc, Math.max(1, this.s.turn)).includes(id);
+  }
+
+  /** Play the first copy of a card. flag = evidence row index offered as the clue (Block/Escalate). */
+  play(cardId, target, flag) {
+    if (!this.playing) return false;
+    if (cardId === "inspect" && this.enc.rules?.lookAction) {
+      const r = this.ctx.engine.lookAt(this.s, this.enc, target);
+      if (!r.ok) return false;
+      this.s = r.state;
+      this.plays.push({ turn: this.cur?.turn ?? 0, cardId, target, safe: this.step.get(target)?.safe, wasInspected: false, fromCoffee: false, wrapUp: !!this.inWrapUp });
+      if (this.cur) this.cur.cardsPlayed++;
+      return true;
+    }
+    const inst = this.s.hand.find((c) => c.cardId === cardId);
+    if (!inst) return false;
+    if (cardId === "escalate" && this.escBudget != null && this.escUsed >= this.escBudget) return false;
+    const before = this.s;
+    const turn = this.cur;
+    const wasInspected = target ? this.inspected(target) : false;
+    let next;
+    if (cardId === "coffee" && this.rules.coffee === "energy" && !this.ctx.CARDS.coffee.energy) {
+      if (inst && this.cost("coffee") > before.energy) return false;
+      next = structuredClone(before);
+      next.hand = next.hand.filter((c) => c.uid !== inst.uid);
+      next.exhausted.push(inst);
+      next.energy += this.rules.coffeeEnergy - this.cost("coffee");
+      next.events.push({ t: "card-played", cardId: "coffee" });
+    } else {
+      const clue = cardId === "block" || cardId === "escalate" ? (flag ?? null) : undefined;
+      const r = this.ctx.engine.playCard(before, this.enc, inst.uid, target, clue);
+      if (!r.ok) return false;
+      next = r.state;
+    }
+    this.s = next;
+    const fromCoffee = this.coffeeDrawn.has(inst.uid);
+    if (cardId === "coffee" && this.rules.coffee !== "energy") {
+      const had = new Set(before.hand.map((c) => c.uid));
+      for (const c of next.hand) if (!had.has(c.uid)) this.coffeeDrawn.add(c.uid);
+    }
+    if (cardId === "escalate") this.escUsed++;
+    const def = target ? this.step.get(target) : null;
+    const rec = { turn: turn?.turn ?? 0, cardId, target, safe: def?.safe, wasInspected, fromCoffee, wrapUp: !!this.inWrapUp };
+    if ((cardId === "block" || cardId === "escalate") && def && !def.safe) {
+      const seen = wasInspected || (this.rules.glance && flag === 0) || !this.rules.flagNeedsInspect;
+      const proof = seen && this.isProofRow(target, flag);
+      this.flags[target] = { flag, seen, proof, by: cardId };
+      rec.proof = proof;
+    }
+    this.plays.push(rec);
+    if (turn) turn.cardsPlayed++;
+    return true;
+  }
+
+  /** End the turn: the agent runs every announced plan (engine endTurn). */
+  end() {
+    if (!this.playing) return;
+    const t = this.cur;
+    t.energyLeft = this.s.energy;
+    t.blindRun = this.s.announced.filter((id) => !this.inspected(id)).length;
+    t.redRun = this.s.announced.filter((id) => this.inspected(id) && this.red(id)).length;
+    t.riskyRun = this.s.announced.filter((id) => !this.step.get(id).safe).length;
+    t.short = t.blindRun > 0 || t.redRun > 0;
+    // Card luck: a risky plan runs and no Block/Escalate was in hand at turn start (energy was never the issue).
+    t.cardLuckMiss = t.riskyRun > 0 && t.stopless;
+    // "Spotted it, no card": the red flag was on screen and no Block/Escalate could be played.
+    const stopPossible = this.can("block") || this.can("escalate");
+    for (const id of this.s.announced) if (this.inspected(id) && !this.step.get(id).safe && !stopPossible) this.spottedNoCard.add(id);
+    this.s = this.ctx.engine.endTurn(this.s, this.enc);
+    this.coffeeDrawn.clear();
+    if (this.playing) this._turnStarted();
+  }
+
+  /** Wrap-up beat (rules.wrapUpRollback): after a won shift, energy for one more Roll Back pass. */
+  wrapUp(bot) {
+    if (!this.rules.wrapUpRollback || this.s.status !== "won" || !bot.wrapUp) return;
+    if (!this.knownBad().length || !this.deckHas("rollback")) return;
+    const s = structuredClone(this.s);
+    s.status = "playing";
+    s.energy = this.enc.energyPerTurn;
+    if (!s.hand.some((c) => c.cardId === "rollback")) {
+      for (const pile of [s.drawPile, s.discardPile]) {
+        const i = pile.findIndex((c) => c.cardId === "rollback");
+        if (i >= 0) {
+          s.hand.push(pile.splice(i, 1)[0]);
+          break;
+        }
+      }
+    }
+    const saved = this.s;
+    this.s = s;
+    this.inWrapUp = true;
+    const before = this.plays.length;
+    bot.wrapUp(this);
+    this.inWrapUp = false;
+    if (this.plays.length === before) this.s = saved;
+    else {
+      this.wrapUps++;
+      this.s.status = "won";
+    }
+  }
+
+  _turnStarted() {
+    if (this.rules.stopGuarantee?.includes(this.mode)) this._guaranteeStop();
+    const s = this.s;
+    const ann = s.announced;
+    const unins = ann.filter((id) => !this.inspected(id));
+    const inspects = this.count("inspect");
+    const affordable = Math.min(inspects, Math.floor(s.energy / Math.max(1, this.cost("inspect"))));
+    const knownRed = ann.filter((id) => this.inspected(id) && this.red(id));
+    const knownBad = this.knownBad();
+    const t = {
+      turn: s.turn,
+      plans: ann.length,
+      uninspected: unins.length,
+      risky: ann.filter((id) => !this.step.get(id).safe).length,
+      oneWay: ann.filter((id) => !this.step.get(id).reversible).length,
+      inspects,
+      affordable,
+      energy: s.energy,
+      hand: s.hand.map((c) => c.cardId),
+      forcedBlind: unins.length > affordable,
+      // Why a turn is short: not enough Inspect cards (card) vs not enough energy to inspect all and still block one (time).
+      cardShort: unins.length > inspects,
+      timeShort: unins.length <= inspects && unins.length > 0 && ann.some((id) => !this.step.get(id).safe) && unins.length + 1 > s.energy,
+      // A triage choice: not every plan can be inspected, or inspecting them all leaves no energy to stop one.
+      triage: unins.length > affordable || (unins.length > 0 && unins.length >= s.energy + (this.rules.coffee === "energy" && this.has("coffee") ? this.rules.coffeeEnergy - this.cost("coffee") : 0)),
+      // Nothing worth a card: every plan already inspected (auto) and clean, and nothing bad to undo.
+      dead: unins.length === 0 && knownRed.length === 0 && (knownBad.length === 0 || !this.has("rollback")),
+      noRisk: ann.every((id) => this.step.get(id).safe),
+      // A risky plan is up and the hand holds no Block or Escalate (card luck; Coffee may still dig one).
+      stopless: ann.some((id) => !this.step.get(id).safe) && !s.hand.some((c) => STOP_CARDS.has(c.cardId)),
+      cardsPlayed: 0,
+    };
+    this.turns.push(t);
+    this.cur = t;
+  }
+
+  /** Stop guarantee: if the new hand has no Block/Escalate, swap one in from the piles (deterministic). */
+  _guaranteeStop() {
+    const s = this.s;
+    if (s.hand.some((c) => STOP_CARDS.has(c.cardId))) return;
+    for (const pileName of ["drawPile", "discardPile"]) {
+      const pile = s[pileName];
+      const i = pile.findIndex((c) => c.cardId === "block") >= 0 ? pile.findIndex((c) => c.cardId === "block") : pile.findIndex((c) => c.cardId === "escalate");
+      if (i < 0) continue;
+      const n = structuredClone(s);
+      const stop = n[pileName].splice(i, 1)[0];
+      // Give back the last non-inspect card if any, else the last card.
+      let j = -1;
+      for (let k = n.hand.length - 1; k >= 0; k--) if (n.hand[k].cardId !== "inspect") { j = k; break; }
+      if (j < 0) j = n.hand.length - 1;
+      if (j >= 0) n[pileName].splice(i, 0, n.hand.splice(j, 1)[0]);
+      n.hand.push(stop);
+      this.s = n;
+      this.stopSwaps = (this.stopSwaps ?? 0) + 1;
+      return;
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+ "name": "depth-look3",
+ "notes": "Look action + 3 plans a turn (story 3-3-3-1, daily 3).",
+ "cards": {
+  "coffee": {
+   "energy": 1
+  },
+  "rollback": {
+   "cost": 1
+  },
+  "policy": {
+   "cost": 2
+  }
+ },
+ "rules": {
+  "coffee": "energy",
+  "coffeeEnergy": 1,
+  "starRule": "proof",
+  "proofRow": "last",
+  "readOnlyBadge": true
+ },
+ "all": {
+  "engineRules": {
+   "proofStar": true,
+   "stopGuarantee": true,
+   "escalateBudget": 1,
+   "rollbackCosts3rd": true,
+   "inspectFloor": 0,
+   "lookAction": true
+  }
+ },
+ "story": {
+  "actionsPerTurn": [
+   3,
+   3,
+   3,
+   1
+  ],
+  "maxTurns": 5,
+  "starterDeck": [
+   "block",
+   "block",
+   "block",
+   "rollback"
+  ],
+  "unlocks": [
+   {
+    "turn": 1,
+    "cards": [
+     "policy"
+    ]
+   },
+   {
+    "turn": 3,
+    "cards": [
+     "escalate"
+    ]
+   },
+   {
+    "turn": 4,
+    "cards": [
+     "coffee"
+    ]
+   }
+  ],
+  "handSize": 3
+ },
+ "bands": {
+  "guessStar3Max": 1
+ },
+ "shiftGen": {
+  "dailyActionsPerTurn": [
+   3
+  ]
+ },
+ "pathways": {
+  "help-desk": {
+   "story": {}
+  },
+  "cybersecurity": {
+   "story": {}
+  },
+  "cloud-network": {
+   "story": {}
+  },
+  "full-stack": {
+   "story": {}
+  },
+  "business-analyst": {
+   "story": {}
+  }
+ },
+ "daily": {
+  "handSize": 3,
+  "deck": {
+   "remove": [
+    "inspect",
+    "inspect",
+    "inspect",
+    "inspect"
+   ]
+  }
+ }
+}

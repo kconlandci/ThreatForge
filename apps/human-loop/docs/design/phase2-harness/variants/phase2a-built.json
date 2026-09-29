@@ -1,0 +1,14 @@
+{
+ "name": "phase2a-built",
+ "notes": "Use AFTER Stage 2a is built: run against the built repo (--app). No encounter overrides: the engine, cards and content already carry Phase 2a. Only the bot knowledge (coffee = energy, proof star) and bands. Must reproduce results/dir-final-content.txt (story 2000 seeds, dailies 400 x 3).",
+ "rules": {
+  "coffee": "energy",
+  "coffeeEnergy": 1,
+  "starRule": "proof",
+  "proofRow": "last",
+  "readOnlyBadge": true
+ },
+ "bands": {
+  "guessStar3Max": 1
+ }
+}

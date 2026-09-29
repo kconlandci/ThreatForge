@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+/**
+ * Story layout search for the depth design: chain-preserving step orders (each ticket keeps its own
+ * order, plan 1 is safe) x plans-per-turn patterns x deck knobs, scored against the bands.
+ *   node search.mjs --variant variants/depth-v1.json --pathways help-desk --orders 150 --seeds 300
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { loadApp } from "./lib/load.mjs";
+import { runVariant } from "./lib/runner.mjs";
+import { seedState, nextFloat } from "./lib/rngLocal.mjs";
+
+const argv = process.argv.slice(2);
+const arg = (n, d) => { const i = argv.indexOf(`--${n}`); return i < 0 ? d : argv[i + 1]; };
+const ctx = await loadApp(arg("app"));
+const base = JSON.parse(fs.readFileSync(arg("variant", "variants/depth-v1.json"), "utf8"));
+const pathways = arg("pathways", "all") === "all" ? ctx.pathways.map((p) => p.id) : arg("pathways").split(",");
+const nOrders = Number(arg("orders", 120));
+const seeds = Number(arg("seeds", 300));
+const apts = JSON.parse(arg("apts", "[[2,2,3,3],[2,3,2,3],[2,2,2,2,2],[2,3,3,2],[3,2,3,2]]"));
+const slacks = JSON.parse(arg("slacks", "[1]"));
+const extra = JSON.parse(arg("extra", "[{}]")); // story-layer patches to try
+const bots = ["careful-pol", "careful", "triage", "oracle", "block-all", "approve-all", "guess-flag", "escalate-unknown", "human80"];
+
+function orders(enc, n, seed) {
+  const chains = new Map();
+  for (const s of enc.steps) { const k = s.ticket ?? s.id; if (!chains.has(k)) chains.set(k, []); chains.get(k).push(s); }
+  const out = new Map();
+  out.set(enc.steps.map((s) => s.id).join(","), enc.steps.map((s) => s.id));
+  let r = seedState(seed);
+  const f = () => { const x = nextFloat(r); r = x.state; return x.value; };
+  for (let tries = 0; out.size < n && tries < n * 50; tries++) {
+    const heads = [...chains.values()].map((c) => c.slice());
+    const seq = [];
+    while (heads.some((h) => h.length)) {
+      const live = heads.filter((h) => h.length);
+      // weight by remaining length so chains interleave evenly
+      const tot = live.reduce((a, h) => a + h.length, 0);
+      let u = f() * tot, pick = live[0];
+      for (const h of live) { if ((u -= h.length) < 0) { pick = h; break; } }
+      seq.push(pick.shift());
+    }
+    if (!seq[0].safe) continue;
+    if (argv.includes("--t1safe") && !(seq[1].safe && (seq[0].twist === "scary-safe" || seq[1].twist === "scary-safe"))) continue;
+    out.set(seq.map((s) => s.id).join(","), seq.map((s) => s.id));
+  }
+  return [...out.values()];
+}
+
+const rows = [];
+for (const pid of pathways) {
+  const p = ctx.pathways.find((x) => x.id === pid);
+  const list = orders(p.story, nOrders, `ord-${pid}`);
+  const byId = new Map(p.story.steps.map((s) => [s.id, s]));
+  const pairFree = (order, apt) => { let i = 0; for (let t = 0; i < order.length; t++) { const n = apt[Math.min(t, apt.length - 1)]; if (order.slice(i, i + n).filter((id) => !byId.get(id).safe).length > 1) return false; i += n; } return true; };
+  for (const order of list) for (const apt of apts) for (const slack of slacks) for (const ex of extra) {
+    if (!argv.includes("--allow-pairs") && !pairFree(order, apt)) continue;
+    const turnsNeeded = (() => { let left = order.length, t = 0; while (left > 0) { left -= apt[Math.min(t, apt.length - 1)]; t++; } return t; })();
+    const v = structuredClone(base);
+    v.name = "search";
+    v.pathways = { [pid]: { story: { ...(v.pathways?.[pid]?.story ?? {}), stepOrder: { order }, actionsPerTurn: apt, maxTurns: turnsNeeded + slack, ...(ex.story ?? {}) } } };
+    if (ex.cards) v.cards = { ...(v.cards ?? {}), ...ex.cards };
+    if (ex.rules) v.rules = { ...(v.rules ?? {}), ...ex.rules };
+    if (ex.engineRules) v.pathways[pid].story.engineRules = { ...(v.all?.engineRules ?? {}), ...(v.story?.engineRules ?? {}), ...ex.engineRules };
+    const res = runVariant(ctx, v, { seeds, modes: ["story"], pathways: [pid], bots });
+    const b = res.pathways[pid].story.bots;
+    const row = { pid, order: order.join(" "), apt, slack, ex, careful: b.careful.star3Proof, triage: b.triage.star3Proof, h80: b.human80.star3Proof, oracle: b.oracle.clean, oracle3: b.oracle.star3Proof, careWin: b.careful.win, blockAll: b["block-all"].win, approve: b["approve-all"].win, guess: b["guess-flag"].star3Proof, escU: b["escalate-unknown"].win, triageAny: b.careful.anyTriage, pol: b["careful-pol"].star3Proof };
+    row.ok = row.oracle >= 99 && row.oracle3 >= 90 && row.careful >= 40 && row.careful <= 70 && row.blockAll <= 5 && row.approve <= 5 && row.guess <= 1 && row.triageAny >= 60 && row.careWin >= 80;
+    row.gap = row.triage - row.careful;
+    rows.push(row);
+  }
+  const mine = rows.filter((r) => r.pid === pid);
+  const ok = mine.filter((r) => r.ok).sort((a, b) => b.gap - a.gap || Math.abs(55 - a.careful) - Math.abs(55 - b.careful));
+  console.log(`\n== ${pid}: ${mine.length} layouts, ${ok.length} pass all story bands; oracle>=99 in ${mine.filter((r) => r.oracle >= 99).length}`);
+  for (const r of ok.slice(0, 8)) console.log(`  apt ${JSON.stringify(r.apt)} +${r.slack} careful ${r.careful} pol ${r.pol} trAny ${r.triageAny} triage ${r.triage} h80 ${r.h80} oracle ${r.oracle}/${r.oracle3} blockAll ${r.blockAll} escU ${r.escU} guess ${r.guess} | ${r.order}`);
+  if (!ok.length) {
+    const near = mine.filter((r) => r.oracle >= 99 && r.oracle3 >= 90).sort((a, b) => Math.abs(55 - a.careful) - Math.abs(55 - b.careful)).slice(0, 5);
+    for (const r of near) console.log(`  near: apt ${JSON.stringify(r.apt)} +${r.slack} careful ${r.careful} triage ${r.triage} oracle ${r.oracle}/${r.oracle3} blockAll ${r.blockAll} guess ${r.guess} triageAny ${r.triageAny} | ${r.order}`);
+  }
+}
+const out = arg("out", "results/search.json");
+fs.writeFileSync(out, JSON.stringify(rows, null, 1));
+console.log(`\nwrote ${out}`);

@@ -1,0 +1,16 @@
+{
+  "name": "p2-rules",
+  "notes": "Judge's Phase 2 card fixes + fairness + proof star, with today's encounter shapes (no step/apt/deck changes).",
+  "cards": { "policy": { "cost": 2 } },
+  "rules": {
+    "coffee": "energy",
+    "coffeeEnergy": 1,
+    "escalateBudget": 2,
+    "stopGuarantee": ["daily"],
+    "wrapUpRollback": true,
+    "glance": true,
+    "spottedNoCardPartly": true,
+    "starRule": "proof",
+    "proofRow": "any"
+  }
+}

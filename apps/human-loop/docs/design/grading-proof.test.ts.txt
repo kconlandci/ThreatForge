@@ -1,0 +1,90 @@
+/**
+ * Phase 2 prototype contract (grading analyst): clues on Block/Escalate, proof in the 3rd star and the
+ * lens grade, and old in-progress battles graded the old way. Runs against the private copy only.
+ */
+import { describe, expect, it } from "vitest";
+import { canResume, createBattle, endTurn, isProof, playCard, scoreBattle, unprovedCatches } from "./engine";
+import { gradePlan } from "./mastery";
+import { revealFor } from "./reveal";
+import { HELP_DESK } from "@/lib/pathways/help-desk";
+import type { BattleState, Encounter } from "./types";
+
+const E: Encounter = HELP_DESK.story;
+const uid = (s: BattleState, card: string) => s.hand.find((c) => c.cardId === card)?.uid as string;
+const flagOf = (id: string) => E.steps.find((x) => x.id === id)!.evidence.findIndex((e) => e.redFlag);
+const plainOf = (id: string) => E.steps.find((x) => x.id === id)!.evidence.findIndex((e) => !e.redFlag);
+
+/** Seed 1 until the first risky plan is on the board and inspected. */
+function atFirstRisky(): { s: BattleState; id: string } {
+  let s = createBattle(E, 1);
+  for (let i = 0; i < 6; i++) {
+    const id = s.announced.find((x) => !E.steps.find((y) => y.id === x)!.safe);
+    if (id) {
+      const r = playCard(s, E, uid(s, "inspect"), id);
+      if (r.ok) return { s: r.state, id };
+    }
+    s = endTurn(s, E);
+  }
+  throw new Error("no risky plan");
+}
+
+describe("Phase 2 proof (prototype)", () => {
+  it("new battles are proof battles; Block records the clue on the plan", () => {
+    const { s, id } = atFirstRisky();
+    expect(s.grading).toBe("proof");
+    const r = playCard(s, E, uid(s, "block"), id, flagOf(id));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.state.steps[id].clue).toBe(flagOf(id));
+    expect(isProof(E.steps.find((x) => x.id === id)!, r.state.steps[id])).toBe(true);
+    expect(revealFor(r.state, E, id)?.kind).toBe("caught-proof");
+    expect(gradePlan(E.steps.find((x) => x.id === id)!, r.state.steps[id]).reason).toBe("Caught with proof");
+  });
+
+  it("no clue: still Caught (R), but the catch is unproved (no 3rd star)", () => {
+    const { s, id } = atFirstRisky();
+    const r = playCard(s, E, uid(s, "block"), id);
+    if (!r.ok) throw new Error(r.reason);
+    expect(r.state.steps[id].clue).toBeNull();
+    expect(gradePlan(E.steps.find((x) => x.id === id)!, r.state.steps[id]).result).toBe("R");
+    expect(unprovedCatches(r.state, E)).toEqual([id]);
+  });
+
+  it("a wrong clue is P 'Right call, wrong clue'", () => {
+    const { s, id } = atFirstRisky();
+    const r = playCard(s, E, uid(s, "block"), id, plainOf(id));
+    if (!r.ok) throw new Error(r.reason);
+    const g = gradePlan(E.steps.find((x) => x.id === id)!, r.state.steps[id]);
+    expect([g.result, g.reason]).toEqual(["P", "Right call, wrong clue"]);
+  });
+
+  it("an invalid clue (out of range, not a number, plan not inspected) is ignored, never refused", () => {
+    const { s, id } = atFirstRisky();
+    for (const bad of [99, -1, 1.5, Number.NaN]) {
+      const r = playCard(s, E, uid(s, "block"), id, bad);
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.state.steps[id].clue).toBeNull();
+    }
+  });
+
+  it("an old in-progress battle (no grading field) keeps today's grading, even with clues", () => {
+    const { s, id } = atFirstRisky();
+    const old = JSON.parse(JSON.stringify(s)) as BattleState;
+    delete old.grading;
+    expect(canResume(old, E)).toBe(true);
+    const r = playCard(old, E, uid(old, "block"), id, plainOf(id));
+    if (!r.ok) throw new Error(r.reason);
+    expect(r.state.steps[id].clue).toBeUndefined();
+    expect(gradePlan(E.steps.find((x) => x.id === id)!, r.state.steps[id]).reason).toBe("Caught");
+  });
+
+  it("clues survive a save round trip and a resume", () => {
+    const { s, id } = atFirstRisky();
+    const r = playCard(s, E, uid(s, "block"), id, flagOf(id));
+    if (!r.ok) throw new Error(r.reason);
+    const back = JSON.parse(JSON.stringify(r.state));
+    expect(canResume(back, E)).toBe(true);
+    expect(back.steps[id].clue).toBe(flagOf(id));
+    expect(scoreBattle(back, E)).toEqual(scoreBattle(r.state, E));
+  });
+});

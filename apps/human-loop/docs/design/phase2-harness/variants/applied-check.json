@@ -1,0 +1,14 @@
+{
+ "name": "applied-check",
+ "notes": "No overrides: the design is applied in app-applied (content, cards.ts, shiftGen.ts). Only bot knowledge rules.",
+ "rules": {
+  "coffee": "energy",
+  "coffeeEnergy": 1,
+  "starRule": "proof",
+  "proofRow": "last",
+  "readOnlyBadge": true
+ },
+ "bands": {
+  "guessStar3Max": 1
+ }
+}

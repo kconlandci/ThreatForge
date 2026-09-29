@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+/**
+ * Sweep: many variants, one compact table. See README.md "Sweeps".
+ *
+ *   node sweep.mjs sweeps/story-apt.json [--seeds 500] [--dailies 100] [--pathways help-desk,...] [--app DIR]
+ *
+ * Sweep file: { "name", "base": "variants/x.json" | {variant}, "grid": { "dotted.path": [values...] },
+ *               "combine": "product" | "each", "modes": [...], "pathways": [...], "seeds", "dailies" }
+ * Dotted paths go into the variant, e.g. "story.actionsPerTurn", "cards.policy.cost", "rules.coffee",
+ * "pathways.help-desk.story.stepOrder".
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { loadApp } from "./lib/load.mjs";
+import { runVariant } from "./lib/runner.mjs";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const argv = process.argv.slice(2);
+const arg = (name, def) => {
+  const i = argv.indexOf(`--${name}`);
+  return i < 0 ? def : argv[i + 1];
+};
+const file = argv.find((a) => a.endsWith(".json"));
+if (!file) throw new Error("usage: node sweep.mjs sweeps/<name>.json");
+const sweep = JSON.parse(fs.readFileSync(path.resolve(file), "utf8"));
+const base = typeof sweep.base === "string" ? JSON.parse(fs.readFileSync(path.resolve(path.dirname(path.resolve(file)), "..", sweep.base), "utf8")) : sweep.base ?? {};
+
+function setPath(obj, dotted, value) {
+  // Pathway ids contain dashes, never dots, so a plain split works.
+  const keys = dotted.split(".");
+  let o = obj;
+  for (const k of keys.slice(0, -1)) o = o[k] ??= {};
+  o[keys.at(-1)] = value;
+}
+
+const entries = Object.entries(sweep.grid ?? {});
+let combos = [[]];
+if ((sweep.combine ?? "product") === "product") {
+  for (const [k, vals] of entries) combos = combos.flatMap((c) => vals.map((v) => [...c, [k, v]]));
+} else {
+  combos = [[], ...entries.flatMap(([k, vals]) => vals.map((v) => [[k, v]]))];
+}
+
+const ctx = await loadApp(arg("app"));
+const opts = {
+  seeds: Number(arg("seeds", sweep.seeds ?? 500)),
+  dailies: Number(arg("dailies", sweep.dailies ?? 100)),
+  modes: sweep.modes ?? ["story", "daily"],
+  pathways: arg("pathways") ? arg("pathways").split(",") : sweep.pathways ?? "all",
+  bots: sweep.bots ?? ["careful", "triage", "approve-all", "block-all", "guess-flag", "gut-flag", "oracle", "escalate-unknown", "human80"],
+};
+const W = Number(sweep.labelWidth ?? 52);
+const passOnly = argv.includes("--pass-only");
+const pad = (x, n) => String(x ?? "-").padStart(n);
+const lines = [`sweep "${sweep.name ?? path.basename(file)}" — ${combos.length} variants — ${opts.seeds} story seeds, ${opts.dailies} dailies`];
+lines.push(`${"variant".padEnd(W)}${"pathway/mode".padEnd(24)}${pad("win", 5)}${pad("3*", 6)}${pad("3*T", 6)}${pad("triag", 6)}${pad("short", 6)}${pad("miss", 6)}${pad("unusE", 6)}${pad("T1nr", 6)}${pad("guess", 6)}${pad("gut", 5)}${pad("appr", 5)}${pad("blk", 5)}${pad("escU", 5)}${pad("orcCl", 6)}${pad("cardL", 6)}${pad("h80", 5)}${pad("bands", 7)}`);
+const all = [];
+for (const combo of combos) {
+  const v = structuredClone(base);
+  for (const [k, val] of combo) setPath(v, k, val);
+  const short = (val) => sweep.names?.[JSON.stringify(val)] ?? JSON.stringify(val).replace(/"/g, "");
+  const label = combo.length ? combo.map(([k, val]) => `${sweep.keys?.[k] ?? k.split(".").at(-1)}=${short(val)}`).join(" ") : "(base)";
+  v.name = label;
+  const r = runVariant(ctx, v, opts);
+  all.push({ label, combo, result: r });
+  for (const [pid, modes] of Object.entries(r.pathways)) {
+    for (const [mode, e] of Object.entries(modes)) {
+      const star = e.rules.starRule === "proof" ? "star3Proof" : "star3";
+      const c = e.bots.careful;
+      const t = e.bots.triage;
+      const ok = r.bands.checks[`${pid}/${mode}`];
+      const succ = (a) => (a ? (mode === "daily" ? a.pass : a.win) : "-");
+      if (passOnly && !ok.every((x) => x.ok)) continue;
+      lines.push(
+        `${label.slice(0, W - 1).padEnd(W)}${`${pid}/${mode}`.padEnd(24)}${pad(c?.win, 5)}${pad(c?.[star], 6)}${pad(t?.[star], 6)}${pad(c?.anyTriage, 6)}${pad(c?.anyShort, 6)}${pad(c?.misses, 6)}${pad(c?.unusedEnergy, 6)}${pad(c?.perTurn?.[1]?.noRisk, 6)}${pad(e.bots["guess-flag"]?.[star], 6)}${pad(e.bots["gut-flag"]?.[star], 5)}${pad(succ(e.bots["approve-all"]), 5)}${pad(succ(e.bots["block-all"]), 5)}${pad(succ(e.bots["escalate-unknown"]), 5)}${pad(e.bots.oracle?.clean, 6)}${pad(c?.anyCardLuckMiss, 6)}${pad(e.bots.human80?.[star], 5)}${pad(`${ok.filter((x) => x.ok).length}/${ok.length}`, 7)}`,
+      );
+    }
+  }
+}
+lines.push("");
+lines.push("columns: careful win% | careful 3*% (star rule of the variant) | triage-bot 3*% | careful runs with a triage turn % | careful runs with a short turn % | careful misses/run | careful unused energy/run | turn-1 no-risk % | guess-flag 3*% | gut-flag 3*% | approve-all win (story) or pass (daily) % | block-all same | escalate-unknown same | oracle clean % | careful card-luck miss % | human80 3*% | bands passed");
+const text = lines.join("\n");
+console.log(text);
+const name = sweep.name ?? path.basename(file, ".json");
+const out = path.join(HERE, "results", `sweep-${name}.json`);
+fs.mkdirSync(path.dirname(out), { recursive: true });
+fs.writeFileSync(out, JSON.stringify(all.map((x) => ({ label: x.label, combo: x.combo, bands: x.result.bands, pathways: Object.fromEntries(Object.entries(x.result.pathways).map(([p, m]) => [p, Object.fromEntries(Object.entries(m).map(([mode, e]) => [mode, { encounter: e.encounter, bots: Object.fromEntries(Object.entries(e.bots).map(([b, a]) => [b, { ...a, perTurn: undefined }])) }]))])) })), null, 1));
+fs.writeFileSync(out.replace(/\.json$/, ".txt"), text + "\n");
+console.log(`\nwrote ${out} (+ .txt)`);

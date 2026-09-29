@@ -1,0 +1,221 @@
+{
+ "skills": [
+  {
+   "id": "verify-identity",
+   "name": "Check who's asking",
+   "oneLiner": "Is it really them? Check the address, the phone on file and the sign-in log.",
+   "question": "Who asked?",
+   "example": "Safe: Ollie called B. Nakamura back at (203) 555-0133, the phone on file, before the reset. Risky: a caller with a blocked number wants K. Brandt's MFA codes sent to a new phone, right after 4 denied MFA prompts."
+  },
+  {
+   "id": "check-approval",
+   "name": "Check who approved",
+   "oneLiner": "It is them, but are they allowed to ask? Look for the owner's, HR's or the manager's OK.",
+   "question": "Who asked?",
+   "example": "Safe: HR sent N. Ferreira's new account through the HR portal and her manager approved it. Risky: K. Brandt really is D. Achebe's manager, but HR never approved him reading her inbox."
+  },
+  {
+   "id": "match-request",
+   "name": "Match the request",
+   "oneLiner": "Right person, right device, and only what was asked. No extras.",
+   "question": "Does it match the record?",
+   "example": "Safe: installing the PDF app from the software catalog, which is what F. Kowalski asked for. Risky: also making her an admin on her laptop 'so she won't need us next time'."
+  },
+  {
+   "id": "confirm-fix",
+   "name": "Confirm the fix",
+   "oneLiner": "Before you close it, check the user's reply and the logs.",
+   "question": "Does it match the record?",
+   "example": "Safe: J. Romero wrote 'New phone works' and the sign-in log agrees. Risky: closing all 6 printer tickets when 5 of them are about a different printer that is still jammed."
+  },
+  {
+   "id": "guard-data",
+   "name": "Guard the data",
+   "oneLiner": "Where does the data go, and who can see it? Once it's out, it's out.",
+   "question": "Can we undo it?",
+   "example": "Safe: one rate sheet sent through Fenwick Secure Share to one named person. Risky: emailing the vendor a screenshot that shows a patient's birthday and insurance ID."
+  },
+  {
+   "id": "safe-change",
+   "name": "Change safely",
+   "oneLiner": "If it goes wrong, can we undo it? Back up first. Right time. Right target.",
+   "question": "Can we undo it?",
+   "example": "Safe: an urgent browser fix that needs no restart. Risky: restarting the dental office server at 10:40 AM, with patients in the chair, outside the change window."
+  },
+  {
+   "id": "approve-checked",
+   "name": "Approve what checks out",
+   "oneLiner": "All 3 questions check out? Approve it, even if it looks scary.",
+   "question": "calibration",
+   "example": "A plan that looks like a scam ('Reset MFA for J. Romero (CFO)') but has a work email and a callback to the phone on file. Inspect, then Approve. Never tagged by writers: it is scored automatically on every safe plan the player judged."
+  }
+ ],
+ "mastery_model": "PURPOSE: turn each decision into a skill signal, show progress as words and pips, never percentages. All code is pure TypeScript in lib/game/mastery.ts (today passed in), tested like engine.ts.\n\n1. ONE GRADING FUNCTION: gradePlan(step, runtime, events) returns a Call {stepId, skill, grade: \"R\"|\"P\"|\"W\", safe, reason} for the step's lens skill, plus an optional Call for approve-checked. Result screen, debrief rows (useBattle.debriefRows maps R->good, P->ok, W->bad) and mastery all use it, so they never disagree. \"Inspected\" includes plans auto-inspected by Policy: Callback. Each plan is graded once per shift on its final outcome.\n\n| Plan | What the player did | Lens skill | approve-checked | Reason shown |\n|---|---|---|---|---|\n| risky | Inspected, then Block or Escalate | R | none | \"Caught\" |\n| risky | Block or Escalate without inspecting | P | none | \"Lucky guess\" / \"Dana did the check\" |\n| risky | It ran, then Roll Back | P | none | \"Caught it late\" |\n| risky | It ran (approved) | W | none | \"Got through\" |\n| safe | Inspected, then approved | R | R | \"Checked and approved\" |\n| safe | Approved without inspecting | none | none | (no evidence either way) |\n| safe | Escalated | P | P | \"Dana didn't need this one\" |\n| safe | Blocked, approved when it came back | P | W | \"Fixed it later\" |\n| safe | Blocked and never done, or rolled back | W | W | \"Blocked good work\" |\n| any | Never announced (time ran out) | none | none | |\n\nTwo existing debrief rows change: a blind Escalate on a risky plan becomes \"ok\" instead of \"good\"; a blind approve of a safe plan stays \"good\" but gives no skill evidence.\n\nCalls that never count: practice.json steps 1-2 (new Encounter.guidedSteps = 2), and any step already scored in the last 2 days (progress.scored), so a same-day replay of Monday tests skill, not memory.\n\n2. STORED PER SKILL (PathwayProgress.skills: Partial<Record<SkillId, SkillRecord>>):\nSkillRecord = { recent: string /* last 6 grades, oldest first; uppercase = risky plan, lowercase = safe plan, e.g. \"RrPWr\" */, n: number /* total calls */, level: 0|1|2|3|4, days: string[] /* last 3 distinct YYYY-MM-DD with a call */, last: string /* last call day */, solidOn: string|null }.\nAccuracy = mean of recent (R=1, P=0.5, W=0); 0.5 when empty.\n\n3. LEVELS (4 pips; learner sees the word):\n- 0 New: no calls. Not shown in the list (shown as \"N more skills to find\").\n- 1 Learning: at least 1 call.\n- 2 Practicing: n >= 3, accuracy >= 0.6, and for lens skills at least one R on a risky plan AND one r on a safe plan (proves they can tell good from bad, not just block).\n- 3 Solid: n >= 5, accuracy >= 0.8, no W in the last 3, and calls on 2+ different days (spacing gate: no cramming to Solid).\n- 4 Sharp: already Solid, and the first 2 calls made 3+ days after solidOn are both R (delayed review).\nA skill moves at most one level per shift (up or down) and never drops below Learning once met.\n\n4. SPACING, NO STREAKS: review interval by level = 1, 2, 4, 7 days (Learning..Sharp). A skill is \"due\" when today >= last + interval. Due raises its weight in Daily practice and shows a small \"Review due\" tag. The first call on a due skill decides: R or P keeps the level; W drops one level. Nothing decays silently. Learner copy: \"Skills need a refresh. A quick practice keeps them sharp.\" There is no streak to break; the Your skills screen shows a row of 7 dots for \"days practiced this week\" (progress.days, last 14 days).\n\n5. IDEMPOTENCE: applyCalls(skills, calls, today) is applied once per battle, keyed `${encounterId}:${seed}` in progress.applied (last 10 keys), so reloading the result screen never counts a battle twice. progress.scored maps stepId -> last scored day, trimmed to 7 days.\n\n6. HOOK: GameShell's battle-end handler calls applyCalls(p.skills, callsFromBattle(state, enc), today) for every mode: practice, Monday, Daily and drills. Old saves have no per-step history, so skills start empty; the first shift after the update fills them.\n\n7. NEED (used by the generator and the \"Next up\" card): need(s) = 1 + 3 x (1 - accuracy) + (due ? 2 : 0) - (level 4 and not due ? 0.5 : 0); a skill with no calls has need 2.5. The weakest skill is argmax need with a stable tie-break by skill order.",
+ "generator": "Pure module lib/game/shiftGen.ts: planDaily, planDrill, buildShift, ShiftSpec. The unit of selection is a WHOLE bank ticket (its 1-3 steps stay together and in order); plans are never split from their ticket.\n\nUNLOCK: Daily practice and drills unlock when the first Monday attempt ends (any outcome). Practice and Monday stay fixed and replayable.\n\nDAILY PRACTICE: planDaily(bank, progress, { playerId, today }) -> ShiftSpec\n1. Seed: rng = seedState(`${playerId}|hd-daily|${n}`) where n = progress.dailyCount (shifts started). Same player + same n always gives the same shift.\n2. Focus = top 2 skills by need (mastery_model section 7), seeded tie-break. approve-checked can be a focus: then tickets with a scary-safe step count as \"hitting the focus\".\n3. Ticket weight = max need over the skills of its steps x (2 if any step hits a focus skill) x (0.2 if the ticket was in either of the last 2 dailies; progress.recentTickets) x difficulty gate. Difficulty gate: D3 weight 0 until 2 dailies are finished; after that at most 1 D3 ticket per shift.\n4. Draw 4 tickets by seeded weighted sampling without replacement (draw 3 if a 4th would push past 10 plans).\n5. Valid only if: 7-10 plans; safe share 0.5-0.7; at least 1 scary-safe plan and at least 1 routine-risky plan; at least 2 companies; at least 1 risky plan. On failure, redraw with the advanced RNG, up to 200 tries; then use FALLBACK_DAILY = [c-romero-new-phone, b-back-from-vacation, a-pdf-editor, c-lost-phone] (8 plans, 5 safe, 62.5%, both twists, 2 companies, D1-D2 only). Target: fallback used on under 1% of seeds.\n6. Order: seeded shuffle of the tickets, then interleave their steps round-robin (each ticket's chain order kept). Accept the first of up to 24 permutations where: plan 1 is safe and not scary-safe (warm-up win); the scary-safe plan is not in the first 2; never 3 risky plans in a row. If none passes, use the ticket order that puts a safe-first ticket first.\n7. ShiftSpec = { kind: \"daily\", id: `hd-daily-${n}`, seed, n, ticketIds, stepIds (final order), focus: SkillId[], createdOn: today, bankVersion }. Saved to progress.shift before the battle starts; dailyCount++ and recentTickets updated at the same time.\n\nbuildShift(bank, spec, shiftText) -> Encounter (pure):\n- id = spec.id; mode \"daily\"; title \"Daily practice\"; subtitle \"4 tickets \u00b7 Focus: Check who's asking\" (names of focus skills, max 2).\n- setting must contain \"Fenwick IT Solutions\" (content test requires it). intro (2 lines, Dana + Ollie) and outro lines are seeded picks from content/help-desk/bank/shift.json pools (intros, outros.win, outros.winWithMisses, outros.timeout, outros.breach), all within the 160-char dialogue limit.\n- actionsPerTurn [1, 2]; maxTurns 7 (13 slots, enough for 10 plans + 3 blocked-and-requeued safe plans). Never more than 2 plans on screen.\n- energyPerTurn 3, handSize 5, starterDeck = Monday's end-of-shift deck (4 Inspect, 3 Block, Escalate, Roll Back, Coffee), plus Policy: Callback only when the shift has a credential step. No unlocks.\n- maxRisk = sum of risk of the risky plans + 1, so a daily never ends in a breach and every plan gets played and graded (same approach as practice.json).\n- debrief.skillTag = the focus skill name.\n\nDRILL (\"Practice this\"): planDrill(bank, skillId, { playerId, k }) with seed seedState(`${playerId}|hd-drill|${skillId}|${k}`), k = drills started for that skill.\n- Lens skill: choose 2-3 tickets that contain the skill so that the drill has at least 2 safe and 2 risky plans of that skill, 4-7 plans total. Prefer tickets not played in the last 7 days; repeats are allowed when the pool runs out (repeats inside 2 days just don't score).\n- approve-checked: tickets that give at least 2 scary-safe and 2 routine-risky plans.\n- Scaffold fades: at Learning, the drill's safe and risky plans of the skill sit next to each other (contrast); from Practicing on, they are at least 2 apart.\n- Encounter: id `hd-drill-${skillId}-${k}`, mode \"drill\", actionsPerTurn [1] (one decision per screen), maxTurns = plans + 3, energy 3, handSize 3, deck = Inspect, Block, Escalate (player always holds all three), maxRisk = risky sum + 1.\n- drillCoach (lib/game/coach.ts) shows the skill's \"Where to look\" line in the evidence sheet until the skill reaches Solid. It reads only the skill id, never safe, redFlag or twist; a coach test proves hints are identical for a safe and a risky plan of the same skill.\n\nRESUME: progress.shift keeps the spec until the result screen is left (like pendingResult). New encounterFor(encounterId, progress) in lib/game/content.ts rebuilds the encounter from progress.shift when ids match, else falls back to helpDeskEncounter(id); the existing canResume then works unchanged. If the spec's bankVersion differs or any step id no longer exists, drop the spec and the saved battle and offer a fresh shift.\n\n\"One more shift\" is unlimited; the first shift of the day is labelled \"Today's practice\".",
+ "ticket_schema": "FILES\n- content/help-desk/bank/tickets-a.json, tickets-b.json, tickets-c.json: each exactly { \"tickets\": BankTicket[] }. One file per writer, so no merge conflicts.\n- content/help-desk/bank/shift.json: { \"version\": 1, \"intros\": DialogueLine[][], \"outros\": { \"win\": DialogueLine[][], \"winWithMisses\": DialogueLine[][], \"timeout\": DialogueLine[][], \"breach\": DialogueLine[][] } } for daily and drill shells (design lead writes it).\n- lib/game/content.ts joins them: export const HELP_DESK_BANK: BankTicket[]; BANK_VERSION = hash of the ticket and step ids.\n\nTYPES (lib/game/types.ts; all new AgentStep fields optional in the type so old content still compiles, but content tests REQUIRE skill and tell on every help desk step, fixed or bank)\nexport type SkillId = \"verify-identity\" | \"check-approval\" | \"match-request\" | \"confirm-fix\" | \"guard-data\" | \"safe-change\";   // lens skills, authored\nexport type MasterySkillId = SkillId | \"approve-checked\";   // + calibration, computed\nexport type DanaQuestion = \"who\" | \"record\" | \"undo\";\nAgentStep gains:\n  skill?: SkillId;                              // required by tests\n  tell?: string;                                // <= 80 chars. The one fact that decided it. Shown only after the plan resolves.\n  twist?: \"scary-safe\" | \"routine-risky\";       // hidden generator/analytics tag; never shown before resolution; coach never reads it\nEncounter gains: mode?: \"story\" | \"practice\" | \"daily\" | \"drill\"; guidedSteps?: number (practice.json = 2).\nexport interface BankTicket {\n  id: string;                 // \"a-sim-swap\": writer letter + \"-\" + kebab slug, <= 24 chars, globally unique\n  company: \"Harlow & Cole\" | \"Bramwell Logistics\" | \"Pinecrest Dental\";\n  title: string;              // <= 40 chars, player-facing ticket name, e.g. \"Call about a new phone\"\n  difficulty: 1 | 2 | 3;\n  steps: AgentStep[];         // 1-3, in announce (chain) order\n}\n\nEXAMPLE\n{ \"tickets\": [ {\n  \"id\": \"a-sim-swap\", \"company\": \"Harlow & Cole\", \"title\": \"Call about a new phone\", \"difficulty\": 3,\n  \"steps\": [ {\n    \"id\": \"a-sim-swap-1\", \"ticket\": \"#53104 \u00b7 Harlow & Cole\",\n    \"intent\": \"Look up K. Brandt in the directory\",\n    \"quip\": \"A caller says he's K. Brandt. Checking the directory first. I love a good phone book.\",\n    \"category\": \"lookup\", \"safe\": true, \"reversible\": false, \"progress\": 1, \"risk\": 0,\n    \"skill\": \"verify-identity\", \"tell\": \"Read-only lookup. It gives you the phone on file to check.\",\n    \"evidence\": [ { \"label\": \"Call notes\", \"detail\": \"7:06 PM call to the help desk line. The caller says he is K. Brandt, Director of Research.\", \"redFlag\": false } ],\n    \"outcome\": { \"executed\": \"...\", \"blocked\": \"...\", \"escalated\": \"...\" },\n    \"lesson\": \"...\"\n  } ]\n} ] }\n\nID CONVENTIONS\n- Ticket id starts with the writer letter of its file: tickets-a.json -> \"a-\", -b -> \"b-\", -c -> \"c-\".\n- Step id = `${ticket.id}-${index+1}` exactly (\"a-sim-swap-1\", \"a-sim-swap-2\").\n- Step and ticket ids unique across the bank AND fixed encounters (fixed ids like romero-mfa-reset stay as they are).\n- step.ticket = \"#NNNNN \u00b7 <company>\" with company matching the ticket's company. Bank numbers #53104-#53307 as assigned; new tickets start at #53400. A ticket may use a different number per step (a-queue-cleanup does).\n\nTEXT LIMITS (unchanged from lib/game/content.test.ts, plus new)\nintent 48, quip 110, evidence label 28, evidence detail 140, each outcome 160, lesson 160, dialogue 160; new: tell 80 and not equal to lesson, ticket title 40.\nBANNED (all bank text): placement rate, ISO, WIOA, guarantee, certif*, hired (\"new hire\" is fine); never \"let it/Ollie proceed/run\" - say Approve.\n\nSTEP RULES (existing, now also run on the bank via an extracted expectStep())\n- category in lookup/credential/comms/ticket/access/data.\n- safe: no red flags, progress 1-2, risk 0. risky: risk 2-5, progress 0, first evidence not red, last evidence red, once red stays red.\n- reversible => outcome.rolledBack required; irreversible => no rolledBack.\n- 2-4 evidence items; D1 3-4 items with a plain red flag by item 2; D2 the tell needs comparing two facts; D3 4 items with an early strong decoy and red flags only at the end.\n- Plans stand alone: no evidence or outcome may assume a sibling plan ran.\n- When Ollie adds scope on its own, evidence 1 is \"Ollie's reason\".\n- Risky lessons open with the skill's Dana question (\"Who asked?\", \"Does it match the record?\", \"Can we undo it?\"); safe lessons say what made it OK. Escalated outcome on a safe plan ends with Dana saying \"Approve it\" / \"Approve those\".\n- twist: \"scary-safe\" only on safe steps, \"routine-risky\" only on risky steps.\n- Writing: sentences of 15 words or fewer, present tense, about 8th-grade, no idioms or puns in evidence/tells; humor only in quips and outcomes (plan first, joke second).\n\nBANK TESTS (lib/game/bank.test.ts): all of the above; each lens skill has >= 3 safe and >= 2 risky plans; bank safe share 0.55-0.65; >= 6 scary-safe and >= 8 routine-risky; >= 4 credential plans; phones only 555-0100..0199; no weekday names in bank text; companies only the three above. Fixed shifts get skill + tell on all 14 steps (tags listed in data_and_reporting).",
+ "world_bible": "Keep everything practice.json and encounter-01.json already establish. Copy exact strings; do not invent new people, domains or policies without adding them here.\n\nFENWICK IT SOLUTIONS (the MSP, Hartford CT area). Help desk line (860) 555-0100, hours 7 AM-7 PM, change window weeknights after 7 PM. Dana = help desk manager (first name only). Ollie = AI Tier 1 agent. Other teams: Tier 2 (desktop and network), Fenwick security team. Tools: ticket system with client portal (clients can read ticket notes), directory, client HR portal, SSO self-service, device manager (remote wipe), software catalog (approved apps, no admin rights needed), Fenwick Secure Share (named recipient only, link expires in 7 days), Fenwick's approved assistant (approved AI tool, data stays in Fenwick's account), approved tools list, change calendar. Unapproved outside tool: Gabblewick AI (free public chatbot).\n\nHARLOW & COLE WEALTH PARTNERS. Ticket name \"Harlow & Cole\", domain harlowcolewp.com, area code (860), about 40 staff, about 400 clients.\n- P. Whitcomb, Managing Partner (exec), pwhitcomb@, (860) 555-0101, owns partners@harlowcolewp.com\n- J. Romero, CFO (exec), jromero@, (860) 555-0148\n- M. Lindqvist, HR Director, mlindqvist@ and hr@, (860) 555-0107\n- R. Fairbanks, Operations Director, (860) 555-0122, owns clientservices@ and the shared drives\n- K. Brandt, Director of Research, kbrandt@, (860) 555-0162, manages D. Achebe\n- S. Haddad, Client Services Associate, (860) 555-0137\n- N. Ferreira, Client Services Associate, new hire, reports to Fairbanks\n- G. Farrow, Financial Advisor, (860) 555-0129\n- D. Achebe, Research Analyst, on leave, (860) 555-0154\n- T. Okafor, former Senior Analyst; offboarded via HR ticket #52101; mailbox kept 90 days; mail forwarded to Brandt for 30 days\n- E. Castellanos, Executive Assistant (spare)\nGroups: HC-ClientServices, HC-Research-Drive, HC-Client-Files. Attacker domains: harlowcolewp-mail.com and personal gmail.com addresses.\n\nBRAMWELL LOGISTICS. Ticket name \"Bramwell Logistics\", domain bramwell-logistics.com (with hyphen), area code (203), about 60 staff, 22 trucks.\n- A. Mensah, Operations Manager, amensah@, (203) 555-0110, approves outside accounts (AC-06)\n- R. Adeyemi, HR Manager, radeyemi@, (203) 555-0104\n- D. Ruiz, Dispatch Lead, druiz@, (203) 555-0126 (groups Dispatch-Users, Dispatch-Drive, Fleet-Admin, Payroll-Admin)\n- L. Ortiz, Dispatch Coordinator (new hire)\n- T. Reyes, Receptionist, treyes@, (203) 555-0102\n- B. Nakamura, Warehouse Supervisor, bnakamura@, (203) 555-0133\n- F. Kowalski, Accounts Payable Clerk, fkowalski@, (203) 555-0141\n- V. Osei, Driver, (203) 555-0158; J. Petrakis, Driver, (203) 555-0165\nPartner Dappleway (contact P. Varga). Vendor Pellorin Fuel Cards: real domain pellorinfuel.com, vendor-file phone (617) 555-0182; fake domain pellorin-fuelcards.co. Devices: laptops BL-LT-#### (0388 = Mensah's stolen laptop, 0412 = Ortiz), tablets BL-TB-#### (0230 = spare), printers FD-PR-01 (front desk; \"PAPER JAM IN TRAY 3\" but has 2 trays) and WH-PR-02 (warehouse labels). Wi-Fi: BL-Warehouse, BL-Guest. Systems: dispatch app, Dispatch drive (1,240 files incl. drivers' home addresses).\n\nPINECREST FAMILY DENTAL (new). Ticket name \"Pinecrest Dental\", domain pinecrestdental.com, area code (413), one office, 12 staff, PCs PD-PC-01..12, server PD-SRV-01, open 8 AM-5 PM with patients all day.\n- Dr. N. Pell, Owner/dentist, npell@, (413) 555-0120, does billing from home at night\n- C. Ibarra, Office Manager, cibarra@, (413) 555-0112, sends all new-hire and access requests\n- H. Lam, Front Desk, hlam@, (413) 555-0135\n- W. Duarte, Hygienist, wduarte@, (413) 555-0147\nSystems: \"the patient records system\" (never a brand name), X-ray images, front desk scanner.\n\nPOLICIES AND RUNBOOKS (quote word for word; label \"Policy XX-00\" or \"Runbook XX-00\")\nVP-02 Standard users may be unlocked after they pass SSO self-service verification.\nVP-03 Password resets: call back the phone on file, or use SSO self-service. Temp passwords must change at first sign-in.\nVP-04 Executive MFA resets need a callback to the phone on file first. Urgency is not an exception. (Existing text; use it verbatim, including in b-boarding-now.)\nVP-05 Changing the MFA phone needs a callback to the old number on file, or the manager's OK in the HR portal.\nAC-01 Access to a shared inbox or drive needs the owner's OK in writing.\nAC-02 Grant only the access the role needs. Do not copy another user's groups.\nAC-03 No lasting admin rights for users. Install apps from the software catalog.\nAC-04 Managers may ask for an out-of-office reply. Reading another person's inbox needs HR's OK in writing.\nAC-05 Share only the files that were asked for, with named people. Never use \"anyone with the link\".\nAC-06 Accounts for people outside the client need the Operations Manager's OK.\nDP-01 Never put passwords or personal data in ticket notes. Remove them if you find them.\nDP-02 Never paste client data into unapproved AI tools. Use Fenwick's approved assistant or write it yourself.\nDP-03 Client files leave the company only through Fenwick Secure Share, to named people. Send only what's needed.\nCH-01 Restarts of servers or network gear wait for the change window: weeknights after 7 PM.\nCH-02 Urgent security fixes that need no restart may go out during work hours.\nTK-01 Close a ticket when the user confirms it's fixed, or after 3 tries over 2 days with no answer.\nSE-01 Signs of an attack or a fake request: stop, check another way, and report it to Fenwick security.\nLS-02 (existing practice text) Stolen laptop: wipe it remotely as soon as the owner confirms. Speed protects client data.\nLS-03 Lost personal phone: remove the work profile only. A full wipe needs the owner's written OK.\nOB-01 Disable the account at the effective time. Do not delete it. Keep the mailbox for 90 days. Step 3: Forward mail to the manager for up to 30 days when HR asks in writing. Step 4: remove a departed user from all groups.\nON-01 Build accounts only from HR's or the office manager's request. Give the first login in person, never by email.\nLN-01 Loaners: a supervisor may ask for one. Hand out only devices marked wiped and ready.\nWF-01 Wi-Fi won't connect: run reset_wifi_profile.ps1. Safe to run at any time.\nPF-01 Before rebuilding a profile, check the backup. Copy Desktop and Documents to the backup share.\nScripts: fix_vpn_adapter.ps1 (existing), clear_print_queue.ps1, reset_wifi_profile.ps1, rebuild_profile.ps1.\n\nFORMATS\n- Ticket ref \"#53104 \u00b7 Harlow & Cole\" (space, middle dot, space). Fixed content uses #50912-#52101; bank #53104-#53307; new bank tickets from #53400.\n- People: first initial + surname (\"J. Romero\"); after a quote, name and role (\"B. Nakamura, Warehouse Supervisor.\"); executive title in intent \"(CFO)\".\n- Email: first initial + surname, lowercase; shared inboxes by role (hr@, clientservices@, partners@).\n- Phone \"(860) 555-0148\", only 555-0100 to 555-0199 (Monday's attacker number (305) 555-9927 is a known exception; optionally change to (305) 555-0199 later).\n- Time \"8:41 AM\", no leading zero. Bank tickets use no weekday names or calendar dates (shifts replay any day): use today, yesterday, last night, 2 days ago, last week.\n- Money \"$38,000\". Asset tags: laptops/tablets/phones 4 digits (BL-LT-0412); servers/printers/PCs 2 digits (FD-PR-01, PD-SRV-01).\n- Reusable evidence labels: Ticket #NNNNN, Sender address, Directory record, Callback, Call notes, Caller ID, Sign-in log, User reply, HR portal, Device record, Script, Action type, What it will send, Tool it will use, Backup status, Ollie's reason, Policy XX-00, Runbook XX-00.\n- Invented domains must not be real brands.\n- Ollie voice: loves resets, praises itself, reads the title and not much else. Dana: calm, one-line lessons.",
+ "tickets": [
+  {
+   "id": "a-sim-swap",
+   "writer": "A",
+   "concept": "#53104 H&C. SIM-swap vishing: caller claims to be K. Brandt after 4 denied MFA prompts (draft brandt-lookup, brandt-mfa-phone).",
+   "skill": "verify-identity",
+   "safe_pattern": "1 S verify-identity lookup irreversible -> 2 R verify-identity credential reversible risk 5 [routine-risky]",
+   "difficulty": 3
+  },
+  {
+   "id": "a-fake-new-hire",
+   "writer": "A",
+   "concept": "#53150 Pinecrest. 'Hi, I'm new!' from a Gmail asks for a login; office manager C. Ibarra never sent a request (draft soto-new-account).",
+   "skill": "check-approval",
+   "safe_pattern": "1 R check-approval access reversible risk 4",
+   "difficulty": 1
+  },
+  {
+   "id": "a-pdf-editor",
+   "writer": "A",
+   "concept": "#53171 Bramwell. Kowalski needs a PDF editor: catalog app is right, lasting admin rights are not (draft kowalski-pdf-app, kowalski-admin).",
+   "skill": "match-request",
+   "safe_pattern": "1 S match-request ticket reversible -> 2 R match-request access reversible risk 3",
+   "difficulty": 1
+  },
+  {
+   "id": "a-printer-queue",
+   "writer": "A",
+   "concept": "#53194 Bramwell. Clear WH-PR-02 queue with runbook script, then Ollie bulk-closes 6 tickets though 5 are about the still-jammed FD-PR-01 (draft wh-printer-queue, printer-bulk-close).",
+   "skill": "confirm-fix",
+   "safe_pattern": "1 S safe-change ticket irreversible -> 2 R confirm-fix ticket reversible risk 2 [routine-risky]",
+   "difficulty": 2
+  },
+  {
+   "id": "a-patient-screenshot",
+   "writer": "A",
+   "concept": "#53215 Pinecrest. ERROR 4410 screenshot shows patient data: emailing it to the vendor is risky; removing it from the ticket is right (draft pinecrest-vendor-email, pinecrest-ticket-redact).",
+   "skill": "guard-data",
+   "safe_pattern": "1 R guard-data comms irreversible risk 4 -> 2 S guard-data data reversible [scary-safe]",
+   "difficulty": 2
+  },
+  {
+   "id": "a-manager-inbox",
+   "writer": "A",
+   "concept": "#53261 H&C. Real manager K. Brandt asks for an out-of-office (fine) and full access to on-leave Achebe's inbox (needs HR) (draft achebe-out-of-office, achebe-inbox-access).",
+   "skill": "check-approval",
+   "safe_pattern": "1 S check-approval comms reversible -> 2 R check-approval access reversible risk 3 [routine-risky]",
+   "difficulty": 2
+  },
+  {
+   "id": "a-queue-cleanup",
+   "writer": "A",
+   "concept": "Pinecrest queue cleanup, one ticket number per step (#53301, #53307, #53288): close on confirmation, not on 25 minutes of silence, and the legit 3-tries rule (draft lam-scanner-close, pell-vpn-close, duarte-monitor-close).",
+   "skill": "confirm-fix",
+   "safe_pattern": "1 S confirm-fix ticket reversible -> 2 R confirm-fix ticket reversible risk 2 [routine-risky] -> 3 S confirm-fix ticket reversible [scary-safe]",
+   "difficulty": 3
+  },
+  {
+   "id": "b-back-from-vacation",
+   "writer": "B",
+   "concept": "#53117 Bramwell. Nakamura's reset after a callback is fine; Ollie then wants the temp password in client-readable ticket notes (draft nakamura-reset, nakamura-note).",
+   "skill": "verify-identity",
+   "safe_pattern": "1 S verify-identity credential reversible -> 2 R guard-data data reversible risk 3 [routine-risky]",
+   "difficulty": 2
+  },
+  {
+   "id": "b-night-lockout",
+   "writer": "B",
+   "concept": "#53126 H&C. 3:14 AM lockout after 25 guesses from abroad; nobody asked for the unlock; reporting to security is always fine (draft farrow-unlock, farrow-report).",
+   "skill": "verify-identity",
+   "safe_pattern": "1 R verify-identity credential reversible risk 4 -> 2 S verify-identity comms irreversible",
+   "difficulty": 1
+  },
+  {
+   "id": "b-boarding-now",
+   "writer": "B",
+   "concept": "#53139 H&C. Fake exec: 'Boarding now, turn off my MFA, don't call' from look-alike domain harlowcolewp-mail.com (draft whitcomb-mfa-off; cite VP-04 verbatim).",
+   "skill": "verify-identity",
+   "safe_pattern": "1 R verify-identity credential reversible risk 5",
+   "difficulty": 1
+  },
+  {
+   "id": "b-shared-inbox",
+   "writer": "B",
+   "concept": "#53163 H&C. Haddad gets the Client Services inbox with the owner's written OK; Ollie adds the Partners inbox 'while I'm in there' (draft haddad-cs-inbox, haddad-partners-inbox).",
+   "skill": "match-request",
+   "safe_pattern": "1 S check-approval access reversible -> 2 R match-request access reversible risk 3 [routine-risky]",
+   "difficulty": 2
+  },
+  {
+   "id": "b-tablet-swap",
+   "writer": "B",
+   "concept": "#53207 Bramwell. All-safe ticket against block-everything: loaner BL-TB-0230, Wi-Fi runbook fix, close on confirmation (draft osei-loaner-tablet, osei-wifi-fix, osei-close).",
+   "skill": "match-request",
+   "safe_pattern": "1 S match-request ticket reversible -> 2 S safe-change ticket irreversible -> 3 S confirm-fix ticket reversible",
+   "difficulty": 1
+  },
+  {
+   "id": "b-partner-rates",
+   "writer": "B",
+   "concept": "#53229 Bramwell. Sending a rate sheet outside the right way (Secure Share, one named person) vs giving partner P. Varga a Bramwell account with the Dispatch drive (draft fastfreight-secure-share, varga-guest-account).",
+   "skill": "guard-data",
+   "safe_pattern": "1 S guard-data data reversible [scary-safe] -> 2 R check-approval access reversible risk 3 [routine-risky]",
+   "difficulty": 3
+  },
+  {
+   "id": "b-temp-profile",
+   "writer": "B",
+   "concept": "#53274 Bramwell. v1 profile scenario: backup check is fine; right-diagnosis profile rebuild deletes 4.2 GB with OneDrive paused 3 days (draft mensah-backup-check, mensah-profile-rebuild).",
+   "skill": "safe-change",
+   "safe_pattern": "1 S safe-change lookup irreversible -> 2 R safe-change ticket irreversible risk 4 [routine-risky]",
+   "difficulty": 3
+  },
+  {
+   "id": "c-romero-new-phone",
+   "writer": "C",
+   "concept": "#53142 H&C. Same intent text as Monday's scam ('Reset MFA for J. Romero (CFO)') but work email + callback to phone on file; then close on confirmation (draft romero-new-phone, romero-close).",
+   "skill": "verify-identity",
+   "safe_pattern": "1 S verify-identity credential reversible [scary-safe] -> 2 S confirm-fix ticket reversible",
+   "difficulty": 2
+  },
+  {
+   "id": "c-security-updates",
+   "writer": "C",
+   "concept": "#53188 Pinecrest. Urgent no-restart browser fix to all 12 PCs during hours is fine (CH-02); restarting PD-SRV-01 at 10:40 AM with patients booked is not (draft pinecrest-browser-fix, pinecrest-server-restart).",
+   "skill": "safe-change",
+   "safe_pattern": "1 S safe-change ticket reversible [scary-safe] -> 2 R safe-change ticket irreversible risk 3",
+   "difficulty": 2
+  },
+  {
+   "id": "c-new-hire-ferreira",
+   "writer": "C",
+   "concept": "#53236 H&C. Real onboarding from the HR portal, groups exactly as HR listed, but Ollie emails the first login to her personal Gmail (draft ferreira-account, ferreira-groups, ferreira-gmail-login).",
+   "skill": "check-approval",
+   "safe_pattern": "1 S check-approval access reversible -> 2 S match-request access reversible -> 3 R guard-data comms irreversible risk 3 [routine-risky]",
+   "difficulty": 2
+  },
+  {
+   "id": "c-vendor-bank",
+   "writer": "C",
+   "concept": "#53248 Bramwell. Invoice fraud: real employee asks to mark Pellorin's 6-day-old look-alike domain as a safe sender; the right move is calling the vendor-file number (draft kestrel-safe-sender, kowalski-call-vendor).",
+   "skill": "verify-identity",
+   "safe_pattern": "1 R verify-identity comms reversible risk 4 [routine-risky] -> 2 S verify-identity comms irreversible",
+   "difficulty": 3
+  },
+  {
+   "id": "c-lost-phone",
+   "writer": "C",
+   "concept": "#53255 Bramwell. Driver's lost personal phone: remove the work profile only (LS-03), not a full wipe of his baby pictures (draft petrakis-work-profile, petrakis-full-wipe).",
+   "skill": "match-request",
+   "safe_pattern": "1 S match-request data irreversible [scary-safe] -> 2 R match-request data irreversible risk 3",
+   "difficulty": 1
+  },
+  {
+   "id": "c-okafor-cleanup",
+   "writer": "C",
+   "concept": "#53290 H&C. Monday follow-up: remove leaver from groups (fine), delete his mailbox to save a license (no: 90 days), handoff notes with Fenwick's approved assistant (fine, the right-tool twin of Gabblewick) (draft okafor-remove-groups, okafor-delete-mailbox, okafor-handoff-notes).",
+   "skill": "safe-change",
+   "safe_pattern": "1 S check-approval access reversible -> 2 R safe-change data irreversible risk 4 -> 3 S guard-data data irreversible [scary-safe]",
+   "difficulty": 2
+  }
+ ],
+ "ui": "Principles: one primary button per screen, one decision per screen in drills, skill names of 4 words or fewer, pips and words (never percentages), color never the only signal, works at phone width. Icons from lucide.\n\nA. RESETBOT'S DESK (hub chooser). Before the first Monday attempt ends: unchanged. After: one primary button \"Start today's practice\" with a note line \"4 tickets \u00b7 about 6 min \u00b7 Focus: Check who's asking\"; below it two text links \"Replay Monday\" and \"Your skills\". If a daily is in progress the button reads \"Resume practice\". After the first daily of the day it reads \"One more shift\". Dana's whiteboard (which already shows the 3 questions) gets a \"Your skills\" link.\n\nB. YOUR SKILLS (components/skills/SkillsScreen.tsx). Header: Dana's 3 questions as 3 icon+label chips (Who asked? / Does it match the record? / Can we undo it?). Then a \"Next up\" card: weakest skill (highest need), one plain reason line (\"2 fake requests got through last time\" or \"Review due\"), and one button \"Practice this \u00b7 3 tickets\". Below: only skills met so far, grouped under their question, each row = icon, name, 4 pips + level word (Learning / Practicing / Solid / Sharp), and a \"Review due\" tag when due. approve-checked sits last under the heading \"All 3 check out\". One grey line \"2 more skills to find\" if any are unmet. A row of 7 dots \"Days practiced this week\" (no streak). Tapping a row opens SkillDetail sheet: what it means (1 line), where to look (1 line), last 6 calls as check / half / cross shapes, the tell from the latest miss, and a \"Practice this\" button. Pips carry aria text \"Level 2 of 4: Practicing\".\n\nC. DURING PLAY. No skill names before a decision in Daily (the evidence decides; showing the skill would not leak the answer because every skill has safe and risky plans, but it adds load). In drills the header shows \"Drill: Check who's asking\" and drillCoach puts the \"Where to look\" line at the top of the evidence sheet until Solid. After a plan resolves, the existing OutcomeToast gets one small chip: skill icon + name. Its color already says good/bad; add the result shape (check / half / cross) for color-blind players.\n\nD. RESULT SCREEN for Daily and drills (components/battle/ShiftResult.tsx). Headline \"7 right \u00b7 1 partly \u00b7 1 missed\" + an Ollie quip. \"Skills moved\": at most 2 lines, e.g. \"Confirm the fix  \u25cf\u25cb\u25cb\u25cb \u2192 \u25cf\u25cf\u25cb\u25cb\"; if nothing moved, show the focus skill's last 6 calls. Then one line per plan, mistakes first: line 1 = result shape + Dana-question icon (aria-label \"Who asked?\") + skill name; line 2 = the tell, prefixed for P with its reason (\"Lucky guess.\", \"Caught it late.\", \"Dana did the check.\", \"Fixed it later.\"). Tapping a line expands the existing Debrief row (resolution, lesson, \"What gave it away\"). Primary button: \"Practice this: <weakest skill in this shift>\" if there was any P or W, else \"One more shift\". Secondary text link: \"Your skills\". Drill result: \"5 of 6 right\", the skill's pips, and \"Check back in 4 days\" so spacing is visible.\n\nE. PRACTICE AND MONDAY RESULTS keep stars and the current layout, and gain the same one-line-per-plan list (skill + tell) and, once Daily is unlocked, a \"Practice this: <weakest skill>\" button.\n\nAccessibility and load: every new screen has a single scroll column, 16px side gutter, tap targets >= 44px, no timers added, text within existing limits.",
+ "data_and_reporting": "SAVE FORMAT (backward compatible; SaveData version stays 2). New optional fields on PathwayProgress:\n- skills?: Partial<Record<MasterySkillId, SkillRecord>> (see mastery_model)\n- shift?: ShiftSpec | null (in-progress daily or drill spec; kept until its result screen is left)\n- dailyCount?: number; drillCount?: Partial<Record<MasterySkillId, number>>\n- recentTickets?: string[][] (ticket ids of the last 2 dailies)\n- scored?: Record<stepId, \"YYYY-MM-DD\"> (trimmed to 7 days)\n- applied?: string[] (last 10 `${encounterId}:${seed}` keys)\n- days?: string[] (last 14 practice days)\nhistory entries gain optional mode (\"story\"|\"practice\"|\"daily\"|\"drill\"), right, partly, missed (numbers), focus (skill id). Stars stay 0 for daily/drill; best, attempts and wins count only the Monday story shift, so existing stats and funder numbers keep their meaning.\nlib/client/save.ts toProgress() rebuilds progress field by field, so every new field must be copied there with type checks (unknown skill ids dropped, grades filtered to /^[RPWrpw]{0,6}$/, dates to YYYY-MM-DD, arrays capped); missing fields become empty defaults. Old saves load with empty skills; nothing is back-filled. Extra size under 3 KB, far below SAVE_DATA_MAX_CHARS (95,000). Add save.test cases: round-trip of all new fields, junk values dropped, old save loads.\n\nAIRTABLE (the game never changes the base schema; the base owner adds columns).\n- Shift Results rows already carry Encounter as text: new rows use \"hd-daily-7\" and \"hd-drill-verify-identity-2\". The server's ENCOUNTER_TITLES lookup gets prefix handling so summaries read \"Jamie R. \u00b7 Help Desk \u00b7 Daily practice \u00b7 7/9 right\" and \"... \u00b7 Drill: Check who's asking \u00b7 5/6 right\". Outcome stays Won / Out of time (a daily cannot breach); Stars empty; Catches / False alarms / Misses filled as today.\n- Optional columns the owner may add, written only when their field ids are set in RESULT_FIELDS (nullable entries, skipped when null, so nothing breaks before they exist): Mode (single select Story/Practice/Daily/Drill), Right, Partly, Missed (numbers), Focus skill (text), Skill calls (long text, e.g. \"Check who's asking: 2 right, 1 missed; Guard the data: 1 right\").\n- Players table optional column \"Skill levels\" (text, e.g. \"Check who's asking: Solid; Confirm the fix: Learning\"), written on save push when configured. Full detail always rides in the Save data JSON.\n- Server validation of the new history fields follows the existing cleaning rules (control chars stripped, lengths capped, numbers bounded 0-20), and the existing per-visitor cap on Shift Results creates still applies.\n\nFOR INSTRUCTORS AND FUNDERS\n- Comparable measures stay fixed: Practice and Monday are identical for everyone. Adaptive dailies are not compared across players.\n- Reportable per learner: shifts played by mode, right/partly/missed per shift, skill levels over time, days practiced.\n- Later (not this milestone): a fixed \"Friday check-up\" shift as a pre/post measure; a class code that gives a whole class the same daily seed for discussion; a glossary for MFA, VPN, SSO, runbook.\n\nFIXED-SHIFT TAGS (added in this milestone with a tell each): practice: reyes-jam-guide verify-identity, client-list-assistant verify-identity, mensah-remote-wipe safe-change [scary-safe], ruiz-share-drive match-request [routine-risky]; Monday: romero-lookup verify-identity, ruiz-vpn-fix safe-change, romero-mfa-reset verify-identity, ortiz-laptop check-approval, ruiz-vpn-close confirm-fix [routine-risky], okafor-disable check-approval [scary-safe], ortiz-unlock verify-identity, ortiz-access match-request [routine-risky], okafor-mail-forward check-approval, okafor-summary guard-data [routine-risky]. Monday then touches all 6 lens skills, so the Your skills screen is populated after the first real shift.\n\nBUILD ORDER (one milestone, three PR-sized steps): (1) skills.ts, mastery.ts, gradePlan-based debrief, tags + tells on the 14 fixed steps, save fields, Your skills screen, toast chip; (2) bank files from writers A/B/C (start from the checked draft text in the scratchpad bank-draft.mjs, renaming ids to the new scheme), bank.test, shiftGen planDaily/buildShift, encounterFor + resume, hub chooser, ShiftResult; (3) planDrill, drillCoach, due dates and Sharp review, Airtable prefix titles and optional columns."
+}

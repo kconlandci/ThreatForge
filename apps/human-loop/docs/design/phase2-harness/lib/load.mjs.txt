@@ -1,0 +1,44 @@
+/**
+ * Loads the REAL Human Loop engine and pathway content (TypeScript) with jiti, read-only.
+ * App root: --app <dir>, else $HL_APP, else the private copy next to this harness
+ * (../balance/human-loop). Point it at /home/user/ThreatForge/apps/human-loop to measure the
+ * live repo (imports only; nothing is written there).
+ */
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+export const DEFAULT_APP = path.resolve(HERE, "../../app");
+
+/** Fail loudly if the engine does not see the CARDS object this harness patches. */
+function assertSharedCards(engine, CARDS, p) {
+  const id = engine.policyCardOf(p.story);
+  const before = CARDS[id].cost;
+  CARDS[id].cost = before + 7;
+  let s = engine.createBattle(p.story, 1);
+  for (let i = 0; i < p.story.maxTurns && !s.hand.some((c) => c.cardId === id) && s.status === "playing"; i++) s = engine.endTurn(s, p.story);
+  const inst = s.hand.find((c) => c.cardId === id);
+  const r = inst ? engine.playCard(s, p.story, inst.uid) : null;
+  CARDS[id].cost = before;
+  if (!inst || r.ok) throw new Error("harness: the engine does not share the CARDS object (card cost overrides would be ignored)");
+}
+
+export async function loadApp(appRoot) {
+  const APP = path.resolve(appRoot || process.env.HL_APP || DEFAULT_APP);
+  if (!fs.existsSync(path.join(APP, "lib/game/engine.ts"))) throw new Error(`No engine at ${APP}/lib/game/engine.ts`);
+  const jitiPath = path.join(APP, "node_modules/jiti/lib/jiti.mjs");
+  const { createJiti } = await import(pathToFileURL(jitiPath).href);
+  const jiti = createJiti(import.meta.url, { alias: { "@": APP }, interopDefault: true, moduleCache: true });
+  const imp = (p) => jiti.import(path.join(APP, p));
+  // Sequential on purpose: parallel jiti imports can load a module twice, and then a card-cost
+  // override on our CARDS would not reach the engine's CARDS (checked below).
+  const engine = await imp("lib/game/engine.ts");
+  const cards = await imp("lib/game/cards.ts");
+  const rng = await imp("lib/game/rng.ts");
+  const mastery = await imp("lib/game/mastery.ts");
+  const registry = await imp("lib/pathways/testing.ts");
+  const shiftGen = await imp("lib/game/shiftGen.ts");
+  assertSharedCards(engine, cards.CARDS, registry.TEST_PATHWAYS[0]);
+  return { APP, engine, CARDS: cards.CARDS, rng, mastery, shiftGen, pathways: registry.TEST_PATHWAYS };
+}

@@ -1,0 +1,123 @@
+/**
+ * Variants: designer knobs applied to COPIES of the real encounters (the repo is never touched).
+ * See ../README.md "Variant files" for the schema.
+ */
+
+export const DEFAULT_RULES = {
+  /** "draw2" (today: Coffee draws 2) or "energy" (Coffee gives rules.coffeeEnergy energy this turn). */
+  coffee: "draw2",
+  coffeeEnergy: 1,
+  /** Escalations allowed per shift (null = no limit). */
+  escalateBudget: null,
+  /** Modes ("story", "daily") where every turn's hand is guaranteed a Block or Escalate. */
+  stopGuarantee: [],
+  /** After the last plans run on a won shift, one extra beat to Roll Back known-bad actions. */
+  wrapUpRollback: false,
+  /** evidence[0] is shown free on every plan card; a flag on row 0 counts as seen. */
+  glance: false,
+  /** A clue only counts as proof when the plan was inspected (or glanced, for row 0). */
+  flagNeedsInspect: true,
+  /** A risky plan whose red flag was on screen when the turn ended with no playable Block/Escalate grades P, not W. */
+  spottedNoCardPartly: false,
+  /** Which red rows count as proof: "any" red row, or only the "last" (most telling) one. */
+  proofRow: "any",
+  /** Which 3rd-star rule the band check uses: "blind" (today: no blind Block) or "proof" (every catch had proof). */
+  starRule: "blind",
+};
+
+const ENC_KEYS = ["actionsPerTurn", "energyPerTurn", "handSize", "maxTurns", "maxRisk", "starterDeck", "unlocks", "engineRules"];
+const EXTRA_KEYS = ["maxTurnsSlack"];
+
+function mergeLayer(into, layer) {
+  if (!layer) return into;
+  const out = { ...into };
+  for (const [k, v] of Object.entries(layer)) {
+    if (k === "deck") out.deck = { add: [...(into.deck?.add ?? []), ...(v.add ?? [])], remove: [...(into.deck?.remove ?? []), ...(v.remove ?? [])] };
+    else out[k] = v;
+  }
+  return out;
+}
+
+/** The encounter overrides for one pathway and mode: all -> mode -> pathways[id].all -> pathways[id][mode]. */
+export function overridesFor(variant, pathwayId, mode) {
+  let o = {};
+  o = mergeLayer(o, variant.all);
+  o = mergeLayer(o, variant[mode]);
+  o = mergeLayer(o, variant.pathways?.[pathwayId]?.all);
+  o = mergeLayer(o, variant.pathways?.[pathwayId]?.[mode]);
+  return o;
+}
+
+export function rulesFor(variant, pathwayId) {
+  return { ...DEFAULT_RULES, ...(variant.rules ?? {}), ...(variant.pathways?.[pathwayId]?.rules ?? {}) };
+}
+
+const resolveCard = (id, policy) => (id === "policy" ? policy : id);
+
+/** Apply overrides to a deep copy of the encounter. `policy` is the pathway's policy card id. */
+export function applyOverrides(enc, o, policy) {
+  const e = structuredClone(enc);
+  for (const k of ENC_KEYS) {
+    if (o[k] === undefined) continue;
+    if (k === "starterDeck") e.starterDeck = o.starterDeck.map((c) => resolveCard(c, policy));
+    else if (k === "engineRules") e.rules = { ...(e.rules ?? {}), ...structuredClone(o.engineRules) };
+    else if (k === "unlocks") e.unlocks = o.unlocks.map((u) => ({ turn: u.turn, cards: u.cards.map((c) => resolveCard(c, policy)) }));
+    else e[k] = structuredClone(o[k]);
+  }
+  if (o.deck) {
+    for (const c of o.deck.add ?? []) e.starterDeck.push(resolveCard(c, policy));
+    for (const raw of o.deck.remove ?? []) {
+      const c = resolveCard(raw, policy);
+      const i = e.starterDeck.lastIndexOf(c);
+      if (i >= 0) {
+        e.starterDeck.splice(i, 1);
+        continue;
+      }
+      const us = (e.unlocks ?? []).slice().sort((a, b) => b.turn - a.turn);
+      const u = us.find((x) => x.cards.includes(c));
+      if (u) u.cards.splice(u.cards.lastIndexOf(c), 1);
+    }
+    if (e.unlocks) e.unlocks = e.unlocks.filter((u) => u.cards.length);
+  }
+  if (o.stepOrder && (o.stepOrder.swap || o.stepOrder.order)) {
+    const steps = e.steps.slice();
+    if (o.stepOrder.swap) {
+      for (const [a, b] of o.stepOrder.swap) [steps[a], steps[b]] = [steps[b], steps[a]];
+    }
+    if (o.stepOrder.order) {
+      const byId = new Map(steps.map((s, i) => [s.id, s]));
+      const picked = o.stepOrder.order.map((x) => (typeof x === "number" ? e.steps[x] : byId.get(x)));
+      if (picked.some((s) => !s) || new Set(picked).size !== steps.length) throw new Error(`bad stepOrder.order for ${e.id}`);
+      steps.splice(0, steps.length, ...picked);
+    }
+    e.steps = steps;
+  }
+  if (o.maxTurnsSlack !== undefined) {
+    // Shift clock: just enough turns for every plan, plus this many spare (for blocked-and-requeued safe plans).
+    let left = e.steps.length, t = 0;
+    const apt = e.actionsPerTurn.length ? e.actionsPerTurn : [1];
+    while (left > 0) { left -= Math.max(1, apt[Math.min(t, apt.length - 1)]); t++; }
+    e.maxTurns = t + o.maxTurnsSlack;
+  }
+  if ((o.maxTurns !== undefined || o.maxTurnsSlack !== undefined) && e.unlocks) e.unlocks = e.unlocks.filter((u) => u.turn <= e.maxTurns);
+  return e;
+}
+
+/** Card cost overrides on the shared CARDS object. Returns a function that restores the originals. */
+export function applyCards(CARDS, cardsOverride, policyIds) {
+  const saved = [];
+  for (const [rawId, patch] of Object.entries(cardsOverride ?? {})) {
+    const ids = rawId === "policy" ? policyIds : [rawId];
+    for (const id of ids) {
+      if (!CARDS[id]) throw new Error(`unknown card ${id}`);
+      saved.push([id, { ...CARDS[id] }]);
+      Object.assign(CARDS[id], patch);
+    }
+  }
+  return () => {
+    for (const [id, def] of saved.reverse()) {
+      for (const k of Object.keys(CARDS[id])) delete CARDS[id][k];
+      Object.assign(CARDS[id], def);
+    }
+  };
+}

@@ -1,0 +1,80 @@
+# Design notes
+
+Design specs, audits and review notes from the sessions that built Human Loop, saved so they are not lost. They are records, not rules: the working rules are in `../../CLAUDE.md`, and the code and content in the repo are the truth where they differ (names were changed, Phase 1a shipped, Phase 2 is not built).
+
+- Dates are when each file was written (UTC). Paths inside the notes (for example `/tmp/claude-0/...`, `fun/phase2/...`) point to the original session's scratch folder, which no longer exists.
+- AI playtester and reviewer notes are hints, not learner evidence.
+- Code-like files are saved as `.txt` so `tsc`, `eslint` and `vitest` ignore them. To use the harness, copy `phase2-harness/` somewhere, rename `*.mjs.txt` to `*.mjs`, and run `node run.mjs --app <path to apps/human-loop>`.
+- Not saved (too large or only raw output): the 7 AI playtesters' screenshots, the 22 workflow transcripts, the name-collision search dumps (the result is in commit 4dd38d3), and the regression, accessibility and SME review outputs.
+
+## Files
+
+- `phase2-spec.md` (2026-09-28): Fun Phase 2 plan: the hunt for the clue counts, and cards force choices (chosen design, measured numbers, build stages 2a-2d, tests, file ownership).
+- `grading-impact.md` (2026-09-28): How the 3rd star ("proof" of the clue) would change grading, saves, results and the Help Desk golden; includes the old-save compatibility test.
+- `art-m1-readme.md` (2026-09-24): M1 art notes: sprite files, sizes and intent, for the integrator.
+- `content-audit-per-file-table.md` (2026-09-28): Content audit counts per content file and pathway.
+- `content-audit-worksheets.md` (2026-09-28): Row-by-row rewrite worksheets per pathway (verdict rows, reassurance rows, absence-as-story rows) for the writers of stages 2b and 2c.
+- `content-audit.md` (2026-09-28): Audit of all story and bank evidence for rows that give the verdict away (86 hard hits), quips that confess, and clue position; 10 before/after examples.
+- `fun-critique-amendments.md` (2026-09-27): The critic's amendments to Phase 1 (what was cut or changed before building).
+- `fun-phase1-spec.md` (2026-09-27): The judge's buildable Phase 1 spec (a real choice in the first minute, results you can see).
+- `fun-phase1a-spec.md` (2026-09-27): The amended, buildable Phase 1a spec that was built (commit 18a810e): entry, first choice, spot-it, reveal.
+- `fun-review-playtests/designer.md` (2026-09-27): AI playtester notes, designer lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-playtests/funder.md` (2026-09-27): AI playtester notes, funder lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-playtests/game-feel.md` (2026-09-27): AI playtester notes, game-feel lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-playtests/learner-adult.md` (2026-09-27): AI playtester notes, learner-adult lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-playtests/learner-teen.md` (2026-09-27): AI playtester notes, learner-teen lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-playtests/learning.md` (2026-09-27): AI playtester notes, learning lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-playtests/onboarding.md` (2026-09-27): AI playtester notes, onboarding lens (an AI agent playing on a phone, not a real learner).
+- `fun-review-result.json` (2026-09-27): Full output of the fun review: 7 AI playtester reports ("reviews"), 3 redesign proposals, the judge's phased plan, and the critic. Includes the note that practice ticket 4 (share the whole drive) felt too easy.
+- `grading-mastery-sim.txt` (2026-09-28): Simulation of skill levels over 11 days under the grading rules, with players who mark, guess or never mark.
+- `grading-proof.test.ts.txt` (2026-09-28): Draft test for proof grading, saved as .txt so tsc and vitest ignore it (the spec says to port it).
+- `grading-prototype.diff` (2026-09-28): Prototype of proof grading as a patch against commit 18a810e (engine, mastery, reveal, save).
+- `grading-save-compat.txt` (2026-09-28): Result of resuming 2,000 simulated old saves under the new grading rule (same stars and grades as today).
+- `jules-review-fullstack.md` (2026-09-25): Findings from the Jules (Google's AI coding agent) review of Full-Stack, 2026-09-25.
+- `m3-learner-review.md` (2026-09-25): The M3 first-time-learner review of Daily practice and Your skills (12 findings) and the fix report. This is the "learner review" named in content/help-desk/bank/README.md.
+- `pathway-specs/business-analyst.json` (2026-09-26): Writers' brief for Business Analyst (Quill/Marisol): world and characters, skills, schema, practice/story outlines, bank plan, hub, art and integration notes. Content has changed since (renames, Phase 1a).
+- `pathway-specs/cloud-network.json` (2026-09-26): Writers' brief for Cloud & Network (Nimbus/Nadia): world and characters, skills, schema, practice/story outlines, bank plan, hub, art and integration notes. Content has changed since (renames, Phase 1a).
+- `pathway-specs/cybersecurity.json` (2026-09-26): Writers' brief for Cybersecurity (Patch/Kofi): world and characters, skills, schema, practice/story outlines, bank plan, hub, art and integration notes. Content has changed since (renames, Phase 1a).
+- `pathway-specs/full-stack.json` (2026-09-26): Writers' brief for Full-Stack (Piper/Leo): world and characters, skills, schema, practice/story outlines, bank plan, hub, art and integration notes. Content has changed since (renames, Phase 1a).
+- `pathway-specs/m3-skills-and-practice.json` (2026-09-26): M3 design: the 7 oversight skills, mastery model, Daily practice generator, ticket schema, world bible, UI, data and reporting.
+- `phase2-designs-plan-critique.json` (2026-09-28): The three Phase 2 designs (Scarcity, Depth, Tempo) with their results, the director's plan, and the critic's review. One retired real-business name in a mockup line was replaced with its current name (Cairnholt).
+- `phase2-harness/README.md` (2026-09-28): How to run the balance simulator (real engine, scripted players, many seeds). Rename *.mjs.txt to *.mjs to use it; point --app at apps/human-loop.
+- `phase2-harness/lib/bots.mjs.txt` (2026-09-28): The scripted players: careful, careful-pol, triage, human80, esl-mix, guess-flag, no-mark, block-all, approve-all, escalate-unknown, oracle (rename to .mjs).
+- `phase2-harness/lib/game.mjs.txt` (2026-09-28): Harness game loop over the real engine (rename to .mjs).
+- `phase2-harness/lib/load.mjs.txt` (2026-09-28): Loads the app's TypeScript engine and pathway content (rename to .mjs).
+- `phase2-harness/lib/rngLocal.mjs.txt` (2026-09-28): Seeded random numbers for the harness (rename to .mjs).
+- `phase2-harness/lib/runner.mjs.txt` (2026-09-28): Runs bots over many seeds and collects stats (rename to .mjs).
+- `phase2-harness/lib/sim.mjs.txt` (2026-09-28): Simulation core: turns, hands, energy, scoring (rename to .mjs).
+- `phase2-harness/lib/variant.mjs.txt` (2026-09-28): Applies a variant JSON (plans per turn, deck, costs, rules) to a copy of an encounter (rename to .mjs).
+- `phase2-harness/run.mjs.txt` (2026-09-28): Harness entry point run.mjs (rename to .mjs).
+- `phase2-harness/search.mjs.txt` (2026-09-28): Harness entry point search.mjs (rename to .mjs).
+- `phase2-harness/sweep.mjs.txt` (2026-09-28): Harness entry point sweep.mjs (rename to .mjs).
+- `phase2-harness/variants/_daily-try.json` (2026-09-28): Rule variant _daily-try.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/_dtry.json` (2026-09-28): Rule variant _dtry.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/_floor1.json` (2026-09-28): Rule variant _floor1.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/_floor2.json` (2026-09-28): Rule variant _floor2.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/_noRO.json` (2026-09-28): Rule variant _noRO.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/_xcheck.json` (2026-09-28): Rule variant _xcheck.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/applied-check.json` (2026-09-28): Rule variant applied-check.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/baseline.json` (2026-09-28): Rule variant baseline.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-final.json` (2026-09-28): Rule variant depth-final.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-look.json` (2026-09-28): Rule variant depth-look.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-look3.json` (2026-09-28): Rule variant depth-look3.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-v1.json` (2026-09-28): Rule variant depth-v1.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-v2.json` (2026-09-28): Rule variant depth-v2.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-v3.json` (2026-09-28): Rule variant depth-v3.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-v4.json` (2026-09-28): Rule variant depth-v4.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/depth-v5.json` (2026-09-28): Rule variant depth-v5.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-base.json` (2026-09-28): Rule variant dir-base.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-daily-nocoffee.json` (2026-09-28): Rule variant dir-daily-nocoffee.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-exhaust-cb1.json` (2026-09-28): Rule variant dir-exhaust-cb1.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-exhaust.json` (2026-09-28): Rule variant dir-exhaust.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-final-content.json` (2026-09-28): Rule variant dir-final-content.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-final.json` (2026-09-28): Rule variant dir-final.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-t2.json` (2026-09-28): Rule variant dir-t2.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/dir-t2c1.json` (2026-09-28): Rule variant dir-t2c1.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/p2-candidate.json` (2026-09-28): Rule variant p2-candidate.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/p2-rules.json` (2026-09-28): Rule variant p2-rules.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-harness/variants/phase2a-built.json` (2026-09-28): Rule variant phase2a-built.json for the harness (the dir-* variants are the director's measured designs).
+- `phase2-proof-rows-report.txt` (2026-09-28): Output of the proof-row picker: the one proof row chosen for each risky plan (the default picks for stage 2a).
+- `phase2-proof-rows.py` (2026-09-28): The script that picked those proof rows (Python; not run by the app).
