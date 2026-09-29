@@ -212,8 +212,8 @@ describe("shiftCoach: first-shift tips", () => {
 
   it("walks through one tip per turn on turns 1-5", () => {
     let s = createBattle(E, 21);
-    expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-energy", target: "card:inspect" });
-    expect(shiftCoach(s, E, first).text).toBe("Tap **Inspect**, then the plan. Cards cost energy: the orange number.");
+    expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-energy", target: "energy" });
+    expect(shiftCoach(s, E, first).text).toBe("Cards cost energy: the orange number.");
     s = play(s, "inspect", E);
     expect(shiftCoach(s, E, first).id.startsWith("g-")).toBe(true);
 
@@ -286,8 +286,22 @@ describe("shiftCoach: first-shift tips", () => {
 
   it("shows no tips after the first shift, only generic hints", () => {
     const s = createBattle(E, 21);
-    expect(shiftCoach(s, E, { ...closed, firstShift: false }).id).toBe("g-check-one");
-    expect(shiftCoach(s, E, { ...closed, firstShift: false }).text).toBe("Check the plan: tap **Inspect**, then the plan.");
+    expect(shiftCoach(s, E, { ...closed, firstShift: false })).toEqual({ id: "g-check-one", text: "1 plan not checked.", target: null });
+  });
+
+  it("never tells the player to tap Inspect in the real shift (practice taught it), and rings it only on the rush turn", () => {
+    for (const TP of TEST_PATHWAYS) {
+      const S = TP.story;
+      let s = createBattle(S, 21);
+      for (let turn = 1; turn <= 6 && s.status === "playing"; turn++, s = endTurn(s, S)) {
+        for (const firstShift of [true, false]) {
+          const hint = shiftCoach(s, S, { ...closed, firstShift });
+          expect(hint.text, `${TP.id} turn ${turn}`).not.toMatch(/tap \*\*inspect/i);
+          // The rush-turn hint ("Save 1 for Block") is about energy and keeps its ring.
+          if (hint.id !== "g-check-save") expect(hint.target, `${TP.id} turn ${turn}`).not.toBe("card:inspect");
+        }
+      }
+    }
   });
 
   it("uses the card prompt while a card is selected", () => {

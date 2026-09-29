@@ -241,8 +241,8 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
   if (state.turn === 1 && played.size === 0) {
     return {
       id: "tip-energy",
-      text: "Tap **Inspect**, then the plan. Cards cost energy: the orange number.",
-      target: "card:inspect",
+      text: "Cards cost energy: the orange number.",
+      target: "energy",
     };
   }
 
@@ -310,7 +310,8 @@ export function genericHint(state: BattleState): CoachHint {
   const unchecked = board.filter((id) => !state.steps[id]?.inspected).length;
   const canInspect = state.hand.some((c) => c.cardId === "inspect") && state.energy >= CARDS.inspect.cost;
   if (unchecked > 0 && canInspect) {
-    if (board.length === 1) return { id: "g-check-one", text: "Check the plan: tap **Inspect**, then the plan.", target: "card:inspect" };
+    // The real shift states what is left, not which card to tap: practice already taught Inspect.
+    if (board.length === 1) return { id: "g-check-one", text: "1 plan not checked.", target: null };
     // Inspecting them all would spend the energy a Block needs: say so, never "inspect them all".
     if (state.energy >= 2 && unchecked >= state.energy && state.hand.some((c) => c.cardId === "block")) {
       return {
@@ -321,8 +322,8 @@ export function genericHint(state: BattleState): CoachHint {
     }
     return {
       id: "g-check",
-      text: `${unchecked} ${unchecked === 1 ? "plan" : "plans"} not checked. Tap **Inspect**, then a plan.`,
-      target: "card:inspect",
+      text: `${unchecked} ${unchecked === 1 ? "plan" : "plans"} not checked.`,
+      target: null,
     };
   }
   const missingBlock = !state.hand.some((c) => c.cardId === "block");

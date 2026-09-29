@@ -333,7 +333,8 @@ sign-up) comes straight back. Landing pathway buttons link to `/play/<pathway>`.
    adds one new card per turn (the encounter's `unlocks` list: Policy on turn 2, Escalate on 3,
    Roll Back on 4, Coffee on 5). On the first shift, the hint line adds one tip per new card, at
    the start of that turn, only while the card can be played; "Out of energy" and "No Inspect
-   left" always win over a tip.
+   left" always win over a tip. The hint line says what is left ("2 plans not checked."), never
+   which card to tap: practice already taught Inspect.
 
 The main button is **Approve** ("Approve 2 plans"): Ollie does every plan you didn't stop. In
 practice it reads **Let it run**, like the sheet's button. Tapping **Inspect** with one plan to check plays it at once and opens the evidence sheet.

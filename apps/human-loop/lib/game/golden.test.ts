@@ -30,6 +30,12 @@
  *   (g-check-save) instead of "Tap Inspect" when that would spend the Block's energy. Audited on raw
  *   (unhashed) traces: 48 traces changed, only in hint rows (tip-rollback/g-check -> tip-rush,
  *   g-check -> g-check-save); every event, beat, debrief and score is identical.
+ * - No "Tap Inspect" hints in the real shift (every pathway): practice taught it. g-check-one is
+ *   "1 plan not checked.", g-check is "N plans not checked." (both without the Inspect ring), and
+ *   tip-energy is "Cards cost energy: the orange number." (ring on the energy orb). Audited on raw
+ *   (unhashed) traces: 88 of 112 changed (48 story, 40 generated daily/drill, 0 practice), only in
+ *   those hint rows (text and target; no lock or sheet line); every event, beat, debrief, plan line,
+ *   card prompt and score is identical. Only the "traces" key of the golden changed.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
