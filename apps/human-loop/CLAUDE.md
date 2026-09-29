@@ -77,6 +77,9 @@ the "Intended changes" header of `golden.test.ts`.
 - New pushes create new preview deployments. Testers stay on the pinned one.
 - Production (`human-loop-eight.vercel.app`) still serves the old v1. Moving this version there is
   the owner's call. The project has login protection on everything except custom domains.
+- `humanloop.dciworkforce.com` is connected to this branch (it shows the latest build). The owner
+  bought `dciworkforce.com` on 2026-09-29, in the owner's own name for now. It should move to DCI
+  later. The dev container cannot reach it either.
 - The dev container cannot reach `vercel.app`.
 - `AIRTABLE_TOKEN` exists only on Vercel, so `stored:false` locally is expected. The owner pastes
   tokens into Vercel, never into chat. Never write a token or a share link into the repo.

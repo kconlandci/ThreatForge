@@ -54,7 +54,7 @@ All optional. Copy `.env.example` to `.env.local` for local development.
 | `DATABASE_URL`               | Postgres connection string (Neon). Turns on cloud save. Set for you on Vercel when you add Neon from the Marketplace.                           |
 | `POSTGRES_URL`               | Used only if `DATABASE_URL` is not set. The Neon integration sets both.                                                                         |
 | `LEAD_RATE_LIMIT_PER_10_MIN` | Sign-ups allowed per IP address per 10 minutes. Default `30`, so a room of people on one Wi-Fi network can all sign up (see [Abuse limits](#abuse-limits)). |
-| `NEXT_PUBLIC_PRIVACY_EMAIL`  | DCI's privacy contact email, linked from `/privacy` ("contact us"). **Set it before a public launch** (read at build time, so redeploy). |
+| `NEXT_PUBLIC_PRIVACY_EMAIL`  | DCI's privacy contact email, linked from `/privacy` ("contact us"). Defaults to `privacy@dciresourcesllc.com` (`lib/site/contact.ts`). Set it only to use another address. **Make sure the mailbox exists before a public launch** (read at build time, so redeploy). |
 | `CRON_SECRET`                | Protects the daily retention job (`/api/cron/purge`, scheduled in `vercel.json`). Any long random string.                                     |
 | `HL_TEST_PG_URL`             | Tests only. A disposable local Postgres for the database integration test (it drops and recreates the tables).                                  |
 
@@ -138,9 +138,9 @@ kept in the browser and sent again).
    or `POSTGRES_URL`: when either is set, Postgres is used instead.
 5. **Redeploy.** New environment variables only reach new deployments: go to **Deployments**, open
    the latest production deployment, and choose **Redeploy**.
-6. **Before a public launch** also set `NEXT_PUBLIC_PRIVACY_EMAIL` (the privacy notice's contact for
-   deletion and email opt-out requests) and `CRON_SECRET` (turns on the daily retention job), then
-   redeploy.
+6. **Before a public launch** make sure the privacy contact mailbox exists (the notice links to
+   `privacy@dciresourcesllc.com` by default; `NEXT_PUBLIC_PRIVACY_EMAIL` overrides it) and set
+   `CRON_SECRET` (turns on the daily retention job), then redeploy.
 
 To check it worked: open `/play` on the live site and sign up. The confirmation should say
 *"We'll back up your progress as you play."* and a new row appears in **Players**. Play a shift and
@@ -181,9 +181,10 @@ This is the only manual step for Postgres. It needs someone with access to the V
 5. **Redeploy.** New environment variables only reach new deployments: go to **Deployments**, open
    the latest production deployment, and choose **Redeploy**.
 
-6. **Before a public launch** also set `NEXT_PUBLIC_PRIVACY_EMAIL` (the privacy notice's contact for
-   deletion and email opt-out requests; without it the notice has no email address) and `CRON_SECRET`
-   (turns on the daily retention job), then redeploy.
+6. **Before a public launch** make sure the privacy contact mailbox exists (the notice links to
+   `privacy@dciresourcesllc.com` by default, for deletion and email opt-out requests;
+   `NEXT_PUBLIC_PRIVACY_EMAIL` overrides it) and set `CRON_SECRET` (turns on the daily retention
+   job), then redeploy.
 
 To check it worked: open `/play` on the live site and sign up. The confirmation should say
 *"We'll back up your progress as you play."* (In no-op mode it says *"Saved on this device."*)

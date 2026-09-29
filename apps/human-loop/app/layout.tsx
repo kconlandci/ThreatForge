@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description:
     "AI agents are your new coworkers. Learn to supervise them. A free card game from DCI Resources: read the agent's plan, inspect the evidence, and make the call.",
   applicationName: "Human Loop",
-  metadataBase: new URL("https://human-loop-eight.vercel.app"),
+  metadataBase: new URL("https://humanloop.dciworkforce.com"),
   openGraph: {
     title: "Human Loop: learn to supervise AI at work",
     description: "AI agents are your new coworkers. Learn to supervise them. A free card game from DCI Resources.",
