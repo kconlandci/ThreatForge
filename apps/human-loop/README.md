@@ -1,5 +1,7 @@
 # Human Loop
 
+Working rules for people and AI sessions: see [CLAUDE.md](CLAUDE.md).
+
 A free browser game by DCI Resources that teaches AI agentic oversight: supervising AI agents at work.
 Players pick a DCI career pathway, then run a shift with an overeager AI coworker. They inspect
 evidence, approve safe work, and block, escalate or roll back the risky stuff. All five pathways
