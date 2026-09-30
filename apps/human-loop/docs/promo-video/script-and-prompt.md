@@ -29,11 +29,35 @@ stays true while the game changes. Every claim below comes from the README or th
 
 | Line | On screen |
 | ---- | --------- |
-| 1, 2 | Presenter on camera, captions |
-| 3, 4, 5 | Real gameplay clips (phone size): reading a plan, checking the evidence, making the call. Until clips exist: a calm plain background with large captions |
+| 1, 2 | Presenter on camera, captions. Clip 1 can sit under line 2 ("a free game") |
+| 3 | Clips 3 and 4: the plan, its evidence, the decision |
+| 4 | Clip 4 (a risky plan blocked) then clip 5 (a safe plan let through) |
+| 5 | Clip 2 (the pathway tour) |
 | 6 | End card: "Human Loop. A free game from DCI Resources." and the web address as text |
 
 Sizes: 16:9 for YouTube. A 9:16 copy is optional.
+
+## Gameplay clips
+
+Five real clips, recorded from the game at phone size, with no sound and no music. Each comes
+as a portrait file (`-phone`, 780x1688) and a 16:9 file (`-16x9`, 1920x1080, the phone centred on
+a teal background). An orange ring marks each tap. The ring is added by the recorder, not the game.
+
+| Clip | Shows | About |
+| ---- | ----- | ----- |
+| 1 the front door | Landing page, Play free, Play now | 7 s |
+| 2 pick a career path | Slow tour of all five pathway cards, then Help Desk | 17 s |
+| 3 read the plan | The AI coworker's plan on the board, open its evidence | 7 s |
+| 4 check the evidence and block | Mark the wrong line, block the plan, "Caught with proof!" | 10 s |
+| 5 a safe plan, let it run | Check a safe plan and let it run | 11 s |
+
+The clips are not stored in git (they are large, and go stale when screens change). To make them
+again, run `docs/promo-video/record-clips.mjs` against a production build. The top of that file
+says how. Re-record when the game's screens or wording change.
+
+What the footage shows: the AI coworkers' names (Ollie, Dana) and the on-screen words appear in
+the picture, even though the voiceover never says them. Animation is a little less smooth than on
+a real phone (about 15 to 25 frames a second), because the clips are recorded on a server.
 
 ## Paste-ready prompt (ChatGPT with HeyGen, or HeyGen directly)
 
