@@ -308,7 +308,7 @@ export function HubOverlay({
               </p>
             ) : null}
             <div className={h.chooserRow}>
-              <button type="button" className={`${plainBtn} px-3.5`} onClick={onOpenRooms}>
+              <button type="button" className={`${plainBtn} px-3.5`} onClick={onOpenRooms} data-hub-rooms="">
                 <List className="h-5 w-5" aria-hidden="true" />
                 <span className="sr-only">Office list</span>
               </button>
@@ -335,7 +335,7 @@ export function HubOverlay({
         ) : (
           <div>
             <div className={h.actions}>
-              <button type="button" className={`${plainBtn} max-[389px]:px-3.5`} onClick={onOpenRooms}>
+              <button type="button" className={`${plainBtn} max-[389px]:px-3.5`} onClick={onOpenRooms} data-hub-rooms="">
                 <List className="h-5 w-5" aria-hidden="true" />
                 {/* Narrow phones: icon only, so the main button fits on one line. */}
                 <span className="max-[389px]:sr-only">Office list</span>

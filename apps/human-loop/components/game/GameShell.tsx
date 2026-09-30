@@ -476,6 +476,13 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [stageFailed, setStageFailed] = useState(false);
   const [stageKey, setStageKey] = useState(0);
   const [dialogue, setDialogue] = useState<HubTargetId | null>(null);
+  // The control that had focus when the dialogue opened, so closing it can give focus back there.
+  const dialogueOpenerRef = useRef<HTMLElement | null>(null);
+  const openDialogue = useCallback((target: HubTargetId) => {
+    const a = document.activeElement;
+    dialogueOpenerRef.current = a instanceof HTMLElement && a !== document.body ? a : null;
+    setDialogue(target);
+  }, []);
   const [walking, setWalking] = useState<HubTargetId | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
@@ -662,7 +669,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
         case "hub-arrived":
           if (viewRef.current !== "hub") break;
           setWalking(null);
-          setDialogue(msg.target);
+          openDialogue(msg.target);
           setBark(null);
           break;
         case "hub-moved":
@@ -679,7 +686,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
       window.clearTimeout(moveTimer);
       window.clearTimeout(lostTimer);
     };
-  }, [bus, api]);
+  }, [bus, api, openDialogue]);
 
   // If the stage never reports an arrival (no WebGL, slow device), open the dialogue anyway.
   useEffect(() => {
@@ -687,11 +694,11 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
     const t = window.setTimeout(() => {
       if (walkingRef.current === walking) {
         setWalking(null);
-        setDialogue(walking);
+        openDialogue(walking);
       }
     }, stageReady ? 8000 : 50);
     return () => window.clearTimeout(t);
-  }, [walking, stageReady]);
+  }, [walking, stageReady, openDialogue]);
 
   // Result screen: the agent's mood matches how the shift went (celebrate only a clean run).
   useEffect(() => {
@@ -1130,10 +1137,20 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
                 reducedMotion={reducedMotion}
                 onOpenRooms={() => setRoomsOpen(true)}
                 onCloseDialogue={() => {
-                  // Keep keyboard focus in the game when the dialogue (and its focused button) goes away.
+                  // Keep keyboard focus in the game when the dialogue (and its focused button) goes away:
+                  // hold it on the heading now, then give it back to the control that opened the dialogue
+                  // (usually the Office list button), once the hub buttons are back on screen.
                   const hadFocus = document.activeElement?.closest("section") != null;
+                  const opener = dialogueOpenerRef.current;
+                  dialogueOpenerRef.current = null;
                   setDialogue(null);
-                  if (hadFocus) hubHeadingRef.current?.focus({ preventScroll: true });
+                  if (hadFocus) {
+                    hubHeadingRef.current?.focus({ preventScroll: true });
+                    requestAnimationFrame(() => {
+                      const back = opener?.isConnected ? opener : document.querySelector<HTMLElement>("[data-hub-rooms]");
+                      back?.focus({ preventScroll: true });
+                    });
+                  }
                 }}
                 onStartShift={startShift}
                 chooser={chooser}
