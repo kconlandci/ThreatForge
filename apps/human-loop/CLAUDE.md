@@ -94,4 +94,7 @@ the "Intended changes" header of `golden.test.ts`.
   (`lib/game/content.test.ts`).
 - Music is off by default. The three songs were made with Gemini. The licence wording in
   `lib/client/music.ts` has not been checked against Gemini's terms.
+- The demo kit (a 3-page PDF for funders and case workers) is served at `/demo-kit/Human-Loop-demo-kit.pdf`.
+  Its source and rebuild steps are in `docs/demo-kit`. Rebuild it when the address or the game's
+  wording, flow or privacy facts change.
 - Leave the old Jules branches alone.
