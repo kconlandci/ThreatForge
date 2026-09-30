@@ -36,6 +36,11 @@
  *   (unhashed) traces: 88 of 112 changed (48 story, 40 generated daily/drill, 0 practice), only in
  *   those hint rows (text and target; no lock or sheet line); every event, beat, debrief, plan line,
  *   card prompt and score is identical. Only the "traces" key of the golden changed.
+ * - One quip no longer gives its answer away (Jules review 3): c-billing-folder-2 was "Why stop at one
+ *   folder? I'll give Lam everything Dr. Pell has. Future tickets: prevented!" and is now "Access for
+ *   Lam! I'll copy Dr. Pell's access to her. Quick and easy. One click. Done." Audited on raw (unhashed)
+ *   generated shifts: 12 of 115 "built"/"full" entries changed (9 + 3), each only in that step's quip;
+ *   bankVersion, traces, practice, story and every other key are identical.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
