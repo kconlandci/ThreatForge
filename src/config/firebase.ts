@@ -9,6 +9,11 @@ import {
   browserLocalPersistence,
   type Auth,
 } from "firebase/auth";
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  type Firestore,
+} from "firebase/firestore";
 
 // IMPORTANT: These are client-side Firebase config values.
 // They are NOT secrets — they identify the project to Firebase.
@@ -33,4 +38,11 @@ const auth: Auth = initializeAuth(app, {
   persistence: browserLocalPersistence,
 });
 
-export { app, auth };
+// Firestore with a persistent local cache: reads stay fast and writes
+// queue automatically while offline, syncing when connectivity returns.
+// Must be initialized here (before any other Firestore usage).
+const db: Firestore = initializeFirestore(app, {
+  localCache: persistentLocalCache(),
+});
+
+export { app, auth, db };

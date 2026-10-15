@@ -15,6 +15,11 @@ import { Preferences } from "@capacitor/preferences";
 import { Capacitor } from "@capacitor/core";
 import { Purchases } from "@revenuecat/purchases-capacitor";
 import { auth } from "../config/firebase";
+import {
+  setSyncUid,
+  pullCloudProgress,
+  CLOUD_PULL_EVENT,
+} from "../services/sync";
 
 interface AuthContextType {
   uid: string | null;
@@ -76,6 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               );
             }
           }
+
+          // Cloud sync: register the UID, then pull any existing cloud
+          // progress. useProgress merges it via the CLOUD_PULL_EVENT.
+          setSyncUid(currentUid);
+          pullCloudProgress(currentUid).then((remote) => {
+            if (remote) {
+              window.dispatchEvent(
+                new CustomEvent(CLOUD_PULL_EVENT, { detail: remote })
+              );
+            }
+          });
         } catch (error) {
           console.error("[ThreatForge] UID persistence failed:", error);
         } finally {
