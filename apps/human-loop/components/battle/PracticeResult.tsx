@@ -22,7 +22,7 @@ export interface PracticeResultProps {
   stageReady: boolean;
   /** The rows the player marked, by plan (from the battle, in memory; empty after a reload). */
   marks?: ReadonlyMap<string, number>;
-  /** "Start the real shift": the office, with the coach's one line. */
+  /** "Start the real shift": straight into the real shift. */
   onStartShift: () => void;
   onPracticeAgain: () => void;
   onOffice: () => void;

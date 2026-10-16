@@ -231,7 +231,8 @@ export function unlockTip(id: CardId, enc: Encounter): string {
  * First-shift tips, derived only from events (so they survive a reload). One at a time, and only
  * at the start of a turn: once the player has acted (played a card), the coach's generic "what to do
  * next" hints take over. An unlock tip also needs the card to be usable right now (enough energy,
- * and for Roll Back something in the Done row), so the ring never points at a card that can't help.
+ * and for Roll Back a plan in the Done row that raised the risk bar), so the ring never points at a
+ * card that can't help.
  */
 export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | null {
   if (state.status !== "playing") return null;
@@ -283,7 +284,12 @@ export function firstShiftTip(state: BattleState, enc: Encounter): CoachHint | n
     for (const id of ev.cardIds) {
       if (played.has(id) || !state.hand.some((c) => c.cardId === id)) continue;
       if (CARDS[id].cost > state.energy) continue;
-      if (CARDS[id].target === "executed" && validTargets(state, enc, id).length === 0) continue;
+      if (CARDS[id].target === "executed") {
+        // Roll Back's tip waits for a plan in the Done row that raised the risk bar (what the player
+        // saw, never the answers). With only good work there, the ring would invite a false alarm.
+        const ranRisky = new Set(state.events.flatMap((ev) => (ev.t === "executed" && ev.risk > 0 ? [ev.stepId] : [])));
+        if (!validTargets(state, enc, id).some((t) => ranRisky.has(t))) continue;
+      }
       return { id: `tip-${id}`, text: unlockTip(id, enc), target: `card:${id}` };
     }
   }

@@ -329,12 +329,20 @@ sign-up) comes straight back. Landing pathway buttons link to `/play/<pathway>`.
    `lib/game/reveal.ts` `practiceBar`). The result says "3 of 4 right." (plus "N caught with
    proof.") and "You practiced: checking an AI agent's work before it runs." Practice can't end
    in a breach, and it never counts toward attempts, wins, best or history. **Start the real
-   shift** opens the office with the coach's one line (`hubBark`, which names **Start shift**) and the main button focused;
-   reaching the agent's desk on that path starts the story at once. **Skip practice** is in the
-   Menu until practice is done.
-2. **The real shift** (`content/help-desk/encounter-01.json`): starts with Inspect and Block, then
-   adds one new card per turn (the encounter's `unlocks` list: Policy on turn 2, Escalate on 3,
-   Roll Back on 4, Coffee on 5). On the first shift, the hint line adds one tip per new card, at
+   shift** starts the real shift at once (play data showed learners who stopped in the office on
+   the way often never started it). **Back to the office** after the first practice opens the
+   office with the coach's one line (`hubBark`, which names **Start shift**) and the main button
+   focused; reaching the agent's desk on that path starts the story at once. **Skip practice** is
+   in the Menu until practice is done.
+2. **The real shift** (`content/help-desk/encounter-01.json`): ten plans over 7 turns, arriving
+   slowly at first (`actionsPerTurn` [1, 1, 2, 2, 3]: one plan on turns 1 and 2, two on turns 3
+   and 4, then three). It starts with Inspect and Block, then adds new cards spaced out, so most
+   turns bring only one new thing (the encounter's `unlocks` list: Policy on turn 2, Roll Back on 4,
+   Escalate on 5, Coffee on 6). Roll Back comes before the busiest turn, so a plan that slipped
+   through on turn 3 can be undone before more risk lands. The pacing was tested with the balance
+   simulator (`docs/design/phase2-harness`): careful play wins every seed with 3 stars in every
+   pathway; approving everything, blocking everything, or escalating whatever can be escalated and
+   approving the rest still lose (98% or more). No turn deals two risky plans (a content test). On the first shift, the hint line adds one tip per new card, at
    the start of that turn, only while the card can be played; "Out of energy" and "No Inspect
    left" always win over a tip. The hint line says what is left ("2 plans not checked."), never
    which card to tap: practice already taught Inspect.

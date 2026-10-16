@@ -621,7 +621,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
       // A shift saved before the content changed (e.g. the old 12-card deck, or a daily built from
       // an older ticket bank) starts fresh. History, attempts, best and skills are kept.
       const staleShift = !!p.shift && (!pathway.shiftUsable(p.shift) || p.battle?.encounterId === p.shift.id);
-      if (p.battle?.encounterId === ENC.id || staleShift) setNote("The shift was updated, so it starts fresh.");
+      if (p.battle?.encounterId === ENC.id || p.pendingResult?.encounterId === ENC.id || staleShift) {
+        setNote("The shift was updated, so it starts fresh.");
+      }
       if (p.battle || p.pendingResult || p.shift) {
         setSave(api.patchProgress((x) => ({ ...x, battle: null, pendingResult: null, shift: null })));
       }
@@ -930,8 +932,14 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
     startShift();
   }, [barkPath, view, dialogue, HUB, startShift]);
 
-  /** "Start the real shift" after practice: the office, with the coach's one line. */
-  const toRealShift = useCallback(() => {
+  /**
+   * "Start the real shift" after practice: straight into the shift. Learners who stopped in the
+   * office on the way often never started it, so there is no stop there now.
+   */
+  const startRealShift = useCallback(() => startShift(), [startShift]);
+
+  /** "Back to the office" after the first practice: the office, with the coach's one line naming Start shift. */
+  const officeAfterPractice = useCallback(() => {
     setSave(
       api.patchProgress((p) => ({
         ...p,
@@ -1251,9 +1259,10 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             stage={<StageSlot host={host} />}
             stageReady={stageReady}
             marks={finalMarks}
-            onStartShift={toRealShift}
+            onStartShift={startRealShift}
             onPracticeAgain={startPractice}
-            onOffice={backToOffice}
+            // Once "Practice this" leads (Daily practice is open), the office needs no pointer.
+            onOffice={practiceSkill ? backToOffice : officeAfterPractice}
             practiceSkill={practiceSkill}
             onPractice={startDrill}
           />

@@ -27,7 +27,7 @@
         { "speaker": "coach", "text": "Each turn, it shows you what it plans to do. Play Inspect to see the evidence behind a plan." },
         { "speaker": "coach", "text": "If a plan is wrong, play Block to stop it. Not sure? Play Escalate, and I'll handle it." },
         { "speaker": "coach", "text": "When you tap Approve, Ollie goes ahead with every plan you didn't stop. So look first." },
-        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the shift is only six turns." }
+        { "speaker": "coach", "text": "But don't block everything. Blocked good work goes back in line, and the shift is only seven turns." }
       ],
       "returningLines": [
         { "speaker": "coach", "text": "Welcome back. Each day I pick tickets for the skills you need most." },

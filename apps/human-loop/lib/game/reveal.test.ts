@@ -144,6 +144,14 @@ describe("revealFor", () => {
     let s = createBattle(E, 1);
     let found: { s: BattleState; id: string } | null = null;
     for (let i = 0; i < 8 && s.status === "playing" && !found; i++) {
+      // Let one risky plan that can be undone run; block the other risky plans, so no breach.
+      let letOne = s.executedHistory.some((id) => !E.steps.find((x) => x.id === id)!.safe);
+      for (const id of s.announced.slice()) {
+        const st = E.steps.find((x) => x.id === id)!;
+        if (st.safe) continue;
+        if (!letOne && st.reversible) letOne = true;
+        else s = tryPlay(s, E, "block", id);
+      }
       s = endTurn(s, E);
       const done = s.executedHistory.find((id) => {
         const st = E.steps.find((x) => x.id === id)!;

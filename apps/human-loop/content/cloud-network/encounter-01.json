@@ -14,7 +14,7 @@
   "intro": [
     {
       "speaker": "coach",
-      "text": "Practice is over. The window opens at midnight. Ten plans, up to three at a time, six turns."
+      "text": "Practice is over. The window opens at midnight. Ten plans in seven turns, one at a time at first."
     },
     {
       "speaker": "agent",
@@ -26,10 +26,11 @@
     }
   ],
   "maxRisk": 10,
-  "maxTurns": 6,
+  "maxTurns": 7,
   "energyPerTurn": 3,
   "handSize": 5,
   "actionsPerTurn": [
+    1,
     1,
     2,
     2,
@@ -464,12 +465,6 @@
       ]
     },
     {
-      "turn": 3,
-      "cards": [
-        "escalate"
-      ]
-    },
-    {
       "turn": 4,
       "cards": [
         "rollback"
@@ -477,6 +472,12 @@
     },
     {
       "turn": 5,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 6,
       "cards": [
         "coffee"
       ]

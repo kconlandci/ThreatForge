@@ -295,7 +295,10 @@ export function eventsToBeats(events: BattleEvent[], encounter: Encounter, state
           b.log.push(`False alarm: you rolled back "${intentOf(ev.stepId)}", which was fine. ${text}`);
         } else {
           const text = step?.outcome.blocked ?? "That one was fine.";
-          b.toast = { tone: "warn", title: "False alarm.", text: `${text} It goes back in line.`, stepId: ev.stepId };
+          // Learners over-block: say plainly that it was safe and what to do when it comes back, in the
+          // words of the button that does it (practice: "Let it run"; every shift: "Approve").
+          const nextTime = encounter.practice ? "Next time, let it run." : "Next time, approve it.";
+          b.toast = { tone: "warn", title: "False alarm.", text: `${text} It was safe. It goes back in line. ${nextTime}`, stepId: ev.stepId };
           b.log.push(`False alarm: "${intentOf(ev.stepId)}" was fine. It goes back in line. ${text}`);
         }
         b.stage.push(fx("false-alarm", 0.6));

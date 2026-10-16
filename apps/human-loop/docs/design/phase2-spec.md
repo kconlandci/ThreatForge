@@ -3,6 +3,11 @@
 Creative director, 2026-09-28. This is a plan, not a build. Nothing in `apps/human-loop` was
 edited (git status clean). Every number here comes from the real engine, run in private copies.
 
+**Note, 2026-10-16:** the live first shift's pacing has changed since this plan (plans arrive 1, 1,
+2, 2, then 3 a turn over 7 turns; Policy, Roll Back, Escalate, Coffee on turns 2, 4, 5, 6; README,
+"The real shift"). The measurements and turn numbers below are for the old pacing ([1, 2, 2, 3] over
+6 turns). Re-run the harness before building from them.
+
 **Gate: no Stage 2a code starts until the owner has sent phone feedback on Phase 1a (commit 18a810e).**
 If that feedback changes the evidence sheet, the plan card or the toasts, fold it in here first.
 

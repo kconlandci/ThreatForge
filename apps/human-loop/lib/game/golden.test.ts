@@ -41,6 +41,16 @@
  *   Lam! I'll copy Dr. Pell's access to her. Quick and easy. One click. Done." Audited on raw (unhashed)
  *   generated shifts: 12 of 115 "built"/"full" entries changed (9 + 3), each only in that step's quip;
  *   bankVersion, traces, practice, story and every other key are identical.
+ * - Gentler first shift (every pathway, 2026-10-16): story plans arrive 1, 1, 2, 2, then 3 a turn over
+ *   7 turns (was [1, 2, 2, 3] over 6), new cards on turns 2, 4, 5, 6 (Policy, Roll Back, Escalate,
+ *   Coffee; was Policy, Escalate, Roll Back, Coffee on 2-5), and intro line 1 says so. The Roll Back
+ *   tip waits for a plan in the Done row that raised the risk bar. The false-alarm toast now ends
+ *   "It was safe. It goes back in line." plus "Next time, let it run." (practice) or "Next time,
+ *   approve it." (every shift). Audited on raw (unhashed) captures: "story" changed only in intro,
+ *   maxTurns, actionsPerTurn and unlocks; headlines only in story|* rows (89 of 320; fixture rows
+ *   identical); the 48 story traces changed (pacing); 16 practice, daily and drill traces changed
+ *   only in that toast text (95 lines, each exactly it); plans, built, full, skills, cards, reasons,
+ *   ui, practice and bankVersion are identical.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";

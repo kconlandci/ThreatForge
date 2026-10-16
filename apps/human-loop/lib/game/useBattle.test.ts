@@ -46,7 +46,7 @@ describe("fixtures", () => {
 
   it("puts the rollback fixture on a turn where Roll Back is unlocked and in hand", () => {
     const s = fixtureBattle("rollback");
-    expect(s.turn).toBeGreaterThanOrEqual(4);
+    expect(s.turn).toBe(E.unlocks?.find((u) => u.cards.includes("rollback"))?.turn);
     expect(s.hand.some((c) => c.cardId === "rollback")).toBe(true);
   });
 
@@ -106,12 +106,16 @@ describe("hand stacks and new cards", () => {
     expect(played).not.toBe(s);
     expect(newCardIds(played).size).toBe(0);
     s = endTurn(s, E);
-    expect(unlockedThisTurn(s)).toEqual(["escalate"]);
-    expect([...newCardIds(s)]).toEqual(["escalate"]);
+    expect(s.turn).toBe(3);
+    expect(unlockedThisTurn(s)).toEqual([]);
+    expect(newCardIds(s).size).toBe(0);
+    s = endTurn(s, E);
+    expect(unlockedThisTurn(s)).toEqual(["rollback"]);
+    expect([...newCardIds(s)]).toEqual(["rollback"]);
   });
 
-  it("gives the deck per turn: 7 cards, then one more each turn from turn 2 to 5", () => {
-    expect([1, 2, 3, 4, 5, 6].map((t) => deckAtTurn(E, t).length)).toEqual([7, 8, 9, 10, 11, 11]);
+  it("gives the deck per turn: 7 cards, then one more on turns 2, 4, 5 and 6", () => {
+    expect([1, 2, 3, 4, 5, 6, 7].map((t) => deckAtTurn(E, t).length)).toEqual([7, 8, 8, 9, 10, 11, 11]);
   });
 
   it("attaches unlocks to the turn beat and logs them", () => {
@@ -124,6 +128,20 @@ describe("hand stacks and new cards", () => {
 });
 
 describe("eventsToBeats", () => {
+  it("after a false alarm, says it was safe and what to do, in the words of that mode's button", () => {
+    for (const enc of [P, E]) {
+      const isSafe = (id: string) => !!enc.steps.find((x) => x.id === id)?.safe;
+      let s0 = createBattle(enc, 3);
+      for (let i = 0; i < 4 && !s0.announced.some(isSafe); i++) s0 = endTurn(s0, enc);
+      const s1 = tryPlay(s0, enc, "block", s0.announced.find(isSafe));
+      expect(s1, enc.id).not.toBe(s0);
+      const toast = eventsToBeats(newEvents(s0, s1), enc).find((b) => b.toast?.title === "False alarm.")?.toast;
+      // Practice's sheet button is "Let it run"; in every shift the plan runs on "Approve".
+      expect(toast?.text, enc.id).toMatch(/It was safe\. It goes back in line\. Next time, (let it run|approve it)\.$/);
+      expect(toast?.text.endsWith(enc.practice ? "let it run." : "approve it."), enc.id).toBe(true);
+    }
+  });
+
   it("turns the opening events into one turn beat", () => {
     const s = createBattle(E, 3);
     const beats = eventsToBeats(s.events, E);

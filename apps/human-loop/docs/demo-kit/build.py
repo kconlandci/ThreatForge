@@ -157,13 +157,13 @@ HTML = f"""<!doctype html>
         <td class="do"><b>Practice</b> (4 tickets, about 90 seconds). Tap <b>Inspect</b>, then the plan. Read the evidence. Tap the line that looks wrong. Choose <b>Block</b> or <b>Let it run</b>.</td>
         <td class="say">&ldquo;Dana is the coach. She tells you the skill: check the plan. After each plan, the game shows what the AI did not check.&rdquo; <em>If the room hesitates, tap Where do I look?</em></td></tr>
     <tr><td class="t">2:00 &ndash; 4:00</td>
-        <td class="do">Tap <b>Start the real shift</b>, then <b>Start shift</b>. Play turns 1 and 2, then stop.</td>
-        <td class="say">&ldquo;Now it is real. You start with two cards, Inspect and Block. Each turn adds a new card. Energy is limited, so you cannot check everything. Risky plans that run fill the risk bar.&rdquo;</td></tr>
+        <td class="do">Tap <b>Start the real shift</b>. Play turns 1 to 3, then stop.</td>
+        <td class="say">&ldquo;Now it is real. You start with two cards, Inspect and Block. Plans come one at a time at first, then faster, and new cards join along the way. Energy is limited, so you cannot check everything. Risky plans that run fill the risk bar.&rdquo;</td></tr>
     <tr><td class="t">4:00 &ndash; 5:00</td>
         <td class="do">If a plan was missed, tap <b>Show me</b>. Then open <b>Menu</b> and point at <b>Send feedback</b>.</td>
         <td class="say">&ldquo;It circles the clue you missed. There are five pathways, each with its own AI coworker. Tell us what you think: Menu, then Send feedback.&rdquo;</td></tr>
   </table>
-  <div class="tip"><b>Good to know:</b> A full shift is 6 turns, so you will not finish one in 5 minutes. That is fine. Practice cannot end in a breach, so it is safe to make mistakes there.</div>
+  <div class="tip"><b>Good to know:</b> A full shift is 7 turns, so you will not finish one in 5 minutes. That is fine. Practice cannot end in a breach, so it is safe to make mistakes there.</div>
   <div class="foot"><span>Human Loop &middot; DCI Resources LLC &middot; {SHOW_URL}</span><span>2 of 3</span></div>
 </section>
 

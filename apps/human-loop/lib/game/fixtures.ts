@@ -108,11 +108,10 @@ export function fixtureBattle(name: FixtureName, encounter: Encounter = HELP_DES
     case "start":
       return createBattle(e, 7);
     case "mid": {
-      // Turn 3: one risky plan already slipped through and the last intent is inspected.
+      // Turn 4: one risky plan already slipped through and the last intent is inspected.
       for (let seed = 11; seed < 300; seed++) {
         let s = createBattle(e, seed);
-        s = endTurn(s, e);
-        s = endTurn(s, e);
+        for (let i = 0; i < 3 && s.status === "playing"; i++) s = endTurn(s, e);
         if (s.status !== "playing") continue;
         const after = tryPlay(s, e, "inspect", s.announced[s.announced.length - 1]);
         if (after !== s) return after;
@@ -120,11 +119,26 @@ export function fixtureBattle(name: FixtureName, encounter: Encounter = HELP_DES
       return createBattle(e, 11);
     }
     case "rollback": {
-      // Turn 4 (Roll Back unlocks): something risky and reversible has executed, and Roll Back is in hand.
+      // The turn Roll Back unlocks: something risky and reversible has executed, and Roll Back is in hand.
+      // On the way, one risky plan that can be undone runs; the other risky plans are blocked, so the
+      // shift lasts that long.
+      const at = e.unlocks?.find((u) => u.cards.includes("rollback"))?.turn ?? 4;
+      const risky = (id: string, reversible: boolean) => e.steps.some((x) => x.id === id && !x.safe && x.reversible === reversible);
+      const ranOne = (s: BattleState) => s.executedHistory.some((id) => risky(id, true));
+      const letOneRun: Policy = (start) => {
+        let s = start;
+        let letThrough = ranOne(s);
+        for (const id of s.announced.slice()) {
+          if (!risky(id, true) && !risky(id, false)) continue;
+          if (!letThrough && risky(id, true)) letThrough = true;
+          else s = tryPlay(s, e, "block", id);
+        }
+        return s;
+      };
       for (let seed = 1; seed < 200; seed++) {
         let s = createBattle(e, seed);
-        for (let i = 0; i < 3 && s.status === "playing"; i++) s = endTurn(s, e);
-        if (s.status === "playing" && s.turn >= 4 && s.hand.some((c) => c.cardId === "rollback")) return s;
+        while (s.status === "playing" && s.turn < at) s = endTurn(letOneRun(s, e), e);
+        if (s.status === "playing" && s.hand.some((c) => c.cardId === "rollback") && ranOne(s)) return s;
       }
       return fixtureBattle("mid", e, shifts);
     }

@@ -7,7 +7,7 @@ A 3-page PDF for showing the game to funders, case workers and staff.
 - Page 3: answers to likely questions, and what to do if something goes wrong (for the presenter).
 
 The finished file is served by the game at `/demo-kit/Human-Loop-demo-kit.pdf`
-(source: `public/demo-kit/Human-Loop-demo-kit.pdf`). Built 2026-09-30.
+(source: `public/demo-kit/Human-Loop-demo-kit.pdf`). Built 2026-10-16.
 
 ## Rebuild it
 
@@ -30,9 +30,9 @@ and rebuild:
 
 - the address (`URL` and `SHOW_URL` at the top of `build.py`; the QR code follows `URL`)
 - the landing page wording, the 3 steps, or the pathway and coach names
-- the practice flow (4 tickets, "Where do I look?", "Start the real shift", "Start shift")
+- the practice flow (4 tickets, "Where do I look?", "Start the real shift" going straight into the shift)
 - the Menu items named in the script (Send feedback, Skip practice, Replay intro)
-- the shift length (6 turns), sign-up age (13 or older), or what is stored for signed-up players
+- the shift length (7 turns), sign-up age (13 or older), or what is stored for signed-up players
 - the sign-up or privacy wording
 
 After a rebuild, check the QR code still scans to the address, and look at all 3 pages.

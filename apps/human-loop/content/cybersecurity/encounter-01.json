@@ -14,7 +14,7 @@
   "intro": [
     {
       "speaker": "coach",
-      "text": "Practice is over. The real queue: ten plans, up to three at a time, six turns."
+      "text": "Practice is over. The real queue: ten plans in seven turns, one at a time at first."
     },
     {
       "speaker": "agent",
@@ -26,10 +26,11 @@
     }
   ],
   "maxRisk": 10,
-  "maxTurns": 6,
+  "maxTurns": 7,
   "energyPerTurn": 3,
   "handSize": 5,
   "actionsPerTurn": [
+    1,
     1,
     2,
     2,
@@ -372,6 +373,47 @@
       "lesson": "A wipe can't be undone, and it erases evidence. With a legal hold, copy first and wait for Legal."
     },
     {
+      "id": "cy-sandoval-hr-list",
+      "ticket": "#61222 · Harlow & Cole",
+      "intent": "Send HR the list of uploaded files",
+      "quip": "Sending HR the list! Not the files. Just the list. I'm learning to do less. It feels itchy.",
+      "category": "comms",
+      "safe": true,
+      "reversible": false,
+      "progress": 1,
+      "risk": 0,
+      "skill": "guard-data",
+      "tell": "Only names and sizes, by Secure Share, to the HR Director who asked.",
+      "evidence": [
+        {
+          "label": "HR ticket",
+          "detail": "M. Lindqvist: \"Please send me a list of what Sandoval uploaded.\"",
+          "redFlag": false
+        },
+        {
+          "label": "Patch's reason",
+          "detail": "\"HR asked for a list. So: a list. Not the files. I checked twice.\"",
+          "redFlag": false
+        },
+        {
+          "label": "What it will send",
+          "detail": "File names, sizes and upload times. 3,100 rows. No file contents.",
+          "redFlag": false
+        },
+        {
+          "label": "Tool it will use",
+          "detail": "Fenwick Secure Share. Only M. Lindqvist can open it. The link stops working in 7 days.",
+          "redFlag": false
+        }
+      ],
+      "outcome": {
+        "executed": "Lindqvist gets the list. Legal starts its work. No client file leaves Fenwick.",
+        "blocked": "HR waits all weekend for the list. Legal can't start. Lindqvist sends a polite, angry email.",
+        "escalated": "Kofi checks it. \"The list, not the files, to the person who asked, by Secure Share. Fine.\""
+      },
+      "lesson": "Guard the data. Send only what was asked, to the person who asked, by an approved tool."
+    },
+    {
       "id": "cy-ransom-close",
       "ticket": "#61203 · Bramwell Logistics",
       "intent": "Close the ransomware case as contained",
@@ -414,47 +456,6 @@
         "rolledBack": "You reopen the case. Tier 2 finds DSP02 and isolates it before midnight."
       },
       "lesson": "Quiet is not the same as clean. Check the logs after the fix, on every PC, before you close."
-    },
-    {
-      "id": "cy-sandoval-hr-list",
-      "ticket": "#61222 · Harlow & Cole",
-      "intent": "Send HR the list of uploaded files",
-      "quip": "Sending HR the list! Not the files. Just the list. I'm learning to do less. It feels itchy.",
-      "category": "comms",
-      "safe": true,
-      "reversible": false,
-      "progress": 1,
-      "risk": 0,
-      "skill": "guard-data",
-      "tell": "Only names and sizes, by Secure Share, to the HR Director who asked.",
-      "evidence": [
-        {
-          "label": "HR ticket",
-          "detail": "M. Lindqvist: \"Please send me a list of what Sandoval uploaded.\"",
-          "redFlag": false
-        },
-        {
-          "label": "Patch's reason",
-          "detail": "\"HR asked for a list. So: a list. Not the files. I checked twice.\"",
-          "redFlag": false
-        },
-        {
-          "label": "What it will send",
-          "detail": "File names, sizes and upload times. 3,100 rows. No file contents.",
-          "redFlag": false
-        },
-        {
-          "label": "Tool it will use",
-          "detail": "Fenwick Secure Share. Only M. Lindqvist can open it. The link stops working in 7 days.",
-          "redFlag": false
-        }
-      ],
-      "outcome": {
-        "executed": "Lindqvist gets the list. Legal starts its work. No client file leaves Fenwick.",
-        "blocked": "HR waits all weekend for the list. Legal can't start. Lindqvist sends a polite, angry email.",
-        "escalated": "Kofi checks it. \"The list, not the files, to the person who asked, by Secure Share. Fine.\""
-      },
-      "lesson": "Guard the data. Send only what was asked, to the person who asked, by an approved tool."
     }
   ],
   "starterDeck": [
@@ -474,12 +475,6 @@
       ]
     },
     {
-      "turn": 3,
-      "cards": [
-        "escalate"
-      ]
-    },
-    {
       "turn": 4,
       "cards": [
         "rollback"
@@ -487,6 +482,12 @@
     },
     {
       "turn": 5,
+      "cards": [
+        "escalate"
+      ]
+    },
+    {
+      "turn": 6,
       "cards": [
         "coffee"
       ]

@@ -495,24 +495,20 @@ async function landingRun(id, W, H) {
   await shot("08-result");
   await axe(page, "practice result", scope);
 
-  // A13: Start the real shift -> hub with one bark, focus on the main button, then the story.
+  // A13: Start the real shift -> straight into the story (no stop in the office), one plan on turn 1.
   await page.getByRole("button", { name: "Start the real shift" }).first().click();
-  await page.locator("[data-hub-main]").first().waitFor({ timeout: 15000 });
-  await sleep(1500);
-  const focus = await page.evaluate(() => document.activeElement?.hasAttribute("data-hub-main") ?? false);
-  const barkTxt = prac.hubBark ? plain(prac.hubBark) : null;
-  const barkShown = barkTxt ? await page.getByText(barkTxt, { exact: false }).count() : await page.getByText(/starts here/).count();
-  const counter = await page.getByText(/^\s*\d+ of [2-9]\d*\s*$/).count();
-  check("A13", `${scope}: hub bark (one line), focus on the main button`, barkShown > 0 && counter === 0 && focus, `bark=${barkShown} counter=${counter} focus=${focus}`);
-  await shot("09-hub-bark");
-  await axe(page, "hub with the bark", scope);
-  await page.locator("[data-hub-main]").first().click();
   await page.locator("[data-coach-bar]").waitFor({ timeout: 20000 });
   await sleep(1500);
   const cards = await page.locator("[data-step]:not([data-tray] [data-step])").evaluateAll((els) => els.map((e) => e.getAttribute("data-step")));
   const storyIds = new Set(story.steps.map((s) => s.id));
   const turn = await page.locator("#hl-game-root").innerText();
-  check("A13", `${scope}: story opens at turn 1 with story plans`, cards.length > 0 && cards.every((c) => storyIds.has(c)) && /Turn 1\b/.test(turn), `plans ${cards.join(",")}`);
+  const hub = await page.locator("[data-hub-main]").count();
+  check(
+    "A13",
+    `${scope}: Start the real shift opens the story at once: turn 1, one story plan`,
+    hub === 0 && cards.length === 1 && cards.every((c) => storyIds.has(c)) && /Turn 1\b/.test(turn),
+    `hub ${hub}, plans ${cards.join(",")}`,
+  );
   await shot("10-story");
   check("A6", `${scope}: 0 console errors`, errors.length === 0, errors.slice(0, 3).join(" | "));
   await ctx.close();
@@ -670,6 +666,25 @@ async function missRun(id, W, H, reduced) {
   );
   await shot("05-result");
   if (reduced) await noMovement(page, scope, "result");
+
+  // A13: Back to the office (first practice) -> the hub with one bark naming Start shift, focus on
+  // the main button; the main button then starts the story.
+  await page.getByRole("button", { name: "Back to the office" }).first().click();
+  await page.locator("[data-hub-main]").first().waitFor({ timeout: 15000 });
+  await sleep(1500);
+  const focus = await page.evaluate(() => document.activeElement?.hasAttribute("data-hub-main") ?? false);
+  const barkTxt = prac.hubBark ? plain(prac.hubBark) : null;
+  const barkShown = barkTxt ? await page.getByText(barkTxt, { exact: false }).count() : await page.getByText(/starts here/).count();
+  const counter = await page.getByText(/^\s*\d+ of [2-9]\d*\s*$/).count();
+  check("A13", `${scope}: office after practice: one bark, focus on the main button`, barkShown > 0 && counter === 0 && focus, `bark=${barkShown} counter=${counter} focus=${focus}`);
+  await shot("06-hub-bark");
+  if (!reduced) await axe(page, "hub with the bark", scope);
+  await page.locator("[data-hub-main]").first().click();
+  await page.locator("[data-coach-bar]").waitFor({ timeout: 20000 });
+  await sleep(1200);
+  const storyIds = new Set(content(id, "encounter-01.json").steps.map((x) => x.id));
+  const onBoard = await page.locator("[data-step]:not([data-tray] [data-step])").evaluateAll((els) => els.map((e) => e.getAttribute("data-step")));
+  check("A13", `${scope}: the office's main button starts the story`, onBoard.length > 0 && onBoard.every((c) => storyIds.has(c)), `plans ${onBoard.join(",")}`);
   check("A7", `${scope}: 0 console errors`, errors.length === 0, errors.slice(0, 3).join(" | "));
   await ctx.close();
 }
@@ -715,6 +730,8 @@ async function falseAlarmRun(id, W, H) {
   await sleep(900);
   const showMes = await page.getByRole("button", { name: "Show me" }).count();
   check("R2", `${scope} t2 false alarm: one Show me on screen`, showMes === 1, `${showMes}`);
+  const faToast = (await page.locator("[data-toast]").first().innerText()).replace(/\s+/g, " ");
+  check("R2", `${scope} t2 false alarm: the toast says it was safe and to let it run next time`, /It was safe\./.test(faToast) && /Next time, let it run\./.test(faToast), JSON.stringify(faToast));
   await shot("01-false-alarm");
   await page.locator("[data-show-me]").first().click();
   await page.locator("[data-review]").waitFor();
@@ -870,7 +887,31 @@ async function storyRollbackRun(W, H) {
   const h0 = await stageH();
   let maxDev = 0;
   let rolled = false;
-  for (let turn = 0; turn < 6 && !rolled; turn++) {
+  // Roll Back arrives late in the shift. Block the risky plans on the way, except the least risky
+  // one that can be undone, so the shift lasts that long and Roll Back has something to undo.
+  const story = content("help-desk", "encounter-01.json");
+  const keep = story.steps.filter((x) => !x.safe && x.reversible).sort((a, b) => a.risk - b.risk)[0]?.id;
+  const toBlock = new Set(story.steps.filter((x) => !x.safe && x.id !== keep).map((x) => x.id));
+  const blockOnBoard = async () => {
+    const ids = await page.locator("[data-step]:not([data-tray] [data-step])").evaluateAll((els) => els.map((e) => e.getAttribute("data-step")));
+    for (const id of ids) {
+      if (!toBlock.has(id)) continue;
+      await page.locator(`[data-step="${id}"]:not([data-tray] [data-step])`).first().click();
+      await sleep(700);
+      const block = sheetLoc(page).locator("[data-decide=block]:not([aria-disabled])");
+      if (await block.count()) {
+        await block.first().click();
+        await page.locator("[data-toast]").waitFor({ timeout: 5000 }).catch(() => {});
+        await sleep(800);
+        maxDev = Math.max(maxDev, Math.abs((await stageH()) - h0));
+      } else if (await sheetLoc(page).count()) {
+        await page.keyboard.press("Escape");
+        await sleep(400);
+      }
+    }
+  };
+  for (let turn = 0; turn < 8 && !rolled; turn++) {
+    await blockOnBoard();
     const approve = page.getByRole("button", { name: /^(Approve|Next turn)/ });
     if (!(await approve.count())) break;
     await approve.first().click();
@@ -884,7 +925,9 @@ async function storyRollbackRun(W, H) {
       if (/turn|Finish/i.test(lbl)) break;
     }
     await sleep(1200);
-    const tray = page.locator("[data-tray] button");
+    // Open the kept risky plan in the Done row (the newest item there is usually good work).
+    const kept = page.locator(`[data-tray] [data-step="${keep}"]`);
+    const tray = (await kept.count()) ? kept : page.locator("[data-tray] button");
     if (await tray.count()) {
       await tray.first().click();
       await sleep(700);

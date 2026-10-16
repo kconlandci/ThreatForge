@@ -47,7 +47,7 @@ export interface HubOverlayProps {
   note?: string | null;
   onDismissNote?: () => void;
   /**
-   * Right after practice ("Start the real shift"): the coach's one line ("Monday starts here. Tap
+   * After the first practice ("Back to the office"): the coach's one line ("Monday starts here. Tap
    * **Ollie's desk**."), one screen, with the main button focused.
    */
   bark?: string | null;

@@ -246,6 +246,16 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
       expect(slots).toBeGreaterThan(enc.steps.length);
     });
 
+    it("never deals two risky plans on one turn (a clean run, plans in file order)", () => {
+      let next = 0;
+      for (let t = 1; next < enc.steps.length; t++) {
+        const n = enc.actionsPerTurn[Math.min(t - 1, enc.actionsPerTurn.length - 1)];
+        const turn = enc.steps.slice(next, next + n);
+        next += n;
+        expect(turn.filter((x) => !x.safe).length, `turn ${t}: ${turn.map((x) => x.id).join(", ")}`).toBeLessThanOrEqual(1);
+      }
+    });
+
     it("has 8-10 steps with unique ids, about 55-65% safe", () => {
       expect(enc.steps.length).toBeGreaterThanOrEqual(8);
       expect(enc.steps.length).toBeLessThanOrEqual(10);
@@ -288,7 +298,7 @@ describe.each(TEST_PATHWAYS.map((p) => [p.id, p] as const))("%s content", (_id, 
         expect(turns[i]).toBeLessThanOrEqual(enc.maxTurns);
         if (i > 0) expect(turns[i], "unlock turns rise").toBeGreaterThan(turns[i - 1]);
       }
-      // One new card per turn, so each gets its own tip.
+      // At most one new card per turn, so each gets its own tip.
       for (const u of unlocks) expect(u.cards).toHaveLength(1);
       // The policy card comes first, on turn 2.
       expect(unlocks.find((u) => u.cards.includes(E.policyCard))?.turn).toBe(2);

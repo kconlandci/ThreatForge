@@ -96,8 +96,19 @@ describe("save compatibility (an M3 Help Desk save)", () => {
 
   it("resumes the mid-Monday battle, and Policy: Callback keeps auto-inspecting credential plans", () => {
     const p = toProgress(raw.pathways["help-desk"]);
-    const enc = HELP_DESK.encounterFor(p.battle!.encounterId, p);
-    expect(enc.id).toBe("hd-01-monday");
+    const live = HELP_DESK.encounterFor(p.battle!.encounterId, p);
+    expect(live.id).toBe("hd-01-monday");
+    // The first shift's pacing changed (2026-10-16: plans 1, 1, 2, 2, 3 over 7 turns; new cards on
+    // turns 2, 4, 5, 6: Policy, Roll Back, Escalate, Coffee). This save is on turn 3 with Escalate
+    // already dealt, so it no longer matches and the shift starts fresh. Under the pacing it was
+    // saved with, it still resumes.
+    expect(canResume(p.battle, live)).toBe(false);
+    const enc = {
+      ...live,
+      maxTurns: 6,
+      actionsPerTurn: [1, 2, 2, 3],
+      unlocks: [2, 3, 4, 5].map((turn, i) => ({ turn, cards: [(["policy-callback", "escalate", "rollback", "coffee"] as const)[i]] })),
+    };
     expect(canResume(p.battle, enc)).toBe(true);
     expect(p.battle!.powers.callbackPolicy).toBe(true);
     let s = p.battle!;

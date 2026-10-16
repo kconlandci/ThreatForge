@@ -225,8 +225,9 @@ export interface Encounter {
    */
   coldOpen?: string;
   /**
-   * Practice only: the coach's one bark in the office after "Start the real shift" ("Monday starts
-   * here. Tap **Ollie's desk**."). Optional in content: lib/pathways/create.ts fills in a default
+   * Practice only: the coach's one bark in the office after the first practice ("Back to the
+   * office"; "Start the real shift" starts the shift at once) ("Monday starts here. Tap **Ollie's
+   * desk**."). Optional in content: lib/pathways/create.ts fills in a default
    * from the story's day and the hub's battle target label.
    */
   hubBark?: string;

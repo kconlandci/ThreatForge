@@ -209,22 +209,20 @@ describe("practiceCoach: general", () => {
 
 describe("shiftCoach: first-shift tips", () => {
   const first = { ...closed, firstShift: true };
+  // Block whatever is risky on the board, so a walk through the shift never breaches.
+  const blockRisky = (st: BattleState) =>
+    st.announced.filter((id) => !E.steps.find((x) => x.id === id)?.safe).reduce((acc, id) => tryPlay(acc, E, "block", id), st);
 
-  it("walks through one tip per turn on turns 1-5", () => {
+  it("walks through one new thing at a time on turns 1-6", () => {
     let s = createBattle(E, 21);
+    expect(s.announced).toHaveLength(1);
     expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-energy", target: "energy" });
     expect(shiftCoach(s, E, first).text).toBe("Cards cost energy: the orange number.");
     s = play(s, "inspect", E);
     expect(shiftCoach(s, E, first).id.startsWith("g-")).toBe(true);
 
-    s = endTurn(s, E); // turn 2: two plans, Policy unlocks
-    expect(s.announced).toHaveLength(2);
-    expect(shiftCoach(s, E, first)).toEqual({
-      id: "tip-two-plans",
-      text: "**Two plans** now. They run in order, top to bottom.",
-      target: "plan",
-    });
-    s = play(s, "inspect", E);
+    s = endTurn(s, E); // turn 2: still one plan; Policy unlocks
+    expect(s.announced).toHaveLength(1);
     expect(shiftCoach(s, E, first)).toEqual({
       id: "tip-policy-callback",
       text: "New card: **Policy: Callback**. It inspects every MFA, password and unlock plan.",
@@ -233,24 +231,46 @@ describe("shiftCoach: first-shift tips", () => {
     s = play(s, "policy-callback", E);
     expect(shiftCoach(s, E, first).id.startsWith("g-")).toBe(true);
 
-    s = endTurn(s, E); // turn 3
-    expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-escalate", target: "card:escalate" });
-    s = endTurn(s, E); // turn 4
-    expect(shiftCoach(s, E, first)).toMatchObject({
+    s = endTurn(s, E); // turn 3: two plans, no new card
+    expect(s.announced).toHaveLength(2);
+    expect(shiftCoach(s, E, first)).toEqual({
+      id: "tip-two-plans",
+      text: "**Two plans** now. They run in order, top to bottom.",
+      target: "plan",
+    });
+    // The policy already checked the MFA plan, so inspect the other one. The risky MFA plan runs.
+    s = tryPlay(s, E, "inspect", s.announced.find((id) => !s.steps[id].inspected));
+    expect(shiftCoach(s, E, first).id.startsWith("g-")).toBe(true);
+    const ran = s.announced.find((id) => !E.steps.find((x) => x.id === id)!.safe)!;
+
+    s = endTurn(s, E); // turn 4: Roll Back, with a risky plan in the Done row to undo
+    expect(s.risk).toBeGreaterThan(0);
+    expect(s.announced).toHaveLength(2);
+    expect(shiftCoach(s, E, first)).toEqual({
       id: "tip-rollback",
       text: "New card: **Roll Back**. It undoes an action in the **Done** row.",
+      target: "card:rollback",
     });
-    s = endTurn(s, E); // turn 5
-    if (s.status === "playing") {
-      expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-coffee", text: "New card: **Coffee**. Free. Draw 2 more cards." });
-    }
+    s = tryPlay(s, E, "rollback", ran);
+    expect(s.risk).toBe(0);
+    s = blockRisky(s);
+
+    s = endTurn(s, E); // turn 5: three plans and Escalate (the policy checked one, so no rush tip)
+    expect(s.status).toBe("playing");
+    expect(s.announced).toHaveLength(3);
+    expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-escalate", target: "card:escalate" });
+    s = blockRisky(s);
+
+    s = endTurn(s, E); // turn 6: Coffee
+    expect(s.turn).toBe(6);
+    expect(shiftCoach(s, E, first)).toMatchObject({ id: "tip-coffee", text: "New card: **Coffee**. Free. Draw 2 more cards." });
   });
 
   it("warns once on the rush turn: more plans than energy to inspect them and still Block", () => {
     for (const TP of TEST_PATHWAYS) {
       const S = TP.story;
       let s = createBattle(S, 21);
-      while (s.status === "playing" && s.turn < 4) s = endTurn(s, S);
+      while (s.status === "playing" && s.turn < 5) s = endTurn(s, S);
       expect(s.announced, TP.id).toHaveLength(3);
       expect(shiftCoach(s, S, first), TP.id).toEqual({
         id: "tip-rush",
@@ -261,7 +281,7 @@ describe("shiftCoach: first-shift tips", () => {
       // A fixed hand: the drawn one may hold a single Inspect ("No Inspect left" is right then).
       const hand = ["inspect", "inspect", "inspect", "block", "block"].map((cardId, i) => ({ uid: `r${i}`, cardId: cardId as CardId }));
       const after = play({ ...s, hand }, "inspect", S);
-      expect(shiftCoach(after, S, first).id, TP.id).toMatch(/^(g-check-save|tip-rollback)$/);
+      expect(shiftCoach(after, S, first).id, TP.id).toMatch(/^(g-check-save|tip-coffee)$/);
       expect(shiftCoach(after, S, { ...closed, firstShift: false }), TP.id).toMatchObject({
         id: "g-check-save",
         text: "2 plans not checked, 2 energy. Save 1 for **Block**.",
@@ -273,7 +293,7 @@ describe("shiftCoach: first-shift tips", () => {
 
   it("skips the rush tip when the policy already checked a plan (energy is enough)", () => {
     let s = createBattle(E, 21);
-    while (s.status === "playing" && s.turn < 4) s = endTurn(s, E);
+    while (s.status === "playing" && s.turn < 5) s = endTurn(s, E);
     const one = s.announced[0];
     const checked = { ...s, steps: { ...s.steps, [one]: { ...s.steps[one], inspected: true } } };
     expect(shiftCoach(checked, E, first).id).not.toBe("tip-rush");
@@ -293,7 +313,7 @@ describe("shiftCoach: first-shift tips", () => {
     for (const TP of TEST_PATHWAYS) {
       const S = TP.story;
       let s = createBattle(S, 21);
-      for (let turn = 1; turn <= 6 && s.status === "playing"; turn++, s = endTurn(s, S)) {
+      for (let turn = 1; turn <= S.maxTurns && s.status === "playing"; turn++, s = endTurn(s, S)) {
         for (const firstShift of [true, false]) {
           const hint = shiftCoach(s, S, { ...closed, firstShift });
           expect(hint.text, `${TP.id} turn ${turn}`).not.toMatch(/tap \*\*inspect/i);
@@ -305,7 +325,8 @@ describe("shiftCoach: first-shift tips", () => {
   });
 
   it("uses the card prompt while a card is selected", () => {
-    const s = endTurn(createBattle(E, 21), E);
+    const s = endTurn(endTurn(createBattle(E, 21), E), E); // turn 3: two plans
+    expect(s.announced).toHaveLength(2);
     expect(shiftCoach(s, E, { ...picked("inspect"), firstShift: true }).text).toBe("Tap a plan to inspect it.");
     expect(shiftCoach(s, E, { ...picked("block"), firstShift: true }).text).toBe("Tap a plan to block it.");
     expect(shiftCoach(s, E, { ...picked("policy-callback"), firstShift: true }).text).toBe("Policy: Callback. Tap Play.");
@@ -318,11 +339,12 @@ describe("shiftCoach: first-shift tips", () => {
     s = endTurn(s, E);
     s = play(s, "inspect", E);
     s = play(s, "policy-callback", E);
-    s = endTurn(s, E); // turn 3: Escalate unlocks
-    expect(shiftCoach(s, E, first).id).toBe("tip-escalate");
+    s = endTurn(s, E); // turn 3: the risky MFA plan runs
+    s = endTurn(s, E); // turn 4: Roll Back unlocks
+    expect(shiftCoach(s, E, first).id).toBe("tip-rollback");
     // Out of energy: Dana says Approve, not "New card".
     expect(shiftCoach({ ...s, energy: 0 }, E, first)).toMatchObject({ id: "g-energy", target: "approve" });
-    // Not enough energy for Escalate (2): no ring on a card that can't be played.
+    // Not enough energy for Roll Back (2): no ring on a card that can't be played.
     expect(shiftCoach({ ...s, energy: 1 }, E, first).id.startsWith("g-")).toBe(true);
     // No Inspect left: say so.
     expect(shiftCoach({ ...s, hand: s.hand.filter((c) => c.cardId !== "inspect") }, E, first).id).toBe("g-no-inspect");
@@ -333,12 +355,18 @@ describe("shiftCoach: first-shift tips", () => {
     }
   });
 
-  it("skips the Roll Back tip when the Done row has nothing to undo", () => {
+  it("skips the Roll Back tip when the Done row has nothing risky to undo", () => {
     let s = createBattle(E, 21);
-    while (s.status === "playing" && s.turn < 4) s = endTurn(s, E);
+    while (s.status === "playing" && s.turn < 4) s = endTurn(blockRisky(s), E);
     expect(s.turn).toBe(4);
     const emptyDone = { ...s, executedHistory: [] };
     expect(shiftCoach(emptyDone, E, first).id).not.toBe("tip-rollback");
+    // Only good work in the Done row (every risky plan was blocked): no ring on Roll Back either,
+    // since its only use would be a false alarm.
+    expect(s.executedHistory.length).toBeGreaterThan(0);
+    expect(s.risk).toBe(0);
+    expect(s.hand.some((c) => c.cardId === "rollback")).toBe(true);
+    expect(shiftCoach(s, E, first).id).not.toBe("tip-rollback");
   });
 
   it("generic hints cover out of energy, all checked and an empty board", () => {
