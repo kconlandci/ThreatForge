@@ -67,7 +67,6 @@ export const learningPaths: LearningPath[] = [
       "vpn-remote-access-hardening",
       "evil-twin-wifi-defense",
       "tls-misconfiguration-audit",
-      "waf-configuration-review",
       "sql-injection-detection",
       "wifi-security-remote-workers",
       "browser-extension-security",
@@ -90,6 +89,7 @@ export const learningPaths: LearningPath[] = [
       "endpoint-hardening-audit",
       "cloud-iam-misconfiguration",
       "security-architecture-review",
+      "waf-configuration-review",
     ],
   },
   {
