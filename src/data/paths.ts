@@ -48,6 +48,7 @@ export const learningPaths: LearningPath[] = [
       "brute-force-spray-detection",
       "log-hunter-lateral-movement",
       "incident-escalation-judgment",
+      "ai-incident-report-review",
     ],
   },
   {
