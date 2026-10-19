@@ -3,8 +3,8 @@ import type { LabManifest } from "../../types/manifest";
 export const cloudLoggingInvestigationLab: LabManifest = {
   schemaVersion: "1.1",
   id: "cloud-logging-investigation",
-  version: 1,
-  title: "Cloud Logging Investigation",
+  version: 2,
+  title: "The AI's Hunt Conclusion Is Wrong",
 
   tier: "intermediate",
   track: "cloud-security",
@@ -13,6 +13,7 @@ export const cloudLoggingInvestigationLab: LabManifest = {
   tags: [
     "cloud-security",
     "cloudtrail",
+    "ai-oversight",
     "azure",
     "aws",
     "investigation",
@@ -21,14 +22,14 @@ export const cloudLoggingInvestigationLab: LabManifest = {
   ],
 
   description:
-    "Investigate suspicious cloud API activity using audit logs from AWS CloudTrail and Azure Activity Logs. Assess compromised credentials, unauthorized resource creation, audit trail disruption, and misconfigured access policies.",
+    "An AI log-analysis assistant now writes the first conclusion on cloud audit-log hunts. Work the raw CloudTrail and Activity Log events yourself — overturn its 'routine admin work,' check its 'cryptomining' call, and catch the benign explanation it invented for a disabled audit trail.",
   estimatedMinutes: 18,
   learningObjectives: [
-    "Investigate suspicious cloud API activity using audit logs",
-    "Identify compromised cloud credentials from behavioral indicators",
-    "Assess cloud resource creation events for legitimacy vs. abuse",
-    "Recognize the critical importance of audit trail integrity",
-    "Apply proportional response to cloud security events based on context",
+    "Verify an AI hunt conclusion against the raw cloud audit events it summarized",
+    "Recognize the console-login → access-key → policy-change pattern AI summarization smooths into 'admin activity'",
+    "Calibrate response in both directions — overturning false-benign and false-malicious AI conclusions",
+    "Treat audit-trail disruption as a critical event regardless of the explanation attached to it",
+    "Apply proportional response to cloud findings after AI severity inflation",
   ],
   sortOrder: 305,
 
@@ -41,332 +42,337 @@ export const cloudLoggingInvestigationLab: LabManifest = {
     {
       type: "investigate-decide",
       id: "cloudlog-001",
-      title: "New IAM User Created While Admin on PTO",
+      title: "'Routine Admin Work'",
       objective:
-        "CloudTrail alert: a new IAM user with console access was created. The admin who created it is on PTO. Investigate.",
+        "The AI log-analysis assistant closed last night's cloud hunt: 'All CloudTrail activity is consistent with routine administration. No action required.' The hunt is yours to sign off. Read the raw events before you accept the conclusion.",
       investigationData: [
         {
-          id: "cloudtrail-event",
-          label: "CloudTrail Event",
+          id: "ai-conclusion",
+          label: "AI Hunt Conclusion",
           content:
-            "CreateUser API call by admin-jpark at 3:42 AM. New user: temp-analyst-2026, granted Console access and AdministratorAccess policy.",
+            "'Overnight activity for user tchen consists of standard administrative operations: a console login, credential management, and a storage policy update. Pattern matches the account's administrative role. Assessment: routine admin work. Hunt closed.'",
+        },
+        {
+          id: "cloudtrail-events",
+          label: "CloudTrail Events — tchen (raw)",
+          content:
+            "01:12 UTC — ConsoleLogin from ASN never before seen for this account. 01:19 — CreateAccessKey (new key for tchen, created by tchen). 01:26 — PutBucketPolicy on bucket 'finance-reports' adding a cross-account read grant to an external AWS account ID not in the organization.",
           isCritical: true,
         },
         {
-          id: "admin-status",
-          label: "Admin Status",
+          id: "account-role",
+          label: "Account Role — tchen",
           content:
-            "J. Park on PTO in Bali since March 18. VPN logs show no connection from their known devices.",
-        },
-        {
-          id: "source-ip",
-          label: "Source IP",
-          content:
-            "API call originated from 103.74.19.200 — geolocated to Lagos, Nigeria, not Bali.",
+            "tchen is a compliance auditor. The role is read-only by policy: Describe/List/Get permissions only. Last night's actions used a legacy admin policy still attached to the account — the auditor has never invoked it in 11 months.",
           isCritical: true,
         },
         {
-          id: "account-activity",
-          label: "Account Activity",
+          id: "change-records",
+          label: "Change & Ticket Records",
           content:
-            "admin-jpark account: 3 failed MFA attempts at 3:38 AM, then successful auth at 3:40 AM via backup codes.",
+            "No change ticket, no on-call assignment, and no access request for tchen or the finance-reports bucket in the last 30 days.",
         },
       ],
       actions: [
         {
-          id: "disable-both-escalate",
+          id: "overturn-escalate",
           label:
-            "Disable both accounts and escalate — admin credentials compromised",
+            "Overturn the conclusion — disable the new access key, revoke the sessions, and escalate as credential compromise",
           color: "red",
         },
         {
-          id: "disable-new-only",
-          label: "Disable only the new user",
+          id: "accept-conclusion",
+          label: "Accept the AI's conclusion — the hunt stays closed",
         },
         {
-          id: "contact-admin",
-          label: "Contact J. Park to verify",
+          id: "monitor-key",
+          label: "Leave the key active and monitor the account for a week",
         },
         {
-          id: "monitor-new-user",
-          label: "Monitor the new user's activity",
+          id: "ask-ai-again",
+          label: "Ask the AI assistant to re-run the hunt with a stricter prompt",
         },
       ],
-      correctActionId: "disable-both-escalate",
+      correctActionId: "overturn-escalate",
       rationales: [
         {
-          id: "rat-compromise",
-          text: "Admin on PTO + wrong geolocation + failed MFA + backup code usage = compromised admin credentials — disable both the compromised admin and the attacker-created user immediately.",
+          id: "rat-overturn",
+          text: "Read as a sequence, the raw events are a textbook account-takeover chain: login from a new network, persistence (a fresh access key the attacker controls), then staging access to the finance data (cross-account bucket grant). The AI summarized each event's category — 'credential management,' 'policy update' — and pattern-matched the categories to the account's admin policy, never weighing the sequence, the hour, the new ASN, or that a read-only auditor suddenly used a dormant admin policy. Overturn it, kill the key, and escalate.",
         },
         {
-          id: "rat-partial",
-          text: "Disabling only the new user leaves the compromised admin account active for the attacker to create more users or escalate privileges.",
-        },
-        {
-          id: "rat-contact",
-          text: "Contacting J. Park delays response to an active compromise — the geolocation and MFA evidence already confirms this isn't the real admin.",
+          id: "rat-accept",
+          text: "Accepting the conclusion leaves an attacker-created access key and a cross-account grant to the finance bucket in place. Summaries describe events; they cannot acquit them.",
         },
         {
           id: "rat-monitor",
-          text: "Monitoring gives the attacker more time with admin access — they already have AdministratorAccess through the new user account.",
+          text: "Monitoring an account with a known unauthorized key and an external data grant gives the attacker a week of sanctioned access to prepare extraction.",
+        },
+        {
+          id: "rat-reprompt",
+          text: "A stricter prompt re-runs the same categorization with more adjectives. Verification is not a better question to the summarizer — it is reading the events, which is the step that just overturned the conclusion.",
         },
       ],
-      correctRationaleId: "rat-compromise",
+      correctRationaleId: "rat-overturn",
       feedback: {
         perfect:
-          "Correct. The combination of PTO status, wrong geolocation, failed MFA, and backup code authentication is a clear indicator of credential compromise. Disabling both accounts stops the attacker immediately.",
+          "Correct overturn. The AI saw three administrative event types; you saw a sequence — new-network login, persistence key, external grant on finance data, executed by a read-only auditor at 1 AM. Summarization is lossy by design, and the losses are exactly where this breach was hiding.",
         partial:
-          "You identified part of the threat but didn't fully contain it. Both the compromised admin account and the attacker-created user need to be disabled simultaneously.",
-        wrong: "This response leaves the attacker with active access. The evidence overwhelmingly indicates credential compromise — immediate containment is required.",
+          "You doubted the conclusion but left the key or the grant alive while you watched. A CreateAccessKey plus an external bucket grant is completed attacker infrastructure, not a wait-and-see signal.",
+        wrong:
+          "'Routine admin work' was the most dangerous sentence in the hunt: three individually ordinary events forming one compromise chain. AI conclusions about logs are claims to verify against the logs — never substitutes for them.",
       },
     },
     {
       type: "investigate-decide",
       id: "cloudlog-002",
-      title: "20 GPU Instances — Data Science or Cryptomining?",
+      title: "The AI Cried Cryptomining",
       objective:
-        "Azure Activity Log shows 20 GPU VM instances being created in a non-production subscription. Assess whether this is legitimate.",
+        "New hunt: the AI assistant flagged 20 GPU instances in the dev subscription as 'Probable cryptomining abuse — recommend immediate termination.' Verify before anything is terminated.",
       investigationData: [
+        {
+          id: "ai-conclusion-2",
+          label: "AI Hunt Conclusion",
+          content:
+            "'20 GPU instances (Standard_NC6s_v3) created in a non-production subscription. GPU compute at this scale is a leading indicator of cryptomining via compromised credentials. Confidence: high. Recommendation: terminate all instances immediately.'",
+        },
         {
           id: "azure-activity",
           label: "Azure Activity Log",
           content:
-            "Microsoft.Compute/virtualMachines/write × 20. VM size: Standard_NC6s_v3 (GPU). Subscription: acme-data-science-dev. Created by user ml-pipeline@acme.onmicrosoft.com.",
+            "Microsoft.Compute/virtualMachines/write × 20. Subscription: acme-data-science-dev. Created by service identity ml-pipeline@acme.onmicrosoft.com — the data science team's automation account.",
         },
         {
           id: "team-context",
           label: "Team Context",
           content:
-            'Data Science team lead posted in Teams channel yesterday: "Kicking off the Q2 model training run tomorrow, expect GPU usage in the dev subscription."',
+            "Data Science lead posted yesterday: 'Kicking off the Q2 model training run tomorrow — expect GPU usage in the dev subscription.' VMs are tagged project=q2-model-training, owner=data-science-team, created_by=ml-pipeline.",
         },
         {
           id: "cost-estimate",
           label: "Cost Estimate",
           content:
-            "20 × NC6s_v3 at $3.22/hour = $64.40/hour, $1,545/day — no cost approval above $500/day on file.",
-        },
-        {
-          id: "resource-tags",
-          label: "Resource Tags",
-          content:
-            "VMs tagged: project=q2-model-training, owner=data-science-team, created_by=ml-pipeline.",
+            "20 × NC6s_v3 at $3.22/hour ≈ $1,545/day. No cost approval above the $500/day threshold is on file for this run.",
         },
       ],
       actions: [
         {
           id: "verify-cost-approval",
           label:
-            "Verify with data science team lead — likely legitimate but needs cost approval",
+            "Verify with the data science lead — likely legitimate, but the run needs cost approval before it continues",
         },
         {
           id: "terminate-all",
-          label: "Terminate all GPU instances immediately",
+          label: "Terminate all GPU instances immediately, as the AI recommends",
           color: "red",
         },
         {
-          id: "block-gpu",
-          label: "Block GPU VM creation in the subscription",
+          id: "accept-no-action",
+          label: "Close the hunt — the tags prove it's legitimate, nothing else needed",
         },
         {
-          id: "approve-retroactive",
-          label: "Approve retroactively — the Teams post is sufficient",
+          id: "block-gpu",
+          label: "Block GPU VM creation in the subscription pending a policy review",
         },
       ],
       correctActionId: "verify-cost-approval",
       rationales: [
         {
           id: "rat-verify",
-          text: "Teams message + matching tags + correct service account strongly suggest legitimate ML work, but $1,545/day without cost approval ($500 threshold) requires manager sign-off before continuing.",
+          text: "The AI pattern-matched 'GPU + non-production' to cryptomining and skipped the evidence that decides it: the creator is the team's known automation identity, the tags name a real project, and the team announced the run yesterday. This is legitimate work — with one genuine problem attached: $1,545/day against a $500 approval threshold. Verify with the lead and route the cost approval; don't let an AI's false alarm or its confidence score make either call.",
         },
         {
           id: "rat-terminate",
-          text: "Terminating a legitimate ML training run wastes potentially days of compute time and damages the relationship between security and data science teams.",
+          text: "Terminating on the AI's say-so could destroy days of model training and teaches every team that security acts on unverified pattern matches. The evidence for legitimacy was in the same logs the AI read.",
+        },
+        {
+          id: "rat-no-action",
+          text: "Closing the hunt entirely ignores the one real finding: an unapproved 3×-over-threshold daily spend. Verification isn't only about attacks — financial controls are part of the check.",
         },
         {
           id: "rat-block",
-          text: "Blocking GPU VMs permanently hampers data science operations and is disproportionate when the activity appears legitimate but just needs cost approval.",
-        },
-        {
-          id: "rat-approve",
-          text: "Approving without proper cost authorization sets a bad precedent — a Teams message isn't a substitute for the formal cost approval process.",
+          text: "Blocking GPU creation subscription-wide hampers the data science team's core work in response to their most normal activity. Disproportionate controls built on a false positive erode the credibility every future alert depends on.",
         },
       ],
       correctRationaleId: "rat-verify",
       feedback: {
         perfect:
-          "Correct. The evidence strongly suggests legitimate activity, but the cost threshold violation requires proper authorization. Verify and get approval — don't block legitimate work, but don't bypass financial controls either.",
+          "Correct — verification cuts both ways. The AI's 'high confidence' cryptomining call collapsed against the service identity, the tags, and the team's own announcement, and you still caught the real issue it missed: the missing cost approval. Neither blind trust nor reflexive termination: evidence.",
         partial:
-          "You identified the legitimacy indicators or the cost issue, but the best response balances both — verify legitimacy while enforcing the cost approval process.",
-        wrong: "This response either disrupts legitimate work or bypasses financial controls. Context matters — not every cloud alert is an attack.",
+          "You avoided the worst outcome but either skipped the cost-approval problem or reached for a control broader than the finding. Legitimate-but-unapproved and malicious are different problems with different fixes.",
+        wrong:
+          "Terminating a team's announced training run on an AI's pattern match — without reading the identity, tags, and context present in the same log — is how security teams lose the organization's trust and their future alerts get ignored.",
       },
     },
     {
       type: "investigate-decide",
       id: "cloudlog-003",
-      title: "Primary CloudTrail Trail — Logging Stopped",
+      title: "The Explanation the AI Invented",
       objective:
-        "Alert: CloudTrail logging has been disabled in the production account. The action was taken by a service account.",
+        "Overnight alert: CloudTrail logging was disabled in the production account by a service account. The AI assistant's hunt note reads: 'Consistent with the security team's scheduled automation maintenance. No action required.' Validate that explanation.",
       investigationData: [
         {
-          id: "cloudtrail-final",
-          label: "CloudTrail",
+          id: "ai-conclusion-3",
+          label: "AI Hunt Note",
           content:
-            "Final event: StopLogging by svc-security-automation, preceded by DeleteTrail on 'prod-audit-trail', both at 4:17 AM.",
+            "'StopLogging and DeleteTrail events were performed by svc-security-automation, a security-team service account. Such accounts perform periodic trail maintenance. Assessment: scheduled automation maintenance. No action required.'",
+        },
+        {
+          id: "cloudtrail-final",
+          label: "CloudTrail — Final Events",
+          content:
+            "04:17 UTC — DeleteTrail on 'prod-audit-trail', followed by StopLogging, both by svc-security-automation. These are the last events the trail recorded.",
           isCritical: true,
         },
         {
-          id: "service-account",
-          label: "Service Account",
+          id: "runbook-check",
+          label: "Automation Runbook & Change Calendar",
           content:
-            "svc-security-automation: used for automated compliance checks. Last legitimate use 6 hours ago for Config rule evaluation. Managed by Security team.",
-        },
-        {
-          id: "change-management",
-          label: "Change Management",
-          content:
-            "No change ticket for CloudTrail modification. No planned maintenance. Security team automation runbook does NOT include trail deletion.",
+            "The security automation runbook covers Config rule evaluation and report generation. It contains NO trail deletion or logging changes. No maintenance window, change ticket, or scheduled job exists for last night.",
+          isCritical: true,
         },
         {
           id: "iam-analysis",
-          label: "IAM Analysis",
+          label: "Service Account Analysis",
           content:
-            "Service account access key last rotated 45 days ago, used from 3 different IPs in last 24 hours — one IP not associated with any known infrastructure.",
-          isCritical: true,
+            "svc-security-automation access key last rotated 45 days ago. In the last 24 hours it was used from 3 different IPs — one not associated with any company infrastructure. Its last legitimate run was 6 hours before the trail events, a Config evaluation.",
         },
       ],
       actions: [
         {
           id: "reenable-investigate",
           label:
-            "Re-enable logging immediately and investigate service account compromise",
+            "Re-enable logging immediately and investigate the service account as compromised",
           color: "red",
         },
         {
+          id: "accept-maintenance",
+          label: "Accept the AI's explanation — security accounts do perform maintenance",
+        },
+        {
           id: "wait-morning",
-          label: "Wait for Security team to investigate in the morning",
+          label: "Leave it for the security team to check in the morning",
         },
         {
           id: "reenable-only",
-          label: "Re-enable logging only",
-        },
-        {
-          id: "check-planned",
-          label: "Check if this is a planned automation update",
+          label: "Re-enable logging only — no need to investigate a team service account",
         },
       ],
       correctActionId: "reenable-investigate",
       rationales: [
         {
           id: "rat-reenable-investigate",
-          text: "Disabling audit logging is NEVER an expected automated action — even legitimate service accounts shouldn't delete trails, and the unknown source IP suggests compromise. Re-enable logging first (to capture the investigation itself), then investigate the service account.",
+          text: "The AI's explanation fails on its own terms: the runbook contains no trail maintenance, no window was scheduled, and the account was used from an unknown IP. The assistant generated a plausible story — 'security accounts do maintenance' — to fill an evidence gap, which is precisely what summarizers do with anomalies. Audit-trail destruction is an attacker's blinding move: re-enable logging first so the investigation itself is recorded, then treat the service account as compromised.",
+        },
+        {
+          id: "rat-accept",
+          text: "Accepting an invented explanation for a disabled audit trail because the actor's name contains 'security-automation' is credentialism, not analysis. The runbook contradicts the story outright.",
         },
         {
           id: "rat-wait",
-          text: "Waiting until morning gives an attacker hours without audit visibility — every action they take during this window will be unrecorded.",
+          text: "Every hour logging stays off is an hour of unrecorded attacker activity. Morning can review a restored trail; it cannot recover one that was never written.",
         },
         {
           id: "rat-reenable-only",
-          text: "Re-enabling without investigating the compromised service account means it could be disabled again minutes later.",
-        },
-        {
-          id: "rat-check",
-          text: "Asking about planned updates when the runbook explicitly excludes trail deletion wastes critical time — the answer is already in the evidence.",
+          text: "Re-enabling without investigating the account that disabled it invites a repeat within the hour — and ignores the unknown source IP entirely.",
         },
       ],
       correctRationaleId: "rat-reenable-investigate",
       feedback: {
         perfect:
-          "Correct. Audit trail disruption is one of the most critical alerts. Re-enabling logging restores visibility, and investigating the service account addresses the root cause.",
+          "Correct. You tested the AI's benign story against the runbook and change calendar — the only places such a story could be true — and it failed both. An AI that explains anomalies instead of flagging them is a liability; verification is the control.",
         partial:
-          "You took a step in the right direction but didn't fully address both the immediate gap (logging disabled) and the root cause (compromised service account).",
-        wrong: "Leaving audit logging disabled or ignoring the compromised service account gives the attacker exactly what they want — time without visibility.",
+          "Restoring logging without investigating the service account leaves the likely-compromised actor able to blind you again. Both halves are required: visibility back, root cause hunted.",
+        wrong:
+          "'Scheduled maintenance' that appears in no runbook, no ticket, and no calendar is not an explanation — it is a hallucinated alibi for audit-trail destruction. Legitimate automation never needs its actions invented after the fact.",
       },
     },
     {
       type: "investigate-decide",
       id: "cloudlog-004",
-      title: "S3 Public Access — Test Bucket",
+      title: "'Critical: Production Data Public'",
       objective:
-        "AWS Config alert: S3 bucket policy changed to allow public access. The bucket is named 'dev-test-scratch' and contains only test data.",
+        "The AI assistant escalated an S3 finding to Critical: 'Public bucket policy detected. Production data exposure in progress — recommend declaring an incident.' Verify the escalation before anyone declares anything.",
       investigationData: [
+        {
+          id: "ai-conclusion-4",
+          label: "AI Escalation",
+          content:
+            "'s3:PutBucketPolicy granted public GetObject access. Public exposure of a company bucket constitutes a production data incident. Severity: Critical. Recommend immediate incident declaration and executive notification.'",
+        },
         {
           id: "config-event",
           label: "AWS Config Event",
           content:
-            's3:PutBucketPolicy on dev-test-scratch. Principal: "*" added for s3:GetObject. Changed by developer a.chen@acme.com at 2:15 PM.',
+            "s3:PutBucketPolicy on bucket 'dev-test-scratch'. Principal '*' added for s3:GetObject. Changed by developer a.chen@acme.com at 2:15 PM from the corporate network.",
         },
         {
           id: "bucket-contents",
-          label: "Bucket Contents",
+          label: "Bucket Contents (scan)",
           content:
-            "127 files: test fixtures, sample JSON payloads, mock API responses, README.md. No PII or credentials found in file scan.",
+            "127 files: test fixtures, sample JSON payloads, mock API responses, README.md. No PII, credentials, or production data found in the content scan.",
         },
         {
           id: "developer-context",
           label: "Developer Context",
           content:
-            "Aiden Chen, Junior Developer, working on public API documentation that needs example payloads accessible via URL.",
-        },
-        {
-          id: "alternative",
-          label: "Alternative",
-          content:
-            "S3 presigned URLs or CloudFront distribution could serve the same purpose without making the bucket public.",
+            "Aiden Chen, junior developer, building public API documentation that needs example payloads reachable by URL. Presigned URLs or a CloudFront distribution would serve the same purpose without a public policy.",
         },
       ],
       actions: [
         {
           id: "revert-notify",
           label:
-            "Revert policy and notify developer — even test buckets should not be public",
+            "Revert the policy and coach the developer — misconfiguration, not an incident; suggest presigned URLs",
+        },
+        {
+          id: "declare-incident",
+          label: "Declare a Critical incident and notify executives, as the AI recommends",
+          color: "red",
         },
         {
           id: "allow-test",
-          label: "Allow it — test data with no PII is fine",
+          label: "Leave the policy — the contents are only test data",
         },
         {
-          id: "add-monitoring",
-          label: "Add a monitoring alert but leave the policy",
-        },
-        {
-          id: "block-s3",
-          label: "Block the developer's S3 permissions",
+          id: "block-dev",
+          label: "Revoke the developer's S3 permissions pending retraining",
         },
       ],
       correctActionId: "revert-notify",
       rationales: [
         {
           id: "rat-revert",
-          text: "Even test buckets should not be public — it normalizes dangerous behavior, the bucket may eventually contain sensitive data, and presigned URLs solve the developer's actual need without the risk.",
+          text: "The AI escalated a policy pattern without reading what the policy exposed: test fixtures in a dev bucket, changed by an identified developer for a documented purpose. That's a misconfiguration to revert and a coaching moment — not a data incident. But 'test data' doesn't mean 'leave it': public policies normalize the habit that eventually reaches a production bucket, so revert, notify, and hand the developer the presigned-URL pattern that solves their actual need.",
+        },
+        {
+          id: "rat-declare",
+          text: "Declaring a Critical incident and waking executives over a fixture bucket — because an AI scored the policy string instead of the contents — spends the organization's incident credibility on a non-breach. Save 'Critical' for the day the contents scan disagrees.",
         },
         {
           id: "rat-allow",
-          text: "Allowing public test buckets creates precedent that leads to public production buckets — security policies must be consistent across environments.",
-        },
-        {
-          id: "rat-monitor",
-          text: "Monitoring without reverting leaves the misconfiguration active and teaches the developer that public buckets are acceptable with monitoring.",
+          text: "Leaving a public bucket in place, contents notwithstanding, teaches the whole team that public policies are acceptable when the data looks harmless today. Buckets outlive their contents.",
         },
         {
           id: "rat-block",
-          text: "Blocking S3 permissions entirely is disproportionate for a learning opportunity — the developer needs guidance, not punishment.",
+          text: "Revoking a junior developer's access for a first, well-intentioned misconfiguration punishes the reporter of tomorrow's real finding into silence. Fix the config, teach the pattern.",
         },
       ],
       correctRationaleId: "rat-revert",
       feedback: {
         perfect:
-          "Correct. Reverting the policy enforces consistent security practices while notifying the developer turns this into a learning opportunity. Suggest presigned URLs as the secure alternative.",
+          "Correct calibration. The AI read a policy and shouted 'breach'; you read the bucket and found a fixable misconfiguration. Reverting the policy enforces the standard, coaching fixes the cause, and no incident credibility was spent on test fixtures.",
         partial:
-          "You identified the issue but didn't take the optimal corrective action. Public buckets — even test ones — should be reverted, and the developer should learn about secure alternatives.",
-        wrong: "This response either leaves a public bucket active or overreacts. The goal is to fix the misconfiguration and educate, not to punish or ignore.",
+          "You avoided the overreaction but either left the public policy standing or reached for punishment. The proportionate response is revert + notify + a better pattern — every time, including when the data is harmless.",
+        wrong:
+          "Severity lives in exposure and contents, not in the shape of a policy string. An AI that cannot read the bucket cannot set the severity — and neither can an analyst who skips the scan.",
       },
     },
   ],
 
   hints: [
-    "When a privileged action occurs from an unexpected location during off-hours, prioritize the geolocation and authentication anomalies over the account's legitimate role.",
-    "Cloud audit trail disruption (disabling logging) is one of the most critical alerts you can receive — an attacker's first priority is often to blind the defenders.",
-    "Even non-sensitive cloud resources should follow security best practices. Public test buckets become public production buckets through accumulated permissive habits.",
+    "Read AI hunt conclusions as claims about sequences, then check the sequence: login → persistence → data access is a compromise chain even when every individual event has an innocent category name.",
+    "AI conclusions err in both directions — false-benign ('routine admin work') and false-malicious ('cryptomining,' 'production data public'). Verification means pricing the evidence yourself, not choosing whether to trust the tool today.",
+    "When an AI offers a benign explanation for a critical event, ask where that explanation could be verified — a runbook, a change ticket, a schedule. An explanation with no source is an invention.",
   ],
 
   scoring: {
@@ -377,7 +383,7 @@ export const cloudLoggingInvestigationLab: LabManifest = {
   },
 
   careerInsight:
-    "Cloud security investigation is a rapidly growing field. Organizations running in AWS, Azure, and GCP need analysts who can navigate CloudTrail, Activity Logs, and Audit Logs to detect compromise, investigate incidents, and validate the security of automated processes.",
+    "Cloud security investigation increasingly starts from an AI's conclusion rather than a blank console. The analysts who stay effective are the ones who treat that conclusion as the first hypothesis to beat — tracing CloudTrail sequences themselves, because summarization is lossy by design and the losses concentrate exactly where attackers operate.",
   toolRelevance: [
     "AWS CloudTrail / GuardDuty",
     "Azure Activity Log / Sentinel",
@@ -386,5 +392,5 @@ export const cloudLoggingInvestigationLab: LabManifest = {
   ],
 
   createdAt: "2026-03-23",
-  updatedAt: "2026-03-23",
+  updatedAt: "2026-10-19",
 };

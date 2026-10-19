@@ -95,6 +95,7 @@ import { socialMediaOsintAwarenessLab } from "./labs/social-media-osint-awarenes
 import { qrCodePhishingDetectionLab } from "./labs/qr-code-phishing-detection";
 import { deepfakeVoicePhishingLab } from "./labs/deepfake-voice-phishing";
 import { aiGeneratedPhishingDetectionLab } from "./labs/ai-generated-phishing-detection";
+import { aiIncidentReportReviewLab } from "./labs/ai-incident-report-review";
 import { mitreAttackMappingLab } from "./labs/mitre-attack-mapping";
 import { threatIntelReportAnalysisLab } from "./labs/threat-intel-report-analysis";
 import { redTeamBlueTeamScenarioLab } from "./labs/red-team-blue-team-scenario";
@@ -197,6 +198,7 @@ export const labCatalog: LabManifest[] = [
   qrCodePhishingDetectionLab,
   deepfakeVoicePhishingLab,
   aiGeneratedPhishingDetectionLab,
+  aiIncidentReportReviewLab,
   mitreAttackMappingLab,
   threatIntelReportAnalysisLab,
   redTeamBlueTeamScenarioLab,
