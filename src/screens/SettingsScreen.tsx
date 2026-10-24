@@ -160,7 +160,7 @@ export default function SettingsScreen() {
         </section>
 
         {/* Legal */}
-        <section className="mb-6">
+        {edition === "consumer" && <section className="mb-6">
           <h2 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2 px-1">
             Legal
           </h2>
@@ -181,7 +181,7 @@ export default function SettingsScreen() {
               to="/settings/disclaimer"
             />
           </div>
-        </section>
+        </section>}
 
         {/* Actions */}
         <section>

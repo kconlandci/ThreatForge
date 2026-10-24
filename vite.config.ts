@@ -12,6 +12,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: env.VITE_EDITION === 'dci' ? [
         {
+          find: /^(?:\.\.\/|\.\/)data\/legal$/,
+          replacement: fileURLToPath(new URL('./src/config/noLegalContent.ts', import.meta.url)),
+        },
+        {
           find: /^@capacitor\/preferences$/,
           replacement: fileURLToPath(new URL('./src/sync/dciPreferences.ts', import.meta.url)),
         },

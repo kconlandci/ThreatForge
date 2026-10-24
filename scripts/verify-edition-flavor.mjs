@@ -143,7 +143,7 @@ async function verify(flavor) {
       const settingsHtml = renderRoute(Settings, "/settings");
       assert.match(settingsHtml, /Cybersecurity Judgment Labs/);
       assert.match(settingsHtml, /DCI Resources — Student Edition/);
-      assert.doesNotMatch(settingsHtml, /Upgrade to Pro|Restore Purchases|Rate This App|Reset Progress|href="\/upgrade"/);
+      assert.doesNotMatch(settingsHtml, /Upgrade to Pro|Restore Purchases|Rate This App|Reset Progress|Privacy Policy|Terms of Service|Disclaimer|href="\/(?:upgrade|settings\/(?:privacy|terms|disclaimer))"/);
       const { default: Lab } = await load("/src/screens/LabScreen.tsx");
       const premiumLabs = labCatalog.filter((lab) => lab.accessLevel === "premium");
       assert.ok(premiumLabs.length > 0);
@@ -186,7 +186,7 @@ async function verify(flavor) {
       assert.equal(repeated.streakDays, 1);
       assert.ok(native.calls.every((call) => ["preferences.set", "preferences.get"].includes(call)));
       await sessionModule.clearDciSession();
-      console.log(`PASS dci: config, no billing/cache calls, Settings hides billing/reset, ${premiumLabs.length} premium lab intros, local completion persistence`);
+      console.log(`PASS dci: config, no billing/cache calls, Settings hides billing/reset/legal, ${premiumLabs.length} premium lab intros, local completion persistence`);
     } else {
       console.log(`PASS ${flavor ?? "unset"}: exact consumer config and initial locked/loading entitlement`);
     }

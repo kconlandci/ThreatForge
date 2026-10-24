@@ -14,7 +14,7 @@ import { useAndroidBackButton } from "./hooks/useAndroidBackButton";
 import { IS_DEV } from "./config";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { REVENUECAT_API_KEY } from "./config/revenuecat";
-import { billingEnabled } from "./config/edition";
+import { billingEnabled, edition } from "./config/edition";
 import { trackAppOpened, trackSessionEnd, trackAppResumed } from "./hooks/useAnalytics";
 
 // Lazy-loaded screens (not in initial bundle)
@@ -23,7 +23,9 @@ const UpgradeScreen = billingEnabled
   ? lazy(() => import("./screens/UpgradeScreen"))
   : null;
 const AnalyticsScreen = lazy(() => import("./screens/AnalyticsScreen"));
-const LegalTextViewer = lazy(() => import("./components/LegalTextViewer"));
+const LegalTextViewer = edition === "consumer"
+  ? lazy(() => import("./components/LegalTextViewer"))
+  : null;
 
 function LazyFallback() {
   return (
@@ -69,7 +71,7 @@ function AppLayout() {
           <Route path="/lab/:labId" element={<LabScreen />} />
           <Route path="/progress" element={<ProgressScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
-          <Route
+          {LegalTextViewer && <><Route
             path="/settings/privacy"
             element={
               <LegalTextViewer title="Privacy Policy" content={privacyPolicy} />
@@ -87,6 +89,7 @@ function AppLayout() {
               <LegalTextViewer title="Disclaimer" content={disclaimer} />
             }
           />
+          </>}
           {UpgradeScreen && <Route path="/upgrade" element={<UpgradeScreen />} />}
           <Route path="/settings/analytics" element={<AnalyticsScreen />} />
           {IS_DEV && <Route path="/dev" element={<DevScreen />} />}
