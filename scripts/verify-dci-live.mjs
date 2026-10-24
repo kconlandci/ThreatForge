@@ -60,12 +60,24 @@ try {
     check(returned?.[key] === value, "Round-trip lab fields unchanged");
   }
   const idsAfter = after.body.records.flatMap(row => row.recordIds);
+  check([...idsBefore].every(id => idsAfter.includes(id)), "Existing source rows preserved");
+  const rowIds = result => result.records.flatMap(row => row.recordIds).sort().join("|");
+  check(rowIds(posted.body) === rowIds(repeated.body) && rowIds(repeated.body) === rowIds(after.body), "Replay creates no additional source rows");
+  const logicalTotals = {
+    labsCompleted: after.body.records.filter(row => row.status === "Completed").length,
+    totalXp: after.body.records.reduce((sum, row) => sum + row.xpEarned, 0),
+  };
+  check(after.body.totals.labsCompleted === logicalTotals.labsCompleted &&
+    after.body.totals.totalXp === logicalTotals.totalXp, "Totals match merged logical labs");
   const added = idsAfter.filter(id => !idsBefore.has(id));
   check(added.length === 1, "Exactly one source row created for repeated payload");
   evidence.sourceRecordIds = added;
   evidence.studentRecordId = student.id;
   evidence.totals = after.body.totals;
   evidence.lab = record;
+  // Preserve successful API evidence even if a later asset/UI check fails.
+  const checkpoint = JSON.stringify(evidence, null, 2); audit(checkpoint);
+  writeFileSync(new URL("../dci-live-evidence.local", import.meta.url), checkpoint + "\n");
   pass("production POST/replay/GET round-trip preserves logical labs and totals with one new source row");
   check(posted.headers.get("access-control-allow-origin") === origin, "Production CORS origin readback");
   pass("production API allows its assigned origin");
@@ -89,7 +101,9 @@ try {
     for (const marker of markers) check(!text.includes(marker), "Consumer legal text in live output");
     visited.add(url); allAssetText += text;
     for (const match of text.matchAll(/["'](\.?\/?[^"'\s]+\.(?:js|css))["']/g)) {
-      const target = new URL(match[1], url);
+      // Vite preload tables use root-relative assets/... entries; dynamic
+      // imports use ./chunk.js relative to the importing asset.
+      const target = new URL(match[1].startsWith("assets/") ? `/${match[1]}` : match[1], url);
       if (target.origin === origin && target.pathname.startsWith("/assets/")) assets.add(target.href);
     }
   }
