@@ -19,7 +19,8 @@ import { usePurchase } from "../hooks/usePurchase";
 import { usePremiumStatus } from "../hooks/usePremiumStatus";
 import { Dialog } from "@capacitor/dialog";
 import { Browser } from "@capacitor/browser";
-import { displayName, settingsSubline, supportEmail, billingEnabled } from "../config/edition";
+import { displayName, settingsSubline, supportEmail, billingEnabled, edition } from "../config/edition";
+import DciStudentSettings from "../components/DciStudentSettings";
 
 export default function SettingsScreen() {
   const navigate = useNavigate();
@@ -101,6 +102,8 @@ export default function SettingsScreen() {
             workplace simulations.
           </p>
         </div>
+
+        {edition === "dci" && <DciStudentSettings />}
 
         {/* Premium */}
         {billingEnabled && <section className="mb-6">
@@ -186,7 +189,7 @@ export default function SettingsScreen() {
             Actions
           </h2>
           <div className="space-y-1">
-            <button
+            {edition === "consumer" && <button
               onClick={handleResetProgress}
               className="flex items-center gap-3 w-full bg-slate-800 rounded-xl p-4 min-h-[48px] active:bg-slate-700 transition-colors text-left"
             >
@@ -194,7 +197,7 @@ export default function SettingsScreen() {
               <span className="text-sm font-medium text-red-400">
                 Reset Progress
               </span>
-            </button>
+            </button>}
             <button
               onClick={handleSendFeedback}
               className="flex items-center gap-3 w-full bg-slate-800 rounded-xl p-4 min-h-[48px] active:bg-slate-700 transition-colors text-left"

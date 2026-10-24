@@ -9,7 +9,7 @@ import { labCatalog } from "../data/catalog";
 import { LabManifestSchema } from "../types/manifest";
 import type { LabManifest, RendererType } from "../types/manifest";
 import { useProgress } from "../hooks/useProgress";
-import { displayName } from "../config/edition";
+import { displayName, edition } from "../config/edition";
 
 function ValidateButton({ manifest }: { manifest: LabManifest }) {
   const [result, setResult] = useState<{ ok: boolean; error?: string } | null>(null);
@@ -136,12 +136,12 @@ export default function DevScreen() {
         <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-white">Progress Inspector</h2>
-            <button
+            {edition === "consumer" && <button
               onClick={resetProgress}
               className="px-3 py-1.5 rounded bg-red-900/30 text-red-400 text-xs font-medium hover:bg-red-900/50 transition-colors border border-red-500/30"
             >
               Reset Progress
-            </button>
+            </button>}
           </div>
           <div className="flex gap-4 text-xs text-slate-400">
             <span>XP: {progress.xp}</span>

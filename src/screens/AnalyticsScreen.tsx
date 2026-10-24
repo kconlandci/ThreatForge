@@ -9,6 +9,7 @@ import { ArrowLeft, BarChart3, Clock, Target, Trophy, Trash2 } from "lucide-reac
 import { getAnalyticsSummary, clearAnalytics } from "../hooks/useAnalytics";
 import { labCatalog } from "../data/catalog";
 import { Dialog } from "@capacitor/dialog";
+import { edition } from "../config/edition";
 
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -177,13 +178,13 @@ export default function AnalyticsScreen() {
         )}
 
         {/* Clear Data */}
-        <button
+        {edition === "consumer" && <button
           onClick={handleClear}
           className="flex items-center gap-3 w-full bg-slate-800 rounded-xl p-4 min-h-[48px] active:bg-slate-700 transition-colors text-left"
         >
           <Trash2 size={16} className="text-red-400" />
           <span className="text-sm font-medium text-red-400">Clear Analytics Data</span>
-        </button>
+        </button>}
       </div>
     </div>
   );

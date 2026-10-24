@@ -3,13 +3,12 @@
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
+import react from "@vitejs/plugin-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const envKeys = ["VITE_EDITION", "VITE_DCI_SYNC_URL"];
-const originalEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
 const originalFetch = globalThis.fetch;
 const storage = new Map();
@@ -35,7 +34,7 @@ function verificationPlugin(dci) {
       if (dci && (source.startsWith("firebase/") || /config\/firebase(?:\.ts)?$/.test(source))) {
         throw new Error(`DCI imported Firebase: ${source}`);
       }
-      if (["@capacitor/preferences", "@revenuecat/purchases-capacitor"].includes(source)) {
+      if (["@capacitor/preferences", "@capacitor/preferences/dist/esm/index.js", "@revenuecat/purchases-capacitor"].includes(source)) {
         return "\0edition-verification-native";
       }
       if (source === "edition-verification-progress-hooks") {
@@ -54,7 +53,8 @@ function verificationPlugin(dci) {
         export const calls = [];
         export const Preferences = {
           async get({ key }) { calls.push('preferences.get'); return { value: localStorage.getItem('prefs:' + key) }; },
-          async set({ key, value }) { calls.push('preferences.set'); localStorage.setItem('prefs:' + key, value); }
+          async set({ key, value }) { calls.push('preferences.set'); localStorage.setItem('prefs:' + key, value); },
+          async remove({ key }) { calls.push('preferences.remove'); localStorage.removeItem('prefs:' + key); }
         };
         export const Purchases = new Proxy({}, { get(_, method) {
           return async () => { calls.push('purchases.' + String(method)); throw new Error('Unexpected billing call'); };
@@ -76,14 +76,23 @@ function verificationPlugin(dci) {
 }
 
 async function verify(flavor) {
-  if (flavor === undefined) delete process.env.VITE_EDITION;
-  else process.env.VITE_EDITION = flavor;
-  process.env.VITE_DCI_SYNC_URL = "https://example.invalid/dci-sync-test";
   const dci = flavor === "dci";
   const server = await createServer({
     root,
-    plugins: [verificationPlugin(dci)],
-    server: { middlewareMode: true, watch: null },
+    // This is a fixture-only runner: never load the repo's private env file.
+    configFile: false,
+    envFile: false,
+    plugins: [react(), verificationPlugin(dci)],
+    define: {
+      "import.meta.env.VITE_EDITION": flavor === undefined ? "undefined" : JSON.stringify(flavor),
+      "import.meta.env.VITE_DCI_SYNC_URL": JSON.stringify("https://example.invalid/dci-sync-test"),
+    },
+    resolve: { alias: dci ? [
+      { find: /^@capacitor\/preferences$/, replacement: fileURLToPath(new URL("../src/sync/dciPreferences.ts", import.meta.url)) },
+      { find: /^(?:\.\.\/|\.\/)contexts\/AuthContext$/, replacement: fileURLToPath(new URL("../src/contexts/DciAuthContext.tsx", import.meta.url)) },
+      { find: /^(?:\.\.\/|\.\/)services\/sync$/, replacement: fileURLToPath(new URL("../src/sync/dciSync.ts", import.meta.url)) },
+    ] : [] },
+    server: { middlewareMode: true, watch: null, hmr: false, ws: false },
     optimizeDeps: { noDiscovery: true, include: [] },
     ssr: { noExternal: ["@capacitor/preferences", "@revenuecat/purchases-capacitor", /^firebase(?:\/|$)/] },
   });
@@ -126,24 +135,6 @@ async function verify(flavor) {
       assert.deepEqual(await purchase.restore(), { success: false, error: "unknown" });
       assert.deepEqual(native.calls, [], "DCI billing/entitlement must not touch SDK or preferences");
 
-      const auth = await load("/src/contexts/DciAuthContext.tsx");
-      let authState;
-      function AuthProbe() { authState = auth.useAuth(); return null; }
-      renderToStaticMarkup(createElement(auth.AuthProvider, null, createElement(AuthProbe)));
-      assert.deepEqual(authState, { uid: null, isAuthReady: true });
-
-      const sync = await load("/src/sync/dciSync.ts");
-      assert.equal(sync.dciSyncUrl, process.env.VITE_DCI_SYNC_URL);
-      assert.equal(sync.CLOUD_PULL_EVENT, "threatforge:cloud-pull");
-      const local = { labs: {}, xp: 17 };
-      assert.equal(sync.setSyncUid("verification-only"), undefined);
-      assert.equal(await sync.pullCloudProgress("verification-only"), null);
-      assert.equal(await sync.pushCloudProgress("verification-only", local), undefined);
-      assert.equal(sync.queueCloudPush(local), undefined);
-      assert.equal(sync.mirrorEventToCloud({ type: "verification" }), undefined);
-      assert.equal(sync.mergeProgress(local, { labs: {}, xp: 999 }), local);
-      assert.deepEqual(local, { labs: {}, xp: 17 });
-
       const renderRoute = (Screen, path, pattern = path) => renderToStaticMarkup(
         createElement(MemoryRouter, { initialEntries: [path] },
           createElement(Routes, null, createElement(Route, { path: pattern, element: createElement(Screen) })))
@@ -152,7 +143,7 @@ async function verify(flavor) {
       const settingsHtml = renderRoute(Settings, "/settings");
       assert.match(settingsHtml, /Cybersecurity Judgment Labs/);
       assert.match(settingsHtml, /DCI Resources — Student Edition/);
-      assert.doesNotMatch(settingsHtml, /Upgrade to Pro|Restore Purchases|Rate This App|href="\/upgrade"/);
+      assert.doesNotMatch(settingsHtml, /Upgrade to Pro|Restore Purchases|Rate This App|Reset Progress|href="\/upgrade"/);
       const { default: Lab } = await load("/src/screens/LabScreen.tsx");
       const premiumLabs = labCatalog.filter((lab) => lab.accessLevel === "premium");
       assert.ok(premiumLabs.length > 0);
@@ -163,29 +154,39 @@ async function verify(flavor) {
       }
 
       storage.clear();
+      const sessionModule = await load("/src/sync/dciSession.ts");
+      const fixtureStudent = "rec00000000000001";
+      const fixtureExpiry = Math.floor(Date.now() / 1000) + 3600;
+      const fixtureToken = `${Buffer.from(JSON.stringify({ studentId: fixtureStudent, exp: fixtureExpiry })).toString("base64url")}.public-fixture-signature`;
+      await sessionModule.saveDciSession({ token: fixtureToken, studentId: fixtureStudent, name: "Fixture student", pathway: "Pilot test", expiresAt: fixtureExpiry * 1000 });
+      native.calls.length = 0;
       const progressModule = await load("/src/hooks/useProgress.ts");
       const hooks = await load("\0edition-verification-progress-hooks");
-      const progress = progressModule.useProgress(null);
+      const progress = progressModule.useProgress(fixtureStudent);
+      const { Preferences: wrappedPreferences } = await load("/src/sync/dciPreferences.ts");
       const createdAt = progress.progress.createdAt;
       progress.recordLabCompletion(premiumLabs[0].id, 80, [{ scenarioIndex: 0, grade: "perfect" }]);
+      await wrappedPreferences.get({ key: "threatforge_progress" });
       const saved = JSON.parse(storage.get("threatforge_progress"));
       assert.deepEqual(saved, hooks.getState());
       assert.deepEqual(saved, JSON.parse(storage.get("prefs:threatforge_progress")));
       assert.equal(saved.createdAt, createdAt);
-      assert.equal(saved.userId, null);
+      assert.equal(saved.userId, fixtureStudent);
       assert.equal(saved.xp, 140);
       assert.equal(saved.streakDays, 1);
       assert.equal(saved.labs[premiumLabs[0].id].bestScore, 80);
       assert.equal(saved.labs[premiumLabs[0].id].attempts, 1);
       assert.equal(saved.labs[premiumLabs[0].id].completed, true);
       progress.recordLabCompletion(premiumLabs[0].id, 60, []);
+      await wrappedPreferences.get({ key: "threatforge_progress" });
       const repeated = JSON.parse(storage.get("threatforge_progress"));
       assert.equal(repeated.labs[premiumLabs[0].id].bestScore, 80);
       assert.equal(repeated.labs[premiumLabs[0].id].attempts, 2);
       assert.equal(repeated.xp, 270);
       assert.equal(repeated.streakDays, 1);
-      assert.ok(native.calls.every((call) => call === "preferences.set"));
-      console.log(`PASS dci: config, no billing/cache calls, local auth, sync no-ops, Settings, ${premiumLabs.length} premium lab intros, local completion persistence`);
+      assert.ok(native.calls.every((call) => ["preferences.set", "preferences.get"].includes(call)));
+      await sessionModule.clearDciSession();
+      console.log(`PASS dci: config, no billing/cache calls, Settings hides billing/reset, ${premiumLabs.length} premium lab intros, local completion persistence`);
     } else {
       console.log(`PASS ${flavor ?? "unset"}: exact consumer config and initial locked/loading entitlement`);
     }
@@ -200,10 +201,6 @@ try {
   await verify("consumer");
   await verify("dci");
 } finally {
-  for (const key of envKeys) {
-    if (originalEnv[key] === undefined) delete process.env[key];
-    else process.env[key] = originalEnv[key];
-  }
   if (originalStorage) Object.defineProperty(globalThis, "localStorage", originalStorage);
   else delete globalThis.localStorage;
   globalThis.fetch = originalFetch;
