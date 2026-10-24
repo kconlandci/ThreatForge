@@ -15,6 +15,39 @@
   --forge-danger: #ef4444;
 }
 
+/* Only DCI overrides the central theme. Tailwind utilities already reference
+   these palette variables, so component color classes stay unchanged. */
+:root[data-edition="dci"] {
+  --forge-dark: #ffffff;
+  --forge-surface: #f4f8f5;
+  --forge-card: #edf5ef;
+  --forge-ember: #15803d;
+  --forge-ember-glow: #166534;
+  --forge-steel: #42594b;
+  --forge-text: #173123;
+  --forge-muted: #52665a;
+
+  --color-slate-950: #ffffff;
+  --color-slate-900: #ffffff;
+  --color-slate-800: #f4f8f5;
+  --color-slate-700: #dce8e0;
+  --color-slate-600: #52665a;
+  --color-slate-500: #52665a;
+  --color-slate-400: #42594b;
+  --color-slate-300: #2c4938;
+  --color-slate-200: #213e2e;
+  --color-slate-100: #173123;
+  --color-slate-50: #102719;
+  --color-white: #173123;
+
+  --color-orange-200: #166534;
+  --color-orange-300: #166534;
+  --color-orange-400: #15803d;
+  /* Dark foreground on pale green keeps existing text-white buttons legible. */
+  --color-orange-500: #86efac;
+  --color-orange-600: #4ade80;
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

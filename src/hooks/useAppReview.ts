@@ -7,6 +7,7 @@
 import { useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
 import { InAppReview } from "@capacitor-community/in-app-review";
+import { billingEnabled } from "../config/edition";
 
 const REVIEW_PROMPTED_KEY = "threatforge_review_prompted";
 const LABS_BEFORE_REVIEW = 3;
@@ -18,6 +19,8 @@ const LABS_BEFORE_REVIEW = 3;
  */
 export function useAppReview() {
   const maybeRequestReview = useCallback(async (totalCompleted: number) => {
+    if (!billingEnabled) return;
+
     // Only trigger on the exact threshold
     if (totalCompleted < LABS_BEFORE_REVIEW) return;
 

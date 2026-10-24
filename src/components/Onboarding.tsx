@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { Eye, Hand, CheckCircle } from "lucide-react";
+import { displayName } from "../config/edition";
 
 const ONBOARDING_KEY = "threatforge_onboarding_complete";
 
@@ -30,11 +31,11 @@ interface OnboardingScreen {
 
 const screens: OnboardingScreen[] = [
   {
-    title: "Welcome to ThreatForge",
+    title: `Welcome to ${displayName}`,
     body: "Practice real cybersecurity judgment in short, interactive scenarios.",
     icon: (
       <div className="mb-4">
-        <img src="/icon-512.png" alt="ThreatForge" className="w-20 h-20 rounded-2xl" />
+        <img src="/icon-512.png" alt={displayName} className="w-20 h-20 rounded-2xl" />
       </div>
     ),
   },
@@ -59,7 +60,7 @@ const screens: OnboardingScreen[] = [
   },
   {
     title: "Start Your First Lab",
-    body: "ThreatForge is for educational purposes only. Scenarios are simulated and designed to build defensive cybersecurity judgment. Begin with a free beginner lab — no account needed.",
+    body: `${displayName} is for educational purposes only. Scenarios are simulated and designed to build defensive cybersecurity judgment. Begin with a free beginner lab — no account needed.`,
     icon: null,
     isFinal: true,
     requiresConsent: true,

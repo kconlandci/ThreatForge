@@ -14,11 +14,14 @@ import { useAndroidBackButton } from "./hooks/useAndroidBackButton";
 import { IS_DEV } from "./config";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { REVENUECAT_API_KEY } from "./config/revenuecat";
+import { billingEnabled } from "./config/edition";
 import { trackAppOpened, trackSessionEnd, trackAppResumed } from "./hooks/useAnalytics";
 
 // Lazy-loaded screens (not in initial bundle)
 const DevScreen = lazy(() => import("./screens/DevScreen"));
-const UpgradeScreen = lazy(() => import("./screens/UpgradeScreen"));
+const UpgradeScreen = billingEnabled
+  ? lazy(() => import("./screens/UpgradeScreen"))
+  : null;
 const AnalyticsScreen = lazy(() => import("./screens/AnalyticsScreen"));
 const LegalTextViewer = lazy(() => import("./components/LegalTextViewer"));
 
@@ -84,7 +87,7 @@ function AppLayout() {
               <LegalTextViewer title="Disclaimer" content={disclaimer} />
             }
           />
-          <Route path="/upgrade" element={<UpgradeScreen />} />
+          {UpgradeScreen && <Route path="/upgrade" element={<UpgradeScreen />} />}
           <Route path="/settings/analytics" element={<AnalyticsScreen />} />
           {IS_DEV && <Route path="/dev" element={<DevScreen />} />}
           <Route path="*" element={<HomeScreen />} />
@@ -97,7 +100,7 @@ function AppLayout() {
 
 export default function App() {
   useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
+    if (billingEnabled && Capacitor.isNativePlatform()) {
       Purchases.configure({ apiKey: REVENUECAT_API_KEY }).catch((err) =>
         console.error("[ThreatForge] RevenueCat init failed:", err)
       );

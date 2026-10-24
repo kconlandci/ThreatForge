@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Preferences } from "@capacitor/preferences";
 import { Purchases } from "@revenuecat/purchases-capacitor";
 import { ENTITLEMENT_ID } from "../config/revenuecat";
+import { paywallEnabled } from "../config/edition";
 
 const PREMIUM_KEY = "threatforge_is_premium";
 const PREMIUM_CACHE_TIME_KEY = "threatforge_premium_cache_time";
@@ -57,10 +58,12 @@ async function readCache(): Promise<boolean> {
 }
 
 export function usePremiumStatus(): PremiumStatus {
-  const [isPremium, setIsPremium] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(!paywallEnabled);
+  const [isLoading, setIsLoading] = useState(paywallEnabled);
 
   const checkPremiumStatus = useCallback(async () => {
+    if (!paywallEnabled) return;
+
     setIsLoading(true);
     try {
       // Try RevenueCat first (source of truth)
@@ -97,6 +100,8 @@ export function usePremiumStatus(): PremiumStatus {
 
 /** Write premium status to local cache */
 export async function setPremiumStatus(isPremium: boolean): Promise<void> {
+  if (!paywallEnabled) return;
+
   await Preferences.set({
     key: PREMIUM_KEY,
     value: isPremium ? "true" : "false",

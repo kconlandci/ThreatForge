@@ -19,6 +19,7 @@ import { useActivePath } from "../hooks/useRecommendedLab";
 import { useAuth } from "../contexts/AuthContext";
 import Onboarding, { isOnboardingComplete } from "../components/Onboarding";
 import type { LearningPath } from "../data/paths";
+import { displayName, subline, paywallEnabled } from "../config/edition";
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Server,
@@ -54,11 +55,11 @@ export default function HomeScreen() {
         <div className="max-w-lg mx-auto pt-6">
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
-            <img src="/icon-512.png" alt="ThreatForge" className="w-10 h-10 rounded-xl" />
+            <img src="/icon-512.png" alt={displayName} className="w-10 h-10 rounded-xl" />
             <div>
-              <h1 className="text-xl font-bold text-white">ThreatForge</h1>
+              <h1 className="text-xl font-bold text-white">{displayName}</h1>
               <p className="text-xs text-slate-400">
-                Cybersecurity Decision Simulator
+                {subline}
               </p>
             </div>
           </div>
@@ -142,7 +143,7 @@ export default function HomeScreen() {
           </section>
 
           {/* Upgrade prompt */}
-          {allFreeComplete && !isPremium && (
+          {paywallEnabled && allFreeComplete && !isPremium && (
             <Link
               to="/upgrade"
               className="block bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 mb-6 active:bg-orange-500/20 transition-colors"
@@ -176,7 +177,7 @@ export default function HomeScreen() {
             {showAllLabs && (
               <>
                 {/* Free Labs */}
-                <h3 className="text-xs text-slate-500 mb-2 px-1">Free</h3>
+                {paywallEnabled && <h3 className="text-xs text-slate-500 mb-2 px-1">Free</h3>}
                 <div className="space-y-2 mb-4">
                   {freeLabs.map((lab) => (
                     <LabCard
@@ -189,15 +190,15 @@ export default function HomeScreen() {
                 {/* Premium Labs */}
                 {premiumLabs.length > 0 && (
                   <>
-                    <h3 className="text-xs text-slate-500 mb-2 px-1">
+                    {paywallEnabled && <h3 className="text-xs text-slate-500 mb-2 px-1">
                       Premium
-                    </h3>
+                    </h3>}
                     <div className="space-y-2">
                       {premiumLabs.map((lab) => (
                         <LabCard
                           key={lab.id}
                           lab={lab}
-                          locked={!isPremium}
+                          locked={paywallEnabled && !isPremium}
                           labProgress={getLabProgress(lab.id)}
                         />
                       ))}
@@ -280,7 +281,7 @@ function PathCard({
             const lab = labCatalog.find((l) => l.id === labId);
             if (!lab) return null;
             const lp = getLabProgress(labId);
-            const isLocked = lab.accessLevel === "premium" && !isPremium;
+            const isLocked = paywallEnabled && lab.accessLevel === "premium" && !isPremium;
             return (
               <Link
                 key={labId}

@@ -6,6 +6,7 @@ import LabEngine from "../engine/LabEngine";
 import type { GradeResult } from "../engine/LabEngine";
 import { useProgress } from "../hooks/useProgress";
 import { usePremiumStatus } from "../hooks/usePremiumStatus";
+import { paywallEnabled } from "../config/edition";
 import { useRecommendedLab } from "../hooks/useRecommendedLab";
 import { useAuth } from "../contexts/AuthContext";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -60,7 +61,7 @@ export default function LabScreen() {
   }
 
   // Wait for premium status to resolve before gating
-  if (manifest.accessLevel === "premium" && isPremiumLoading) {
+  if (paywallEnabled && manifest.accessLevel === "premium" && isPremiumLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
         <p className="text-slate-400 text-sm">Loading...</p>
@@ -69,7 +70,7 @@ export default function LabScreen() {
   }
 
   // Premium gate: redirect non-premium users trying to access premium labs
-  if (manifest.accessLevel === "premium" && !isPremium) {
+  if (paywallEnabled && manifest.accessLevel === "premium" && !isPremium) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
         <div className="text-center">
@@ -143,7 +144,7 @@ export default function LabScreen() {
       );
     }
 
-    const isRecPremium = recommendation.lab.accessLevel === "premium" && !isPremium;
+    const isRecPremium = paywallEnabled && recommendation.lab.accessLevel === "premium" && !isPremium;
 
     return (
       <div className="bg-slate-800 rounded-xl p-4">

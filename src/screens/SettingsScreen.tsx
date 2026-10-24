@@ -19,6 +19,7 @@ import { usePurchase } from "../hooks/usePurchase";
 import { usePremiumStatus } from "../hooks/usePremiumStatus";
 import { Dialog } from "@capacitor/dialog";
 import { Browser } from "@capacitor/browser";
+import { displayName, settingsSubline, supportEmail, billingEnabled } from "../config/edition";
 
 export default function SettingsScreen() {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function SettingsScreen() {
 
   const handleSendFeedback = () => {
     window.location.href =
-      "mailto:threatforge.app@gmail.com?subject=ThreatForge%20Feedback";
+      `mailto:${supportEmail}?subject=${encodeURIComponent(`${displayName} Feedback`)}`;
   };
 
   const handleRateApp = async () => {
@@ -87,12 +88,12 @@ export default function SettingsScreen() {
         <div className="text-center mb-8">
           <img
             src="/icon-512.png"
-            alt="ThreatForge"
+            alt={displayName}
             className="w-14 h-14 rounded-2xl mx-auto mb-3"
           />
-          <h1 className="text-xl font-bold text-white">ThreatForge</h1>
+          <h1 className="text-xl font-bold text-white">{displayName}</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Cyber Judgment Training
+            {settingsSubline}
           </p>
           <p className="text-[10px] text-slate-500 mt-1">v1.1.0</p>
           <p className="text-xs text-slate-400 mt-3 max-w-xs mx-auto leading-relaxed">
@@ -102,7 +103,7 @@ export default function SettingsScreen() {
         </div>
 
         {/* Premium */}
-        <section className="mb-6">
+        {billingEnabled && <section className="mb-6">
           <h2 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2 px-1">
             Premium
           </h2>
@@ -139,7 +140,7 @@ export default function SettingsScreen() {
               <p className="text-xs text-slate-400 px-4 py-1">{restoreMsg}</p>
             )}
           </div>
-        </section>
+        </section>}
 
         {/* Data */}
         <section className="mb-6">
@@ -203,7 +204,7 @@ export default function SettingsScreen() {
                 Send Feedback
               </span>
             </button>
-            <button
+            {billingEnabled && <button
               onClick={handleRateApp}
               className="flex items-center gap-3 w-full bg-slate-800 rounded-xl p-4 min-h-[48px] active:bg-slate-700 transition-colors text-left"
             >
@@ -211,7 +212,7 @@ export default function SettingsScreen() {
               <span className="text-sm font-medium text-white">
                 Rate This App
               </span>
-            </button>
+            </button>}
           </div>
         </section>
       </div>

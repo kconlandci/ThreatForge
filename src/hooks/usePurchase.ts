@@ -6,6 +6,7 @@
 import { useState, useCallback } from "react";
 import { Purchases } from "@revenuecat/purchases-capacitor";
 import { ENTITLEMENT_ID } from "../config/revenuecat";
+import { billingEnabled } from "../config/edition";
 import { setPremiumStatus } from "./usePremiumStatus";
 
 export type PurchaseError =
@@ -32,6 +33,8 @@ export function usePurchase(): UsePurchase {
 
   const purchase = useCallback(
     async (productId: string): Promise<PurchaseResult> => {
+      if (!billingEnabled) return { success: false, error: "unknown" };
+
       setIsPurchasing(true);
       try {
         const { customerInfo } = await Purchases.purchaseStoreProduct({
@@ -76,6 +79,8 @@ export function usePurchase(): UsePurchase {
   );
 
   const restore = useCallback(async (): Promise<PurchaseResult> => {
+    if (!billingEnabled) return { success: false, error: "unknown" };
+
     setIsRestoring(true);
     try {
       const { customerInfo } = await Purchases.restorePurchases();
