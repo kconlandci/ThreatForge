@@ -121,7 +121,8 @@ await assert.rejects(withStudentLock(student, async () => { throw new Error("fix
 assert.equal(await withStudentLock(student, async () => 7), 7);
 console.log("PASS API concurrency: same-process student writes serialize and recover after failure");
 
-assert.equal(PRODUCTION_ORIGIN, null);
+assert.equal(PRODUCTION_ORIGIN, "https://dci-cybersecurity-judgment-labs.vercel.app");
+assert.equal(isAllowedOrigin(PRODUCTION_ORIGIN), true);
 for (const origin of ["http://localhost:5173", "http://127.0.0.1:3000", "https://localhost"]) assert.equal(isAllowedOrigin(origin), true);
 for (const origin of ["http://localhost.example.invalid", "https://example.invalid", "null", "http://localhost:5173/path"]) assert.equal(isAllowedOrigin(origin), false);
 const response = () => ({ headers: {}, setHeader(name, value) { this.headers[name] = value; }, end(body) { this.body = body; } });
@@ -141,7 +142,7 @@ assert.equal(options.headers["Access-Control-Allow-Origin"], "http://localhost:5
 assert.deepEqual(await readJson({ headers: {}, body: '{"records":[]}' }), { records: [] });
 await assert.rejects(readJson({ headers: {}, body: "not-json" }));
 await assert.rejects(readJson({ headers: { "content-length": String(128 * 1024 + 1) }, body: {} }));
-console.log("PASS API HTTP: local-only CORS, no production origin, preflight and body limits");
+console.log("PASS API HTTP: approved production/local CORS, preflight and body limits");
 
 // Fixture-only Airtable responses prove cached Student totals cannot corrupt
 // a logical GET, and failed best-effort repair does not delay its response.

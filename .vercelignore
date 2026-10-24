@@ -1,0 +1,17 @@
+.git
+.vercel
+.claude
+.env*
+*.local
+**/*.local*
+node_modules
+dist
+android
+apps
+docs
+scripts
+api/_lib
+*.md
+*.jks
+*.keystore
+*.pem

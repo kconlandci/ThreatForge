@@ -6,8 +6,8 @@ export const TABLES = Object.freeze({
   progress: "tblzcw3zC53G1tHv6",
 });
 
-// Set the single production app origin during the later deployment step.
-export const PRODUCTION_ORIGIN = null;
+// Default domain of the separately scoped DCI Vercel project.
+export const PRODUCTION_ORIGIN = "https://dci-cybersecurity-judgment-labs.vercel.app";
 export const SESSION_LIFETIME_SECONDS = 30 * 24 * 60 * 60;
 
 export function isAllowedOrigin(origin) {
