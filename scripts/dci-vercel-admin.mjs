@@ -23,8 +23,11 @@ export async function cli(args, input) {
   check(args.every(arg => /^[A-Za-z0-9_./:?=&@+,\-]+$/.test(arg)), "Unsafe CLI argument rejected");
   return new Promise((resolve, reject) => {
     const command = process.platform === "win32" ? process.env.ComSpec ?? "cmd.exe" : "vercel";
-    const parameters = process.platform === "win32" ? ["/d", "/s", "/c", `vercel.cmd ${args.join(" ")}`] : args;
-    const child = spawn(command, parameters, { cwd: root, stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, NO_COLOR: "1" } });
+    // The allowlist excludes quotes/expansions; quoting each argument also keeps
+    // query-string ampersands inside the argument rather than a shell command.
+    const parameters = process.platform === "win32" ? ["/d", "/s", "/c", `vercel.cmd ${args.map(arg => `"${arg}"`).join(" ")}`] : args;
+    const child = spawn(command, parameters, { cwd: root, windowsVerbatimArguments: process.platform === "win32",
+      stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, NO_COLOR: "1" } });
     let stdout = "", stderr = "";
     child.stdout.on("data", data => { stdout += data.toString(); });
     child.stderr.on("data", data => { stderr += data.toString(); });
