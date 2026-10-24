@@ -36,7 +36,21 @@ export async function startDciLocalServer({ port = 0 } = {}) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.loadEnvFile(new URL("../.env.local", import.meta.url));
-  const local = await startDciLocalServer({ port: 8787 });
-  console.log(`DCI local harness listening at ${local.url}`);
+  try {
+    process.loadEnvFile(new URL("../.env.local", import.meta.url));
+    const local = await startDciLocalServer({ port: process.send ? 0 : 8787 });
+    if (process.send) {
+      // Test workers share no locks or memory. IPC carries only lifecycle data.
+      process.send({ type: "ready", url: local.url, pid: process.pid });
+      process.once("message", async message => {
+        if (message?.type === "close") {
+          await local.close();
+          process.exit(0);
+        }
+      });
+    } else console.log(`DCI local harness listening at ${local.url}`);
+  } catch {
+    console.error("Local harness startup failed; details suppressed.");
+    process.exitCode = 1;
+  }
 }

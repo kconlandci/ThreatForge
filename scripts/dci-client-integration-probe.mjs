@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 
-export async function verifyDciClientAgainstLocalService({ baseUrl, signInReply }) {
+export async function verifyDciClientAgainstLocalService({ baseUrl, signInReply, expectedProgress }) {
   const root = fileURLToPath(new URL("../", import.meta.url));
   const origin = new URL(baseUrl).origin;
   assert.ok(["localhost", "127.0.0.1"].includes(new URL(baseUrl).hostname), "Client probe requires a local harness");
@@ -54,6 +54,7 @@ export async function verifyDciClientAgainstLocalService({ baseUrl, signInReply 
     });
     const session = await server.ssrLoadModule("/src/sync/dciSession.ts");
     const sync = await server.ssrLoadModule("/src/sync/dciSync.ts");
+    const installation = await server.ssrLoadModule("/src/sync/dciInstallation.ts");
     const parsed = session.sessionFromSignIn(signInReply);
     assert.ok(parsed, "Real sign-in reply must be accepted by DCI session storage");
     await session.saveDciSession(parsed);
@@ -63,14 +64,16 @@ export async function verifyDciClientAgainstLocalService({ baseUrl, signInReply 
     const restored = await sync.applyCloudProgress(remote);
     assert.ok(restored, "Actual DCI hydration must save on-device progress");
     assert.equal(Object.keys(restored.labs).length, 3);
-    assert.equal(restored.xp, 270);
-    assert.equal(Object.values(restored.labs).filter(lab => lab.completed).length, 2);
+    assert.equal(restored.xp, expectedProgress.totals.totalXp);
+    assert.equal(Object.values(restored.labs).filter(lab => lab.completed).length, expectedProgress.totals.labsCompleted);
     assert.deepEqual(JSON.parse(storage.get("prefs:threatforge_progress")), restored);
+    const clientId = await installation.getDciInstallationId();
+    assert.ok(!JSON.stringify(restored).includes(clientId), "Raw installation metadata must not enter progress");
     await sync.pushCloudProgress(parsed.studentId, restored);
     const reread = await sync.pullCloudProgress(parsed.studentId);
     assert.ok(reread);
     assert.equal(Object.keys(reread.labs).length, 3);
-    assert.equal(reread.xp, 270);
+    assert.equal(reread.xp, expectedProgress.totals.totalXp);
     assert.equal(requests, 3, "Expected real GET, POST, then GET transport");
     sync.resetDciSync();
     await session.clearDciSession();
@@ -78,7 +81,9 @@ export async function verifyDciClientAgainstLocalService({ baseUrl, signInReply 
     for (const key of [session.SESSION_STORAGE_KEY, "threatforge_progress", `prefs:${session.SESSION_STORAGE_KEY}`, "prefs:threatforge_progress"]) {
       assert.ok(!storage.has(key), "Sign-out must remove token and device progress");
     }
-    return { labCount: 3, totalXp: 270, labsCompleted: 2, transportRequests: requests, cacheCleared: true };
+    assert.ok(await installation.getDciInstallationId() === clientId && storage.has(installation.DCI_INSTALLATION_STORAGE_KEY), "Installation survives sign-out independently of progress");
+    return { labCount: 3, totalXp: expectedProgress.totals.totalXp, labsCompleted: expectedProgress.totals.labsCompleted,
+      transportRequests: requests, cacheCleared: true, installationRetained: true };
   } finally {
     await server?.close();
     storage.clear();

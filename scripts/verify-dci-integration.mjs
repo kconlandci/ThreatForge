@@ -1,14 +1,15 @@
 // Real-base local integration. All credentials/codes/tokens stay out of output.
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { createServer } from "vite";
 import { startDciLocalServer } from "./dci-local-server.mjs";
 import { verifyDciClientAgainstLocalService } from "./dci-client-integration-probe.mjs";
-import { seedTestRoster } from "./dci-seed-test-roster.mjs";
+import { readLocalRoster } from "./dci-seed-test-roster.mjs";
 import { TABLES } from "../server/dci/config.js";
 import { getRecord, listRecords, updateRecords, formulaString } from "../server/dci/airtable.js";
 import { pilotUnit, studentProgress } from "../server/dci/progress.js";
+import { deriveSourceKey } from "../server/dci/source.js";
 import { issueSession } from "../server/dci/session.js";
 
 const check = (condition, label) => { if (!condition) throw new Error(label); };
@@ -16,6 +17,8 @@ const evidence = { method: "loopback Node harness mounting the production handle
 function pass(label) { evidence.checks.push({ check: label, passed: true }); console.log(`PASS: ${label}`); }
 let local;
 let inactiveId;
+// Runtime-only routing metadata, never persisted or included in evidence/logs.
+const clientId = randomUUID();
 
 async function request(path, { token, body, method = body ? "POST" : "GET", origin = "http://localhost:5173" } = {}) {
   const response = await fetch(`${local.url}${path}`, {
@@ -25,7 +28,7 @@ async function request(path, { token, body, method = body ? "POST" : "GET", orig
       ...(body ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? JSON.stringify(path === "/progress" && method === "POST" ? { ...body, clientId } : body) : undefined,
     signal: AbortSignal.timeout(60000),
   });
   const result = response.status === 204 ? null : await response.json();
@@ -34,7 +37,7 @@ async function request(path, { token, body, method = body ? "POST" : "GET", orig
 
 try {
   process.loadEnvFile(new URL("../.env.local", import.meta.url));
-  const roster = await seedTestRoster();
+  const roster = readLocalRoster();
   const student = roster[0];
   evidence.students = roster.map(({ name, id }) => ({ name, recordId: id }));
   for (const row of roster) {
@@ -83,7 +86,10 @@ try {
   pass("local CORS preflight succeeds; unconfigured foreign origin is rejected");
 
   const before = await studentProgress(student.id);
-  check(before.length === 0 || before.length === 3, "Unexpected prior test progress count; stop before writing");
+  const baseline = await request("/progress", { token });
+  check(baseline.status === 200 && baseline.body.records.every(row => labs.some(lab => lab.id === row.labId)), "Unexpected existing logical test labs; stop before writing");
+  const legacyBefore = new Map(before.filter(row => row.fields["Record Key"] === `${student.id}|${row.fields["Lab ID"]}`)
+    .map(row => [row.id, JSON.stringify(row)]));
   const now = Date.now();
   const firstStartedAt = new Date(now - 120000).toISOString();
   const completedAt = new Date(now - 60000).toISOString();
@@ -91,13 +97,27 @@ try {
     status: index < 2 ? "Completed" : "Started", xpEarned: [140, 130, 0][index], attempts: [2, 1, 0][index],
     firstStartedAt, completedAt: index < 2 ? completedAt : null }));
   if (before.length) check(before.every((row) => records.some((item) => item.labId === row.fields["Lab ID"])), "Prior test labs differ; do not overwrite");
+  const expectedLogical = new Map(baseline.body.records.map(row => [row.labId, row]));
+  for (const row of records) {
+    const previous = expectedLogical.get(row.labId);
+    expectedLogical.set(row.labId, { ...row,
+      status: previous?.status === "Completed" ? "Completed" : row.status,
+      xpEarned: Math.max(previous?.xpEarned ?? 0, row.xpEarned),
+      attempts: Math.max(previous?.attempts ?? 0, row.attempts),
+    });
+  }
+  const expectedTotals = { labsCompleted: [...expectedLogical.values()].filter(row => row.status === "Completed").length,
+    totalXp: [...expectedLogical.values()].reduce((sum, row) => sum + row.xpEarned, 0) };
+  const sourceKey = deriveSourceKey(student.id, clientId);
   const pushed = await request("/progress", { token, body: { records } });
   check(pushed.status === 200 && pushed.body.records.length === 3, "Initial progress upsert");
   const written = await studentProgress(student.id);
-  check(written.length === 3, "Exactly three destination rows");
+  const sourceRows = written.filter(row => row.fields["Record Key"].endsWith(`|${sourceKey}`));
+  check(sourceRows.length === 3 && written.length === before.length + 3, "Exactly three new source rows and no raw duplicate");
   for (const expected of records) {
-    const row = written.find((entry) => entry.fields["Lab ID"] === expected.labId);
-    check(row && row.fields["Record Key"] === `${student.id}|${expected.labId}` &&
+    const row = sourceRows.find((entry) => entry.fields["Lab ID"] === expected.labId);
+    check(row && row.fields["Record Key"] === `${student.id}|${expected.labId}|${sourceKey}` &&
+      !JSON.stringify(row).includes(clientId) &&
       row.fields.Student?.length === 1 && row.fields.Student[0] === student.id &&
       row.fields.Unit?.length === 1 && row.fields.Unit[0] === evidence.unitId &&
       row.fields["Lab Title"] === expected.labTitle && row.fields.Status === expected.status &&
@@ -108,35 +128,36 @@ try {
   }
   const allKeys = await listRecords(TABLES.progress, { filterByFormula:
     `LEFT({Record Key},${student.id.length + 1})=${formulaString(`${student.id}|`)}` });
-  check(allKeys.length === 3, "No unlinked duplicate keys");
-  pass("three labs including premium upsert with correct values, Student and runtime Unit links");
+  check(allKeys.length === written.length, "No unlinked duplicate keys");
+  pass("three source rows including premium upsert with correct values, hashed routing, Student and runtime Unit links");
   const lower = records.map((record) => ({ ...record, status: "Started", completedAt: null, xpEarned: 0, attempts: 0 }));
   const repeated = await request("/progress", { token, body: { records: lower } });
   check(repeated.status === 200 && repeated.body.records.length === 3 &&
-    repeated.body.totals.totalXp === 270 && repeated.body.totals.labsCompleted === 2, "Monotonic retake totals");
+    repeated.body.totals.totalXp === expectedTotals.totalXp && repeated.body.totals.labsCompleted === expectedTotals.labsCompleted, "Monotonic retake totals");
   const after = await studentProgress(student.id);
-  check(after.length === 3 && after.every((row) => written.some((entry) => entry.id === row.id &&
+  check(after.length === written.length && after.every((row) => written.some((entry) => entry.id === row.id &&
     entry.fields["XP Earned"] === row.fields["XP Earned"] && entry.fields.Attempts === row.fields.Attempts &&
     entry.fields.Status === row.fields.Status)), "Monotonic retake rows/IDs");
   check((await listRecords(TABLES.progress, { filterByFormula:
-    `LEFT({Record Key},${student.id.length + 1})=${formulaString(`${student.id}|`)}` })).length === 3, "Retake duplicate count");
-  pass("lower XP/attempts and Started retake preserve XP, attempts, Completed status and the same three row IDs");
+    `LEFT({Record Key},${student.id.length + 1})=${formulaString(`${student.id}|`)}` })).length === written.length, "Retake duplicate count");
+  for (const [id, snapshot] of legacyBefore) check(JSON.stringify(after.find(row => row.id === id)) === snapshot, "Legacy rows must remain untouched");
+  pass("lower XP/attempts and Started retake preserve values and source row IDs; legacy rows remain untouched");
 
   const pulled = await request("/progress", { token });
   check(pulled.status === 200 && pulled.body.records.length === 3 &&
-    pulled.body.totals.totalXp === 270 && pulled.body.totals.labsCompleted === 2, "GET rows and totals");
+    pulled.body.totals.totalXp === expectedTotals.totalXp && pulled.body.totals.labsCompleted === expectedTotals.labsCompleted, "GET rows and totals");
   for (const row of pulled.body.records) {
-    const saved = after.find((entry) => entry.id === row.recordId);
-    check(saved && row.xpEarned === (saved.fields["XP Earned"] ?? 0) &&
-      row.attempts === (saved.fields.Attempts ?? 0) && row.status === saved.fields.Status, "GET values");
+    const expected = expectedLogical.get(row.labId);
+    check(expected && row.xpEarned === expected.xpEarned && row.attempts === expected.attempts &&
+      row.status === expected.status && Array.isArray(row.recordIds), "GET logical values");
   }
   const summary = await getRecord(TABLES.students, student.id);
-  check(summary.fields["Labs Completed"] === 2 && summary.fields["Total XP"] === 270 &&
+  check(summary.fields["Labs Completed"] === expectedTotals.labsCompleted && summary.fields["Total XP"] === expectedTotals.totalXp &&
     Number.isFinite(Date.parse(summary.fields["Last Active"])), "Student summary");
   evidence.totals = pulled.body.totals;
   pass("GET returns matching three labs/totals; Student summary and Last Active match");
 
-  evidence.client = await verifyDciClientAgainstLocalService({ baseUrl: local.url, signInReply: signed.body });
+  evidence.client = await verifyDciClientAgainstLocalService({ baseUrl: local.url, signInReply: signed.body, expectedProgress: pulled.body });
   pass("actual DCI client restores three labs on a fresh cache, posts unchanged progress and clears session/cache on sign-out");
 
   const other = roster[2];

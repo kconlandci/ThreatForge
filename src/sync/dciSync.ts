@@ -2,7 +2,8 @@
 import { Preferences } from "@capacitor/preferences";
 import { labCatalog } from "../data/catalog";
 import type { ThreatForgeProgress, LabProgress } from "../hooks/useProgress";
-import { invalidateDciSession, getDciSession, getSessionEpoch, SYNC_STORAGE_KEY } from "./dciSession";
+import { invalidateDciSession, getDciSession, getSessionEpoch, SYNC_STORAGE_KEY, type DciSession } from "./dciSession";
+import { getDciInstallationId } from "./dciInstallation";
 
 export const dciSyncUrl = (import.meta.env.VITE_DCI_SYNC_URL || "/api/dci").replace(/\/+$/, "");
 export const CLOUD_PULL_EVENT = "threatforge:cloud-pull";
@@ -35,6 +36,9 @@ let syncUid: string | null = null;
 let state: SyncState | null = null;
 let pushTimer: ReturnType<typeof setTimeout> | null = null;
 let pending: ThreatForgeProgress | null = null;
+// Keep this tail across sign-out/reset: an old in-flight POST must finish before
+// another request from this installation can start against the same source row.
+let progressPostTail: Promise<unknown> = Promise.resolve();
 
 function emptyProgress(userId: string): ThreatForgeProgress {
   const now = new Date().toISOString();
@@ -85,13 +89,14 @@ function isoTimestamp(value: number): string | null {
   return Number.isFinite(value) && value > 0 ? new Date(value).toISOString() : null;
 }
 
-/** Shared client transport: no token, logs or visible error on sync failure. */
-export async function requestDci<T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T | null> {
-  const current = getDciSession();
-  if (authenticated && !current) return null;
-  const requestEpoch = getSessionEpoch();
+async function sendDci<T>(path: string, init: RequestInit, authenticated: boolean,
+  current: DciSession | null, requestEpoch: number): Promise<T | null> {
+  if (requestEpoch !== getSessionEpoch() || (authenticated && getDciSession()?.studentId !== current?.studentId)) return null;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  // Source-row verification and summary reconciliation can span several paced
+  // Airtable calls. Keep the POST single-flight while those checks complete.
+  const timeoutMs = authenticated && path === "/progress" && (init.method ?? "GET").toUpperCase() === "POST" ? 60_000 : 10_000;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${dciSyncUrl}${path}`, {
       ...init,
@@ -110,6 +115,33 @@ export async function requestDci<T>(path: string, init: RequestInit = {}, authen
     return requestEpoch === getSessionEpoch() ? body : null;
   } catch { return null; }
   finally { clearTimeout(timeout); }
+}
+
+/** Shared client transport: no token, routing ID, logs or visible sync errors. */
+export async function requestDci<T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T | null> {
+  const current = getDciSession();
+  if (authenticated && !current) return null;
+  const requestEpoch = getSessionEpoch();
+  const progressPost = authenticated && path === "/progress" && (init.method ?? "GET").toUpperCase() === "POST";
+  if (!progressPost) return sendDci<T>(path, init, authenticated, current, requestEpoch);
+
+  const operation = async (): Promise<T | null> => {
+    if (requestEpoch !== getSessionEpoch() || getDciSession()?.studentId !== current?.studentId) return null;
+    try {
+      if (typeof init.body !== "string") return null;
+      const body = JSON.parse(init.body) as unknown;
+      if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+      const clientId = await getDciInstallationId();
+      if (requestEpoch !== getSessionEpoch() || getDciSession()?.studentId !== current?.studentId) return null;
+      return sendDci<T>(path, {
+        ...init,
+        body: JSON.stringify({ ...body, clientId }),
+      }, authenticated, current, requestEpoch);
+    } catch { return null; }
+  };
+  const result = progressPostTail.then(operation, operation);
+  progressPostTail = result.then(() => undefined, () => undefined);
+  return result;
 }
 
 export function resetDciSync(): void {

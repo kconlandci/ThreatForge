@@ -112,6 +112,11 @@ const load = path => server.ssrLoadModule(path);
 try {
   const session = await load("/src/sync/dciSession.ts");
   const sync = await load("/src/sync/dciSync.ts");
+  const installation = await load("/src/sync/dciInstallation.ts");
+  const installationId = await installation.getDciInstallationId();
+  assert.ok(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(installationId), "Installation must be a runtime secure UUID");
+  assert.ok(storage.get(installation.DCI_INSTALLATION_STORAGE_KEY) === installationId &&
+    storage.get(`prefs:${installation.DCI_INSTALLATION_STORAGE_KEY}`) === installationId, "Installation identity must persist separately in both stores");
   const native = await load("\0dci-client-preferences");
   const { labCatalog } = await load("/src/data/catalog.ts");
   const lab = labCatalog.find(item => item.accessLevel === "premium");
@@ -160,12 +165,39 @@ try {
   assert.deepEqual(merged.xpHistory, local.xpHistory);
   assert.deepEqual(JSON.parse(storage.get("prefs:threatforge_progress")), merged);
   await sync.pushCloudProgress(studentA, merged);
-  const pushed = JSON.parse(fetchCalls.at(-1).options.body).records.find(record => record.labId === lab.id);
+  const pushedEnvelope = JSON.parse(fetchCalls.at(-1).options.body);
+  const pushed = pushedEnvelope.records.find(record => record.labId === lab.id);
+  assert.ok(pushedEnvelope.clientId === installationId, "Every progress POST must include the stable installation identity");
   assert.equal(pushed.status, "Completed");
   assert.equal(pushed.xpEarned, 400);
   assert.equal(pushed.attempts, 3);
-  assert.equal(fetchCalls.at(-1).options.headers.Authorization, `Bearer ${authenticated.token}`);
+  assert.ok(fetchCalls.at(-1).options.headers.Authorization === `Bearer ${authenticated.token}`, "POST must use the original verified session");
+  assert.ok(!JSON.stringify(merged).includes(installationId), "Installation identity must not enter the progress cache");
   console.log("PASS DCI sync: same-origin API, bearer request, monotonic merge, device-only scores/streaks/detail preserved");
+
+  // Direct callers and debounced work share the same transport queue.
+  let releasePost, postStarted;
+  const firstPostStarted = new Promise(resolve => { postStarted = resolve; });
+  const firstPostRelease = new Promise(resolve => { releasePost = resolve; });
+  let activePosts = 0, highestPosts = 0, sentPosts = 0;
+  fetchHandler = async (_url, options) => {
+    if (options.method !== "POST") return response(remoteReply);
+    activePosts += 1; highestPosts = Math.max(highestPosts, activePosts); sentPosts += 1;
+    if (sentPosts === 1) { postStarted(); await firstPostRelease; }
+    activePosts -= 1;
+    return response(remoteReply);
+  };
+  const firstPost = sync.pushCloudProgress(studentA, merged);
+  await firstPostStarted;
+  const secondPost = sync.pushCloudProgress(studentA, merged);
+  for (let turn = 0; turn < 20; turn += 1) await Promise.resolve();
+  assert.equal(sentPosts, 1, "Concurrent caller must wait for the in-flight source write");
+  releasePost();
+  await Promise.all([firstPost, secondPost]);
+  assert.equal(sentPosts, 2);
+  assert.equal(highestPosts, 1, "Progress POSTs must remain single-flight");
+  assert.ok(fetchCalls.filter(call => call.options.method === "POST").every(call => JSON.parse(call.options.body).clientId === installationId), "All queued POSTs must retain one installation identity");
+  console.log("PASS DCI source ordering: concurrent progress POSTs serialize and preserve one installation identity");
 
   const otherLab = labCatalog.find(item => item.id !== lab.id);
   const unionReply = { records: [...remoteReply.records, {
@@ -232,6 +264,28 @@ try {
   assert.equal(storage.has("prefs:threatforge_progress"), false);
   sync.resetDciSync();
   console.log("PASS DCI account isolation: sign-out clears token/progress and stale responses cannot restore prior student data");
+
+  // A queued write belongs to its original student/epoch, never the next one.
+  await session.saveDciSession(fixtureSession(studentA));
+  sync.setSyncUid(studentA);
+  let releaseQueuedPost, queuedPostStarted;
+  const queuedStarted = new Promise(resolve => { queuedPostStarted = resolve; });
+  const queuedRelease = new Promise(resolve => { releaseQueuedPost = resolve; });
+  let queuedSent = 0;
+  fetchHandler = async (_url, options) => {
+    if (options.method === "POST") { queuedSent += 1; queuedPostStarted(); await queuedRelease; }
+    return response(remoteReply);
+  };
+  const staleFirst = sync.pushCloudProgress(studentA, merged);
+  await queuedStarted;
+  const staleSecond = sync.pushCloudProgress(studentA, merged);
+  await session.clearDciSession();
+  await session.saveDciSession(fixtureSession(studentB));
+  releaseQueuedPost();
+  await Promise.all([staleFirst, staleSecond]);
+  assert.equal(queuedSent, 1, "A prior student's queued source write must be discarded");
+  assert.ok(await installation.getDciInstallationId() === installationId, "Installation identity must survive sign-out and account switching");
+  console.log("PASS DCI installation: independent persistent identity survives sign-out; stale queued student writes are discarded");
 
   // Late native writes must be drained before sign-out's cache removals.
   let releaseWrite;
@@ -333,6 +387,9 @@ try {
   assert.doesNotMatch(renderProvider(catalog), /Fixture catalog/);
   assert.match(renderProvider(catalog), /Use the email and access code from your instructor/);
   lifecycle.reset();
+  assert.ok(await installation.getDciInstallationId() === installationId &&
+    storage.get(installation.DCI_INSTALLATION_STORAGE_KEY) === installationId &&
+    storage.get(`prefs:${installation.DCI_INSTALLATION_STORAGE_KEY}`) === installationId, "Session/expiry/cache clearing must never clear the installation identity");
   console.log("PASS DCI provider/Settings: absent session gates catalog, valid restored session mounts it, signed name/action render, sign-out regates");
 } finally {
   // Cancel any fixture debounce timers, close Vite workers, and restore globals.

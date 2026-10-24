@@ -1,7 +1,9 @@
 import { AIRTABLE_BASE_ID, TABLES } from "./config.js";
 
 const ALLOWED_TABLES = new Set(Object.values(TABLES));
-const MIN_REQUEST_INTERVAL_MS = 210; // Stay below Airtable's five requests/sec/base.
+// Two independent pilot processes together stay below five requests/sec/base.
+// This pacing is not a distributed lock or part of source-row coordination.
+const MIN_REQUEST_INTERVAL_MS = 550;
 let requestTail = Promise.resolve();
 let lastRequestAt = 0;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -55,7 +57,8 @@ export async function airtableRequest(tableId, { method = "GET", recordId, query
       if (response.status === 429 && attempt < 2) {
         // A rate-limited request was rejected, so retrying it cannot duplicate it.
         await response.body?.cancel();
-        await delay(1000 * (attempt + 1));
+        const retryAfter = Number(response.headers.get("retry-after"));
+        await delay(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 30000);
         continue;
       }
       if (!response.ok) {
