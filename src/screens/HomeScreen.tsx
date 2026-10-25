@@ -19,7 +19,7 @@ import { useActivePath } from "../hooks/useRecommendedLab";
 import { useAuth } from "../contexts/AuthContext";
 import Onboarding, { isOnboardingComplete } from "../components/Onboarding";
 import type { LearningPath } from "../data/paths";
-import { displayName, subline, paywallEnabled } from "../config/edition";
+import { displayName, subline, paywallEnabled, editionBranding } from "../config/edition";
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Server,
@@ -55,7 +55,7 @@ export default function HomeScreen() {
         <div className="max-w-lg mx-auto pt-6">
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
-            <img src="/icon-512.png" alt={displayName} className="w-10 h-10 rounded-xl" />
+            <img {...editionBranding.headerLogo} />
             <div>
               <h1 className="text-xl font-bold text-white">{displayName}</h1>
               <p className="text-xs text-slate-400">

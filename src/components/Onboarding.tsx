@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { Eye, Hand, CheckCircle } from "lucide-react";
-import { displayName } from "../config/edition";
+import { displayName, editionBranding } from "../config/edition";
 
 const ONBOARDING_KEY = "threatforge_onboarding_complete";
 
@@ -35,7 +35,7 @@ const screens: OnboardingScreen[] = [
     body: "Practice real cybersecurity judgment in short, interactive scenarios.",
     icon: (
       <div className="mb-4">
-        <img src="/icon-512.png" alt={displayName} className="w-20 h-20 rounded-2xl" />
+        <img {...editionBranding.onboardingLogo} />
       </div>
     ),
   },

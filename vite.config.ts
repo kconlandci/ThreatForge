@@ -27,7 +27,10 @@ export default defineConfig(({ mode }) => {
           find: /^(?:\.\.\/|\.\/)services\/sync$/,
           replacement: fileURLToPath(new URL('./src/sync/dciSync.ts', import.meta.url)),
         },
-      ] : [],
+      ] : [{
+        find: /^\.\.\/assets\/dci-logo\.png$/,
+        replacement: fileURLToPath(new URL('./src/config/noDciLogo.ts', import.meta.url)),
+      }],
     },
   }
 })

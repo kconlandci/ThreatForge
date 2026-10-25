@@ -9,7 +9,7 @@ import { labCatalog } from "../data/catalog";
 import { LabManifestSchema } from "../types/manifest";
 import type { LabManifest, RendererType } from "../types/manifest";
 import { useProgress } from "../hooks/useProgress";
-import { displayName, edition } from "../config/edition";
+import { displayName, edition, editionBranding } from "../config/edition";
 
 function ValidateButton({ manifest }: { manifest: LabManifest }) {
   const [result, setResult] = useState<{ ok: boolean; error?: string } | null>(null);
@@ -68,6 +68,7 @@ export default function DevScreen() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
+            {editionBranding.devLogo && <img {...editionBranding.devLogo} />}
             <h1 className="text-lg font-bold text-white">{displayName} Dev Preview</h1>
             <p className="text-xs text-slate-400">{labCatalog.length} manifests loaded</p>
           </div>

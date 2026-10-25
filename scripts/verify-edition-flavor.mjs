@@ -100,6 +100,7 @@ async function verify(flavor) {
   try {
     const config = await load("/src/config/edition.ts");
     const { labCatalog } = await load("/src/data/catalog.ts");
+    assert.equal(labCatalog.length, 101, "All 101 lab manifests must remain available");
     if (flavor === undefined) {
       const { LabManifestSchema } = await load("/src/types/manifest.ts");
       for (const lab of labCatalog) LabManifestSchema.parse(lab);
@@ -146,7 +147,7 @@ async function verify(flavor) {
       assert.doesNotMatch(settingsHtml, /Upgrade to Pro|Restore Purchases|Rate This App|Reset Progress|Privacy Policy|Terms of Service|Disclaimer|href="\/(?:upgrade|settings\/(?:privacy|terms|disclaimer))"/);
       const { default: Lab } = await load("/src/screens/LabScreen.tsx");
       const premiumLabs = labCatalog.filter((lab) => lab.accessLevel === "premium");
-      assert.ok(premiumLabs.length > 0);
+      assert.equal(premiumLabs.length, 36, "All 36 premium labs must remain available in DCI");
       for (const lab of premiumLabs) {
         const html = renderRoute(Lab, `/lab/${lab.id}`, "/lab/:labId");
         assert.match(html, /aria-label="Start lab"/, lab.id);

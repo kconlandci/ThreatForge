@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { displayName, subline } from "../config/edition";
+import { displayName, subline, editionBranding } from "../config/edition";
 
 export const SIGN_IN_FAILURE = "That email and access code don't match our records. Check both and try again — or ask your instructor for help.";
 
@@ -21,6 +21,7 @@ export default function DciSignIn({ onSignIn, isSigningIn, showFailure }: DciSig
   return (
     <main className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
+        {editionBranding.signInLogo && <img {...editionBranding.signInLogo} />}
         <h1 className="text-2xl font-bold text-white">{displayName}</h1>
         <p className="text-sm text-slate-400 mt-2">{subline}</p>
         <p className="text-sm text-slate-400 mt-6">Use the email and access code from your instructor.</p>

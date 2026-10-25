@@ -19,7 +19,7 @@ import { usePurchase } from "../hooks/usePurchase";
 import { usePremiumStatus } from "../hooks/usePremiumStatus";
 import { Dialog } from "@capacitor/dialog";
 import { Browser } from "@capacitor/browser";
-import { displayName, settingsSubline, supportEmail, billingEnabled, edition } from "../config/edition";
+import { displayName, settingsSubline, supportEmail, billingEnabled, edition, editionBranding } from "../config/edition";
 import DciStudentSettings from "../components/DciStudentSettings";
 
 export default function SettingsScreen() {
@@ -87,11 +87,7 @@ export default function SettingsScreen() {
       <div className="max-w-lg mx-auto pt-6">
         {/* App Info */}
         <div className="text-center mb-8">
-          <img
-            src="/icon-512.png"
-            alt={displayName}
-            className="w-14 h-14 rounded-2xl mx-auto mb-3"
-          />
+          <img {...editionBranding.settingsLogo} />
           <h1 className="text-xl font-bold text-white">{displayName}</h1>
           <p className="text-xs text-slate-400 mt-1">
             {settingsSubline}
