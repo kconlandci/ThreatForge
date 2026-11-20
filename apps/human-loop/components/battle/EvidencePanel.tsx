@@ -436,6 +436,7 @@ export function EvidencePanel({
             </h2>
           </div>
           <ListenButton
+            small
             label="Listen: read this plan aloud"
             text={forSpeech([
               step.intent,

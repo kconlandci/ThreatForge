@@ -61,9 +61,20 @@ async function advance(page) {
 }
 
 async function run(id) {
-  const scope = `${id} 390x844`;
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
+  try {
+    await play(id, page);
+  } catch (e) {
+    await page.screenshot({ path: join(OUT, `${id}-99-error.png`) }).catch(() => {});
+    throw e;
+  } finally {
+    await ctx.close();
+  }
+}
+
+async function play(id, page) {
+  const scope = `${id} 390x844`;
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
@@ -210,7 +221,6 @@ async function run(id) {
   await page.locator("#hl-trophies").scrollIntoViewIfNeeded();
   await shot("06-trophy-shelf");
   check("E1", `${scope}: 0 console errors`, errors.length === 0, errors.slice(0, 3).join(" | "));
-  await ctx.close();
 }
 
 for (const id of PATHS) {

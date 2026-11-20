@@ -20,7 +20,18 @@ export function useReadAloud(): boolean {
  * A round "Listen" button: reads `text` aloud, and stops on a second tap. Renders nothing where the
  * browser has no voice or the player turned Read aloud off.
  */
-export function ListenButton({ text, label = "Listen", className = "" }: { text: string; label?: string; className?: string }) {
+export function ListenButton({
+  text,
+  label = "Listen",
+  small = false,
+  className = "",
+}: {
+  text: string;
+  label?: string;
+  /** 40 px (the evidence sheet header, where a wider button would wrap the plan's title). */
+  small?: boolean;
+  className?: string;
+}) {
   const on = useReadAloud();
   const [speaking, setSpeaking] = useState(false);
   // Each reading gets a number: a late "ended" from an earlier, cancelled reading is ignored.
@@ -47,7 +58,7 @@ export function ListenButton({ text, label = "Listen", className = "" }: { text:
   return (
     <button
       type="button"
-      className={`grid h-11 w-11 flex-none place-items-center rounded-full border-2 border-ink ${speaking ? "bg-teal text-white" : "bg-paper text-ink"} ${className}`}
+      className={`grid ${small ? "h-10 w-10" : "h-11 w-11"} flex-none place-items-center rounded-full border-2 border-ink ${speaking ? "bg-teal text-white" : "bg-paper text-ink"} ${className}`}
       aria-label={speaking ? "Stop reading" : label}
       data-listen=""
       onClick={() => {
