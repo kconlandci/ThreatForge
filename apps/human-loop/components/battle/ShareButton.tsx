@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { buttonClass } from "@/components/site/ui";
+import { SITE_URL } from "@/lib/site/address";
 
 /**
  * "Share": the phone's share sheet with a short line and the pathway's link, or a copied link where
@@ -11,7 +12,7 @@ import { buttonClass } from "@/components/site/ui";
 export function ShareButton({ text, path, className = "" }: { text: string; path: string; className?: string }) {
   const [note, setNote] = useState("");
   const share = async () => {
-    const url = `${window.location.origin}${path}`;
+    const url = `${SITE_URL}${path}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "Human Loop", text, url });

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_URL } from "@/lib/site/address";
 import { Atkinson_Hyperlegible_Next, JetBrains_Mono, Lexend } from "next/font/google";
 import "./globals.css";
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   description:
     "AI agents are your new coworkers. Learn to supervise them. A free card game from DCI Resources: read the agent's plan, inspect the evidence, and make the call.",
   applicationName: "Human Loop",
-  metadataBase: new URL("https://humanloop.dciworkforce.com"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: "Human Loop: learn to supervise AI at work",
     description: "AI agents are your new coworkers. Learn to supervise them. A free card game from DCI Resources.",

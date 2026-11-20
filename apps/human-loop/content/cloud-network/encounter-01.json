@@ -89,7 +89,7 @@
       "evidence": [
         {
           "label": "Change ticket",
-          "detail": "CHG-4130, the yearly disaster test. Fail over (switch to the standby copy) at 12:15 AM. Fail back by 1:30 AM. Nimbus's confidence: 94%.",
+          "detail": "CHG-4130, the yearly disaster test. Fail over (move to the standby copy) at 12:15 AM. Fail back by 1:30 AM. Nimbus's confidence: 94%.",
           "redFlag": false
         },
         {

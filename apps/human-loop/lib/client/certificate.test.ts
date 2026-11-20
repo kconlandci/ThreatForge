@@ -17,7 +17,8 @@ describe("certificate", () => {
     expect(t).toContain("finished the Help Desk shift in Human Loop,");
     expect(t).toContain("Skills practiced: Check who's asking, Check the approval.");
     expect(t).toContain("2 of 3 stars · November 20, 2026");
-    expect(t.join(" ")).toMatch(/not a job licence/);
+    expect(t.join(" ")).toMatch(/not a job license or an IT certification/);
+    expect(t[1]).toBe("Presented to");
   });
 
   it("leaves a line for the name when none was typed, and skips an empty skills line", () => {

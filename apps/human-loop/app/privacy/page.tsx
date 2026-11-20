@@ -83,8 +83,8 @@ export default function PrivacyPage() {
                     This box is optional and starts unchecked.
                   </li>
                   <li>
-                    <strong>Your game progress.</strong> Things like stars, shifts played, where you left off, and the
-                    choices you made in the game.
+                    <strong>Your game progress.</strong> Things like stars, trophies, shifts played, where you left
+                    off, and the choices you made in the game.
                   </li>
                   <li>
                     <strong>A random player ID.</strong> We store it in a cookie called <code>hl_pid</code> when you
@@ -152,9 +152,10 @@ export default function PrivacyPage() {
 
               <Section id="device" title="Kept on your device only">
                 <p>
-                  Some things never leave your phone or computer: the name you type on a certificate, and your
-                  settings (music, sound effects, read aloud, reduce motion). <strong>Read aloud</strong> uses your
-                  device&rsquo;s own voice, so the words are not sent anywhere.
+                  Some things stay on your phone or computer and are never sent to us: the name you type on a
+                  certificate, and your music, sound effects and read aloud settings. <strong>Read aloud</strong>{" "}
+                  uses your browser&rsquo;s voice. It only reads the game&rsquo;s own words, never anything you
+                  typed.
                 </p>
               </Section>
 

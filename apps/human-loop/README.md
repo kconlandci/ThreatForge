@@ -513,9 +513,9 @@ now turns all sound (effects and music) on or off together. Saved per device (`h
 
 **Read aloud** (`lib/client/speech.ts`, `components/battle/ListenButton.tsx`): a round speaker
 button reads a plan's evidence sheet (intent, quip, every row, "Can we undo it?") and each outcome
-message out loud with the device's own voice (Web Speech API, English, a little slow). On by default
-where the browser has a voice; **Menu > Read aloud** hides the buttons (`human-loop:read-aloud`).
-Nothing is sent anywhere.
+message out loud with the browser's voice (Web Speech API, English, a little slow; an on-device voice
+is preferred). It only reads the game's own words. On by default where the browser has a voice;
+**Menu > Read aloud** hides the buttons (`human-loop:read-aloud`).
 
 ### Trophies, certificate, Words to know
 

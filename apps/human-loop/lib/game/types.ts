@@ -1,5 +1,5 @@
 import type { PathwayId } from "@/lib/types";
-import type { TrophyId } from "./trophies";
+import type { TrophyId } from "./trophyIds";
 
 /* ------------------------------------------------------------------ */
 /* Cards                                                               */

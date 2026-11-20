@@ -38,7 +38,8 @@ export function CertificateSheet({ open, onClose, data, defaultName = "" }: Cert
 
   useEffect(() => {
     if (!open) return;
-    setName(savedCertName() || defaultName);
+    // A signed-up player's own name first; a guest's last typed name on this device.
+    setName(defaultName || savedCertName());
     setStatus("");
     let live = true;
     void loadLogo().then((img) => live && setLogo(img));
@@ -119,7 +120,7 @@ export function CertificateSheet({ open, onClose, data, defaultName = "" }: Cert
           Save picture
         </button>
         <p aria-live="polite" className="mt-2 min-h-5 text-[15px] font-semibold text-ink">
-          {status === "saved" ? "Saved. You can print it or add it to your resume." : status === "error" ? "Sorry, that didn't work. Try again." : ""}
+          {status === "saved" ? "Saved. You can print it or show it to your teacher or case worker." : status === "error" ? "Sorry, that didn't work. Try again." : ""}
         </p>
       </div>
     </Sheet>

@@ -202,9 +202,7 @@ async function run(id) {
   await sleep(300);
   check("M2", `${scope}: Sound effects turns on, and the speaker shows sound on`, (await menu.getByRole("switch", { name: "Sound effects" }).getAttribute("aria-checked")) === "true" && (await page.getByRole("button", { name: "Sound" }).getAttribute("aria-pressed")) === "true");
   await shot("05-menu");
-  const skills = menu.getByRole("button", { name: /Your skills/ });
-  if (await skills.count()) await skills.click();
-  else await page.goto(`${BASE}/play/${id}?view=skills`);
+  await menu.getByRole("button", { name: /Your skills/ }).click();
   await page.locator("#hl-trophies").waitFor({ timeout: 15000 });
   await sleep(800);
   const earned = await page.locator("[data-trophy][data-earned=yes]").count();

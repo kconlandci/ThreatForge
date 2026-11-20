@@ -1,8 +1,9 @@
 /**
  * Read aloud: the browser's own voice (Web Speech API) reads a plan, its evidence or a result out
- * loud, a little slower than normal, for players reading in a second language. Nothing is sent
- * anywhere: the phone or computer makes the sound. The Listen buttons show unless the player turns
- * them off in the Menu (per device), and never where the browser has no voice.
+ * loud, a little slower than normal, for players reading in a second language. It only reads the
+ * game's own words; an on-device voice is preferred (some browsers also offer online voices). The
+ * Listen buttons show unless the player turns them off in the Menu (per device), and never where the
+ * browser has no voice.
  */
 
 const KEY = "human-loop:read-aloud";

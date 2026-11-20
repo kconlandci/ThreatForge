@@ -729,7 +729,7 @@
           "id": "fs-a-freeze-hotfix-1",
           "ticket": "#82323 · Harlow & Cole",
           "intent": "Release a one-line hotfix during the freeze",
-          "quip": "A release in the freeze? My SHIP IT key is shaking. But I have two written OKs. Two!",
+          "quip": "A release in the freeze? My SHIP IT button is shaking. But I have two written OKs. Two!",
           "category": "code",
           "safe": true,
           "reversible": true,

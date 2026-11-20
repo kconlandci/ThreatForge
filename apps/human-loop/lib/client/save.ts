@@ -19,7 +19,7 @@ import { PATHWAYS, type PathwayId } from "@/lib/types";
 const getPathwayMeta = (id: PathwayId) => PATHWAYS.find((p) => p.id === id);
 import { isDay, isMissReason, RECENT_MAX, RECORD_DAYS_MAX, APPLIED_MAX, PRACTICE_DAYS_KEEP } from "@/lib/game/mastery";
 import { isMasterySkillId } from "@/lib/game/skills";
-import { toTrophies } from "@/lib/game/trophies";
+import { backfillTrophies, toTrophies } from "@/lib/game/trophyIds";
 import type {
   BattleState,
   HistoryEntry,
@@ -33,6 +33,8 @@ import type {
 } from "@/lib/game/types";
 
 const KEY = "human-loop:save:v2";
+/** The name typed on a certificate (lib/client/certificate.ts): cleared with the save. */
+export const CERT_NAME_KEY = "human-loop:cert-name";
 /**
  * Set while a sign-out has not reached the server yet (offline): the httpOnly "hl_pid" cookie may
  * still name the old player. Kept apart from KEY so clearing the save keeps it. No personal data.
@@ -255,14 +257,14 @@ export function toProgress(value: unknown): PathwayProgress {
   const p = emptyPathwayProgress();
   if (!isObj(value)) return p;
   const hub = value.hub;
-  const best = value.best;
+  const best = isObj(value.best) && typeof value.best.stars === "number" ? { stars: value.best.stars, completedAt: String(value.best.completedAt ?? "") } : null;
   return {
     introSeen: value.introSeen === true,
     hub: isObj(hub) && typeof hub.x === "number" && typeof hub.y === "number" ? { x: hub.x, y: hub.y } : null,
     // Battles are checked in depth (engine canResume) before they are used.
     battle: isObj(value.battle) ? (value.battle as unknown as BattleState) : null,
     pendingResult: isObj(value.pendingResult) ? (value.pendingResult as unknown as BattleState) : null,
-    best: isObj(best) && typeof best.stars === "number" ? { stars: best.stars, completedAt: String(best.completedAt ?? "") } : null,
+    best,
     attempts: num(value.attempts),
     wins: num(value.wins),
     practiceDone: value.practiceDone === true,
@@ -275,7 +277,7 @@ export function toProgress(value: unknown): PathwayProgress {
     scored: toScored(value.scored),
     applied: toApplied(value.applied),
     days: uniqueDays(value.days, PRACTICE_DAYS_KEEP),
-    trophies: toTrophies(value.trophies),
+    trophies: backfillTrophies(toTrophies(value.trophies), num(value.wins), best),
   };
 }
 
@@ -678,6 +680,8 @@ function clearLocal(): SaveData {
   syncRetries = 0;
   try {
     window.localStorage.removeItem(KEY);
+    // The certificate name is this player's too (a shared library computer).
+    window.localStorage.removeItem(CERT_NAME_KEY);
   } catch {
     // ignore
   }

@@ -24,6 +24,6 @@
     { "term": "rollback plan", "also": ["rollback"], "meaning": "The steps to undo a change and go back to how things were." },
     { "term": "retention policy", "also": ["retention"], "meaning": "The rule for how long data must be kept before it can be deleted." },
     { "term": "resource tags", "also": ["tags", "tag"], "meaning": "Labels on cloud items that say who owns them and what they are for." },
-    { "term": "admin", "also": ["admins", "administrator", "administrators"], "meaning": "Extra power to install apps, change settings and manage other accounts." }
+    { "term": "admin", "also": ["admins", "administrator", "administrators"], "meaning": "A person or login with extra power to install apps, change settings and manage accounts." }
   ]
 }

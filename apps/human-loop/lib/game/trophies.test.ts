@@ -35,7 +35,7 @@ describe("trophies", () => {
       expect(TROPHIES[id].name.length).toBeGreaterThan(0);
       expect(TROPHIES[id].how).toMatch(/\.$/);
     }
-    expect(trophyHow("team-player", "Dana")).toBe("Not sure? Escalate a plan to Dana.");
+    expect(trophyHow("team-player", "Dana")).toBe("Check a plan. Not sure? Escalate it to Dana.");
   });
 
   it("practice: a catch and a checked safe plan that ran; never a clean-shift trophy", () => {
@@ -72,12 +72,22 @@ describe("trophies", () => {
   });
 
   it("escalating earns team player; rolling back a risky plan earns undo, a safe one does not", () => {
-    const esc = play(E, 5, (start) => {
+    const escalateRisky = (checkFirst: boolean) => (start: BattleState) => {
       const id = start.announced.find((x) => !isSafe(E, x));
-      const s = id ? tryPlay(start, E, "escalate", id) : start;
+      let s = start;
+      if (id && checkFirst) s = tryPlay(s, E, "inspect", id);
+      if (id) s = tryPlay(s, E, "escalate", id);
       return careful(E)(s);
+    };
+    expect(trophiesFor(none, play(E, 5, escalateRisky(true)), E, 0)).toContain("team-player");
+    // A blind escalation is luck, not a habit.
+    const blind = play(E, 5, (start) => {
+      let s = start;
+      for (const id of s.announced.slice()) if (!isSafe(E, id) && !s.steps[id].inspected) s = tryPlay(s, E, "escalate", id);
+      return s;
     });
-    expect(trophiesFor(none, esc, E, 0)).toContain("team-player");
+    const blindEsc = blind.events.some((ev) => (ev.t === "caught" && ev.by === "escalate") || ev.t === "escalated-safe");
+    if (blindEsc) expect(trophiesFor(none, blind, E, 0)).not.toContain("team-player");
 
     // Let one risky plan run, then roll it back once Roll Back is in hand.
     let undone: BattleState | null = null;
@@ -115,6 +125,27 @@ describe("trophies", () => {
     }
     expect(s.stats.falseAlarms).toBeGreaterThan(0);
     expect(trophiesFor(none, { ...s, status: "won" }, E, 0)).not.toContain("undo");
+  });
+
+  it("a blind block is luck: no first-catch trophy without an inspect", () => {
+    const s = play(P, 1, (start) => {
+      let t = start;
+      for (const id of t.announced.slice()) if (!isSafe(P, id)) t = tryPlay(t, P, "block", id);
+      return t;
+    });
+    expect(s.events.some((ev) => ev.t === "caught")).toBe(true);
+    expect(trophiesFor(none, s, P, 0)).not.toContain("first-catch");
+  });
+
+  it("old saves: a won first shift gives First shift done (and Three stars for a 3-star best)", () => {
+    expect(toProgress({ wins: 1, best: { stars: 3, completedAt: "2026-10-01T16:46:53.265Z" } }).trophies).toEqual({
+      "first-shift": "2026-10-01",
+      "three-stars": "2026-10-01",
+    });
+    expect(toProgress({ wins: 2, best: { stars: 1, completedAt: "2026-10-01T16:46:53.265Z" }, trophies: { "first-shift": "2026-09-30" } }).trophies).toEqual({
+      "first-shift": "2026-09-30",
+    });
+    expect(toProgress({ wins: 0, best: null }).trophies).toEqual({});
   });
 
   it("proof needs the player's mark on a red-flag row", () => {

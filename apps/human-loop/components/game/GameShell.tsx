@@ -58,8 +58,8 @@ import { ShiftIntro } from "@/components/hub/ShiftIntro";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
 import { FeedbackSheet } from "@/components/game/FeedbackSheet";
-import { CertificateSheet } from "@/components/skills/CertificateSheet";
 import { metSkills } from "@/lib/game/skillsView";
+import { SITE_HOST } from "@/lib/site/address";
 import { musicPref, setMusicPref, startMusic, stopMusic } from "@/lib/client/music";
 import { playSfx, playTestBeep, setSfxPref, sfxPref, unlockSfx } from "@/lib/client/sfx";
 import { canSpeak, readAloudPref, setReadAloudPref } from "@/lib/client/speech";
@@ -82,6 +82,9 @@ import { HAND_ORDER, guideCards } from "@/lib/game/useBattle";
 import { PathwayProvider, usePathway } from "@/lib/pathways/context";
 import type { PathwayBundle } from "@/lib/pathways/types";
 import g from "./GameShell.module.css";
+
+// Loaded on first open (see openCertificate).
+const CertificateSheet = dynamic(() => import("@/components/skills/CertificateSheet").then((m) => m.CertificateSheet), { ssr: false });
 
 const PhaserStage = dynamic(() => import("@/components/game/PhaserStage"), { ssr: false });
 
@@ -519,6 +522,12 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [howOpen, setHowOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [certOpen, setCertOpen] = useState(false);
+  // The certificate's code loads on its first open (it only opens after a won first shift).
+  const [certLoaded, setCertLoaded] = useState(false);
+  const openCertificate = useCallback(() => {
+    setCertLoaded(true);
+    setCertOpen(true);
+  }, []);
   // The full guide (outside a battle): this pathway's cards only, never another pathway's policy card.
   const allCards = useMemo<HowDeck>(() => ({ practice: false, cards: guideCards(pathway.config.policyCard) }), [pathway]);
   const [howDeck, setHowDeck] = useState<HowDeck>(allCards);
@@ -1092,8 +1101,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
           pathway: copy.barTitle,
           skills: metSkills(progress.skills).map(skillName),
           stars: progress.best?.stars ?? 0,
-          day: progress.trophies?.["first-shift"] ?? (progress.best?.completedAt ? localDay(new Date(progress.best.completedAt)) : day),
-          site: "humanloop.dciworkforce.com",
+          // The day of the best shift, so the date matches the stars.
+          day: progress.best?.completedAt ? localDay(new Date(progress.best.completedAt)) : (progress.trophies?.["first-shift"] ?? day),
+          site: SITE_HOST,
         }
       : null;
   const playerId = save?.playerId ?? "guest";
@@ -1402,7 +1412,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             practiceSkill={practiceSkill}
             onPractice={startDrill}
             newTrophies={newTrophies}
-            onCertificate={() => setCertOpen(true)}
+            onCertificate={openCertificate}
           />
         ) : null}
 
@@ -1414,7 +1424,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onPractice={startDrill}
             onBack={backToOffice}
             resume={savedBattle && resumeLabel ? { label: resumeLabel, onResume: startShift } : null}
-            onCertificate={certificate ? () => setCertOpen(true) : undefined}
+            onCertificate={certificate ? openCertificate : undefined}
           />
         ) : null}
       </main>
@@ -1454,7 +1464,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
       <RoomList open={roomsOpen} hub={HUB} onClose={() => setRoomsOpen(false)} onGo={goTo} />
       <HowToPlay open={howOpen} deck={howDeck} onClose={() => setHowOpen(false)} />
       <FeedbackSheet open={feedbackOpen} onClose={() => setFeedbackOpen(false)} pathwayId={pathway.id} screen={view} />
-      {certificate ? (
+      {certificate && certLoaded ? (
         <CertificateSheet
           open={certOpen}
           onClose={() => setCertOpen(false)}

@@ -3,12 +3,13 @@
  * preview, the saved image and a print all match. It is earned by finishing a pathway's first real
  * shift (trophy "first-shift"). The name is typed on this device and never sent anywhere.
  *
- * It says what it is: a record of practice in a free training game, not a job licence.
+ * It says what it is: a record of practice in a free training game, not a job license or certification.
  */
+
+import { CERT_NAME_KEY as NAME_KEY } from "./save";
 
 export const CERT_W = 1600;
 export const CERT_H = 1131;
-const NAME_KEY = "human-loop:cert-name";
 
 export interface CertificateData {
   /** The player's name as they typed it (may be empty: a line is drawn instead). */
@@ -43,14 +44,15 @@ export function longDay(day: string): string {
 export function certificateText(data: CertificateData): string[] {
   return [
     "Certificate of practice",
-    "This certifies that",
+    "Presented to",
     data.name.trim() || "(your name)",
     `finished the ${data.pathway} shift in Human Loop,`,
     "practicing how to check an AI coworker's work before it runs.",
     data.skills.length ? `Skills practiced: ${data.skills.join(", ")}.` : "",
     `${data.stars} of 3 stars · ${longDay(data.day)}`,
     `Human Loop, a free training game by DCI Resources · ${data.site}`,
-    "A record of practice in a training game, not a job licence.",
+    "A record of practice in a training game. It is not a job license or an IT certification.",
+    "All names in the game are made up.",
   ].filter(Boolean);
 }
 
@@ -209,7 +211,7 @@ export function drawCertificate(canvas: HTMLCanvasElement, data: CertificateData
   ctx.font = `400 26px ${body}`;
   ctx.fillText(`Human Loop, a free training game by DCI Resources · ${data.site}`, CERT_W / 2, CERT_H - 120);
   ctx.font = `400 22px ${body}`;
-  ctx.fillText("A record of practice in a training game, not a job licence. All names in the game are made up.", CERT_W / 2, CERT_H - 84);
+  ctx.fillText("A record of practice in a training game. It is not a job license or an IT certification. All names in the game are made up.", CERT_W / 2, CERT_H - 84);
 }
 
 /** The canvas as a PNG file, for saving or sharing. */

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Square, Volume2 } from "lucide-react";
+import { Speech, Square } from "lucide-react";
 import { READ_ALOUD_EVENT, canSpeak, readAloudPref, speak, stopSpeaking } from "@/lib/client/speech";
 
 /** Whether Listen buttons show: the browser has a voice and the Menu switch is on (client only). */
@@ -39,9 +39,8 @@ export function ListenButton({ text, label = "Listen", className = "" }: { text:
   return (
     <button
       type="button"
-      className={`grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-ink ${speaking ? "bg-teal text-white" : "bg-paper text-ink"} ${className}`}
+      className={`grid h-11 w-11 flex-none place-items-center rounded-full border-2 border-ink ${speaking ? "bg-teal text-white" : "bg-paper text-ink"} ${className}`}
       aria-label={speaking ? "Stop reading" : label}
-      aria-pressed={speaking}
       data-listen=""
       onClick={() => {
         if (speaking) {
@@ -52,7 +51,7 @@ export function ListenButton({ text, label = "Listen", className = "" }: { text:
         if (speak(text, () => live.current && setSpeaking(false))) setSpeaking(true);
       }}
     >
-      {speaking ? <Square className="h-4 w-4" fill="currentColor" aria-hidden="true" /> : <Volume2 className="h-5 w-5" aria-hidden="true" />}
+      {speaking ? <Square className="h-4 w-4" fill="currentColor" aria-hidden="true" /> : <Speech className="h-5 w-5" aria-hidden="true" />}
     </button>
   );
 }
