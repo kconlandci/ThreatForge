@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check:bundles": "node scripts/check-bundles.mjs",
-    "e2e:first-five": "node scripts/e2e/first-five.mjs"
+    "e2e:first-five": "node scripts/e2e/first-five.mjs",
+    "e2e:features": "node scripts/e2e/features.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

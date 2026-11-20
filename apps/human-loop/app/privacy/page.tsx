@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           <div className="mx-auto max-w-3xl">
             <p className="font-display text-sm font-semibold text-teal">Human Loop · DCI Resources</p>
             <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">Privacy notice</h1>
-            <p className="mt-3 text-[15px] text-muted">Last updated: September 28, 2026</p>
+            <p className="mt-3 text-[15px] text-muted">Last updated: November 20, 2026</p>
             <p className="mt-5 text-lg leading-relaxed text-ink-soft sm:text-xl">
               Human Loop is a free training game by DCI Resources. This page explains what we collect, why we
               collect it, and how to delete it. Plain words, no tricks.
@@ -147,6 +147,14 @@ export default function PrivacyPage() {
                 <p>
                   Guests don&rsquo;t give us a name or email. Your progress is stored only in your browser. If you
                   clear your browser data, it&rsquo;s gone.
+                </p>
+              </Section>
+
+              <Section id="device" title="Kept on your device only">
+                <p>
+                  Some things never leave your phone or computer: the name you type on a certificate, and your
+                  settings (music, sound effects, read aloud, reduce motion). <strong>Read aloud</strong> uses your
+                  device&rsquo;s own voice, so the words are not sent anywhere.
                 </p>
               </Section>
 

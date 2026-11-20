@@ -3,6 +3,9 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Play, RotateCcw, Target } from "lucide-react";
 import { PlanList } from "@/components/skills/PlanList";
+import { NewTrophies } from "@/components/skills/Trophies";
+import { coachName } from "@/lib/game/coach";
+import type { TrophyId } from "@/lib/game/trophies";
 import { buttonClass } from "@/components/site/ui";
 import { gradePlan } from "@/lib/game/mastery";
 import { PRACTICED_LINE, isCleanRun, practiceScoreLine, proofCount, resultMood } from "@/lib/game/reveal";
@@ -29,6 +32,8 @@ export interface PracticeResultProps {
   /** Once Daily practice is open: the weakest skill of this shift, for "Practice this". */
   practiceSkill?: MasterySkillId | null;
   onPractice?: (skill: MasterySkillId) => void;
+  /** Trophies this practice earned (empty after a reload). */
+  newTrophies?: readonly TrophyId[];
 }
 
 /** Plans the player got wrong: risky ones that ran, and good ones they blocked. */
@@ -73,6 +78,7 @@ export function PracticeResult({
   onOffice,
   practiceSkill = null,
   onPractice,
+  newTrophies = [],
 }: PracticeResultProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -146,6 +152,7 @@ export function PracticeResult({
                 </div>
               ))}
             </div>
+            <NewTrophies ids={newTrophies} coach={coachName(encounter)} />
           </div>
         </section>
 

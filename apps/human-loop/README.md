@@ -503,6 +503,41 @@ lib/server/     server-only code for the API routes
 public/         brand and game art
 ```
 
+### Sound effects and Read aloud
+
+**Sound effects** (`lib/client/sfx.ts`) are made in code with Web Audio (no audio files, so no
+licences): a short sound per stage effect (inspect, catch, risk by vignette, safe work, false alarm,
+escalate, roll back, win, lose), played from the same `bus.toStage` "fx" messages the stage uses.
+Off by default (classrooms): **Menu > Sound effects**, or the speaker button in the game bar, which
+now turns all sound (effects and music) on or off together. Saved per device (`human-loop:sfx`).
+
+**Read aloud** (`lib/client/speech.ts`, `components/battle/ListenButton.tsx`): a round speaker
+button reads a plan's evidence sheet (intent, quip, every row, "Can we undo it?") and each outcome
+message out loud with the device's own voice (Web Speech API, English, a little slow). On by default
+where the browser has a voice; **Menu > Read aloud** hides the buttons (`human-loop:read-aloud`).
+Nothing is sent anywhere.
+
+### Trophies, certificate, Words to know
+
+- **Trophies** (`lib/game/trophies.ts`): ten per pathway, each tied to a habit (first catch, caught
+  with proof, good work runs, team player, undo, clean shift, first shift done, three stars, three
+  days, a Solid skill). Earned at the end of a battle from its events and the saved progress, kept in
+  `PathwayProgress.trophies` (id -> day). Result screens show "New trophy!" (memory only, so a
+  reload shows none); **Your skills** shows the shelf, with how to earn each locked one. "Caught
+  with proof" needs the marks, so it is earned when the result opens.
+- **Certificate of practice** (`lib/client/certificate.ts`, `components/skills/CertificateSheet.tsx`):
+  once the first shift was won, the shift result and Your skills offer it. One canvas picture (A4
+  landscape) with the typed name, pathway, skills met, best stars and day; **Save picture** uses
+  the phone's share sheet or a download. The name stays on the device (`human-loop:cert-name`).
+  The first-shift result also has **Share** (share sheet or a copied link, no personal details).
+- **Words to know** (`content/<pathway>/glossary.json`, `lib/game/glossary.ts`): 15-25 jargon words
+  per pathway with plain meanings that never hint at a verdict (`glossary.test.ts`). A closed box
+  at the end of the evidence sheet lists the words that plan uses (not on practice sheets, which
+  are sized to one screen and gloss their key words). The Field guide lists every word per pathway.
+- **Add to Home Screen**: `app/manifest.ts` (start page `/play`, 192 and 512 icons).
+- Browser checks for all of this: `BASE=http://localhost:PORT npm run e2e:features` (about 3
+  minutes; `PATHS` defaults to help-desk,cybersecurity).
+
 ### Background music
 
 Off by default (classrooms). The speaker button in the game bar and **Menu > Music** turn it on; the

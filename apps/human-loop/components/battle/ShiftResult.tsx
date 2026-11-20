@@ -4,6 +4,9 @@ import { Fragment, useEffect, useRef, type ReactNode } from "react";
 import { ArrowDown, ArrowRight, ArrowUp, Play, Target } from "lucide-react";
 import { CallRow, Pips, skillIcon } from "@/components/skills/SkillBits";
 import { PlanList } from "@/components/skills/PlanList";
+import { NewTrophies } from "@/components/skills/Trophies";
+import { coachName } from "@/lib/game/coach";
+import type { TrophyId } from "@/lib/game/trophies";
 import k from "@/components/skills/skills.module.css";
 import { buttonClass } from "@/components/site/ui";
 import { shiftTally } from "@/lib/game/mastery";
@@ -39,6 +42,8 @@ export interface ShiftResultProps {
   onOneMore: () => void;
   onSkills: () => void;
   onOffice: () => void;
+  /** Trophies this shift earned (empty after a reload). */
+  newTrophies?: readonly TrophyId[];
 }
 
 /** End of a Daily practice or drill: counts and a quip, skills that moved, then one line per plan. */
@@ -55,6 +60,7 @@ export function ShiftResult({
   onOneMore,
   onSkills,
   onOffice,
+  newTrophies = [],
 }: ShiftResultProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -138,6 +144,7 @@ export function ShiftResult({
                 </div>
               </div>
             ) : null}
+            <NewTrophies ids={newTrophies} coach={coachName(encounter)} />
           </div>
         </section>
 

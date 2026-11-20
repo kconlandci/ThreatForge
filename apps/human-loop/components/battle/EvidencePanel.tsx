@@ -18,6 +18,10 @@ import { HINT_BUTTON, SPOT_PROMPT, rowName, stepById, undoText } from "@/lib/gam
 import type { BattleState, CardId, CardInstance, Encounter, Evidence, PlayResult } from "@/lib/game/types";
 import { ARTIFACT_ICON, CATEGORY_ICON, artifactKind, type ArtifactKind } from "./icons";
 import { HintText } from "./HintText";
+import { ListenButton } from "./ListenButton";
+import { WordsToKnow } from "./WordsToKnow";
+import { usePathway } from "@/lib/pathways/context";
+import { forSpeech } from "@/lib/client/speech";
 import { Sheet } from "./Sheet";
 import { SpeakerFace } from "./SpeakerFace";
 import s from "./battle.module.css";
@@ -169,6 +173,7 @@ export function EvidencePanel({
   onClose,
   returnFocusRef,
 }: EvidencePanelProps) {
+  const { glossary } = usePathway();
   const titleId = useId();
   const [error, setError] = useState<string | null>(null);
   // Keep showing the last step while the sheet animates closed.
@@ -424,12 +429,22 @@ export function EvidencePanel({
           <span className={s.cat} aria-hidden="true">
             <Icon className="h-5 w-5" strokeWidth={2.2} />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className={s.evTicket}>Ticket {step.ticket}</p>
             <h2 id={titleId} className={s.evTitle}>
               {step.intent}
             </h2>
           </div>
+          <ListenButton
+            label="Listen: read this plan aloud"
+            text={forSpeech([
+              step.intent,
+              hideQuip && announced ? null : `${agent} says: ${step.quip}`,
+              ...(rt.inspected
+                ? [...step.evidence.map(rowName), `Can we undo it? ${undoText(step)}`]
+                : ["The evidence is hidden. Inspect the plan to see it."]),
+            ])}
+          />
         </div>
       }
       footer={footer}
@@ -599,6 +614,13 @@ export function EvidencePanel({
             </div>
           </div>
         </div>
+      )}
+      {/* Practice sheets are sized to fit one screen and gloss their key words already. */}
+      {encounter.practice ? null : (
+        <WordsToKnow
+          words={glossary}
+          texts={[step.intent, hideQuip && announced ? null : step.quip, ...(rt.inspected ? step.evidence.map(rowName) : [])]}
+        />
       )}
     </Sheet>
   );

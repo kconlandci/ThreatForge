@@ -1,4 +1,5 @@
 import type { PathwayId } from "@/lib/types";
+import type { TrophyId } from "./trophies";
 
 /* ------------------------------------------------------------------ */
 /* Cards                                                               */
@@ -465,6 +466,8 @@ export interface PathwayProgress {
   applied?: string[];
   /** The last 14 distinct days (YYYY-MM-DD) with a finished shift. */
   days?: string[];
+  /** Trophies earned in this pathway: id -> the day (YYYY-MM-DD) it was earned (lib/game/trophies.ts). */
+  trophies?: Partial<Record<TrophyId, string>>;
 }
 
 export interface HistoryEntry {

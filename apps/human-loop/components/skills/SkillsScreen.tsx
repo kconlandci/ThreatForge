@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, Play, Target } from "lucide-react";
+import { Award, ChevronLeft, ChevronRight, Clock, Play, Target } from "lucide-react";
 import { buttonClass } from "@/components/site/ui";
 import { isDue } from "@/lib/game/mastery";
 import { MASTERY_SKILLS, skillName } from "@/lib/game/skills";
@@ -18,6 +18,7 @@ import {
 import type { CheckQuestion, MasterySkillId, PathwayProgress } from "@/lib/game/types";
 import { Pips, questionIcon, skillIcon } from "./SkillBits";
 import { SkillDetail } from "./SkillDetail";
+import { TrophyShelf } from "./Trophies";
 import k from "./skills.module.css";
 
 export interface SkillsScreenProps {
@@ -33,10 +34,12 @@ export interface SkillsScreenProps {
    * resume it instead ("Resume shift").
    */
   resume?: { label: string; onResume: () => void } | null;
+  /** Opens the certificate of practice (only once the first shift was won). */
+  onCertificate?: () => void;
 }
 
 /** Your skills: the coach's 3 questions (with the pathway's hints), the one skill to practice next, the skills met so far, and the week. */
-export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack, resume = null }: SkillsScreenProps) {
+export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack, resume = null, onCertificate }: SkillsScreenProps) {
   const { coach, skills: copy } = usePathway();
   const skills = progress.skills;
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -169,6 +172,15 @@ export function SkillsScreen({ progress, today, drillTickets, onPractice, onBack
               : `${unmet} more ${unmet === 1 ? "skill" : "skills"} to find.`}
           </p>
         ) : null}
+
+        <TrophyShelf trophies={progress.trophies} coach={coach.name}>
+          {onCertificate ? (
+            <button type="button" className={buttonClass("teal", "md", "mt-3 w-full")} onClick={onCertificate} data-certificate-open="">
+              <Award className="h-5 w-5" aria-hidden="true" />
+              Your certificate
+            </button>
+          ) : null}
+        </TrophyShelf>
 
         <section className={k.week} aria-labelledby="hl-week">
           <h2 id="hl-week" className={k.weekTitle}>

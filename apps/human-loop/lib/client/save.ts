@@ -19,6 +19,7 @@ import { PATHWAYS, type PathwayId } from "@/lib/types";
 const getPathwayMeta = (id: PathwayId) => PATHWAYS.find((p) => p.id === id);
 import { isDay, isMissReason, RECENT_MAX, RECORD_DAYS_MAX, APPLIED_MAX, PRACTICE_DAYS_KEEP } from "@/lib/game/mastery";
 import { isMasterySkillId } from "@/lib/game/skills";
+import { toTrophies } from "@/lib/game/trophies";
 import type {
   BattleState,
   HistoryEntry,
@@ -274,6 +275,7 @@ export function toProgress(value: unknown): PathwayProgress {
     scored: toScored(value.scored),
     applied: toApplied(value.applied),
     days: uniqueDays(value.days, PRACTICE_DAYS_KEEP),
+    trophies: toTrophies(value.trophies),
   };
 }
 
@@ -409,6 +411,7 @@ export function emptyPathwayProgress(): PathwayProgress {
     scored: {},
     applied: [],
     days: [],
+    trophies: {},
   };
 }
 

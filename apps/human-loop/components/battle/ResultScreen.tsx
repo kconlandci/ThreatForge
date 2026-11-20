@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
-import { Briefcase, Building, Check, Circle, Clock, RotateCcw, ShieldCheck, Star, Target, TriangleAlert, X } from "lucide-react";
+import { Award, Briefcase, Building, Check, Circle, Clock, RotateCcw, ShieldCheck, Star, Target, TriangleAlert, X } from "lucide-react";
 import { PlanList } from "@/components/skills/PlanList";
+import { NewTrophies } from "@/components/skills/Trophies";
+import { coachName } from "@/lib/game/coach";
+import type { TrophyId } from "@/lib/game/trophies";
 import { buttonClass } from "@/components/site/ui";
 import { blindBlocks, blindSafeBlocks, scoreBattle } from "@/lib/game/engine";
 import { resultMood } from "@/lib/game/reveal";
@@ -11,6 +14,7 @@ import { skillName } from "@/lib/game/skills";
 import type { BattleState, Encounter, MasterySkillId } from "@/lib/game/types";
 import { PRACTICE_BTN } from "./ShiftResult";
 import { usePathway } from "@/lib/pathways/context";
+import { ShareButton } from "./ShareButton";
 import { SpeakerFace, speakerName, speakerNames } from "./SpeakerFace";
 import r from "./result.module.css";
 
@@ -24,6 +28,10 @@ export interface ResultScreenProps {
   /** Once Daily practice is open: the weakest skill of this shift, for "Practice this". */
   practiceSkill?: MasterySkillId | null;
   onPractice?: (skill: MasterySkillId) => void;
+  /** Trophies this shift earned (empty after a reload). */
+  newTrophies?: readonly TrophyId[];
+  /** Opens the certificate (shown on a win). */
+  onCertificate?: () => void;
 }
 
 const STAR_WORDS = ["No stars this time.", "1 star out of 3.", "2 stars out of 3.", "3 stars out of 3!"];
@@ -38,8 +46,10 @@ export function ResultScreen({
   onOffice,
   practiceSkill = null,
   onPractice,
+  newTrophies = [],
+  onCertificate,
 }: ResultScreenProps) {
-  const { config } = usePathway();
+  const { id: pathwayId, config } = usePathway();
   const score = scoreBattle(state, encounter);
   const won = state.status === "won";
   // A win where risky plans got through gets its own outro when the story has one: no praise for
@@ -108,9 +118,19 @@ export function ResultScreen({
         Back to the office
       </button>
       {withPathways ? (
-        <Link href="/play" className={buttonClass("teal", "lg")}>
-          Choose a pathway
-        </Link>
+        <>
+          <ShareButton
+            path={`/play/${pathwayId}`}
+            text={
+              won
+                ? `I finished my first ${config.copy.barTitle} shift in Human Loop: ${score.stars} of 3 stars. It's a free game about checking an AI coworker's work.`
+                : "I'm learning to check an AI coworker's work in Human Loop, a free game."
+            }
+          />
+          <Link href="/play" className={buttonClass("teal", "lg")}>
+            Choose a pathway
+          </Link>
+        </>
       ) : null}
     </div>
   );
@@ -171,6 +191,13 @@ export function ResultScreen({
                 </li>
               ))}
             </ul>
+            <NewTrophies ids={newTrophies} coach={coachName(encounter)} />
+            {won && onCertificate ? (
+              <button type="button" className={buttonClass("teal", "lg", "mt-4 w-full")} onClick={onCertificate} data-certificate-open="">
+                <Award className="h-5 w-5" aria-hidden="true" />
+                Get your certificate
+              </button>
+            ) : null}
             {buttons(false)}
           </div>
         </section>

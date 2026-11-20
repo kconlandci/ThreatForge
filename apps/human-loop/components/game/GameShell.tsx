@@ -40,6 +40,7 @@ import {
   Music,
   Play,
   RotateCcw,
+  Speech,
   Target,
   Volume2,
   VolumeX,
@@ -57,7 +58,11 @@ import { ShiftIntro } from "@/components/hub/ShiftIntro";
 import { RoomList } from "@/components/hub/RoomList";
 import { DciLogo } from "@/components/site/Logo";
 import { FeedbackSheet } from "@/components/game/FeedbackSheet";
+import { CertificateSheet } from "@/components/skills/CertificateSheet";
+import { metSkills } from "@/lib/game/skillsView";
 import { musicPref, setMusicPref, startMusic, stopMusic } from "@/lib/client/music";
+import { playSfx, playTestBeep, setSfxPref, sfxPref, unlockSfx } from "@/lib/client/sfx";
+import { canSpeak, readAloudPref, setReadAloudPref } from "@/lib/client/speech";
 import { preloadStage } from "@/lib/client/preloadStage";
 import { prefetchSvgs } from "@/components/game/stage/svgCache";
 import { getPathwayProgress, loadSave, practiceDone, syncFromCloud, updateSave, type SaveData } from "@/lib/client/save";
@@ -68,6 +73,7 @@ import { stageSprites } from "@/lib/game/hubMap";
 import { drillCoach } from "@/lib/game/coach";
 import { resultMood } from "@/lib/game/reveal";
 import { applyBattle, localDay, shiftTally, skillChanges } from "@/lib/game/mastery";
+import { TROPHY_IDS, trophiesFor, withTrophies, type TrophyId } from "@/lib/game/trophies";
 import { skillName } from "@/lib/game/skills";
 import { beginShift } from "@/lib/game/shiftGen";
 import { dailyDoneToday, dailyNote, dailyUnlocked, hasSkills, nextUpSkill, planLines, weakestInShift } from "@/lib/game/skillsView";
@@ -167,6 +173,10 @@ function GameMenu({
   onToggleMotion,
   musicOn,
   onToggleMusic,
+  sfxOn,
+  onToggleSfx,
+  readAloud,
+  onToggleReadAloud,
   onOfficeList,
   onLeaveBattle,
   onHowTo,
@@ -185,6 +195,11 @@ function GameMenu({
   onToggleMotion: () => void;
   musicOn: boolean;
   onToggleMusic: () => void;
+  sfxOn: boolean;
+  onToggleSfx: () => void;
+  /** Read aloud buttons on or off; null where the browser has no voice (no switch then). */
+  readAloud: boolean | null;
+  onToggleReadAloud: () => void;
   onOfficeList: () => void;
   onLeaveBattle: () => void;
   onHowTo: () => void;
@@ -274,6 +289,22 @@ function GameMenu({
             Music
             <span className={`${g.switch} ${musicOn ? g.switchOn : ""}`} aria-hidden="true" />
           </button>
+          <button type="button" role="switch" aria-checked={sfxOn} className={g.menuItem} onClick={onToggleSfx}>
+            <span className={g.menuIcon} aria-hidden="true">
+              <Volume2 className="h-5 w-5" />
+            </span>
+            Sound effects
+            <span className={`${g.switch} ${sfxOn ? g.switchOn : ""}`} aria-hidden="true" />
+          </button>
+          {readAloud !== null ? (
+            <button type="button" role="switch" aria-checked={readAloud} className={g.menuItem} onClick={onToggleReadAloud}>
+              <span className={g.menuIcon} aria-hidden="true">
+                <Speech className="h-5 w-5" />
+              </span>
+              Read aloud
+              <span className={`${g.switch} ${readAloud ? g.switchOn : ""}`} aria-hidden="true" />
+            </button>
+          ) : null}
           <button type="button" className={g.menuItem} onClick={run(onHowTo)}>
             <span className={g.menuIcon} aria-hidden="true">
               <BookOpen className="h-5 w-5" />
@@ -487,6 +518,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [roomsOpen, setRoomsOpen] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [certOpen, setCertOpen] = useState(false);
   // The full guide (outside a battle): this pathway's cards only, never another pathway's policy card.
   const allCards = useMemo<HowDeck>(() => ({ practice: false, cards: guideCards(pathway.config.policyCard) }), [pathway]);
   const [howDeck, setHowDeck] = useState<HowDeck>(allCards);
@@ -497,6 +529,8 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const [moved, setMoved] = useState<{ key: string; list: SkillMove[] } | null>(null);
   // The rows the player marked in the battle that just ended ("spot it"; in memory only).
   const [finalMarks, setFinalMarks] = useState<ReadonlyMap<string, number>>(() => new Map());
+  // Trophies the last battle earned, for its result screen (memory only: a reload shows none).
+  const [newTrophies, setNewTrophies] = useState<TrophyId[]>([]);
   // "Replay intro" from the Menu: the intro plays over the current view, then closes.
   const [replayIntro, setReplayIntro] = useState(false);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
@@ -539,6 +573,44 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
     if (on) startMusic();
     else stopMusic();
   }, [musicOn]);
+
+  // Sound effects: off unless the player turns them on (saved per device), played from the same
+  // stage messages that drive the stage's effects. Browsers need a tap before sound.
+  const [sfxOn, setSfxOn] = useState(false);
+  useEffect(() => setSfxOn(sfxPref()), []);
+  useEffect(() => {
+    const wake = () => unlockSfx();
+    window.addEventListener("click", wake);
+    window.addEventListener("keydown", wake);
+    return () => {
+      window.removeEventListener("click", wake);
+      window.removeEventListener("keydown", wake);
+    };
+  }, []);
+  useEffect(() => bus.toStage.on((m) => m.type === "fx" && playSfx(m)), [bus]);
+  const toggleSfx = useCallback(() => {
+    const on = !sfxOn;
+    setSfxPref(on);
+    setSfxOn(on);
+    if (on) {
+      unlockSfx();
+      playTestBeep();
+    }
+  }, [sfxOn]);
+  // Read aloud: Listen buttons on plans and results (on unless turned off; hidden without a voice).
+  const [readAloud, setReadAloud] = useState<boolean | null>(null);
+  useEffect(() => setReadAloud(canSpeak() ? readAloudPref() : null), []);
+  const toggleReadAloud = useCallback(() => {
+    const on = !readAloud;
+    setReadAloudPref(on);
+    setReadAloud(on);
+  }, [readAloud]);
+  // The top bar's speaker: all sound on (effects and music) or all off.
+  const toggleSound = useCallback(() => {
+    const on = !(musicOn || sfxOn);
+    if (sfxOn !== on) toggleSfx();
+    if (musicOn !== on) toggleMusic();
+  }, [musicOn, sfxOn, toggleSfx, toggleMusic]);
 
   useEffect(() => {
     viewRef.current = view;
@@ -733,6 +805,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   );
 
   const beginBattle = useCallback((st: BattleState, next: "battle" | "brief" = "battle") => {
+    setNewTrophies([]);
     setBark(null);
     setBarkPath(false);
     // A Daily practice or drill spec lives only as long as its own battle.
@@ -821,12 +894,18 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
     // (applyBattle is keyed by encounter id + seed, so a reload never counts a battle twice).
     const day = localDay(now);
     const before = api.progressOf(loadSave()).skills;
+    let earned: TrophyId[] = [];
+    // Trophies read the progress after the battle counted (its day, its skill levels).
+    const award = (out: PathwayProgress, enc: Encounter, stars: number): PathwayProgress => {
+      earned = trophiesFor(out, st, enc, stars);
+      return earned.length ? { ...out, trophies: withTrophies(out.trophies, earned, day) } : out;
+    };
     const next = api.patchProgress((p) => {
         const enc = pathway.encounterFor(st.encounterId, p);
         const base: PathwayProgress = { ...p, battle: null, pendingResult: st };
         if (enc.practice) {
           // Practice never counts toward attempts, wins, best or history. It only unlocks the real shift.
-          return applyBattle({ ...base, practiceDone: true }, st, enc, day);
+          return award(applyBattle({ ...base, practiceDone: true }, st, enc, day), enc, 0);
         }
         const score = scoreBattle(st, enc);
         const tally = shiftTally(st, enc);
@@ -856,8 +935,9 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             };
         // pendingResult (and a daily's spec) stay until the result screen is left, so a reload
         // right now still shows the debrief.
-        return applyBattle({ ...counted, history: [...p.history, entry].slice(-50) }, st, enc, day);
+        return award(applyBattle({ ...counted, history: [...p.history, entry].slice(-50) }, st, enc, day), enc, entry.stars);
     });
+    setNewTrophies(earned);
     setSave(next);
     setMoved({ key: key, list: skillChanges(before, api.progressOf(next).skills) });
     setFinalState(st);
@@ -866,8 +946,21 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
   const showResult = useCallback((st: BattleState, marks?: ReadonlyMap<string, number>) => {
     setFinalState(st);
     setFinalMarks(marks ?? new Map());
+    // "Caught with proof" needs the marks, which only the battle screen knew until now.
+    if (marks?.size) {
+      let more: TrophyId[] = [];
+      const next = api.patchProgress((p) => {
+        const enc = pathway.encounterFor(st.encounterId, p);
+        more = trophiesFor(p, st, enc, isGenerated(enc) || enc.practice ? 0 : scoreBattle(st, enc).stars, marks);
+        return more.length ? { ...p, trophies: withTrophies(p.trophies, more, localDay(new Date())) } : p;
+      });
+      if (more.length) {
+        setSave(next);
+        setNewTrophies((had) => TROPHY_IDS.filter((id) => had.includes(id) || more.includes(id)));
+      }
+    }
     setView("result");
-  }, []);
+  }, [api, pathway]);
 
   const backToOffice = useCallback(() => {
     setDialogue(null);
@@ -992,6 +1085,17 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
         : "shift"
     : null;
   const day = today();
+  // The certificate of practice: earned by winning this pathway's first shift (any stars).
+  const certificate =
+    progress && progress.wins > 0
+      ? {
+          pathway: copy.barTitle,
+          skills: metSkills(progress.skills).map(skillName),
+          stars: progress.best?.stars ?? 0,
+          day: progress.trophies?.["first-shift"] ?? (progress.best?.completedAt ? localDay(new Date(progress.best.completedAt)) : day),
+          site: "humanloop.dciworkforce.com",
+        }
+      : null;
   const playerId = save?.playerId ?? "guest";
   const unlocked = !!progress && api.practiceDone(progress) && dailyUnlocked(progress);
   const skillsOn = !!progress && hasSkills(progress);
@@ -1051,8 +1155,8 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
           {copy.barTitle} <span className={g.titleSub}>{copy.barSub}</span>
         </p>
         {view !== "boot" ? (
-          <button type="button" className={g.soundButton} aria-pressed={musicOn} aria-label="Music" onClick={toggleMusic}>
-            {musicOn ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
+          <button type="button" className={g.soundButton} aria-pressed={musicOn || sfxOn} aria-label="Sound" onClick={toggleSound}>
+            {musicOn || sfxOn ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
           </button>
         ) : null}
         {view !== "boot" ? (
@@ -1063,6 +1167,10 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onToggleMotion={toggleMotion}
             musicOn={musicOn}
             onToggleMusic={toggleMusic}
+            sfxOn={sfxOn}
+            onToggleSfx={toggleSfx}
+            readAloud={readAloud}
+            onToggleReadAloud={toggleReadAloud}
             onOfficeList={() => setRoomsOpen(true)}
             onLeaveBattle={backToOffice}
             onHowTo={openHowTo}
@@ -1265,6 +1373,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onOffice={practiceSkill ? backToOffice : officeAfterPractice}
             practiceSkill={practiceSkill}
             onPractice={startDrill}
+            newTrophies={newTrophies}
           />
         ) : view === "result" && finalState && isGenerated(resultEnc) && progress ? (
           <ShiftResult
@@ -1280,6 +1389,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onOneMore={startDaily}
             onSkills={openSkills}
             onOffice={backToOffice}
+            newTrophies={newTrophies}
           />
         ) : view === "result" && finalState ? (
           <ResultScreen
@@ -1291,6 +1401,8 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onOffice={backToOffice}
             practiceSkill={practiceSkill}
             onPractice={startDrill}
+            newTrophies={newTrophies}
+            onCertificate={() => setCertOpen(true)}
           />
         ) : null}
 
@@ -1302,6 +1414,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             onPractice={startDrill}
             onBack={backToOffice}
             resume={savedBattle && resumeLabel ? { label: resumeLabel, onResume: startShift } : null}
+            onCertificate={certificate ? () => setCertOpen(true) : undefined}
           />
         ) : null}
       </main>
@@ -1341,6 +1454,14 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
       <RoomList open={roomsOpen} hub={HUB} onClose={() => setRoomsOpen(false)} onGo={goTo} />
       <HowToPlay open={howOpen} deck={howDeck} onClose={() => setHowOpen(false)} />
       <FeedbackSheet open={feedbackOpen} onClose={() => setFeedbackOpen(false)} pathwayId={pathway.id} screen={view} />
+      {certificate ? (
+        <CertificateSheet
+          open={certOpen}
+          onClose={() => setCertOpen(false)}
+          data={certificate}
+          defaultName={save?.profile && !save.profile.guest ? save.profile.name : ""}
+        />
+      ) : null}
     </div>
   );
 }

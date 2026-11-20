@@ -49,6 +49,8 @@ Run from `apps/human-loop`:
 - `npx vitest run` (3 tests skip: the Postgres tests need `HL_TEST_PG_URL`)
 - `npx next build`
 - `npm run check:bundles` (7 routes ok)
+- New features (trophies, certificate, Share, Read aloud, sound, Words to know, home screen) have
+  their own browser checks: `BASE=http://localhost:PORT npm run e2e:features` (about 3 minutes).
 - Layout or flow changes also need `BASE=http://localhost:PORT npm run e2e:first-five`. It takes
   about 25 minutes. Narrow it with `SIZES`, `PATHS` or `RUNS`. Playwright is loaded from
   `PW_MODULE` (default `/tmp/pwrun/node_modules/playwright`; install it there with

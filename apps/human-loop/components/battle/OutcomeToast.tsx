@@ -6,6 +6,8 @@ import { ResultShape, shapeLabel, skillIcon } from "@/components/skills/SkillBit
 import { skillName } from "@/lib/game/skills";
 import type { CallGrade, MasterySkillId } from "@/lib/game/types";
 import type { ToastSpec } from "@/lib/game/useBattle";
+import { forSpeech } from "@/lib/client/speech";
+import { ListenButton } from "./ListenButton";
 import s from "./battle.module.css";
 
 /** The skill a resolved plan tested, and how it went (shape + color, so color is never the only signal). */
@@ -103,6 +105,7 @@ export function OutcomeToast({
             <p className={s.toastText}>{toast.text}</p>
             {chip ? <SkillChip chip={chip} /> : null}
           </div>
+          {toast.tone === "hint" ? null : <ListenButton label="Listen: read this aloud" text={forSpeech([toast.title, toast.text])} />}
           {toast.nextLabel ? null : (
             <button type="button" className={s.toastBtn} onClick={onDismiss} aria-label={timed ? "Dismiss message" : "Close"}>
               <X className="h-5 w-5" aria-hidden="true" />

@@ -1,0 +1,123 @@
+/* Trophies: the "New trophy!" strip on result screens and the shelf on Your skills. */
+
+.new {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 18px;
+  background: var(--hl-orange-tint);
+  box-shadow: 0 4px 0 0 var(--hl-ink);
+  text-align: left;
+}
+
+.newTitle {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--hl-orange-text);
+}
+
+.newList {
+  margin-top: 8px;
+  display: grid;
+  gap: 10px;
+}
+
+.newItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.newItem .name,
+.newItem .how {
+  display: block;
+}
+
+.badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 999px;
+  background: var(--hl-orange);
+  color: var(--hl-ink);
+}
+
+.name {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--hl-ink);
+  line-height: 1.25;
+}
+
+.how {
+  font-size: 14px;
+  color: var(--hl-ink-soft);
+  line-height: 1.35;
+}
+
+.shelf {
+  margin-top: 26px;
+}
+
+.shelfTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--hl-ink);
+}
+
+.count {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hl-muted);
+}
+
+.grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px;
+  border: 2px solid var(--hl-ink);
+  border-radius: 16px;
+  background: var(--hl-paper);
+  box-shadow: 0 3px 0 0 var(--hl-ink);
+}
+
+.locked {
+  border-color: var(--hl-line);
+  box-shadow: none;
+  background: var(--hl-paper-soft);
+}
+
+.locked .badge {
+  width: 32px;
+  height: 32px;
+  border-color: var(--hl-line);
+  background: var(--hl-paper);
+  color: var(--hl-muted);
+}
+
+.locked .name {
+  color: var(--hl-ink-soft);
+}
+
+.earned .badge {
+  background: var(--hl-teal);
+  color: #fff;
+}
