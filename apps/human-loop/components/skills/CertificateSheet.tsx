@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Download } from "lucide-react";
 import { Sheet } from "@/components/battle/Sheet";
 import { buttonClass } from "@/components/site/ui";
@@ -31,15 +31,16 @@ export interface CertificateSheetProps {
 export function CertificateSheet({ open, onClose, data, defaultName = "" }: CertificateSheetProps) {
   const titleId = useId();
   const nameId = useId();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // A callback ref: the sheet mounts its body a render after `open`, so the draw waits for the canvas.
+  const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
   const [name, setName] = useState("");
   const [logo, setLogo] = useState<HTMLImageElement | null>(null);
   const [status, setStatus] = useState<"" | "saving" | "saved" | "error">("");
 
   useEffect(() => {
     if (!open) return;
-    // A signed-up player's own name first; a guest's last typed name on this device.
-    setName(defaultName || savedCertName());
+    // The name typed last on this device (cleared on sign out), else a signed-up player's own name.
+    setName(savedCertName() || defaultName);
     setStatus("");
     let live = true;
     void loadLogo().then((img) => live && setLogo(img));
@@ -51,9 +52,7 @@ export function CertificateSheet({ open, onClose, data, defaultName = "" }: Cert
   const full: CertificateData = { ...data, name };
   const key = JSON.stringify(full);
   useEffect(() => {
-    if (!open) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!open || !canvas) return;
     let live = true;
     // Fonts first, so the picture uses the game's typefaces.
     void (document.fonts?.ready ?? Promise.resolve()).then(() => live && drawCertificate(canvas, full, logo));
@@ -61,13 +60,14 @@ export function CertificateSheet({ open, onClose, data, defaultName = "" }: Cert
       live = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, key, logo]);
+  }, [open, canvas, key, logo]);
 
   const save = async () => {
-    const canvas = canvasRef.current;
     if (!canvas || status === "saving") return;
     saveCertName(name);
     setStatus("saving");
+    // Draw once more right now, so the file always matches what is typed.
+    drawCertificate(canvas, full, logo);
     const file = await certificateFile(canvas, data.pathway);
     if (!file) return setStatus("error");
     const how = await saveCertificate(file);
@@ -90,7 +90,7 @@ export function CertificateSheet({ open, onClose, data, defaultName = "" }: Cert
     >
       <div data-certificate="">
         <canvas
-          ref={canvasRef}
+          ref={setCanvas}
           width={1600}
           height={1131}
           className="block h-auto w-full rounded-lg border-2 border-ink"

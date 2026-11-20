@@ -1412,7 +1412,7 @@ function Shell({ pathway }: { pathway: PathwayBundle }) {
             practiceSkill={practiceSkill}
             onPractice={startDrill}
             newTrophies={newTrophies}
-            onCertificate={openCertificate}
+            onCertificate={certificate ? openCertificate : undefined}
           />
         ) : null}
 

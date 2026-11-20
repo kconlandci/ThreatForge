@@ -16,10 +16,11 @@ export function ShareButton({ text, path, className = "" }: { text: string; path
     if (navigator.share) {
       try {
         await navigator.share({ title: "Human Loop", text, url });
-      } catch {
-        /* closed the share sheet */
+        return;
+      } catch (e) {
+        // Closed the share sheet; any other error falls back to copying the link.
+        if ((e as { name?: string })?.name === "AbortError") return;
       }
-      return;
     }
     try {
       await navigator.clipboard.writeText(`${text} ${url}`);

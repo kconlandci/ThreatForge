@@ -22,6 +22,14 @@ export type TrophyRecord = Partial<Record<TrophyId, string>>;
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** YYYY-MM-DD on this device's clock for an ISO time (like mastery.localDay), "" when invalid. */
+function localDayOf(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 /** Saved trophies, cleaned: only known ids with a YYYY-MM-DD day. */
 export function toTrophies(value: unknown): TrophyRecord {
   const out: TrophyRecord = {};
@@ -42,7 +50,7 @@ export function backfillTrophies(
   wins: number,
   best: { stars: number; completedAt: string } | null,
 ): TrophyRecord {
-  const day = best?.completedAt.slice(0, 10) ?? "";
+  const day = best ? localDayOf(best.completedAt) : "";
   if (wins <= 0 || !best || !DAY_RE.test(day)) return trophies;
   const out: TrophyRecord = { ...trophies };
   out["first-shift"] ??= day;

@@ -123,7 +123,7 @@ export function ResultScreen({
             path={`/play/${pathwayId}`}
             text={
               won
-                ? `I finished my first ${config.copy.barTitle} shift in Human Loop: ${score.stars} of 3 stars. It's a free game about checking an AI coworker's work.`
+                ? `I finished the ${config.copy.barTitle} shift in Human Loop: ${score.stars} of 3 stars. It's a free game about checking an AI coworker's work.`
                 : "I'm learning to check an AI coworker's work in Human Loop, a free game."
             }
           />

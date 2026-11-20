@@ -232,8 +232,10 @@ export async function saveCertificate(file: File): Promise<"shared" | "downloade
     try {
       await nav.share({ files: [file], title: "Human Loop certificate" });
       return "shared";
-    } catch {
-      return "cancelled";
+    } catch (e) {
+      // Closed the share sheet. Any other error (a phone that refused after the picture was made):
+      // download it instead.
+      if ((e as { name?: string })?.name === "AbortError") return "cancelled";
     }
   }
   const url = URL.createObjectURL(file);

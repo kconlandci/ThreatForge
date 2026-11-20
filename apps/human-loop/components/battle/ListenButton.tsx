@@ -23,17 +23,25 @@ export function useReadAloud(): boolean {
 export function ListenButton({ text, label = "Listen", className = "" }: { text: string; label?: string; className?: string }) {
   const on = useReadAloud();
   const [speaking, setSpeaking] = useState(false);
-  const live = useRef(true);
-  useEffect(() => {
-    live.current = true;
-    return () => {
-      live.current = false;
-      stopSpeaking();
-    };
-  }, []);
-  // New words (the next plan, the next result): stop reading the old ones.
-  useEffect(() => {
+  // Each reading gets a number: a late "ended" from an earlier, cancelled reading is ignored.
+  const reading = useRef(0);
+  const speakingRef = useRef(false);
+  speakingRef.current = speaking;
+  const stopMine = () => {
+    reading.current++;
+    if (speakingRef.current) stopSpeaking();
     setSpeaking(false);
+  };
+  // Unmount, or new words (the next plan, the next result): stop only what this button started.
+  useEffect(
+    () => () => {
+      reading.current++;
+      if (speakingRef.current) stopSpeaking();
+    },
+    [],
+  );
+  useEffect(() => {
+    stopMine();
   }, [text]);
   if (!on) return null;
   return (
@@ -43,12 +51,9 @@ export function ListenButton({ text, label = "Listen", className = "" }: { text:
       aria-label={speaking ? "Stop reading" : label}
       data-listen=""
       onClick={() => {
-        if (speaking) {
-          stopSpeaking();
-          setSpeaking(false);
-          return;
-        }
-        if (speak(text, () => live.current && setSpeaking(false))) setSpeaking(true);
+        if (speaking) return stopMine();
+        const mine = ++reading.current;
+        if (speak(text, () => mine === reading.current && setSpeaking(false))) setSpeaking(true);
       }}
     >
       {speaking ? <Square className="h-4 w-4" fill="currentColor" aria-hidden="true" /> : <Speech className="h-5 w-5" aria-hidden="true" />}
