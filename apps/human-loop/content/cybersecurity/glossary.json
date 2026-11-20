@@ -1,0 +1,29 @@
+{
+  "words": [
+    { "term": "phishing", "also": ["phish", "phishes"], "meaning": "An email or web page that pretends to be someone trusted, to steal passwords or money." },
+    { "term": "MFA", "also": ["multi-factor authentication", "multi-factor"], "meaning": "A second check when you sign in, like a code sent to your phone." },
+    { "term": "VPN", "also": ["VPNs"], "meaning": "A private, locked connection to the work network over the internet." },
+    { "term": "isolate", "also": ["isolated", "isolates", "isolating"], "meaning": "To cut a device off from the network. It stays on but cannot reach other computers." },
+    { "term": "firewall", "also": ["firewalls"], "meaning": "A network guard that lets data in or out based on a list of rules." },
+    { "term": "ransomware", "meaning": "A harmful program that locks files and asks for money to unlock them." },
+    { "term": "quarantine", "also": ["quarantined"], "meaning": "To move a file into a locked area where it cannot run or spread." },
+    { "term": "allowlist", "also": ["allowlists", "allowlisted"], "meaning": "A list of programs or sites that are always allowed to run or connect." },
+    { "term": "hash", "also": ["hashes"], "meaning": "A short code worked out from a file. The same file always gives the same code." },
+    { "term": "EDR", "meaning": "The security app on each computer. It watches for attacks and can take it off the network." },
+    { "term": "DLP", "meaning": "Data loss prevention. A tool that watches for private data leaving the company." },
+    { "term": "asset inventory", "also": ["asset inventories"], "meaning": "The list of all company devices, with who owns them and where they are." },
+    { "term": "proxy", "also": ["web proxy", "proxies"], "meaning": "A middle point that all web visits pass through. It can allow or deny sites." },
+    { "term": "pen test", "also": ["pen tests", "penetration test"], "meaning": "Penetration test. Testers the company pays try to break in, to find weak spots." },
+    { "term": "playbook", "also": ["playbooks"], "meaning": "A step-by-step guide for handling one kind of security event." },
+    { "term": "change calendar", "meaning": "The schedule of planned work on systems, with dates, times and owners." },
+    { "term": "legal hold", "meaning": "A legal order to keep all records about a case. Nothing in it may be deleted." },
+    { "term": "threat intel", "also": ["threat intelligence"], "meaning": "Threat intelligence. Shared news about attackers, their tools and the signs they leave." },
+    { "term": "PowerShell", "meaning": "A command tool built into many work computers. It runs typed commands and small programs." },
+    { "term": "remote desktop", "meaning": "A tool to see and control a computer from far away." },
+    { "term": "mailbox rule", "also": ["mailbox rules", "forwarding rule", "forwarding rules"], "meaning": "A mailbox setting that acts on new mail by itself, like forwarding copies elsewhere." },
+    { "term": "sender checks", "also": ["sender check"], "meaning": "Tests that show whether an email really came from the domain it names." },
+    { "term": "domain", "also": ["domains"], "meaning": "The name part of an email or web address, like example.com." },
+    { "term": "admin", "also": ["admins", "administrator", "administrators"], "meaning": "Extra power to install apps, change settings and manage other accounts." },
+    { "term": "log", "also": ["logs"], "meaning": "A record a system keeps of what happened and when." }
+  ]
+}

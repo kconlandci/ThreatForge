@@ -3,6 +3,7 @@
  * a typed hub map. The game shell gets it as a prop and shares it through React context
  * (./context.tsx). Shared runtime code never imports a pathway's content directly.
  */
+import type { GlossaryJson, GlossaryWord } from "@/lib/game/glossary";
 import type { HubContent } from "@/lib/game/hub";
 import type { HubMap, StageSetup } from "@/lib/game/hubMap";
 import type { SkillCopy, SkillInfo } from "@/lib/game/skills";
@@ -74,6 +75,8 @@ export interface PathwayInput {
   bank: BankTicket[];
   shiftText: ShiftText;
   hubMap: HubMap;
+  /** Words to know (content/<pathway>/glossary.json). */
+  glossary: GlossaryJson;
 }
 
 export interface PathwayBundle {
@@ -116,6 +119,8 @@ export interface PathwayBundle {
   skill(id: MasterySkillId): SkillInfo;
   /** CARDS[id] with this pathway's wording (name, text, short, flavor). */
   cardCopy(id: CardId): CardDef;
+  /** Words to know: the jargon this pathway's plans use, with plain meanings. */
+  glossary: GlossaryWord[];
   planDaily(progress: PathwayProgress, opts: { playerId: string; today: string }): ShiftSpec;
   /** k defaults to progress.drillCount[skill]. */
   planDrill(progress: PathwayProgress, skill: MasterySkillId, opts: { playerId: string; today: string; k?: number }): ShiftSpec;

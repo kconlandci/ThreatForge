@@ -6,10 +6,12 @@ import shiftText from "@/content/business-analyst/bank/shift.json";
 import ticketsA from "@/content/business-analyst/bank/tickets-a.json";
 import ticketsB from "@/content/business-analyst/bank/tickets-b.json";
 import story from "@/content/business-analyst/encounter-01.json";
+import glossary from "@/content/business-analyst/glossary.json";
 import hub from "@/content/business-analyst/hub.json";
 import pathway from "@/content/business-analyst/pathway.json";
 import practice from "@/content/business-analyst/practice.json";
 import skills from "@/content/business-analyst/skills.json";
+import type { GlossaryJson } from "@/lib/game/glossary";
 import type { HubContent } from "@/lib/game/hub";
 import type { BankTicket, Encounter, ShiftText } from "@/lib/game/types";
 import { getPathway } from "@/lib/types";
@@ -28,4 +30,5 @@ export const BUSINESS_ANALYST = createPathway({
   bank: [...(ticketsA.tickets as BankTicket[]), ...(ticketsB.tickets as BankTicket[])],
   shiftText: shiftText as ShiftText,
   hubMap: BUSINESS_ANALYST_HUB_MAP,
+  glossary: glossary as GlossaryJson,
 });

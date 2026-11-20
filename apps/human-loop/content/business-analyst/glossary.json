@@ -1,0 +1,29 @@
+{
+  "words": [
+    { "term": "dashboard", "also": ["dashboards"], "meaning": "A screen of charts and numbers that updates itself from the data." },
+    { "term": "publish", "also": ["published", "publishes", "publishing", "unpublish", "unpublished"], "meaning": "To post a report so its readers can open it. Unpublish takes it down." },
+    { "term": "refresh", "also": ["refreshes"], "meaning": "When a dashboard loads the newest data from its source." },
+    { "term": "export", "also": ["exports", "exported"], "meaning": "A copy of data saved out of a system into a file." },
+    { "term": "no-show", "also": ["no-shows"], "meaning": "A person who misses a booked visit without canceling." },
+    { "term": "duplicate", "also": ["duplicates"], "meaning": "A second record for the same person or thing." },
+    { "term": "merge", "also": ["merges", "merged", "merging"], "meaning": "To join two or more records into one record." },
+    { "term": "deck", "also": ["decks"], "meaning": "A set of slides for a talk or meeting." },
+    { "term": "mask", "also": ["masked", "masking"], "meaning": "To hide real names and details by swapping in made-up ones." },
+    { "term": "sample", "also": ["samples", "sample size"], "meaning": "A small set taken from all the data. Sample size is how many are in it." },
+    { "term": "query", "also": ["queries"], "meaning": "A saved question to a database. It returns the matching rows." },
+    { "term": "outlier", "also": ["outliers"], "meaning": "A number far from the others in a set of data." },
+    { "term": "median", "meaning": "The middle number when all the numbers are put in order." },
+    { "term": "requirements", "also": ["requirement"], "meaning": "The written list of what a new system or report must do." },
+    { "term": "sign-off", "also": ["signed-off", "sign off", "signed off", "signs off"], "meaning": "The owner's written OK that a piece of work is final." },
+    { "term": "CRM", "meaning": "Customer relationship management. The system that keeps client contacts and their history." },
+    { "term": "bounced", "also": ["bounce", "bounces"], "meaning": "When an email comes back because the address does not work." },
+    { "term": "forecast", "also": ["forecasts"], "meaning": "A best guess about future numbers, based on past data." },
+    { "term": "KPI", "also": ["KPIs"], "meaning": "Key performance indicator. A key number a team watches closely." },
+    { "term": "pivot table", "also": ["pivot tables"], "meaning": "A table that groups and adds up rows of data, like totals by month." },
+    { "term": "stakeholder", "also": ["stakeholders"], "meaning": "A person who cares about a project or is affected by it." },
+    { "term": "change request", "also": ["change requests"], "meaning": "A written request to change work that was already agreed." },
+    { "term": "data owner", "also": ["data owners"], "meaning": "The person in charge of a set of data. They decide who may see it." },
+    { "term": "version history", "meaning": "The list of saved versions of a file, with dates and authors." },
+    { "term": "VP", "also": ["VPs"], "meaning": "Vice president. A senior leader who runs one part of the company." }
+  ]
+}

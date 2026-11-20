@@ -1,0 +1,29 @@
+{
+  "words": [
+    { "term": "firewall", "also": ["firewalls"], "meaning": "A network guard that lets data in or out based on a list of rules." },
+    { "term": "switch", "also": ["switches"], "meaning": "A box that links the computers and devices in one office network." },
+    { "term": "fail over", "also": ["failover", "fails over"], "meaning": "To move work from the main system to its standby copy." },
+    { "term": "standby", "meaning": "A spare copy of a system, kept ready to take over." },
+    { "term": "orphaned", "meaning": "Left with no owner and not attached to anything that uses it." },
+    { "term": "snapshot", "also": ["snapshots"], "meaning": "A saved copy of a disk at one moment in time." },
+    { "term": "tunnel", "also": ["tunnels"], "meaning": "A private, locked link between two networks over the internet." },
+    { "term": "VPN", "also": ["VPNs"], "meaning": "A private, locked connection to the work network over the internet." },
+    { "term": "port", "also": ["ports"], "meaning": "A numbered door on a computer. Each kind of network connection uses its own port." },
+    { "term": "DNS", "meaning": "The internet's address book. It turns names like example.com into number addresses." },
+    { "term": "TTL", "meaning": "Time to live. How long other computers keep a saved web address before checking again." },
+    { "term": "CPU", "also": ["CPUs"], "meaning": "The main chip that does a computer's work. CPU use shows how busy it is." },
+    { "term": "firmware", "meaning": "The built-in software that runs a device, like a switch or router." },
+    { "term": "config", "also": ["configs", "configuration"], "meaning": "Short for configuration. The saved settings that tell a device how to work." },
+    { "term": "audit", "also": ["audits", "auditor", "auditors"], "meaning": "A formal check of a company's records. An auditor is the person who does it." },
+    { "term": "VLAN", "also": ["VLANs"], "meaning": "A separate network that runs on the same switch and cables as others." },
+    { "term": "DHCP range", "also": ["DHCP"], "meaning": "The set of network addresses handed out to devices as they join." },
+    { "term": "TLS cert", "also": ["TLS certs", "TLS", "cert", "certs"], "meaning": "A digital ID for a website. It proves the site's name and keeps visits private." },
+    { "term": "cold storage", "meaning": "Cheap, slow storage for data that is rarely opened." },
+    { "term": "RDP", "meaning": "Remote desktop protocol. A way to see and control a computer from far away." },
+    { "term": "change ticket", "also": ["change tickets", "CHG"], "meaning": "A written request for a planned change, with its steps, time and approval." },
+    { "term": "rollback plan", "also": ["rollback"], "meaning": "The steps to undo a change and go back to how things were." },
+    { "term": "retention policy", "also": ["retention"], "meaning": "The rule for how long data must be kept before it can be deleted." },
+    { "term": "resource tags", "also": ["tags", "tag"], "meaning": "Labels on cloud items that say who owns them and what they are for." },
+    { "term": "admin", "also": ["admins", "administrator", "administrators"], "meaning": "Extra power to install apps, change settings and manage other accounts." }
+  ]
+}

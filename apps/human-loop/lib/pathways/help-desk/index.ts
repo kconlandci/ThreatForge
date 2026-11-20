@@ -7,10 +7,12 @@ import ticketsA from "@/content/help-desk/bank/tickets-a.json";
 import ticketsB from "@/content/help-desk/bank/tickets-b.json";
 import ticketsC from "@/content/help-desk/bank/tickets-c.json";
 import story from "@/content/help-desk/encounter-01.json";
+import glossary from "@/content/help-desk/glossary.json";
 import hub from "@/content/help-desk/hub.json";
 import pathway from "@/content/help-desk/pathway.json";
 import practice from "@/content/help-desk/practice.json";
 import skills from "@/content/help-desk/skills.json";
+import type { GlossaryJson } from "@/lib/game/glossary";
 import type { HubContent } from "@/lib/game/hub";
 import type { BankTicket, Encounter, ShiftText } from "@/lib/game/types";
 import { getPathway } from "@/lib/types";
@@ -29,4 +31,5 @@ export const HELP_DESK = createPathway({
   bank: [...(ticketsA.tickets as BankTicket[]), ...(ticketsB.tickets as BankTicket[]), ...(ticketsC.tickets as BankTicket[])],
   shiftText: shiftText as ShiftText,
   hubMap: HELP_DESK_HUB_MAP,
+  glossary: glossary as GlossaryJson,
 });

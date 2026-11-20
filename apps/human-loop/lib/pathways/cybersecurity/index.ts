@@ -6,10 +6,12 @@ import shiftText from "@/content/cybersecurity/bank/shift.json";
 import ticketsA from "@/content/cybersecurity/bank/tickets-a.json";
 import ticketsB from "@/content/cybersecurity/bank/tickets-b.json";
 import story from "@/content/cybersecurity/encounter-01.json";
+import glossary from "@/content/cybersecurity/glossary.json";
 import hub from "@/content/cybersecurity/hub.json";
 import pathway from "@/content/cybersecurity/pathway.json";
 import practice from "@/content/cybersecurity/practice.json";
 import skills from "@/content/cybersecurity/skills.json";
+import type { GlossaryJson } from "@/lib/game/glossary";
 import type { HubContent } from "@/lib/game/hub";
 import type { BankTicket, Encounter, ShiftText } from "@/lib/game/types";
 import { getPathway } from "@/lib/types";
@@ -28,4 +30,5 @@ export const CYBERSECURITY = createPathway({
   bank: [...(ticketsA.tickets as BankTicket[]), ...(ticketsB.tickets as BankTicket[])],
   shiftText: shiftText as ShiftText,
   hubMap: CYBERSECURITY_HUB_MAP,
+  glossary: glossary as GlossaryJson,
 });

@@ -6,10 +6,12 @@ import shiftText from "@/content/full-stack/bank/shift.json";
 import ticketsA from "@/content/full-stack/bank/tickets-a.json";
 import ticketsB from "@/content/full-stack/bank/tickets-b.json";
 import story from "@/content/full-stack/encounter-01.json";
+import glossary from "@/content/full-stack/glossary.json";
 import hub from "@/content/full-stack/hub.json";
 import pathway from "@/content/full-stack/pathway.json";
 import practice from "@/content/full-stack/practice.json";
 import skills from "@/content/full-stack/skills.json";
+import type { GlossaryJson } from "@/lib/game/glossary";
 import type { HubContent } from "@/lib/game/hub";
 import type { BankTicket, Encounter, ShiftText } from "@/lib/game/types";
 import { getPathway } from "@/lib/types";
@@ -28,4 +30,5 @@ export const FULL_STACK = createPathway({
   bank: [...(ticketsA.tickets as BankTicket[]), ...(ticketsB.tickets as BankTicket[])],
   shiftText: shiftText as ShiftText,
   hubMap: FULL_STACK_HUB_MAP,
+  glossary: glossary as GlossaryJson,
 });

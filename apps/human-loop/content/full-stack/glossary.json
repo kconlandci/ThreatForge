@@ -1,0 +1,29 @@
+{
+  "words": [
+    { "term": "merge", "also": ["merges", "merged", "merging"], "meaning": "To add a code change into the main code." },
+    { "term": "pull request", "also": ["pull requests", "PR", "PRs"], "meaning": "A request to add a code change to the main code, so others can review it first." },
+    { "term": "revert", "also": ["reverts", "reverted", "reverting"], "meaning": "To go back to an earlier version of the code or site." },
+    { "term": "log", "also": ["logs", "logging"], "meaning": "A record a system keeps of what happened and when." },
+    { "term": "feature flag", "also": ["feature flags", "flag", "flags"], "meaning": "An on and off switch for one feature. It works without a new release." },
+    { "term": "build", "also": ["builds"], "meaning": "The automatic step that puts the code together and runs every test." },
+    { "term": "API", "also": ["APIs"], "meaning": "A way for one program to ask another program for data or actions." },
+    { "term": "key", "also": ["keys", "API key", "API keys"], "meaning": "A secret code one program uses to sign in to another program." },
+    { "term": "key vault", "also": ["vault"], "meaning": "A locked store for secret keys. Only allowed apps can read them." },
+    { "term": "rotate", "also": ["rotates", "rotating", "rotation"], "meaning": "To swap a secret key for a new one and turn the old one off." },
+    { "term": "package", "also": ["packages"], "meaning": "Ready-made code from others that a project adds and uses." },
+    { "term": "mask", "also": ["masked", "masking"], "meaning": "To hide real names and details by swapping in made-up ones." },
+    { "term": "hotfix", "also": ["hotfixes"], "meaning": "A small, urgent code fix released outside the normal schedule." },
+    { "term": "code freeze", "also": ["freeze"], "meaning": "A set time when no new code releases are allowed." },
+    { "term": "flaky", "meaning": "Describes a test that sometimes passes and sometimes fails, with no code change." },
+    { "term": "migration", "also": ["migrations"], "meaning": "A planned set of steps that changes how a database stores its data." },
+    { "term": "database", "also": ["databases"], "meaning": "An organized store of data that apps read and write." },
+    { "term": "index", "also": ["indexes"], "meaning": "A sorted list a database keeps so searches run faster." },
+    { "term": "parameterized query", "also": ["parameterized"], "meaning": "A database search that keeps typed text as plain data, never as a command." },
+    { "term": "staging", "meaning": "A test copy of the live site, used to try changes before release." },
+    { "term": "branch", "also": ["branches"], "meaning": "A separate copy of the code where changes are made before they join the main code." },
+    { "term": "code review", "also": ["code reviews"], "meaning": "A teammate reads a code change and checks it before it is added." },
+    { "term": "diff", "also": ["diffs"], "meaning": "A view that shows the exact lines added and removed in a change." },
+    { "term": "rollback plan", "also": ["rollback"], "meaning": "The steps to undo a change and go back to how things were." },
+    { "term": "read-only", "meaning": "You can look at it, but you cannot change anything." }
+  ]
+}

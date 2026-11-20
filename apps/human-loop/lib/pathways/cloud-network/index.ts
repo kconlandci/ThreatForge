@@ -6,10 +6,12 @@ import shiftText from "@/content/cloud-network/bank/shift.json";
 import ticketsA from "@/content/cloud-network/bank/tickets-a.json";
 import ticketsB from "@/content/cloud-network/bank/tickets-b.json";
 import story from "@/content/cloud-network/encounter-01.json";
+import glossary from "@/content/cloud-network/glossary.json";
 import hub from "@/content/cloud-network/hub.json";
 import pathway from "@/content/cloud-network/pathway.json";
 import practice from "@/content/cloud-network/practice.json";
 import skills from "@/content/cloud-network/skills.json";
+import type { GlossaryJson } from "@/lib/game/glossary";
 import type { HubContent } from "@/lib/game/hub";
 import type { BankTicket, Encounter, ShiftText } from "@/lib/game/types";
 import { getPathway } from "@/lib/types";
@@ -28,4 +30,5 @@ export const CLOUD_NETWORK = createPathway({
   bank: [...(ticketsA.tickets as BankTicket[]), ...(ticketsB.tickets as BankTicket[])],
   shiftText: shiftText as ShiftText,
   hubMap: CLOUD_NETWORK_HUB_MAP,
+  glossary: glossary as GlossaryJson,
 });

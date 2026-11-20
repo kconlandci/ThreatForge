@@ -1,0 +1,29 @@
+{
+  "words": [
+    { "term": "MFA", "also": ["multi-factor authentication", "multi-factor"], "meaning": "A second check when you sign in, like a code sent to your phone." },
+    { "term": "VPN", "also": ["VPNs"], "meaning": "A private, locked connection to the work network over the internet." },
+    { "term": "SSO", "also": ["single sign-on"], "meaning": "Single sign-on. One sign-in that opens many work apps." },
+    { "term": "runbook", "also": ["runbooks"], "meaning": "A step-by-step guide for a common task." },
+    { "term": "directory", "also": ["directories"], "meaning": "The company list of staff, with names, titles and phone numbers." },
+    { "term": "read-only", "meaning": "You can look at it, but you cannot change anything." },
+    { "term": "CFO", "meaning": "Chief financial officer. The leader in charge of a company's money." },
+    { "term": "HR", "meaning": "Human resources. The team that handles hiring, staff records and people leaving." },
+    { "term": "admin rights", "also": ["admin", "admins", "administrator", "administrators"], "meaning": "Extra power to install apps, change settings and manage other accounts." },
+    { "term": "backup", "also": ["backups"], "meaning": "A saved copy of files, kept so they can be brought back if lost." },
+    { "term": "profile", "also": ["profiles"], "meaning": "The settings, files and apps kept for one user on a computer or phone." },
+    { "term": "license", "also": ["licenses"], "meaning": "Paid permission for one person to use a piece of software." },
+    { "term": "callback", "also": ["callbacks", "call back"], "meaning": "Calling a person back on the phone number already on file, to check who they are." },
+    { "term": "portal", "also": ["portals"], "meaning": "A website where people send requests or see their records." },
+    { "term": "script", "also": ["scripts"], "meaning": "A small program that runs a list of steps by itself." },
+    { "term": "Tier 2", "meaning": "The second level of support staff. They take the harder problems." },
+    { "term": "vendor", "also": ["vendors"], "meaning": "An outside company that sells goods or services to a business." },
+    { "term": "log", "also": ["logs"], "meaning": "A record a system keeps of what happened and when." },
+    { "term": "wipe", "also": ["wipes", "wiped", "wiping", "remote wipe"], "meaning": "To erase all data on a device. A remote wipe does it over the internet." },
+    { "term": "offboarding", "also": ["offboard"], "meaning": "The steps to close a worker's accounts and access when they leave." },
+    { "term": "out-of-office", "also": ["auto-reply", "auto-replies"], "meaning": "An automatic email reply that says the person is away." },
+    { "term": "handoff notes", "also": ["handoff", "handoffs"], "meaning": "Notes that tell the next worker what was done and what is left." },
+    { "term": "domain", "also": ["domains"], "meaning": "The name part of an email or web address, like example.com." },
+    { "term": "spam filter", "also": ["spam filters", "spam"], "meaning": "A tool that moves unwanted bulk email out of the inbox." },
+    { "term": "group", "also": ["groups"], "meaning": "A named list of users. Everyone in it gets the same access." }
+  ]
+}

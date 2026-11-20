@@ -105,6 +105,7 @@ export function createPathway(input: PathwayInput): PathwayBundle {
     bank,
     bankVersion,
     shiftText,
+    glossary: input.glossary.words,
     encounter,
     encounterFor(id, progress) {
       const spec = progress?.shift;

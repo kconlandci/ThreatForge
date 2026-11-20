@@ -5,7 +5,30 @@ import { Play } from "lucide-react";
 import { SiteFooter } from "@/components/site/Footer";
 import { SiteHeader } from "@/components/site/Header";
 import { buttonClass, container, eyebrow } from "@/components/site/ui";
+// The word lists only: this is a server page (plain HTML, no client JavaScript), so no pathway
+// content reaches any route's bundle (npm run check:bundles).
+/* eslint-disable no-restricted-imports */
+import baWords from "@/content/business-analyst/glossary.json";
+import cnWords from "@/content/cloud-network/glossary.json";
+import cyWords from "@/content/cybersecurity/glossary.json";
+import fsWords from "@/content/full-stack/glossary.json";
+import hdWords from "@/content/help-desk/glossary.json";
+/* eslint-enable no-restricted-imports */
+import type { GlossaryJson, GlossaryWord } from "@/lib/game/glossary";
 import { getPathway, type LivePathwayId } from "@/lib/types";
+
+/** Words to know per pathway (the same lists the evidence sheet uses), A to Z. */
+const WORDS: Record<LivePathwayId, GlossaryWord[]> = Object.fromEntries(
+  (
+    [
+      ["help-desk", hdWords],
+      ["cybersecurity", cyWords],
+      ["cloud-network", cnWords],
+      ["full-stack", fsWords],
+      ["business-analyst", baWords],
+    ] as [LivePathwayId, GlossaryJson][]
+  ).map(([id, g]) => [id, [...g.words].sort((a, b) => a.term.localeCompare(b.term, "en", { sensitivity: "base" }))]),
+) as Record<LivePathwayId, GlossaryWord[]>;
 
 export const metadata: Metadata = {
   title: "Field guide",
@@ -238,6 +261,22 @@ export default function GuidePage() {
                       </li>
                     ))}
                   </ol>
+
+                  {WORDS[e.id]?.length ? (
+                    <details className="mt-5 rounded-2xl border-2 border-line bg-paper-soft">
+                      <summary className="flex min-h-12 cursor-pointer items-center px-4 font-display text-lg font-bold text-ink">
+                        Words to know ({WORDS[e.id].length})
+                      </summary>
+                      <dl className="grid gap-3 px-4 pb-4 sm:grid-cols-2">
+                        {WORDS[e.id].map((w) => (
+                          <div key={w.term}>
+                            <dt className="font-display text-[16px] font-bold text-teal">{w.term}</dt>
+                            <dd className="text-[16px] leading-snug text-ink-soft">{w.meaning}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </details>
+                  ) : null}
 
                   <Link href={`/play/${e.id}`} className={buttonClass("primary", "md", "mt-6")}>
                     <Play className="h-4 w-4" aria-hidden="true" fill="currentColor" />
